@@ -27,8 +27,6 @@ interface CriteriaManagerProps {
 }
 
 export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled, isLoadingCriteria = false }: CriteriaManagerProps) => {
-  const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
-  
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -36,33 +34,13 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled, 
     })
   );
 
-  // Gestion de l'apparition progressive des critères
-  useEffect(() => {
-    if (isLoadingCriteria) {
-      setVisibleCriteria([]);
-      return;
-    }
-
-    // Révéler les critères un par un avec un délai
-    criteria.forEach((criterion, index) => {
-      setTimeout(() => {
-        setVisibleCriteria(prev => {
-          if (!prev.includes(criterion.id)) {
-            return [...prev, criterion.id];
-          }
-          return prev;
-        });
-      }, index * 200); // 200ms entre chaque critère
-    });
-  }, [criteria, isLoadingCriteria]);
-
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
       setCriteria((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over.id);
-        toast.info("L'ordre des critères a été mis à jour.", { duration: 2000 });
+        toast.info("L'ordre des critères a été mis à jour.", { duration: 1600 });
         return arrayMove(items, oldIndex, newIndex);
       });
     }
@@ -80,7 +58,6 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled, 
       return;
     }
     setCriteria((items) => items.filter((item) => item.id !== id));
-    setVisibleCriteria(prev => prev.filter(critId => critId !== id));
     toast.success("Critère supprimé.");
   };
 
@@ -94,10 +71,6 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled, 
       name: '',
     };
     setCriteria((items) => [...items, newCriterion]);
-    // Ajouter immédiatement le nouveau critère à la liste visible
-    setTimeout(() => {
-      setVisibleCriteria(prev => [...prev, newCriterion.id]);
-    }, 100);
     toast.success("Nouveau critère ajouté.");
   };
 
@@ -135,7 +108,7 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled, 
             </TooltipProvider>
           )}
         </div>
-        <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+        <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-160 group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
 
       <CollapsibleContent className="space-y-4 pt-4">
@@ -146,22 +119,14 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled, 
                 renderCriteriaSkeletons()
               ) : (
                 criteria.map((criterion) => (
-                  <div
+                  <CriterionRow
                     key={criterion.id}
-                    className={`transition-all duration-500 ${
-                      visibleCriteria.includes(criterion.id) 
-                        ? 'opacity-100 scale-100 translate-y-0' 
-                        : 'opacity-0 scale-95 translate-y-2'
-                    }`}
-                  >
-                    <CriterionRow
-                      criterion={criterion}
-                      onNameChange={handleNameChange}
-                      onRemove={handleRemove}
-                      isRemoveDisabled={criteria.length <= 2}
-                      isDragDisabled={isInteractionDisabled}
-                    />
-                  </div>
+                    criterion={criterion}
+                    onNameChange={handleNameChange}
+                    onRemove={handleRemove}
+                    isRemoveDisabled={criteria.length <= 2}
+                    isDragDisabled={isInteractionDisabled}
+                  />
                 ))
               )}
             </div>

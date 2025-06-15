@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { toast } from "sonner";
 import { useDebounceCallback } from 'usehooks-ts';
@@ -117,7 +116,7 @@ export const useDecisionMaker = () => {
           setEmojiState(response.emoji || '🤔');
           setAnalysisStep('criteria-loaded');
           
-          // Phase 2: Générer automatiquement les options
+          // Phase 2: Générer automatiquement les options (délai réduit de 20%)
           setTimeout(async () => {
             setAnalysisStep('loading-options');
             setProgressMessage("Génération des options...");
@@ -147,7 +146,7 @@ export const useDecisionMaker = () => {
             } finally {
               setProgressMessage('');
             }
-          }, 1000);
+          }, 800); // Réduit de 1000ms à 800ms (20% plus rapide)
           
         } catch (e) {
           if (e instanceof Error) {
@@ -159,7 +158,7 @@ export const useDecisionMaker = () => {
         }
     };
     
-    const debouncedGenerateOptions = useDebounceCallback(handleGenerateOptions, 2000);
+    const debouncedGenerateOptions = useDebounceCallback(handleGenerateOptions, 1600); // Réduit de 2000ms à 1600ms (20% plus rapide)
 
     useEffect(() => {
         if (analysisStep === 'done') {
