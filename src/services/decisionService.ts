@@ -9,11 +9,13 @@ interface IFullAnalysisResponse {
 
 export const startAnalysis = async (dilemma: string): Promise<IFullAnalysisResponse> => {
     const prompt = `En tant qu'assistant expert en prise de décision, pour le dilemme : "${dilemma}", veuillez fournir une analyse complète.
+    La réponse DOIT être un objet JSON valide.
     JSON attendu :
     {
       "criteria": ["Critère 1", "Critère 2", "Critère 3", "Critère 4"],
       "result": {
         "recommendation": "Option Recommandée",
+        "imageQuery": "English search query for a background image, 2-3 keywords",
         "description": "Un texte descriptif (2-3 phrases) et engageant expliquant pourquoi c'est la meilleure option. Sois convaincant.",
         "infoLinks": [
           { "title": "Titre du lien d'information 1", "url": "https://example.com/info1" },
@@ -53,6 +55,7 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[]): 
     Le résultat doit être un objet JSON avec la structure suivante :
     {
       "recommendation": "Option Recommandée",
+      "imageQuery": "English search query for a background image for the recommended option, 2-3 keywords",
       "description": "Un texte descriptif (2-3 phrases) et engageant expliquant pourquoi c'est la meilleure option. Sois convaincant.",
       "infoLinks": [ { "title": "Titre du lien info 1", "url": "https://example.com/info1" } ],
       "shoppingLinks": [ { "title": "Titre du lien achat 1", "url": "https://example.com/shop1" } ],

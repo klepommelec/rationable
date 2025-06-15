@@ -36,7 +36,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
 
   let imageSrc: string = '/placeholder.svg';
   if (result.imageQuery) {
-    imageSrc = `https://source.unsplash.com/800x600/?${encodeURIComponent(result.imageQuery.replace(/ /g, ','))}`;
+    imageSrc = `https://source.unsplash.com/800x600/?${encodeURIComponent(result.imageQuery)}`;
   } else if (result.imageBase64) {
     // Fallback for old history items
     imageSrc = `data:image/png;base64,${result.imageBase64}`;

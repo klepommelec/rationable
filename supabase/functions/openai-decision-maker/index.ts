@@ -72,16 +72,6 @@ serve(async (req) => {
       throw new Error("La réponse de l'API n'était pas un JSON valide.");
     }
     
-    const recommendation = jsonContent.result?.recommendation || jsonContent.recommendation;
-    if (recommendation) {
-        if (jsonContent.result) {
-            jsonContent.result.imageQuery = recommendation;
-        } else {
-            jsonContent.imageQuery = recommendation;
-        }
-    }
-
-
     return new Response(JSON.stringify(jsonContent), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
