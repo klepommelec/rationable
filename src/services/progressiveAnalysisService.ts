@@ -35,7 +35,7 @@ export class ProgressiveAnalysisService {
       message: '🧠 Analyse de votre dilemme...'
     });
 
-    await this.delay(1500);
+    await this.delay(300);
 
     const prompt = `Pour le dilemme : "${dilemma}", choisissez un emoji pertinent et retournez UNIQUEMENT l'emoji (un seul caractère unicode). Exemples : 🤔, 💻, ✈️, 🏠, 🎉, 💡, 💸, ❤️, 🍔, 📚, 🏆`;
     
@@ -49,7 +49,7 @@ export class ProgressiveAnalysisService {
         message: '✨ Emoji sélectionné !'
       });
 
-      await this.delay(800);
+      await this.delay(200);
       return emoji;
     } catch (error) {
       console.error('Error generating emoji:', error);
@@ -71,25 +71,19 @@ export class ProgressiveAnalysisService {
       const criteriaData = typeof response === 'string' ? JSON.parse(response) : response;
       const allCriteria = criteriaData.criteria || [];
 
-      // Simule la génération progressive des critères
+      // Génération progressive rapide des critères
       const criteriaGenerated: string[] = [];
       
       for (let i = 0; i < allCriteria.length; i++) {
-        await this.delay(1200);
+        await this.delay(400);
         criteriaGenerated.push(allCriteria[i]);
         
         this.updateState({
           criteriaGenerated: [...criteriaGenerated],
           progress: 20 + (i + 1) * 15,
-          message: `💡 Critère ${i + 1}/4 identifié : ${allCriteria[i]}`
+          message: `💡 Critère ${i + 1}/4 : ${allCriteria[i]}`
         });
       }
-
-      await this.delay(600);
-      this.updateState({
-        progress: 80,
-        message: '✅ Tous les critères identifiés !'
-      });
 
       return allCriteria;
     } catch (error) {
@@ -101,8 +95,8 @@ export class ProgressiveAnalysisService {
   async analyzeOptionsProgressively(dilemma: string, criteria: string[]): Promise<IResult> {
     this.updateState({
       phase: 'analyzing-options',
-      progress: 85,
-      message: '⚖️ Évaluation des options disponibles...',
+      progress: 80,
+      message: '⚖️ Évaluation des options...',
       totalOptions: 3
     });
 
@@ -129,23 +123,15 @@ export class ProgressiveAnalysisService {
       const response = await callOpenAiApi(prompt);
       const result: IResult = typeof response === 'string' ? JSON.parse(response) : response;
 
-      // Simule l'analyse progressive des options
+      // Analyse progressive rapide des options
       for (let i = 0; i < result.breakdown.length; i++) {
-        await this.delay(1500);
+        await this.delay(600);
         this.updateState({
           optionsAnalyzed: i + 1,
-          progress: 85 + (i + 1) * 4,
-          message: `🔍 Analyse de l'option ${i + 1}/3 : ${result.breakdown[i].option}`
+          progress: 80 + (i + 1) * 6,
+          message: `🔍 ${result.breakdown[i].option} : ${result.breakdown[i].score}/100`
         });
       }
-
-      this.updateState({
-        phase: 'finalizing',
-        progress: 97,
-        message: '🎯 Finalisation de la recommandation...'
-      });
-
-      await this.delay(1000);
 
       this.updateState({
         phase: 'done',

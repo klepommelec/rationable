@@ -15,7 +15,7 @@ export const OptionsAnalyzer: React.FC<OptionsAnalyzerProps> = ({
   result
 }) => {
   const isAnalyzing = progressiveState.phase === 'analyzing-options';
-  const isComplete = progressiveState.phase === 'done' || progressiveState.phase === 'finalizing';
+  const isComplete = progressiveState.phase === 'done';
 
   if (!isAnalyzing && !isComplete) {
     return null;
@@ -43,7 +43,10 @@ export const OptionsAnalyzer: React.FC<OptionsAnalyzerProps> = ({
                 <Skeleton className="h-6 w-1/3" />
                 <Skeleton className="h-6 w-1/4" />
               </div>
-              <Skeleton className="h-16 w-full" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
             </div>
           );
         }

@@ -3,10 +3,13 @@ import * as React from 'react';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
 import DilemmaSetup from './decision-maker/DilemmaSetup';
 import AnalysisResult from './decision-maker/AnalysisResult';
-import { ProgressiveInterface } from './decision-maker/ProgressiveInterface';
 import { EmojiPicker } from './EmojiPicker';
 import { CriteriaManager } from './CriteriaManager';
 import { CriteriaSkeleton } from './CriteriaSkeleton';
+import { CriteriaGenerator } from './decision-maker/CriteriaGenerator';
+import { OptionsAnalyzer } from './decision-maker/OptionsAnalyzer';
+import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 
 const DecisionMaker = () => {
   const {
@@ -36,39 +39,10 @@ const DecisionMaker = () => {
     isProgressiveAnalyzing
   } = useDecisionMaker();
 
-  // Mode progressif actif
-  if (useProgressiveMode && isProgressiveAnalyzing) {
+  // Affichage de la configuration initiale
+  if (analysisStep === 'idle') {
     return (
-      <ProgressiveInterface
-        dilemma={dilemma}
-        emoji={emoji}
-        setEmoji={setEmoji}
-        progressiveState={progressiveState}
-        criteria={criteria}
-        result={result}
-      />
-    );
-  }
-
-  return (
-    <div className="w-full max-w-3xl mx-auto">
-      {(analysisStep === 'analyzing' || analysisStep === 'done') && (
-        <>
-          <div className="flex items-center gap-4 mb-6 animate-fade-in">
-              <EmojiPicker emoji={emoji} setEmoji={setEmoji} />
-              <h1 className="text-3xl font-bold text-left">{dilemma}</h1>
-          </div>
-          <div className="w-full mb-6">
-            {analysisStep === 'analyzing' ? (
-              <CriteriaSkeleton />
-            ) : (
-              criteria.length > 0 && <CriteriaManager criteria={criteria} setCriteria={setCriteria} isInteractionDisabled={isLoading || isUpdating} />
-            )}
-          </div>
-        </>
-      )}
-
-      {analysisStep === 'idle' && (
+      <div className="w-full max-w-3xl mx-auto">
         <DilemmaSetup
           dilemma={dilemma}
           setDilemma={setDilemma}
@@ -88,16 +62,92 @@ const DecisionMaker = () => {
           useProgressiveMode={useProgressiveMode}
           setUseProgressiveMode={setUseProgressiveMode}
         />
+      </div>
+    );
+  }
+
+  // Affichage unifié pour l'analyse (mode classique et progressif)
+  return (
+    <div className="w-full max-w-3xl mx-auto">
+      {/* Header avec emoji et titre - toujours visible */}
+      <div className="flex items-center gap-4 mb-6 animate-fade-in">
+        <div className="relative">
+          <EmojiPicker emoji={emoji} setEmoji={setEmoji} />
+          {useProgressiveMode && progressiveState.phase === 'generating-emoji' && (
+            <div className="absolute -bottom-1 -right-1 flex space-x-0.5">
+              <div className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse" style={{ animationDelay: '300ms' }}></div>
+            </div>
+          )}
+        </div>
+        <h1 className="text-3xl font-bold text-left">{dilemma}</h1>
+      </div>
+
+      {/* Barre de progression et message - en mode progressif */}
+      {useProgressiveMode && isProgressiveAnalyzing && (
+        <Card className="backdrop-blur-sm bg-card/70 mb-6">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Analyse en cours</h2>
+                <span className="text-sm text-muted-foreground">{progressiveState.progress}%</span>
+              </div>
+              
+              <Progress value={progressiveState.progress} className="h-3" />
+              
+              <div className="flex items-center gap-2 text-sm font-medium text-cyan-400">
+                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                {progressiveState.message}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Section des critères */}
+      <div className="w-full mb-6">
+        {useProgressiveMode && isProgressiveAnalyzing ? (
+          // Mode progressif : affichage progressif des critères
+          progressiveState.phase !== 'idle' && progressiveState.phase !== 'generating-emoji' && (
+            <CriteriaGenerator 
+              progressiveState={progressiveState}
+              finalCriteria={criteria}
+            />
+          )
+        ) : analysisStep === 'analyzing' ? (
+          // Mode classique : skeleton pendant le chargement
+          <CriteriaSkeleton />
+        ) : (
+          // Mode terminé : gestion des critères
+          criteria.length > 0 && (
+            <CriteriaManager 
+              criteria={criteria} 
+              setCriteria={setCriteria} 
+              isInteractionDisabled={isLoading || isUpdating} 
+            />
+          )
+        )}
+      </div>
+
+      {/* Section des options analysées - mode progressif */}
+      {useProgressiveMode && isProgressiveAnalyzing && 
+        (progressiveState.phase === 'analyzing-options' || progressiveState.phase === 'done') && (
+        <div className="mb-6">
+          <OptionsAnalyzer 
+            progressiveState={progressiveState}
+            result={result}
+          />
+        </div>
       )}
       
-      {(analysisStep === 'analyzing' || analysisStep === 'done') && (
-        <AnalysisResult
-          result={result}
-          isUpdating={isUpdating}
-          clearSession={clearSession}
-          analysisStep={analysisStep}
-        />
-      )}
+      {/* Résultat final */}
+      <AnalysisResult
+        result={result}
+        isUpdating={isUpdating}
+        clearSession={clearSession}
+        analysisStep={analysisStep}
+      />
     </div>
   );
 };
