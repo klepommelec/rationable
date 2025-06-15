@@ -331,7 +331,10 @@ const DecisionMaker = () => {
       {result && (analysisStep === 'done' || analysisStep === 'generating-options') && (
         <Card className="mt-8 backdrop-blur-sm animate-fade-in">
           <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-2"><Lightbulb className="text-yellow-400" /> Recommandation de l'IA</CardTitle>
+            <CardTitle className="text-2xl flex items-start gap-3">
+              <Lightbulb className="text-yellow-400 h-7 w-7 shrink-0" />
+              <span>{dilemma}</span>
+            </CardTitle>
              <Badge className="w-fit bg-cyan-500 text-slate-900 text-lg mt-2">{result.recommendation}</Badge>
           </CardHeader>
           <CardContent className="space-y-4">
