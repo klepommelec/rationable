@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { DecisionHistory } from './DecisionHistory';
 import { ICriterion, IResult, IDecision } from '@/types/decision';
 import { supabase } from '@/integrations/supabase/client';
+import { ThemeToggle } from './ThemeToggle';
 
 
 const templates = [
@@ -232,22 +233,25 @@ const DecisionMaker = () => {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <Card className="bg-slate-900/80 border-slate-800 backdrop-blur-sm">
-        <CardHeader className="text-center">
+      <Card className="backdrop-blur-sm relative">
+        <div className="absolute top-4 right-4 z-10">
+          <ThemeToggle />
+        </div>
+        <CardHeader className="text-center pt-12">
           <div className="flex justify-center items-center mb-4">
             <BrainCircuit className="h-12 w-12 text-cyan-400" />
           </div>
-          <CardTitle className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-200 to-slate-400">Assistant de Décision IA</CardTitle>
-          <CardDescription className="text-slate-400">Posez votre dilemme, et laissez l'IA vous éclairer.</CardDescription>
+          <CardTitle className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-slate-400">Assistant de Décision IA</CardTitle>
+          <CardDescription className="text-muted-foreground">Posez votre dilemme, et laissez l'IA vous éclairer.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <label className="text-slate-300 font-medium">1. Votre dilemme</label>
+            <label className="font-medium">1. Votre dilemme</label>
             <Textarea
               placeholder="Ex: Quel framework JS devrais-je apprendre en 2025 ?"
               value={dilemma}
               onChange={(e) => setDilemma(e.target.value)}
-              className="bg-slate-800 border-slate-700 focus:ring-cyan-500 text-base md:text-sm"
+              className="focus:ring-cyan-500 text-base md:text-sm"
               disabled={isLoading || isGeneratingCriteria}
               rows={3}
             />
@@ -255,19 +259,19 @@ const DecisionMaker = () => {
 
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <label className="text-slate-300 font-medium">Ou utilisez un modèle</label>
+              <label className="font-medium">Ou utilisez un modèle</label>
               <div className="flex items-center gap-1">
                 <Sheet>
                   <SheetTrigger asChild>
-                    <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                    <Button variant="ghost" size="sm">
                       <History className="h-4 w-4 mr-2" />
                       Historique
                     </Button>
                   </SheetTrigger>
-                  <SheetContent className="bg-slate-900/95 border-slate-800 backdrop-blur-sm text-slate-200 w-full sm:max-w-lg p-6 flex flex-col">
+                  <SheetContent className="bg-background w-full sm:max-w-lg p-6 flex flex-col">
                     <SheetHeader className="pr-6">
-                      <SheetTitle className="text-slate-200">Historique des décisions</SheetTitle>
-                      <SheetDescription className="text-slate-400">
+                      <SheetTitle>Historique des décisions</SheetTitle>
+                      <SheetDescription className="text-muted-foreground">
                         Chargez ou supprimez vos analyses passées.
                       </SheetDescription>
                     </SheetHeader>
@@ -280,7 +284,7 @@ const DecisionMaker = () => {
                     />
                   </SheetContent>
                 </Sheet>
-                 <Button variant="ghost" size="sm" onClick={clearSession} className="text-slate-400 hover:text-white">
+                 <Button variant="ghost" size="sm" onClick={clearSession}>
                   <Eraser className="h-4 w-4 mr-2" />
                   Réinitialiser
                 </Button>
@@ -288,7 +292,7 @@ const DecisionMaker = () => {
             </div>
             <div className="flex flex-wrap gap-2">
               {templates.map(template => (
-                <Button key={template.name} variant="outline" size="sm" onClick={() => applyTemplate(template)} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+                <Button key={template.name} variant="outline" size="sm" onClick={() => applyTemplate(template)}>
                   <BookCopy className="h-4 w-4 mr-2" />
                   {template.name}
                 </Button>
@@ -299,7 +303,7 @@ const DecisionMaker = () => {
           {dilemma.trim() !== '' && (
             <div className="space-y-3 animate-fade-in">
               <div className="flex items-center gap-2">
-                <label className="text-slate-300 font-medium">2. Critères (glissez pour réordonner par importance)</label>
+                <label className="font-medium">2. Critères (glissez pour réordonner par importance)</label>
                 {isGeneratingCriteria && (
                     <div className="flex items-center text-xs text-cyan-400">
                       <LoaderCircle className="h-3 w-3 mr-1 animate-spin" />
@@ -325,7 +329,7 @@ const DecisionMaker = () => {
                 </SortableContext>
               </DndContext>
 
-              <Button variant="outline" onClick={addCriterion} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white" disabled={isGeneratingCriteria}>
+              <Button variant="outline" onClick={addCriterion} disabled={isGeneratingCriteria}>
                 <Plus className="h-4 w-4 mr-2" />
                 Ajouter un critère
               </Button>
@@ -350,33 +354,33 @@ const DecisionMaker = () => {
       </Card>
       
       {result && !isLoading && (
-        <Card className="mt-8 bg-slate-900/80 border-slate-800 backdrop-blur-sm animate-fade-in">
+        <Card className="mt-8 backdrop-blur-sm animate-fade-in">
           <CardHeader>
             <CardTitle className="text-2xl flex items-center gap-2"><Lightbulb className="text-yellow-400" /> Recommandation de l'IA</CardTitle>
              <Badge className="w-fit bg-cyan-500 text-slate-900 text-lg mt-2">{result.recommendation}</Badge>
           </CardHeader>
           <CardContent className="space-y-4">
-            <h3 className="font-semibold text-lg text-slate-300">Analyse détaillée :</h3>
+            <h3 className="font-semibold text-lg">Analyse détaillée :</h3>
             {result.breakdown.sort((a, b) => b.score - a.score).map((item, index) => (
-              <div key={index} className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+              <div key={index} className="p-4 rounded-lg bg-accent border">
                 <div className="flex justify-between items-center mb-2">
                   <h4 className="font-bold text-cyan-400 text-md">{item.option}</h4>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-slate-200">{item.score}/100</span>
-                    <Progress value={item.score} className="w-24 h-2 bg-slate-700" />
+                    <span className="text-sm font-bold">{item.score}/100</span>
+                    <Progress value={item.score} className="w-24 h-2 bg-secondary" />
                   </div>
                 </div>
 
                 <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h5 className="font-semibold text-green-400">Avantages</h5>
-                    <ul className="list-disc list-inside text-sm text-slate-300">
+                    <ul className="list-disc list-inside text-sm text-muted-foreground">
                       {item.pros.map((pro, i) => <li key={i}>{pro}</li>)}
                     </ul>
                   </div>
                   <div>
                     <h5 className="font-semibold text-red-400">Inconvénients</h5>
-                    <ul className="list-disc list-inside text-sm text-slate-300">
+                    <ul className="list-disc list-inside text-sm text-muted-foreground">
                       {item.cons.map((con, i) => <li key={i}>{con}</li>)}
                     </ul>
                   </div>
