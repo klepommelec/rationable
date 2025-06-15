@@ -1,12 +1,9 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { toast } from "sonner";
 import { useDebounceCallback } from 'usehooks-ts';
 import { RefreshCw } from 'lucide-react';
 import { ICriterion, IResult, IDecision } from '@/types/decision';
 import { useDecisionHistory } from './useDecisionHistory';
-import { useProgressiveAnalysis } from './useProgressiveAnalysis';
-import { useClassicProgressiveAnalysis } from './useClassicProgressiveAnalysis';
 import { startAnalysis, generateOptions } from '@/services/decisionService';
 
 const templates = [
@@ -34,32 +31,12 @@ export const useDecisionMaker = () => {
     const [result, setResult] = useState<IResult | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [currentDecisionId, setCurrentDecisionId] = useState<string | null>(null);
-    const [useProgressiveMode, setUseProgressiveMode] = useState(false);
 
     const { history, addDecision, updateDecision, deleteDecision, clearHistory } = useDecisionHistory();
-    const {
-        progressiveState,
-        generatedCriteria,
-        finalResult,
-        emoji: progressiveEmoji,
-        startProgressiveAnalysis,
-        resetProgressiveAnalysis,
-        isAnalyzing: isProgressiveAnalyzing
-    } = useProgressiveAnalysis();
-
-    const {
-        state: classicState,
-        emoji: classicEmoji,
-        criteria: classicCriteria,
-        result: classicResult,
-        startClassicProgressiveAnalysis,
-        resetAnalysis: resetClassicAnalysis,
-        isAnalyzing: isClassicAnalyzing
-    } = useClassicProgressiveAnalysis();
     
     const initialCriteriaRef = useRef<ICriterion[]>([]);
     
-    const isLoading = analysisStep === 'analyzing' || isProgressiveAnalyzing || isClassicAnalyzing;
+    const isLoading = analysisStep === 'analyzing';
 
     const setEmoji = (newEmoji: string) => {
         setEmojiState(newEmoji);
@@ -111,80 +88,52 @@ export const useDecisionMaker = () => {
     };
 
     const handleStartAnalysis = async () => {
-        if (useProgressiveMode) {
-            await handleStartProgressiveAnalysis();
-        } else {
-            await handleStartClassicProgressiveAnalysis();
-        }
-    };
-
-    const handleStartProgressiveAnalysis = async () => {
         setAnalysisStep('analyzing');
-        resetProgressiveAnalysis();
+        setProgress(0);
+        setProgressMessage("Initialisation de l'analyse...");
         setResult(null);
         setCriteria([]);
+        setEmojiState('🤔');
         setCurrentDecisionId(null);
 
+        setTimeout(() => setProgress(10), 100);
+        
         try {
-            const progressiveResult = await startProgressiveAnalysis(dilemma);
-            
-            setEmojiState(progressiveResult.emoji);
-            setCriteria(progressiveResult.criteria);
-            setResult(progressiveResult.result);
-            
-            const newDecision: IDecision = {
-                id: crypto.randomUUID(),
-                timestamp: Date.now(),
-                dilemma,
-                emoji: progressiveResult.emoji,
-                criteria: progressiveResult.criteria,
-                result: progressiveResult.result
-            };
-            addDecision(newDecision);
-            setCurrentDecisionId(newDecision.id);
-            
-            setAnalysisStep('done');
-            toast.success("Analyse progressive complète !");
-        } catch (e) {
-            if (e instanceof Error) {
-                toast.error(`Erreur lors de l'analyse progressive : ${e.message}`);
-            }
-            setAnalysisStep('idle');
-        }
-    };
+          setProgress(25);
+          setProgressMessage("Génération des critères et options...");
+          const response = await startAnalysis(dilemma);
+          setProgress(75);
+          setProgressMessage("Finalisation de l'analyse...");
 
-    const handleStartClassicProgressiveAnalysis = async () => {
-        setAnalysisStep('analyzing');
-        resetClassicAnalysis();
-        setResult(null);
-        setCriteria([]);
-        setCurrentDecisionId(null);
-
-        try {
-            const classicResult = await startClassicProgressiveAnalysis(dilemma);
-            
-            setEmojiState(classicResult.emoji);
-            setCriteria(classicResult.criteria);
-            setResult(classicResult.result);
-            
-            const newDecision: IDecision = {
-                id: crypto.randomUUID(),
-                timestamp: Date.now(),
-                dilemma,
-                emoji: classicResult.emoji,
-                criteria: classicResult.criteria,
-                result: classicResult.result
-            };
-            addDecision(newDecision);
-            setCurrentDecisionId(newDecision.id);
-            
-            setAnalysisStep('done');
-            toast.success("Analyse complète !");
+          const newCriteria = response.criteria.map((name: string) => ({
+            id: crypto.randomUUID(),
+            name,
+          }));
+          setCriteria(newCriteria);
+          setResult(response.result);
+          setEmojiState(response.emoji || '🤔');
+          
+          const newDecision: IDecision = {
+            id: crypto.randomUUID(),
+            timestamp: Date.now(),
+            dilemma,
+            emoji: response.emoji || '🤔',
+            criteria: newCriteria,
+            result: response.result
+          };
+          addDecision(newDecision);
+          setCurrentDecisionId(newDecision.id);
+          
+          setProgress(100);
+          setAnalysisStep('done');
+          toast.success("Analyse complète générée !");
         } catch (e) {
-            if (e instanceof Error) {
-                toast.error(`Erreur lors de l'analyse : ${e.message}`);
-            }
-            setAnalysisStep('idle');
+          if (e instanceof Error) {
+            toast.error(`Erreur lors de l'analyse : ${e.message}`);
+          }
+          setAnalysisStep('idle');
+          setProgress(0);
+          setProgressMessage('');
         }
     };
     
@@ -213,9 +162,6 @@ export const useDecisionMaker = () => {
         setProgress(0);
         setProgressMessage('');
         setCurrentDecisionId(null);
-        setUseProgressiveMode(false);
-        resetProgressiveAnalysis();
-        resetClassicAnalysis();
         toast.success(`Modèle "${template.name}" appliqué !`);
     }
 
@@ -228,9 +174,6 @@ export const useDecisionMaker = () => {
         setProgress(0);
         setProgressMessage('');
         setCurrentDecisionId(null);
-        setUseProgressiveMode(false);
-        resetProgressiveAnalysis();
-        resetClassicAnalysis();
         toast.info("Session réinitialisée.");
     }
     
@@ -269,30 +212,17 @@ export const useDecisionMaker = () => {
         toast.info("L'historique des décisions a été effacé.");
     };
 
-    // Déterminer les valeurs à afficher selon le mode
-    const displayEmoji = useProgressiveMode && isProgressiveAnalyzing 
-        ? progressiveEmoji 
-        : (!useProgressiveMode && isClassicAnalyzing ? classicEmoji : emoji);
-
-    const displayCriteria = useProgressiveMode && isProgressiveAnalyzing 
-        ? generatedCriteria 
-        : (!useProgressiveMode && isClassicAnalyzing ? classicCriteria : criteria);
-
-    const displayResult = useProgressiveMode && finalResult 
-        ? finalResult 
-        : (!useProgressiveMode && classicResult ? classicResult : result);
-
     return {
         dilemma,
         setDilemma,
-        emoji: displayEmoji,
+        emoji,
         setEmoji,
         analysisStep,
         progress,
         progressMessage,
-        criteria: displayCriteria,
+        criteria,
         setCriteria,
-        result: displayResult,
+        result,
         history,
         isUpdating,
         isLoading,
@@ -302,12 +232,6 @@ export const useDecisionMaker = () => {
         loadDecision,
         deleteDecision: handleDeleteDecision,
         clearHistory: handleClearHistory,
-        templates,
-        useProgressiveMode,
-        setUseProgressiveMode,
-        progressiveState,
-        isProgressiveAnalyzing,
-        classicState,
-        isClassicAnalyzing
+        templates
     };
 };

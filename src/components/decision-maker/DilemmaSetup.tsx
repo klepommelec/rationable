@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,8 +26,6 @@ interface DilemmaSetupProps {
     progress: number;
     progressMessage: string;
     templates: { name: string; dilemma: string; }[];
-    useProgressiveMode?: boolean;
-    setUseProgressiveMode?: (value: boolean) => void;
 }
 
 const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
@@ -44,9 +43,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   handleStartAnalysis,
   progress,
   progressMessage,
-  templates,
-  useProgressiveMode = false,
-  setUseProgressiveMode
+  templates
 }) => {
     return (
         <Card className="backdrop-blur-sm relative">
@@ -114,35 +111,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         ))}
                     </div>
                 </div>
-                {setUseProgressiveMode && (
-                    <div className="space-y-3">
-                        <label className="font-medium">Mode d'analyse</label>
-                        <div className="flex gap-2">
-                            <Button
-                                variant={!useProgressiveMode ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => setUseProgressiveMode(false)}
-                                disabled={isLoading || isUpdating}
-                            >
-                                📊 Mode Classique
-                            </Button>
-                            <Button
-                                variant={useProgressiveMode ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => setUseProgressiveMode(true)}
-                                disabled={isLoading || isUpdating}
-                            >
-                                🧠 Mode Progressif
-                            </Button>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            {useProgressiveMode 
-                                ? "Voir l'IA réfléchir étape par étape en temps réel" 
-                                : "Analyse rapide avec résultat final"
-                            }
-                        </p>
-                    </div>
-                )}
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
                 <MainActionButton
