@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -70,9 +69,12 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled }
   return (
     <Collapsible defaultOpen className="p-4 rounded-lg bg-accent border animate-fade-in">
       <CollapsibleTrigger className="flex justify-between items-center w-full group">
-        <h3 className="font-semibold text-lg text-left">
-          Gérez les critères de décision
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-semibold text-lg text-left">
+            Gérez les critères de décision
+          </h3>
+          <span className="text-sm font-medium text-muted-foreground">({criteria.length}/8)</span>
+        </div>
         <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
 
