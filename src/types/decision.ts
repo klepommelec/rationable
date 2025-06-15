@@ -1,4 +1,3 @@
-import { ICriterion } from '@/types/decision';
 
 export interface ICriterion {
   id: string;
