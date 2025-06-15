@@ -1,3 +1,4 @@
+import { ICriterion } from '@/types/decision';
 
 export interface ICriterion {
   id: string;
@@ -14,6 +15,7 @@ export interface IBreakdownItem {
 export interface IResult {
   recommendation: string;
   breakdown: IBreakdownItem[];
+  criteria: string[];
 }
 
 export interface IDecision {
