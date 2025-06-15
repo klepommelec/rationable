@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,6 +62,8 @@ const callOpenAiApi = async (prompt: string) => {
 const DecisionMaker = () => {
   const [dilemma, setDilemma] = useState('');
   const [analysisStep, setAnalysisStep] = useState<'idle' | 'analyzing' | 'done'>('idle');
+  const [progress, setProgress] = useState(0);
+  const [progressMessage, setProgressMessage] = useState('');
   const [criteria, setCriteria] = useState<ICriterion[]>([]);
   const [result, setResult] = useState<IResult | null>(null);
   const [history, setHistory] = useState<IDecision[]>([]);
@@ -88,21 +89,16 @@ const DecisionMaker = () => {
 
     const criteriaNames = currentCriteria.map(c => c.name);
     
-    const prompt = `Vous êtes un assistant expert en prise de décision. Analysez le dilemme suivant : "${dilemma}" en vous basant sur les critères suivants, qui sont classés par ordre d'importance : ${criteriaNames.join(', ')}.
-    Veuillez :
-    1. Générer 3 options potentielles.
-    2. Pour chaque option, fournir une liste concise d'avantages (pros) et d'inconvénients (cons) en se basant sur les critères fournis.
-    3. Pour chaque option, calculer un score de pertinence de 0 à 100, basé sur l'adéquation de l'option avec les critères. Un score plus élevé signifie une meilleure adéquation.
-    4. Fournir une recommandation claire pour la meilleure option et expliquer pourquoi en quelques phrases.
-
-    Retournez le résultat sous la forme d'un objet JSON valide avec la structure suivante :
+    const prompt = `Pour le dilemme "${dilemma}", en utilisant les critères importants : ${criteriaNames.join(', ')}.
+    Veuillez générer 3 options, les évaluer (pros/cons, score de 0 à 100) et fournir une recommandation.
+    Format JSON attendu :
     {
-      "recommendation": "Nom de l'option recommandée",
+      "recommendation": "Option Recommandée",
       "breakdown": [
         {
-          "option": "Nom de l'option 1",
-          "pros": ["Avantage 1", "Avantage 2"],
-          "cons": ["Inconvénient 1", "Inconvénient 2"],
+          "option": "Option 1",
+          "pros": ["Avantage 1"],
+          "cons": ["Inconvénient 1"],
           "score": 85
         }
       ]
@@ -139,26 +135,24 @@ const DecisionMaker = () => {
 
   const handleStartAnalysis = async () => {
     setAnalysisStep('analyzing');
+    setProgress(0);
+    setProgressMessage("Initialisation de l'analyse...");
     setResult(null);
     setCriteria([]);
 
-    const prompt = `Vous êtes un assistant expert en prise de décision. Pour le dilemme suivant : "${dilemma}", veuillez :
-    1. Déterminer les 4 critères d'évaluation les plus pertinents.
-    2. En utilisant ces 4 critères (classés par ordre d'importance), générer 3 options potentielles.
-    3. Pour chaque option, fournir une liste concise d'avantages (pros) et d'inconvénients (cons) en se basant sur les critères.
-    4. Pour chaque option, calculer un score de pertinence de 0 à 100, basé sur l'adéquation de l'option avec les critères. Un score plus élevé signifie une meilleure adéquation.
-    5. Fournir une recommandation claire pour la meilleure option et expliquer pourquoi en quelques phrases.
+    setTimeout(() => setProgress(10), 100);
 
-    Retournez le résultat sous la forme d'un objet JSON valide avec la structure suivante :
+    const prompt = `En tant qu'assistant expert en prise de décision, pour le dilemme : "${dilemma}", veuillez fournir une analyse complète.
+    JSON attendu :
     {
       "criteria": ["Critère 1", "Critère 2", "Critère 3", "Critère 4"],
       "result": {
-        "recommendation": "Nom de l'option recommandée",
+        "recommendation": "Option Recommandée",
         "breakdown": [
           {
-            "option": "Nom de l'option 1",
-            "pros": ["Avantage 1", "Avantage 2"],
-            "cons": ["Inconvénient 1", "Inconvénient 2"],
+            "option": "Option 1",
+            "pros": ["Avantage 1"],
+            "cons": ["Inconvénient 1"],
             "score": 85
           }
         ]
@@ -166,7 +160,12 @@ const DecisionMaker = () => {
     }`;
     
     try {
+      setProgress(25);
+      setProgressMessage("Génération des critères et options...");
       const response = await callOpenAiApi(prompt);
+      setProgress(75);
+      setProgressMessage("Finalisation de l'analyse...");
+
       const isValidCriteria = response && response.criteria && Array.isArray(response.criteria);
       const apiResult = response.result;
       const isValidResult = apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number');
@@ -188,6 +187,7 @@ const DecisionMaker = () => {
           };
           setHistory(prevHistory => [newDecision, ...prevHistory]);
           
+          setProgress(100);
           setAnalysisStep('done');
           toast.success("Analyse complète générée !");
       } else {
@@ -198,6 +198,8 @@ const DecisionMaker = () => {
         toast.error(`Erreur lors de l'analyse : ${e.message}`);
       }
       setAnalysisStep('idle');
+      setProgress(0);
+      setProgressMessage('');
     }
   };
   
@@ -222,6 +224,8 @@ const DecisionMaker = () => {
     setResult(null);
     setCriteria([]);
     setAnalysisStep('idle');
+    setProgress(0);
+    setProgressMessage('');
     toast.success(`Modèle "${template.name}" appliqué !`);
   }
 
@@ -230,6 +234,8 @@ const DecisionMaker = () => {
     setResult(null);
     setCriteria([]);
     setAnalysisStep('idle');
+    setProgress(0);
+    setProgressMessage('');
     toast.info("Session réinitialisée.");
   }
   
@@ -240,6 +246,8 @@ const DecisionMaker = () => {
       setCriteria(decisionToLoad.criteria);
       setResult(decisionToLoad.result);
       setAnalysisStep('done');
+      setProgress(0);
+      setProgressMessage('');
       toast.info("Décision précédente chargée.");
     }
   };
@@ -260,10 +268,13 @@ const DecisionMaker = () => {
     switch (analysisStep) {
       case 'analyzing':
         return (
-          <Button disabled className="w-full bg-cyan-500 text-slate-900 font-bold text-lg py-6">
-            <LoaderCircle className="h-5 w-5 mr-2 animate-spin" />
-            Analyse en cours...
-          </Button>
+          <div className="w-full space-y-2">
+            <Button disabled className="w-full bg-cyan-500 text-slate-900 font-bold text-lg py-6">
+              <LoaderCircle className="h-5 w-5 mr-2 animate-spin" />
+              {progressMessage || 'Analyse en cours...'}
+            </Button>
+            <Progress value={progress} className="w-full h-2" />
+          </div>
         );
       case 'done':
          return null;
@@ -353,7 +364,7 @@ const DecisionMaker = () => {
       </Card>
       
       {analysisStep === 'analyzing' && <ResultSkeleton />}
-
+      
       {result && analysisStep === 'done' && (
         <Card className="mt-8 backdrop-blur-sm animate-fade-in">
           <CardHeader>

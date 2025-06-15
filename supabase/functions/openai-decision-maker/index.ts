@@ -38,12 +38,12 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4-turbo',
+        model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are a world-class decision making assistant. Your responses must be in French and in valid JSON format.' },
+          { role: 'system', content: 'You are a world-class decision making assistant. Your responses must be in French and in a valid JSON object format.' },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.7,
+        temperature: 0.5,
         response_format: { type: "json_object" },
       }),
     });
