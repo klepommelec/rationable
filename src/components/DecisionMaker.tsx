@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,41 +20,38 @@ interface IResult {
   }[];
 }
 
-const callPerplexityApi = async (prompt: string, apiKey: string) => {
+const callOpenAiApi = async (prompt: string, apiKey: string) => {
   if (!apiKey) {
-    throw new Error("Veuillez entrer votre clé API Perplexity.");
+    throw new Error("Veuillez entrer votre clé API OpenAI.");
   }
 
-  const response = await fetch('https://api.perplexity.ai/chat/completions', {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'llama-3.1-sonar-large-128k-online',
+      model: 'gpt-4-turbo',
       messages: [
         { role: 'system', content: 'You are a world-class decision making assistant. Your responses must be in French and in valid JSON format.' },
         { role: 'user', content: prompt }
       ],
       temperature: 0.7,
+      response_format: { type: "json_object" },
     }),
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    console.error("Perplexity API Error:", errorData);
-    throw new Error(`Erreur de l'API Perplexity: ${errorData.error?.message || response.statusText}`);
+    console.error("OpenAI API Error:", errorData);
+    throw new Error(`Erreur de l'API OpenAI: ${errorData.error?.message || response.statusText}`);
   }
 
   const data = await response.json();
   const content = data.choices[0].message.content;
   
-  const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/);
   try {
-    if (jsonMatch && jsonMatch[1]) {
-      return JSON.parse(jsonMatch[1]);
-    }
     return JSON.parse(content);
   } catch(e) {
     console.error("Failed to parse JSON from API response:", content);
@@ -65,7 +61,7 @@ const callPerplexityApi = async (prompt: string, apiKey: string) => {
 
 
 const DecisionMaker = () => {
-  const [apiKey, setApiKey] = useState(localStorage.getItem('perplexity_api_key') || '');
+  const [apiKey, setApiKey] = useState(localStorage.getItem('openai_api_key') || '');
   const [dilemma, setDilemma] = useState('');
   const [criteria, setCriteria] = useState<ICriterion[]>([
     { name: '', weight: 5 },
@@ -78,7 +74,7 @@ const DecisionMaker = () => {
 
   useEffect(() => {
     if (apiKey) {
-      localStorage.setItem('perplexity_api_key', apiKey);
+      localStorage.setItem('openai_api_key', apiKey);
     }
   }, [apiKey]);
 
@@ -122,10 +118,11 @@ const DecisionMaker = () => {
     setError(null);
     setResult(null);
 
-    const prompt = `Pour le dilemme suivant : "${dilemma}", générez 4 critères d'évaluation pertinents. Retournez le résultat sous la forme d'un tableau JSON de chaînes de caractères. Exemple : ["Critère 1", "Critère 2", "Critère 3", "Critère 4"]`;
+    const prompt = `Pour le dilemme suivant : "${dilemma}", générez 4 critères d'évaluation pertinents. Retournez le résultat sous la forme d'un objet JSON avec une seule clé "criteria" contenant un tableau de chaînes de caractères. Exemple : {"criteria": ["Critère 1", "Critère 2", "Critère 3", "Critère 4"]}`;
 
     try {
-      const generatedCriteriaNames = await callPerplexityApi(prompt, apiKey);
+      const response = await callOpenAiApi(prompt, apiKey);
+      const generatedCriteriaNames = response.criteria;
       if (Array.isArray(generatedCriteriaNames) && generatedCriteriaNames.every(c => typeof c === 'string')) {
         setCriteria(generatedCriteriaNames.slice(0, 4).map(name => ({ name, weight: 5 })));
       } else {
@@ -166,7 +163,7 @@ const DecisionMaker = () => {
     }`;
     
     try {
-      const newResult = await callPerplexityApi(prompt, apiKey);
+      const newResult = await callOpenAiApi(prompt, apiKey);
       if (newResult && newResult.recommendation && newResult.breakdown) {
           setResult(newResult);
       } else {
@@ -195,17 +192,17 @@ const DecisionMaker = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <label htmlFor="api-key" className="text-slate-300 font-medium">Clé API Perplexity</label>
+            <label htmlFor="api-key" className="text-slate-300 font-medium">Clé API OpenAI</label>
             <Input
               id="api-key"
               type="password"
-              placeholder="Entrez votre clé API Perplexity"
+              placeholder="Entrez votre clé API OpenAI"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               className="bg-slate-800 border-slate-700 focus:ring-cyan-500"
             />
             <p className="text-xs text-slate-500">
-              Votre clé est stockée localement. Obtenez votre clé sur <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noreferrer" className="underline text-cyan-400">le site de Perplexity</a>.
+              Votre clé est stockée localement. Obtenez votre clé sur <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer" className="underline text-cyan-400">le site d'OpenAI</a>.
             </p>
           </div>
 
