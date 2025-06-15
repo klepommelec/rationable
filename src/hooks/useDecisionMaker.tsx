@@ -23,6 +23,7 @@ const templates = [
 
 export const useDecisionMaker = () => {
     const [dilemma, setDilemma] = useState('');
+    const [emoji, setEmojiState] = useState('🤔');
     const [analysisStep, setAnalysisStep] = useState<'idle' | 'analyzing' | 'done'>('idle');
     const [progress, setProgress] = useState(0);
     const [progressMessage, setProgressMessage] = useState('');
@@ -36,6 +37,16 @@ export const useDecisionMaker = () => {
     const initialCriteriaRef = useRef<ICriterion[]>([]);
     
     const isLoading = analysisStep === 'analyzing';
+
+    const setEmoji = (newEmoji: string) => {
+        setEmojiState(newEmoji);
+        if (analysisStep === 'done' && currentDecisionId) {
+            const decision = history.find(d => d.id === currentDecisionId);
+            if (decision && decision.emoji !== newEmoji) {
+                updateDecision({ ...decision, emoji: newEmoji });
+            }
+        }
+    };
 
     const handleGenerateOptions = async () => {
         const currentCriteria = criteria;
@@ -82,6 +93,7 @@ export const useDecisionMaker = () => {
         setProgressMessage("Initialisation de l'analyse...");
         setResult(null);
         setCriteria([]);
+        setEmojiState('🤔');
         setCurrentDecisionId(null);
 
         setTimeout(() => setProgress(10), 100);
@@ -99,11 +111,13 @@ export const useDecisionMaker = () => {
           }));
           setCriteria(newCriteria);
           setResult(response.result);
+          setEmojiState(response.emoji || '🤔');
           
           const newDecision: IDecision = {
             id: crypto.randomUUID(),
             timestamp: Date.now(),
             dilemma,
+            emoji: response.emoji || '🤔',
             criteria: newCriteria,
             result: response.result
           };
@@ -143,6 +157,7 @@ export const useDecisionMaker = () => {
         setDilemma(template.dilemma);
         setResult(null);
         setCriteria([]);
+        setEmojiState('🤔');
         setAnalysisStep('idle');
         setProgress(0);
         setProgressMessage('');
@@ -154,6 +169,7 @@ export const useDecisionMaker = () => {
         setDilemma('');
         setResult(null);
         setCriteria([]);
+        setEmojiState('🤔');
         setAnalysisStep('idle');
         setProgress(0);
         setProgressMessage('');
@@ -166,6 +182,7 @@ export const useDecisionMaker = () => {
         if (decisionToLoad) {
             setDilemma(decisionToLoad.dilemma);
             setCriteria(decisionToLoad.criteria);
+            setEmojiState(decisionToLoad.emoji || '🤔');
             const resultWithDefaults: IResult = {
                 description: '',
                 infoLinks: [],
@@ -198,6 +215,8 @@ export const useDecisionMaker = () => {
     return {
         dilemma,
         setDilemma,
+        emoji,
+        setEmoji,
         analysisStep,
         progress,
         progressMessage,

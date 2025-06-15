@@ -1,17 +1,18 @@
-
 import { ICriterion, IResult } from '@/types/decision';
 import { callOpenAiApi } from '@/services/openai';
 
 interface IFullAnalysisResponse {
+    emoji: string;
     criteria: string[];
     result: IResult;
 }
 
 export const startAnalysis = async (dilemma: string): Promise<IFullAnalysisResponse> => {
     const prompt = `En tant qu'assistant expert en prise de décision, pour le dilemme : "${dilemma}", veuillez fournir une analyse complète.
-    La réponse DOIT être un objet JSON valide. Le champ "imageQuery" DOIT contenir une requête de recherche d'image en ANGLAIS de 2-3 mots-clés.
+    La réponse DOIT être un objet JSON valide. Le champ "imageQuery" DOIT contenir une requête de recherche d'image en ANGLAIS de 2-3 mots-clés. Le champ "emoji" DOIT contenir un seul emoji unicode pertinent pour le dilemme.
     JSON attendu :
     {
+      "emoji": "🤔",
       "criteria": ["Critère 1", "Critère 2", "Critère 3", "Critère 4"],
       "result": {
         "recommendation": "Option Recommandée",
@@ -37,11 +38,12 @@ export const startAnalysis = async (dilemma: string): Promise<IFullAnalysisRespo
     }`;
 
     const response = await callOpenAiApi(prompt);
+    const isValidEmoji = response && typeof response.emoji === 'string';
     const isValidCriteria = response && response.criteria && Array.isArray(response.criteria);
     const apiResult = response.result;
     const isValidResult = apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number') && apiResult.description && Array.isArray(apiResult.infoLinks) && Array.isArray(apiResult.shoppingLinks) && typeof apiResult.imageQuery === 'string';
 
-    if (isValidCriteria && isValidResult) {
+    if (isValidEmoji && isValidCriteria && isValidResult) {
         return response as IFullAnalysisResponse;
     } else {
         throw new Error("La structure de la réponse de l'IA est invalide.");

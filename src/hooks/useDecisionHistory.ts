@@ -12,16 +12,20 @@ export const useDecisionHistory = () => {
                 const parsedHistory: IDecision[] = JSON.parse(storedHistory);
                 // Data migration for old history items
                 const migratedHistory = parsedHistory.map(decision => {
-                    if (!decision.result.imageQuery && decision.result.recommendation) {
-                        return {
-                            ...decision,
+                    let newDecision = { ...decision };
+                    if (!newDecision.result.imageQuery && newDecision.result.recommendation) {
+                        newDecision = {
+                            ...newDecision,
                             result: {
-                                ...decision.result,
-                                imageQuery: decision.result.recommendation,
+                                ...newDecision.result,
+                                imageQuery: newDecision.result.recommendation,
                             }
                         };
                     }
-                    return decision;
+                    if (!newDecision.emoji) {
+                        newDecision.emoji = '🤔';
+                    }
+                    return newDecision;
                 });
                 setHistory(migratedHistory);
             }

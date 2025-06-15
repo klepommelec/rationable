@@ -30,6 +30,7 @@ export interface IDecision {
   id: string;
   timestamp: number;
   dilemma: string;
+  emoji: string;
   criteria: ICriterion[];
   result: IResult;
 }

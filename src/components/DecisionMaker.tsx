@@ -4,11 +4,14 @@ import { ResultSkeleton } from './ResultSkeleton';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
 import DilemmaSetup from './decision-maker/DilemmaSetup';
 import AnalysisResult from './decision-maker/AnalysisResult';
+import { EmojiPicker } from './EmojiPicker';
 
 const DecisionMaker = () => {
   const {
     dilemma,
     setDilemma,
+    emoji,
+    setEmoji,
     analysisStep,
     progress,
     progressMessage,
@@ -30,7 +33,10 @@ const DecisionMaker = () => {
   return (
     <div className="w-full max-w-3xl mx-auto">
       {analysisStep === 'done' && result && (
-        <h1 className="text-3xl font-bold mb-6 text-center animate-fade-in">{dilemma}</h1>
+        <div className="flex items-center gap-4 mb-6 animate-fade-in">
+            <EmojiPicker emoji={emoji} setEmoji={setEmoji} />
+            <h1 className="text-3xl font-bold text-left">{dilemma}</h1>
+        </div>
       )}
 
       {analysisStep !== 'done' && (
