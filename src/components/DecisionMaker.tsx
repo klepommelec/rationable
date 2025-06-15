@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -323,13 +324,7 @@ const DecisionMaker = () => {
           </div>
            {analysisStep === 'generating-criteria' && <CriteriaSkeleton />}
 
-           { (analysisStep === 'generating-options' || analysisStep === 'done') && criteria.length > 0 && (
-            <CriteriaManager
-              criteria={criteria}
-              setCriteria={setCriteria}
-              isInteractionDisabled={isLoading}
-            />
-           )}
+           {/* The CriteriaManager component has been moved from here to the results card below */}
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           {renderMainButton()}
@@ -345,6 +340,13 @@ const DecisionMaker = () => {
              <Badge className="w-fit bg-cyan-500 text-slate-900 text-lg mt-2">{result.recommendation}</Badge>
           </CardHeader>
           <CardContent className="space-y-4">
+            { (analysisStep === 'generating-options' || analysisStep === 'done') && criteria.length > 0 && (
+              <CriteriaManager
+                criteria={criteria}
+                setCriteria={setCriteria}
+                isInteractionDisabled={isLoading}
+              />
+            )}
             <h3 className="font-semibold text-lg">Analyse détaillée :</h3>
             {result.breakdown.sort((a, b) => b.score - a.score).map((item, index) => (
               <div key={index} className="p-4 rounded-lg bg-accent border">
