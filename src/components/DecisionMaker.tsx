@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,6 +18,7 @@ const DecisionMaker = () => {
   const [dilemma, setDilemma] = useState('');
   const [options, setOptions] = useState<string[]>(['', '']);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingOptions, setIsGeneratingOptions] = useState(false);
   const [result, setResult] = useState<IResult | null>(null);
 
   const handleOptionChange = (index: number, value: string) => {
@@ -34,6 +34,22 @@ const DecisionMaker = () => {
   const removeOption = (index: number) => {
     const newOptions = options.filter((_, i) => i !== index);
     setOptions(newOptions);
+  };
+
+  const handleGenerateOptions = () => {
+    setIsGeneratingOptions(true);
+    setResult(null);
+    // Simulation d'un appel à une IA pour générer des options
+    setTimeout(() => {
+      if (dilemma.toLowerCase().includes("framework js")) {
+        setOptions(["React", "Vue", "Svelte", "Angular"]);
+      } else if (dilemma.toLowerCase().includes("vacances")) {
+        setOptions(["Aller à la montagne", "Partir à la mer", "Visiter une capitale", "Road trip"]);
+      } else {
+        setOptions(["Option générée A", "Option générée B", "Option générée C"]);
+      }
+      setIsGeneratingOptions(false);
+    }, 2000);
   };
 
   const handleAnalyze = () => {
@@ -59,7 +75,7 @@ const DecisionMaker = () => {
     }, 2500);
   };
 
-  const isAnalyzeDisabled = dilemma.trim() === '' || options.filter(o => o.trim() !== '').length < 2 || isLoading;
+  const isAnalyzeDisabled = dilemma.trim() === '' || options.filter(o => o.trim() !== '').length < 2 || isLoading || isGeneratingOptions;
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -79,10 +95,33 @@ const DecisionMaker = () => {
               value={dilemma}
               onChange={(e) => setDilemma(e.target.value)}
               className="bg-slate-800 border-slate-700 focus:ring-cyan-500"
+              disabled={isLoading || isGeneratingOptions}
             />
           </div>
           <div className="space-y-3">
-            <label className="text-slate-300 font-medium">2. Vos options</label>
+            <div className="flex items-center justify-between">
+              <label className="text-slate-300 font-medium">2. Vos options</label>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleGenerateOptions}
+                disabled={dilemma.trim() === '' || isLoading || isGeneratingOptions}
+                className="border-cyan-900 text-cyan-400 hover:bg-cyan-900/50 hover:text-cyan-300 transition-colors px-3 py-1 h-auto text-xs"
+              >
+                {isGeneratingOptions ? (
+                  <>
+                    <LoaderCircle className="h-4 w-4 mr-2 animate-spin" />
+                    Génération...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Générer avec l'IA
+                  </>
+                )}
+              </Button>
+            </div>
+
             {options.map((option, index) => (
               <div key={index} className="flex items-center gap-2">
                 <Input
@@ -90,13 +129,14 @@ const DecisionMaker = () => {
                   value={option}
                   onChange={(e) => handleOptionChange(index, e.target.value)}
                   className="bg-slate-800 border-slate-700 focus:ring-cyan-500"
+                  disabled={isGeneratingOptions}
                 />
-                <Button variant="ghost" size="icon" onClick={() => removeOption(index)} disabled={options.length <= 2}>
+                <Button variant="ghost" size="icon" onClick={() => removeOption(index)} disabled={options.length <= 2 || isGeneratingOptions}>
                   <Trash2 className="h-4 w-4 text-slate-500 hover:text-red-500 transition-colors" />
                 </Button>
               </div>
             ))}
-            <Button variant="outline" onClick={addOption} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+            <Button variant="outline" onClick={addOption} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white" disabled={isGeneratingOptions}>
               <Plus className="h-4 w-4 mr-2" />
               Ajouter une option
             </Button>
