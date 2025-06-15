@@ -11,8 +11,17 @@ export interface IBreakdownItem {
   score: number;
 }
 
+export interface ILink {
+  title: string;
+  url:string;
+}
+
 export interface IResult {
   recommendation: string;
+  description: string;
+  imageQuery: string;
+  infoLinks: ILink[];
+  shoppingLinks: ILink[];
   breakdown: IBreakdownItem[];
 }
 

@@ -1,9 +1,8 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { toast } from "sonner";
 import { useDebounceCallback } from 'usehooks-ts';
 import { RefreshCw } from 'lucide-react';
-import { ICriterion, IResult, IDecision } from '@/types/decision';
+import { ICriterion, IResult, IDecision, ILink } from '@/types/decision';
 import { callOpenAiApi } from '@/services/openai';
 
 const templates = [
@@ -52,10 +51,14 @@ export const useDecisionMaker = () => {
         const criteriaNames = currentCriteria.map(c => c.name);
         
         const prompt = `Pour le dilemme "${dilemma}", en utilisant les critères importants : ${criteriaNames.join(', ')}.
-        Veuillez générer 3 options, les évaluer (pros/cons, score de 0 à 100) et fournir une recommandation.
-        Format JSON attendu :
+        Veuillez générer 3 options, les évaluer (pros/cons, score de 0 à 100) et fournir une recommandation enrichie.
+        Le résultat doit être un objet JSON avec la structure suivante :
         {
           "recommendation": "Option Recommandée",
+          "description": "Un texte descriptif (2-3 phrases) et engageant expliquant pourquoi c'est la meilleure option. Sois convaincant.",
+          "imageQuery": "une requête de recherche d'image pertinente en anglais pour Unsplash (ex: 'modern laptop on desk')",
+          "infoLinks": [ { "title": "Titre du lien info 1", "url": "https://example.com/info1" } ],
+          "shoppingLinks": [ { "title": "Titre du lien achat 1", "url": "https://example.com/shop1" } ],
           "breakdown": [
             {
               "option": "Option 1",
@@ -69,7 +72,9 @@ export const useDecisionMaker = () => {
         try {
           const apiResult: IResult = await callOpenAiApi(prompt);
 
-          if (apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number')) {
+          const isValidResult = apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number') && apiResult.description && apiResult.imageQuery && Array.isArray(apiResult.infoLinks) && Array.isArray(apiResult.shoppingLinks);
+
+          if (isValidResult) {
               setResult(apiResult);
               
               const lastDecision = history[0];
@@ -110,6 +115,16 @@ export const useDecisionMaker = () => {
           "criteria": ["Critère 1", "Critère 2", "Critère 3", "Critère 4"],
           "result": {
             "recommendation": "Option Recommandée",
+            "description": "Un texte descriptif (2-3 phrases) et engageant expliquant pourquoi c'est la meilleure option. Sois convaincant.",
+            "imageQuery": "une requête de recherche d'image pertinente en anglais pour Unsplash (ex: 'modern laptop on desk')",
+            "infoLinks": [
+              { "title": "Titre du lien d'information 1", "url": "https://example.com/info1" },
+              { "title": "Titre du lien d'information 2", "url": "https://example.com/info2" }
+            ],
+            "shoppingLinks": [
+              { "title": "Titre du lien d'achat 1", "url": "https://example.com/shop1" },
+              { "title": "Titre du lien d'achat 2", "url": "https://example.com/shop2" }
+            ],
             "breakdown": [
               {
                 "option": "Option 1",
@@ -130,7 +145,7 @@ export const useDecisionMaker = () => {
 
           const isValidCriteria = response && response.criteria && Array.isArray(response.criteria);
           const apiResult = response.result;
-          const isValidResult = apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number');
+          const isValidResult = apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number') && apiResult.description && apiResult.imageQuery && Array.isArray(apiResult.infoLinks) && Array.isArray(apiResult.shoppingLinks);
 
           if (isValidCriteria && isValidResult) {
               const newCriteria = response.criteria.map((name: string) => ({
@@ -204,13 +219,21 @@ export const useDecisionMaker = () => {
     const loadDecision = (decisionId: string) => {
         const decisionToLoad = history.find(d => d.id === decisionId);
         if (decisionToLoad) {
-        setDilemma(decisionToLoad.dilemma);
-        setCriteria(decisionToLoad.criteria);
-        setResult(decisionToLoad.result);
-        setAnalysisStep('done');
-        setProgress(0);
-        setProgressMessage('');
-        toast.info("Décision précédente chargée.");
+            setDilemma(decisionToLoad.dilemma);
+            setCriteria(decisionToLoad.criteria);
+            // Ensure backward compatibility for old history items
+            const resultWithDefaults: IResult = {
+                description: '',
+                imageQuery: 'decision',
+                infoLinks: [],
+                shoppingLinks: [],
+                ...decisionToLoad.result,
+            };
+            setResult(resultWithDefaults);
+            setAnalysisStep('done');
+            setProgress(0);
+            setProgressMessage('');
+            toast.info("Décision précédente chargée.");
         }
     };
 

@@ -2,10 +2,11 @@ import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Lightbulb, Eraser, Trophy } from 'lucide-react';
+import { Lightbulb, Eraser, Trophy, BookOpen, ShoppingCart, ExternalLink } from 'lucide-react';
 import { CriteriaManager } from '../CriteriaManager';
 import { ICriterion, IResult } from '@/types/decision';
 import { ScoreChart } from './ScoreChart';
+
 interface AnalysisResultProps {
   dilemma: string;
   result: IResult;
@@ -27,24 +28,72 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   const averageScore = result.breakdown.length > 0 ? Math.round(result.breakdown.reduce((acc, item) => acc + item.score, 0) / result.breakdown.length) : 0;
   const topOption = result.breakdown.length > 0 ? result.breakdown.reduce((prev, current) => prev.score > current.score ? prev : current) : null;
   return <div className="mt-8 space-y-6 animate-fade-in">
-            <Card className="backdrop-blur-sm bg-card/70">
-                <CardHeader>
-                    <CardTitle className="text-2xl flex items-start gap-3">
-                        <Lightbulb className="text-yellow-400 h-8 w-8 shrink-0" />
-                        <span>{dilemma}</span>
-                    </CardTitle>
-                    <p className="text-muted-foreground pt-2">Basé sur votre analyse, voici la meilleure option :</p>
-                </CardHeader>
-                <CardContent>
-                     <div className="bg-cyan-900/50 border border-cyan-700 p-4 rounded-lg">
-                        <h3 className="text-xl font-bold text-cyan-400 flex items-center gap-2">
-                           <Trophy /> {result.recommendation}
-                        </h3>
-                     </div>
-                </CardContent>
+            <Card className="overflow-hidden backdrop-blur-sm bg-card/70">
+                <div className="grid grid-cols-1 md:grid-cols-2">
+                    <div className="p-6 flex flex-col">
+                        <CardHeader className="p-0">
+                            <CardTitle className="text-2xl flex items-start gap-3">
+                                <Lightbulb className="text-yellow-400 h-8 w-8 shrink-0 mt-1" />
+                                <span>{dilemma}</span>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0 pt-4 flex-grow">
+                             <p className="text-muted-foreground pb-2">Basé sur votre analyse, voici la meilleure option :</p>
+                             <div className="bg-cyan-900/50 border border-cyan-700 p-4 rounded-lg">
+                                <h3 className="text-xl font-bold text-cyan-400 flex items-center gap-2">
+                                   <Trophy /> {result.recommendation}
+                                </h3>
+                             </div>
+                             {result.description && <p className="text-muted-foreground mt-4">{result.description}</p>}
+                        </CardContent>
+                        <CardFooter className="p-0 pt-6">
+                            <div className="w-full space-y-4">
+                                {result.infoLinks && result.infoLinks.length > 0 && (
+                                    <div>
+                                        <h4 className="font-semibold flex items-center gap-2 text-sm"><BookOpen /> Pour en savoir plus</h4>
+                                        <div className="flex flex-col items-start gap-1.5 mt-2">
+                                            {result.infoLinks.map((link, i) => (
+                                                <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1.5">
+                                                    {link.title}
+                                                    <ExternalLink className="h-3 w-3" />
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {result.shoppingLinks && result.shoppingLinks.length > 0 && (
+                                     <div>
+                                        <h4 className="font-semibold flex items-center gap-2 text-sm"><ShoppingCart /> Où l'acheter ?</h4>
+                                        <div className="flex flex-col items-start gap-1.5 mt-2">
+                                            {result.shoppingLinks.map((link, i) => (
+                                                <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1.5">
+                                                    {link.title}
+                                                    <ExternalLink className="h-3 w-3" />
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                             </div>
+                        </CardFooter>
+                    </div>
+                    <div className="relative min-h-[250px] md:min-h-0">
+                        {result.imageQuery &&
+                            <img 
+                                src={`https://source.unsplash.com/800x600/?${encodeURIComponent(result.imageQuery)}`} 
+                                alt={result.recommendation} 
+                                className="absolute inset-0 w-full h-full object-cover" 
+                                key={result.imageQuery}
+                            />
+                        }
+                         <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent md:bg-gradient-to-l"></div>
+                    </div>
+                </div>
             </Card>
 
-            {criteria.length > 0 && <CriteriaManager criteria={criteria} setCriteria={setCriteria} isInteractionDisabled={isLoading || isUpdating} />}
+            {criteria.length > 0 && <div className="w-full">
+                <CriteriaManager criteria={criteria} setCriteria={setCriteria} isInteractionDisabled={isLoading || isUpdating} />
+            </div>}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-1">
