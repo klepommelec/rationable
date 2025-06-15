@@ -14,7 +14,6 @@ export interface IBreakdownItem {
 export interface IResult {
   recommendation: string;
   breakdown: IBreakdownItem[];
-  criteria: string[];
 }
 
 export interface IDecision {

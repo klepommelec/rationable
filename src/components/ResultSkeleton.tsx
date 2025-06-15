@@ -10,15 +10,6 @@ export const ResultSkeleton = () => {
         <Skeleton className="h-7 w-1/3 mt-2" />
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="p-4 rounded-lg bg-accent border">
-          <Skeleton className="h-6 w-1/3 mb-3" />
-          <div className="flex flex-wrap gap-2">
-            <Skeleton className="h-6 w-24" />
-            <Skeleton className="h-6 w-20" />
-            <Skeleton className="h-6 w-28" />
-            <Skeleton className="h-6 w-24" />
-          </div>
-        </div>
         <Skeleton className="h-6 w-1/3" />
         {[...Array(2)].map((_, index) => (
           <div key={index} className="p-4 rounded-lg bg-accent border space-y-3">

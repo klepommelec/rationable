@@ -88,7 +88,7 @@ const DecisionMaker = () => {
     3. Pour chaque option, calculer un score de pertinence de 0 à 100, basé sur l'adéquation de l'option avec les critères. Un score plus élevé signifie une meilleure adéquation.
     4. Fournir une recommandation claire pour la meilleure option et expliquer pourquoi en quelques phrases.
 
-    Retournez le résultat sous la forme d'un objet JSON valide avec la structure suivante (n'incluez PAS la clé "criteria" dans votre réponse JSON) :
+    Retournez le résultat sous la forme d'un objet JSON valide avec la structure suivante :
     {
       "recommendation": "Nom de l'option recommandée",
       "breakdown": [
@@ -102,14 +102,10 @@ const DecisionMaker = () => {
     }`;
 
     try {
-      const apiResult: Omit<IResult, 'criteria'> = await callOpenAiApi(prompt);
+      const apiResult: IResult = await callOpenAiApi(prompt);
 
       if (apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number')) {
-          const newResult: IResult = {
-            ...apiResult,
-            criteria: criteriaNames,
-          };
-          setResult(newResult);
+          setResult(apiResult);
           
           if (!result) {
             const newDecision: IDecision = {
@@ -117,7 +113,7 @@ const DecisionMaker = () => {
               timestamp: Date.now(),
               dilemma,
               criteria: currentCriteria,
-              result: newResult
+              result: apiResult
             };
             setHistory(prevHistory => [newDecision, ...prevHistory]);
           }
@@ -349,16 +345,6 @@ const DecisionMaker = () => {
              <Badge className="w-fit bg-cyan-500 text-slate-900 text-lg mt-2">{result.recommendation}</Badge>
           </CardHeader>
           <CardContent className="space-y-4">
-            {result.criteria && result.criteria.length > 0 && (
-                <div className="p-4 rounded-lg bg-accent border">
-                    <h3 className="font-semibold text-lg mb-2">Critères d'analyse utilisés</h3>
-                    <div className="flex flex-wrap gap-2">
-                        {result.criteria.map((criterion, index) => (
-                            <Badge key={index} variant="secondary">{criterion}</Badge>
-                        ))}
-                    </div>
-                </div>
-            )}
             <h3 className="font-semibold text-lg">Analyse détaillée :</h3>
             {result.breakdown.sort((a, b) => b.score - a.score).map((item, index) => (
               <div key={index} className="p-4 rounded-lg bg-accent border">
