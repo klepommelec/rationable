@@ -1,32 +1,19 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BrainCircuit, Plus, Sparkles, LoaderCircle, Lightbulb, BookCopy, Eraser } from 'lucide-react';
+import { BrainCircuit, Plus, Sparkles, LoaderCircle, Lightbulb, BookCopy, Eraser, History } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CriterionRow } from './CriterionRow';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { DecisionHistory } from './DecisionHistory';
+import { ICriterion, IResult, IDecision } from '@/types/decision';
 
-
-export interface ICriterion {
-  id: string;
-  name: string;
-}
-
-interface IBreakdownItem {
-  option: string;
-  pros: string[];
-  cons: string[];
-  score: number;
-}
-
-interface IResult {
-  recommendation: string;
-  breakdown: IBreakdownItem[];
-}
 
 const templates = [
   {
@@ -120,6 +107,7 @@ const DecisionMaker = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingCriteria, setIsGeneratingCriteria] = useState(false);
   const [result, setResult] = useState<IResult | null>(null);
+  const [history, setHistory] = useState<IDecision[]>([]);
   const justAppliedTemplate = useRef(false);
 
   // Load state from localStorage on initial render
@@ -133,7 +121,6 @@ const DecisionMaker = () => {
       try {
         const { dilemma, criteria, result } = JSON.parse(savedState);
         if (dilemma) setDilemma(dilemma);
-        // Ensure saved criteria have IDs
         if (criteria && criteria.length > 0) {
             setCriteria(criteria.map((c: any) => ({ ...c, id: c.id || crypto.randomUUID() })));
         }
@@ -141,6 +128,15 @@ const DecisionMaker = () => {
       } catch (e) {
         console.error("Failed to parse saved state from localStorage", e);
         localStorage.removeItem('decision_maker_state');
+      }
+    }
+    const savedHistory = localStorage.getItem('decision_maker_history');
+    if (savedHistory) {
+      try {
+        setHistory(JSON.parse(savedHistory));
+      } catch (e) {
+        console.error("Failed to parse history from localStorage", e);
+        localStorage.removeItem('decision_maker_history');
       }
     }
   }, []);
@@ -157,6 +153,11 @@ const DecisionMaker = () => {
     const stateToSave = JSON.stringify({ dilemma, criteria, result });
     localStorage.setItem('decision_maker_state', stateToSave);
   }, [dilemma, criteria, result]);
+  
+  // Save history to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('decision_maker_history', JSON.stringify(history));
+  }, [history]);
 
   useEffect(() => {
     if (justAppliedTemplate.current) {
@@ -259,6 +260,14 @@ const DecisionMaker = () => {
       const newResult: IResult = await callOpenAiApi(prompt, apiKey);
       if (newResult && newResult.recommendation && newResult.breakdown && Array.isArray(newResult.breakdown) && newResult.breakdown.every(item => typeof item.score === 'number')) {
           setResult(newResult);
+          const newDecision: IDecision = {
+            id: crypto.randomUUID(),
+            timestamp: Date.now(),
+            dilemma,
+            criteria: criteria.filter(c => c.name.trim() !== ''),
+            result: newResult
+          };
+          setHistory(prevHistory => [newDecision, ...prevHistory]);
       } else {
         throw new Error("La structure de la réponse de l'IA est invalide ou le score est manquant.");
       }
@@ -286,6 +295,26 @@ const DecisionMaker = () => {
     localStorage.removeItem('decision_maker_state');
     toast.info("Session réinitialisée.");
   }
+  
+  const loadDecision = (decisionId: string) => {
+    const decisionToLoad = history.find(d => d.id === decisionId);
+    if (decisionToLoad) {
+      setDilemma(decisionToLoad.dilemma);
+      setCriteria(decisionToLoad.criteria);
+      setResult(decisionToLoad.result);
+      toast.info("Décision précédente chargée.");
+    }
+  };
+
+  const deleteDecision = (decisionId: string) => {
+    setHistory(prevHistory => prevHistory.filter(d => d.id !== decisionId));
+    toast.success("Décision supprimée de l'historique.");
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    toast.info("L'historique des décisions a été effacé.");
+  };
 
   const isAnalyzeDisabled = !apiKey || dilemma.trim() === '' || criteria.filter(c => c.name.trim() !== '').length < 1 || isLoading || isGeneratingCriteria;
 
@@ -329,10 +358,35 @@ const DecisionMaker = () => {
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <label className="text-slate-300 font-medium">Ou utilisez un modèle</label>
-               <Button variant="ghost" size="sm" onClick={clearSession} className="text-slate-400 hover:text-white">
-                <Eraser className="h-4 w-4 mr-2" />
-                Réinitialiser
-              </Button>
+              <div className="flex items-center gap-1">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                      <History className="h-4 w-4 mr-2" />
+                      Historique
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent className="bg-slate-900/95 border-slate-800 backdrop-blur-sm text-slate-200 w-full sm:max-w-lg p-6 flex flex-col">
+                    <SheetHeader className="pr-6">
+                      <SheetTitle className="text-slate-200">Historique des décisions</SheetTitle>
+                      <SheetDescription className="text-slate-400">
+                        Chargez ou supprimez vos analyses passées.
+                      </SheetDescription>
+                    </SheetHeader>
+                    <DecisionHistory 
+                      history={history}
+                      onLoad={loadDecision}
+                      onDelete={deleteDecision}
+                      onClear={clearHistory}
+                      onClose={() => {}}
+                    />
+                  </SheetContent>
+                </Sheet>
+                 <Button variant="ghost" size="sm" onClick={clearSession} className="text-slate-400 hover:text-white">
+                  <Eraser className="h-4 w-4 mr-2" />
+                  Réinitialiser
+                </Button>
+              </div>
             </div>
             <div className="flex flex-wrap gap-2">
               {templates.map(template => (
