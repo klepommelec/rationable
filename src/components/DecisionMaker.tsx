@@ -1,5 +1,5 @@
 
-import React from 'react';
+import * as React from 'react';
 import { ResultSkeleton } from './ResultSkeleton';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
 import DilemmaSetup from './decision-maker/DilemmaSetup';
