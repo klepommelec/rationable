@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,19 @@ const DecisionMaker = () => {
   const [isGeneratingOptions, setIsGeneratingOptions] = useState(false);
   const [result, setResult] = useState<IResult | null>(null);
 
+  useEffect(() => {
+    if (dilemma.trim().length < 5) {
+      return;
+    }
+
+    const debounceTimer = setTimeout(() => {
+      handleGenerateOptions();
+    }, 1500); // Déclenche la génération 1.5s après la fin de la saisie
+
+    return () => clearTimeout(debounceTimer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dilemma]);
+
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options];
     newOptions[index] = value;
@@ -37,6 +50,7 @@ const DecisionMaker = () => {
   };
 
   const handleGenerateOptions = () => {
+    if (dilemma.trim() === '') return;
     setIsGeneratingOptions(true);
     setResult(null);
     // Simulation d'un appel à une IA pour générer des options
@@ -99,27 +113,14 @@ const DecisionMaker = () => {
             />
           </div>
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <label className="text-slate-300 font-medium">2. Vos options</label>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleGenerateOptions}
-                disabled={dilemma.trim() === '' || isLoading || isGeneratingOptions}
-                className="border-cyan-900 text-cyan-400 hover:bg-cyan-900/50 hover:text-cyan-300 transition-colors px-3 py-1 h-auto text-xs"
-              >
-                {isGeneratingOptions ? (
-                  <>
-                    <LoaderCircle className="h-4 w-4 mr-2 animate-spin" />
+              {isGeneratingOptions && (
+                  <div className="flex items-center text-xs text-cyan-400">
+                    <LoaderCircle className="h-3 w-3 mr-1 animate-spin" />
                     Génération...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Générer avec l'IA
-                  </>
-                )}
-              </Button>
+                  </div>
+              )}
             </div>
 
             {options.map((option, index) => (
