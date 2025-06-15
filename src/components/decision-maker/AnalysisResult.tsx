@@ -1,15 +1,14 @@
 
 import * as React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Lightbulb, Eraser, Trophy, BookOpen, ShoppingCart, ExternalLink } from 'lucide-react';
+import { Eraser, Trophy, BookOpen, ShoppingCart, ExternalLink } from 'lucide-react';
 import { CriteriaManager } from '../CriteriaManager';
 import { ICriterion, IResult } from '@/types/decision';
 import { ScoreChart } from './ScoreChart';
 
 interface AnalysisResultProps {
-  dilemma: string;
   result: IResult;
   criteria: ICriterion[];
   setCriteria: React.Dispatch<React.SetStateAction<ICriterion[]>>;
@@ -18,7 +17,6 @@ interface AnalysisResultProps {
   clearSession: () => void;
 }
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
-  dilemma,
   result,
   criteria,
   setCriteria,
@@ -46,17 +44,11 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
     imageSrc = `data:image/png;base64,${result.imageBase64}`;
   }
 
-  return <div className="mt-8 space-y-6 animate-fade-in">
+  return <div className="space-y-6 animate-fade-in">
             <Card className="overflow-hidden backdrop-blur-sm bg-card/70">
                 <div className="grid grid-cols-1 md:grid-cols-2">
                     <div className="p-6 flex flex-col">
-                        <CardHeader className="p-0">
-                            <CardTitle className="text-2xl flex items-start gap-3">
-                                <Lightbulb className="text-yellow-400 h-8 w-8 shrink-0 mt-1" />
-                                <span>{dilemma}</span>
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-0 pt-4 flex-grow">
+                        <CardContent className="p-0 flex-grow">
                              <p className="text-muted-foreground pb-2">Basé sur votre analyse, voici la meilleure option :</p>
                              <div className="bg-cyan-900/50 border border-cyan-700 p-4 rounded-lg">
                                 <h3 className="text-xl font-bold text-cyan-400 flex items-center gap-2">

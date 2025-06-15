@@ -29,6 +29,10 @@ const DecisionMaker = () => {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
+      {analysisStep === 'done' && result && (
+        <h1 className="text-3xl font-bold mb-6 text-center animate-fade-in">{dilemma}</h1>
+      )}
+
       {analysisStep !== 'done' && (
         <DilemmaSetup
           dilemma={dilemma}
@@ -53,7 +57,6 @@ const DecisionMaker = () => {
       
       {result && analysisStep === 'done' && (
         <AnalysisResult
-          dilemma={dilemma}
           result={result}
           criteria={criteria}
           setCriteria={setCriteria}
