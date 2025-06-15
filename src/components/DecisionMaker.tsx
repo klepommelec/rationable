@@ -62,34 +62,29 @@ const callOpenAiApi = async (prompt: string) => {
 
 const DecisionMaker = () => {
   const [dilemma, setDilemma] = useState('');
-  const [analysisStep, setAnalysisStep] = useState<'idle' | 'generating-criteria' | 'generating-options' | 'done'>('idle');
+  const [analysisStep, setAnalysisStep] = useState<'idle' | 'analyzing' | 'done'>('idle');
   const [criteria, setCriteria] = useState<ICriterion[]>([]);
   const [result, setResult] = useState<IResult | null>(null);
   const [history, setHistory] = useState<IDecision[]>([]);
+  const [isUpdating, setIsUpdating] = useState(false);
   
   const initialCriteriaRef = useRef<ICriterion[]>([]);
   
-  const isLoading = analysisStep === 'generating-criteria' || analysisStep === 'generating-options';
+  const isLoading = analysisStep === 'analyzing';
 
-  const handleGenerateOptions = async (criteriaOverride?: ICriterion[]) => {
-    const currentCriteria = criteriaOverride || criteria;
+  const handleGenerateOptions = async () => {
+    const currentCriteria = criteria;
     
     if (currentCriteria.length < 2) {
       toast.error("Veuillez définir au moins 2 critères.");
-      if (criteriaOverride) {
-        setAnalysisStep('idle');
-      }
       return;
     }
     if (currentCriteria.some(c => c.name.trim() === '')) {
       toast.error("Veuillez nommer tous les critères avant de continuer.");
-      if (criteriaOverride) {
-        setAnalysisStep('idle');
-      }
       return;
     }
 
-    setAnalysisStep('generating-options');
+    setIsUpdating(true);
 
     const criteriaNames = currentCriteria.map(c => c.name);
     
@@ -119,58 +114,88 @@ const DecisionMaker = () => {
       if (apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number')) {
           setResult(apiResult);
           
-          if (!result) {
-            const newDecision: IDecision = {
-              id: crypto.randomUUID(),
-              timestamp: Date.now(),
-              dilemma,
+          const lastDecision = history[0];
+          if (lastDecision && lastDecision.dilemma === dilemma) {
+            const updatedDecision: IDecision = {
+              ...lastDecision,
               criteria: currentCriteria,
               result: apiResult
             };
-            setHistory(prevHistory => [newDecision, ...prevHistory]);
+            setHistory(prevHistory => [updatedDecision, ...prevHistory.slice(1)]);
           }
-          setAnalysisStep('done');
-          toast.success("Analyse complète générée !");
+          toast.success("Analyse mise à jour !");
 
       } else {
         throw new Error("La structure de la réponse de l'IA pour les options est invalide.");
       }
     } catch (e) {
       if (e instanceof Error) {
-        toast.error(`Erreur lors de la génération des options : ${e.message}`);
+        toast.error(`Erreur lors de la mise à jour de l'analyse : ${e.message}`);
       }
-      setAnalysisStep(result ? 'done' : 'idle');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   const handleStartAnalysis = async () => {
-    setAnalysisStep('generating-criteria');
+    setAnalysisStep('analyzing');
     setResult(null);
     setCriteria([]);
 
-    const prompt = `Vous êtes un assistant expert en prise de décision. Pour le dilemme suivant : "${dilemma}", veuillez déterminer les 4 critères d'évaluation les plus pertinents.
-    
+    const prompt = `Vous êtes un assistant expert en prise de décision. Pour le dilemme suivant : "${dilemma}", veuillez :
+    1. Déterminer les 4 critères d'évaluation les plus pertinents.
+    2. En utilisant ces 4 critères (classés par ordre d'importance), générer 3 options potentielles.
+    3. Pour chaque option, fournir une liste concise d'avantages (pros) et d'inconvénients (cons) en se basant sur les critères.
+    4. Pour chaque option, calculer un score de pertinence de 0 à 100, basé sur l'adéquation de l'option avec les critères. Un score plus élevé signifie une meilleure adéquation.
+    5. Fournir une recommandation claire pour la meilleure option et expliquer pourquoi en quelques phrases.
+
     Retournez le résultat sous la forme d'un objet JSON valide avec la structure suivante :
     {
-      "criteria": ["Critère 1", "Critère 2", "Critère 3", "Critère 4"]
+      "criteria": ["Critère 1", "Critère 2", "Critère 3", "Critère 4"],
+      "result": {
+        "recommendation": "Nom de l'option recommandée",
+        "breakdown": [
+          {
+            "option": "Nom de l'option 1",
+            "pros": ["Avantage 1", "Avantage 2"],
+            "cons": ["Inconvénient 1", "Inconvénient 2"],
+            "score": 85
+          }
+        ]
+      }
     }`;
     
     try {
       const response = await callOpenAiApi(prompt);
-      if (response && response.criteria && Array.isArray(response.criteria)) {
+      const isValidCriteria = response && response.criteria && Array.isArray(response.criteria);
+      const apiResult = response.result;
+      const isValidResult = apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number');
+
+      if (isValidCriteria && isValidResult) {
           const newCriteria = response.criteria.map((name: string) => ({
             id: crypto.randomUUID(),
             name,
           }));
           setCriteria(newCriteria);
-          toast.success("Critères générés ! Génération des options en cours...");
-          await handleGenerateOptions(newCriteria);
+          setResult(apiResult);
+          
+          const newDecision: IDecision = {
+            id: crypto.randomUUID(),
+            timestamp: Date.now(),
+            dilemma,
+            criteria: newCriteria,
+            result: apiResult
+          };
+          setHistory(prevHistory => [newDecision, ...prevHistory]);
+          
+          setAnalysisStep('done');
+          toast.success("Analyse complète générée !");
       } else {
-        throw new Error("La structure de la réponse de l'IA pour les critères est invalide.");
+        throw new Error("La structure de la réponse de l'IA est invalide.");
       }
     } catch (e) {
       if (e instanceof Error) {
-        toast.error(`Erreur lors de la génération des critères : ${e.message}`);
+        toast.error(`Erreur lors de l'analyse : ${e.message}`);
       }
       setAnalysisStep('idle');
     }
@@ -186,11 +211,11 @@ const DecisionMaker = () => {
 
   useEffect(() => {
     const criteriaHaveChanged = JSON.stringify(criteria) !== JSON.stringify(initialCriteriaRef.current);
-    if (analysisStep === 'done' && criteriaHaveChanged) {
+    if (analysisStep === 'done' && criteriaHaveChanged && !isUpdating) {
       toast.info("Les critères ont changé, mise à jour de l'analyse...", { icon: <RefreshCw className="animate-spin" />, duration: 2000 });
       debouncedGenerateOptions();
     }
-  }, [criteria, analysisStep, debouncedGenerateOptions]);
+  }, [criteria, analysisStep, debouncedGenerateOptions, isUpdating]);
   
   const applyTemplate = (template: typeof templates[0]) => {
     setDilemma(template.dilemma);
@@ -233,14 +258,7 @@ const DecisionMaker = () => {
 
   const renderMainButton = () => {
     switch (analysisStep) {
-      case 'generating-criteria':
-        return (
-          <Button disabled className="w-full bg-cyan-500 text-slate-900 font-bold text-lg py-6">
-            <LoaderCircle className="h-5 w-5 mr-2 animate-spin" />
-            Génération des critères...
-          </Button>
-        );
-      case 'generating-options':
+      case 'analyzing':
         return (
           <Button disabled className="w-full bg-cyan-500 text-slate-900 font-bold text-lg py-6">
             <LoaderCircle className="h-5 w-5 mr-2 animate-spin" />
@@ -281,7 +299,7 @@ const DecisionMaker = () => {
               value={dilemma}
               onChange={(e) => setDilemma(e.target.value)}
               className="focus:ring-cyan-500 text-base md:text-sm"
-              disabled={isLoading || analysisStep === 'done'}
+              disabled={isLoading || isUpdating || analysisStep === 'done'}
               rows={3}
             />
           </div>
@@ -321,25 +339,22 @@ const DecisionMaker = () => {
             </div>
             <div className="flex flex-wrap gap-2">
               {templates.map(template => (
-                <Button key={template.name} variant="outline" size="sm" onClick={() => applyTemplate(template)} disabled={isLoading || analysisStep !== 'idle'}>
+                <Button key={template.name} variant="outline" size="sm" onClick={() => applyTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'}>
                   <BookCopy className="h-4 w-4 mr-2" />
                   {template.name}
                 </Button>
               ))}
             </div>
           </div>
-           {analysisStep === 'generating-criteria' && <CriteriaSkeleton />}
-
-           {/* The CriteriaManager component has been moved from here to the results card below */}
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           {renderMainButton()}
         </CardFooter>
       </Card>
       
-      {analysisStep === 'generating-options' && <ResultSkeleton />}
+      {analysisStep === 'analyzing' && <ResultSkeleton />}
 
-      {result && (analysisStep === 'done' || analysisStep === 'generating-options') && (
+      {result && analysisStep === 'done' && (
         <Card className="mt-8 backdrop-blur-sm animate-fade-in">
           <CardHeader>
             <CardTitle className="text-2xl flex items-start gap-3">
@@ -349,11 +364,11 @@ const DecisionMaker = () => {
              <Badge className="w-fit bg-cyan-500 text-slate-900 text-lg mt-2">{result.recommendation}</Badge>
           </CardHeader>
           <CardContent className="space-y-4">
-            { (analysisStep === 'generating-options' || analysisStep === 'done') && criteria.length > 0 && (
+            { criteria.length > 0 && (
               <CriteriaManager
                 criteria={criteria}
                 setCriteria={setCriteria}
-                isInteractionDisabled={isLoading}
+                isInteractionDisabled={isLoading || isUpdating}
               />
             )}
             <h3 className="font-semibold text-lg">Analyse détaillée :</h3>
@@ -386,7 +401,7 @@ const DecisionMaker = () => {
           </CardContent>
           {analysisStep === 'done' && (
             <CardFooter>
-              <Button onClick={clearSession} variant="secondary" className="w-full font-bold text-lg py-6">
+              <Button onClick={clearSession} variant="secondary" className="w-full font-bold text-lg py-6" disabled={isUpdating}>
                 <Eraser className="h-5 w-5 mr-2" />
                 Recommencer une nouvelle analyse
               </Button>
