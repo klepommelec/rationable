@@ -3,10 +3,8 @@ import { toast } from "sonner";
 import { useDebounceCallback } from 'usehooks-ts';
 import { RefreshCw } from 'lucide-react';
 import { ICriterion, IResult, IDecision } from '@/types/decision';
-import { IConversationQuestion } from '@/types/conversation';
 import { useDecisionHistory } from './useDecisionHistory';
-import { startAnalysis, generateOptions } from '@/services/decisionService';
-import { generateConversationQuestions, analyzeWithConversationContext } from '@/services/conversationService';
+import { startAnalysis, generateOptions, generateConversationQuestions, analyzeWithConversationContext } from '@/services/decisionService';
 
 const templates = [
   {
