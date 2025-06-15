@@ -3,14 +3,17 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
 import { BrainCircuit, Plus, Trash2, Sparkles, LoaderCircle, Lightbulb, BookCopy, Eraser } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CriterionRow } from './CriterionRow';
 
-interface ICriterion {
+
+export interface ICriterion {
+  id: string;
   name: string;
-  weight: number;
 }
 
 interface IBreakdownItem {
@@ -30,30 +33,30 @@ const templates = [
     name: "💻 Choisir un ordinateur",
     dilemma: "Quel nouvel ordinateur portable devrais-je acheter ?",
     criteria: [
-      { name: "Prix", weight: 8 },
-      { name: "Performance", weight: 9 },
-      { name: "Autonomie de la batterie", weight: 7 },
-      { name: "Portabilité", weight: 6 },
+      { name: "Performance" },
+      { name: "Prix" },
+      { name: "Autonomie de la batterie" },
+      { name: "Portabilité" },
     ],
   },
   {
     name: "✈️ Choisir des vacances",
     dilemma: "Où devrais-je partir pour mes prochaines vacances ?",
     criteria: [
-      { name: "Budget total", weight: 9 },
-      { name: "Activités", weight: 7 },
-      { name: "Météo", weight: 8 },
-      { name: "Temps de trajet", weight: 5 },
+      { name: "Budget total" },
+      { name: "Activités" },
+      { name: "Météo" },
+      { name: "Temps de trajet" },
     ],
   },
   {
     name: "🤔 Apprendre un framework JS",
     dilemma: "Quel framework JavaScript devrais-je apprendre en 2025 ?",
     criteria: [
-      { name: "Courbe d'apprentissage", weight: 7 },
-      { name: "Popularité", weight: 8 },
-      { name: "Performance", weight: 9 },
-      { name: "Offres d'emploi", weight: 10 },
+      { name: "Popularité" },
+      { name: "Courbe d'apprentissage" },
+      { name: "Performance" },
+      { name: "Offres d'emploi" },
     ],
   },
 ];
@@ -87,7 +90,15 @@ const callOpenAiApi = async (prompt: string, apiKey: string) => {
     throw new Error(`Erreur de l'API OpenAI: ${errorData.error?.message || response.statusText}`);
   }
 
-  const data = await response.json();
+  // Fix for text encoding issues
+  const text = await response.text();
+  const data = JSON.parse(text);
+
+  if (!data.choices || data.choices.length === 0) {
+      console.error("OpenAI API response has no choices:", data);
+      throw new Error("La réponse de l'API OpenAI est malformée.");
+  }
+
   const content = data.choices[0].message.content;
   
   try {
@@ -103,8 +114,8 @@ const DecisionMaker = () => {
   const [apiKey, setApiKey] = useState('');
   const [dilemma, setDilemma] = useState('');
   const [criteria, setCriteria] = useState<ICriterion[]>([
-    { name: '', weight: 5 },
-    { name: '', weight: 5 }
+    { id: crypto.randomUUID(), name: '' },
+    { id: crypto.randomUUID(), name: '' }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingCriteria, setIsGeneratingCriteria] = useState(false);
@@ -122,7 +133,10 @@ const DecisionMaker = () => {
       try {
         const { dilemma, criteria, result } = JSON.parse(savedState);
         if (dilemma) setDilemma(dilemma);
-        if (criteria && criteria.length > 0) setCriteria(criteria);
+        // Ensure saved criteria have IDs
+        if (criteria && criteria.length > 0) {
+            setCriteria(criteria.map((c: any) => ({ ...c, id: c.id || crypto.randomUUID() })));
+        }
         if (result) setResult(result);
       } catch (e) {
         console.error("Failed to parse saved state from localStorage", e);
@@ -162,26 +176,30 @@ const DecisionMaker = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dilemma]);
 
-  const handleCriterionChange = (index: number, name: string) => {
-    const newCriteria = [...criteria];
-    newCriteria[index].name = name;
-    setCriteria(newCriteria);
-  };
-
-  const handleWeightChange = (index: number, newWeight: number[]) => {
-    const newCriteria = [...criteria];
-    newCriteria[index].weight = newWeight[0];
+  const handleCriterionChange = (id: string, name: string) => {
+    const newCriteria = criteria.map(c => c.id === id ? { ...c, name } : c);
     setCriteria(newCriteria);
   };
 
   const addCriterion = () => {
-    setCriteria([...criteria, { name: '', weight: 5 }]);
+    setCriteria([...criteria, { id: crypto.randomUUID(), name: '' }]);
   };
 
-  const removeCriterion = (index: number) => {
-    const newCriteria = criteria.filter((_, i) => i !== index);
+  const removeCriterion = (id: string) => {
+    const newCriteria = criteria.filter((c) => c.id !== id);
     setCriteria(newCriteria);
   };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+      const {active, over} = event;
+      if (over && active.id !== over.id) {
+        setCriteria((items) => {
+          const oldIndex = items.findIndex((item) => item.id === active.id);
+          const newIndex = items.findIndex((item) => item.id === over.id);
+          return arrayMove(items, oldIndex, newIndex);
+        });
+      }
+    };
 
   const handleGenerateCriteria = async () => {
     if (dilemma.trim() === '' || !apiKey) return;
@@ -194,7 +212,7 @@ const DecisionMaker = () => {
       const response = await callOpenAiApi(prompt, apiKey);
       const generatedCriteriaNames = response.criteria;
       if (Array.isArray(generatedCriteriaNames) && generatedCriteriaNames.every(c => typeof c === 'string')) {
-        setCriteria(generatedCriteriaNames.slice(0, 4).map(name => ({ name, weight: 5 })));
+        setCriteria(generatedCriteriaNames.slice(0, 4).map(name => ({ id: crypto.randomUUID(), name })));
       } else {
         throw new Error("Le format des critères générés est incorrect.");
       }
@@ -202,7 +220,11 @@ const DecisionMaker = () => {
       if (e instanceof Error) {
         toast.error(`Erreur lors de la génération des critères : ${e.message}`);
       }
-      setCriteria([{ name: 'Coût', weight: 5 }, { name: 'Qualité', weight: 5 }, { name: 'Durabilité', weight: 5 }]);
+      setCriteria([
+          { id: crypto.randomUUID(), name: 'Coût' }, 
+          { id: crypto.randomUUID(), name: 'Qualité' }, 
+          { id: crypto.randomUUID(), name: 'Durabilité' }
+      ]);
     } finally {
       setIsGeneratingCriteria(false);
     }
@@ -212,12 +234,12 @@ const DecisionMaker = () => {
     setIsLoading(true);
     setResult(null);
 
-    const weightedCriteria = criteria.filter(c => c.name.trim() !== '').map(c => `${c.name} (importance: ${c.weight}/10)`).join(', ');
-    const prompt = `Vous êtes un assistant expert en prise de décision. Analysez le dilemme suivant : "${dilemma}", en vous basant sur ces critères pondérés : ${weightedCriteria}.
+    const orderedCriteria = criteria.filter(c => c.name.trim() !== '').map(c => c.name).join(', ');
+    const prompt = `Vous êtes un assistant expert en prise de décision. Analysez le dilemme suivant : "${dilemma}", en vous basant sur ces critères, listés par ordre d'importance (du plus important au moins important) : ${orderedCriteria}.
     Veuillez :
     1. Générer 3 options potentielles.
     2. Pour chaque option, fournir une liste concise d'avantages (pros) et d'inconvénients (cons) en se basant sur les critères.
-    3. Pour chaque option, calculer un score de pertinence de 0 à 100, basé sur l'adéquation de l'option avec les critères pondérés. Un score plus élevé signifie une meilleure adéquation.
+    3. Pour chaque option, calculer un score de pertinence de 0 à 100, basé sur l'adéquation de l'option avec les critères ordonnés. Un score plus élevé signifie une meilleure adéquation.
     4. Fournir une recommandation claire pour la meilleure option et expliquer pourquoi en quelques phrases.
 
     Retournez le résultat sous la forme d'un objet JSON valide avec la structure suivante :
@@ -251,7 +273,7 @@ const DecisionMaker = () => {
   
   const applyTemplate = (template: typeof templates[0]) => {
     setDilemma(template.dilemma);
-    setCriteria(template.criteria);
+    setCriteria(template.criteria.map(c => ({ id: crypto.randomUUID(), name: c.name })));
     setResult(null);
     justAppliedTemplate.current = true;
     toast.success(`Modèle "${template.name}" appliqué !`);
@@ -259,7 +281,7 @@ const DecisionMaker = () => {
 
   const clearSession = () => {
     setDilemma('');
-    setCriteria([{ name: '', weight: 5 }, { name: '', weight: 5 }]);
+    setCriteria([{ id: crypto.randomUUID(), name: '' }, { id: crypto.randomUUID(), name: '' }]);
     setResult(null);
     localStorage.removeItem('decision_maker_state');
     toast.info("Session réinitialisée.");
@@ -293,6 +315,17 @@ const DecisionMaker = () => {
             </p>
           </div>
 
+          <div className="space-y-2">
+            <label className="text-slate-300 font-medium">1. Votre dilemme</label>
+            <Input
+              placeholder="Ex: Quel framework JS devrais-je apprendre en 2025 ?"
+              value={dilemma}
+              onChange={(e) => setDilemma(e.target.value)}
+              className="bg-slate-800 border-slate-700 focus:ring-cyan-500"
+              disabled={isLoading || isGeneratingCriteria}
+            />
+          </div>
+
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <label className="text-slate-300 font-medium">Ou utilisez un modèle</label>
@@ -311,19 +344,9 @@ const DecisionMaker = () => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-slate-300 font-medium">1. Votre dilemme</label>
-            <Input
-              placeholder="Ex: Quel framework JS devrais-je apprendre en 2025 ?"
-              value={dilemma}
-              onChange={(e) => setDilemma(e.target.value)}
-              className="bg-slate-800 border-slate-700 focus:ring-cyan-500"
-              disabled={isLoading || isGeneratingCriteria}
-            />
-          </div>
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <label className="text-slate-300 font-medium">2. Critères d'évaluation (Pondération)</label>
+              <label className="text-slate-300 font-medium">2. Critères (glissez pour réordonner par importance)</label>
               {isGeneratingCriteria && (
                   <div className="flex items-center text-xs text-cyan-400">
                     <LoaderCircle className="h-3 w-3 mr-1 animate-spin" />
@@ -331,32 +354,24 @@ const DecisionMaker = () => {
                   </div>
               )}
             </div>
-
-            {criteria.map((criterion, index) => (
-              <div key={index} className="flex items-center gap-4">
-                <Input
-                  placeholder={`Critère ${index + 1}`}
-                  value={criterion.name}
-                  onChange={(e) => handleCriterionChange(index, e.target.value)}
-                  className="bg-slate-800 border-slate-700 focus:ring-cyan-500 flex-grow"
-                  disabled={isGeneratingCriteria}
-                />
-                <div className="flex items-center gap-2 w-48 flex-shrink-0">
-                  <Slider
-                    value={[criterion.weight]}
-                    max={10}
-                    step={1}
-                    onValueChange={(value) => handleWeightChange(index, value)}
-                    disabled={isGeneratingCriteria}
-                    className="w-full"
-                  />
-                  <span className="w-6 text-center text-slate-400 font-mono">{criterion.weight}</span>
+            
+            <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={criteria.map(c => c.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2">
+                  {criteria.map((criterion) => (
+                    <CriterionRow
+                      key={criterion.id}
+                      criterion={criterion}
+                      onNameChange={handleCriterionChange}
+                      onRemove={removeCriterion}
+                      isRemoveDisabled={criteria.length <= 1}
+                      isDragDisabled={isGeneratingCriteria}
+                    />
+                  ))}
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => removeCriterion(index)} disabled={criteria.length <= 1 || isGeneratingCriteria}>
-                  <Trash2 className="h-4 w-4 text-slate-500 hover:text-red-500 transition-colors" />
-                </Button>
-              </div>
-            ))}
+              </SortableContext>
+            </DndContext>
+
             <Button variant="outline" onClick={addCriterion} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white" disabled={isGeneratingCriteria}>
               <Plus className="h-4 w-4 mr-2" />
               Ajouter un critère
