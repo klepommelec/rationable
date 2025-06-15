@@ -5,7 +5,6 @@ import DilemmaSetup from './decision-maker/DilemmaSetup';
 import AnalysisResult from './decision-maker/AnalysisResult';
 import { EmojiPicker } from './EmojiPicker';
 import { CriteriaManager } from './CriteriaManager';
-import { CriteriaProgressiveSkeleton } from './CriteriaProgressiveSkeleton';
 import { OptionsLoadingSkeleton } from './OptionsLoadingSkeleton';
 
 const DecisionMaker = () => {
@@ -41,16 +40,12 @@ const DecisionMaker = () => {
               <h1 className="text-3xl font-bold text-left">{dilemma}</h1>
           </div>
           <div className="w-full mb-6">
-            {analysisStep === 'loading-criteria' && (
-              <CriteriaProgressiveSkeleton />
-            )}
-            {(analysisStep === 'criteria-loaded' || analysisStep === 'loading-options' || analysisStep === 'done') && criteria.length > 0 && (
-              <CriteriaManager 
-                criteria={criteria} 
-                setCriteria={setCriteria} 
-                isInteractionDisabled={analysisStep === 'loading-options' || isLoading || isUpdating} 
-              />
-            )}
+            <CriteriaManager 
+              criteria={criteria} 
+              setCriteria={setCriteria} 
+              isInteractionDisabled={analysisStep === 'loading-options' || isLoading || isUpdating} 
+              isLoadingCriteria={analysisStep === 'loading-criteria'}
+            />
           </div>
         </>
       )}

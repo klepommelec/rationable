@@ -13,7 +13,7 @@ import { IDecision } from '@/types/decision';
 interface DilemmaSetupProps {
     dilemma: string;
     setDilemma: (dilemma: string) => void;
-    analysisStep: 'idle' | 'analyzing' | 'done';
+    analysisStep: 'idle' | 'loading-criteria' | 'criteria-loaded' | 'loading-options' | 'done';
     isLoading: boolean;
     isUpdating: boolean;
     applyTemplate: (template: any) => void;
