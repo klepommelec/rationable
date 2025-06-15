@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BrainCircuit, Plus, Trash2, Sparkles, LoaderCircle, Lightbulb, BookCopy, Eraser } from 'lucide-react';
+import { BrainCircuit, Plus, Sparkles, LoaderCircle, Lightbulb, BookCopy, Eraser } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
