@@ -34,5 +34,3 @@ export interface IDecision {
   criteria: ICriterion[];
   result: IResult;
 }
-
-export type AnalysisStep = 'idle' | 'generating-criteria' | 'validating-criteria' | 'final-analysis' | 'done';

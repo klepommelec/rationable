@@ -6,8 +6,6 @@ import AnalysisResult from './decision-maker/AnalysisResult';
 import { EmojiPicker } from './EmojiPicker';
 import { CriteriaManager } from './CriteriaManager';
 import { CriteriaSkeleton } from './CriteriaSkeleton';
-import { CriteriaProgressiveGenerator } from './CriteriaProgressiveGenerator';
-import { ThinkingSkeleton } from './ThinkingSkeleton';
 
 const DecisionMaker = () => {
   const {
@@ -31,50 +29,21 @@ const DecisionMaker = () => {
     deleteDecision,
     clearHistory,
     templates,
-    useProgressiveMode,
-    generatedCriteria,
-    handleProgressiveCriteriaValidation,
   } = useDecisionMaker();
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      {(analysisStep === 'analyzing' || analysisStep === 'generating-criteria' || analysisStep === 'validating-criteria' || analysisStep === 'final-analysis' || analysisStep === 'done') && (
+      {(analysisStep === 'analyzing' || analysisStep === 'done') && (
         <>
           <div className="flex items-center gap-4 mb-6 animate-fade-in">
               <EmojiPicker emoji={emoji} setEmoji={setEmoji} />
               <h1 className="text-3xl font-bold text-left">{dilemma}</h1>
           </div>
-          
           <div className="w-full mb-6">
-            {/* Mode progressif */}
-            {useProgressiveMode && analysisStep === 'generating-criteria' && (
+            {analysisStep === 'analyzing' ? (
               <CriteriaSkeleton />
-            )}
-            
-            {useProgressiveMode && analysisStep === 'validating-criteria' && (
-              <CriteriaProgressiveGenerator
-                criteria={generatedCriteria}
-                onValidationComplete={handleProgressiveCriteriaValidation}
-                validationTimeLimit={20}
-              />
-            )}
-            
-            {useProgressiveMode && analysisStep === 'final-analysis' && (
-              <ThinkingSkeleton />
-            )}
-            
-            {/* Mode classique */}
-            {!useProgressiveMode && analysisStep === 'analyzing' && (
-              <CriteriaSkeleton />
-            )}
-            
-            {/* Affichage des critères validés */}
-            {analysisStep === 'done' && criteria.length > 0 && (
-              <CriteriaManager 
-                criteria={criteria} 
-                setCriteria={setCriteria} 
-                isInteractionDisabled={isLoading || isUpdating} 
-              />
+            ) : (
+              criteria.length > 0 && <CriteriaManager criteria={criteria} setCriteria={setCriteria} isInteractionDisabled={isLoading || isUpdating} />
             )}
           </div>
         </>
@@ -100,7 +69,7 @@ const DecisionMaker = () => {
         />
       )}
       
-      {analysisStep === 'done' && (
+      {(analysisStep === 'analyzing' || analysisStep === 'done') && (
         <AnalysisResult
           result={result}
           isUpdating={isUpdating}
