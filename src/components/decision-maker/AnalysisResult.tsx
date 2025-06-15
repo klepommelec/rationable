@@ -1,30 +1,20 @@
-
 import * as React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Eraser, Trophy, BookOpen, ShoppingCart, ExternalLink } from 'lucide-react';
-import { CriteriaManager } from '../CriteriaManager';
-import { ICriterion, IResult } from '@/types/decision';
+import { IResult } from '@/types/decision';
 import { ScoreChart } from './ScoreChart';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CriteriaSkeleton } from '../CriteriaSkeleton';
-
 
 interface AnalysisResultProps {
   result: IResult | null;
-  criteria: ICriterion[];
-  setCriteria: React.Dispatch<React.SetStateAction<ICriterion[]>>;
-  isLoading: boolean;
   isUpdating: boolean;
   clearSession: () => void;
   analysisStep: 'idle' | 'analyzing' | 'done';
 }
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
-  criteria,
-  setCriteria,
-  isLoading,
   isUpdating,
   clearSession,
   analysisStep
@@ -47,8 +37,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     <div className="relative min-h-[250px] md:min-h-0 bg-muted"></div>
                 </div>
             </Card>
-
-            <CriteriaSkeleton />
 
             <Card>
                 <CardHeader>
@@ -183,10 +171,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     </div>
                 </div>
             </Card>
-
-            {criteria.length > 0 && <div className="w-full">
-                <CriteriaManager criteria={criteria} setCriteria={setCriteria} isInteractionDisabled={isLoading || isUpdating} />
-            </div>}
 
             <Card>
                 <CardHeader>
