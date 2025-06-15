@@ -1,11 +1,37 @@
+
 import { ICriterion, IResult } from '@/types/decision';
 import { callOpenAiApi } from '@/services/openai';
+
+interface ICriteriaResponse {
+    emoji: string;
+    criteria: string[];
+}
 
 interface IFullAnalysisResponse {
     emoji: string;
     criteria: string[];
     result: IResult;
 }
+
+export const generateCriteriaOnly = async (dilemma: string): Promise<ICriteriaResponse> => {
+    const prompt = `Pour le dilemme : "${dilemma}", générez un emoji pertinent et 4 critères de décision importants.
+    La réponse DOIT être un objet JSON valide. Le champ "emoji" DOIT contenir un seul emoji unicode pertinent.
+    JSON attendu :
+    {
+      "emoji": "🤔",
+      "criteria": ["Critère 1", "Critère 2", "Critère 3", "Critère 4"]
+    }`;
+
+    const response = await callOpenAiApi(prompt);
+    const isValidEmoji = response && typeof response.emoji === 'string';
+    const isValidCriteria = response && response.criteria && Array.isArray(response.criteria);
+
+    if (isValidEmoji && isValidCriteria) {
+        return response as ICriteriaResponse;
+    } else {
+        throw new Error("La structure de la réponse de l'IA pour les critères est invalide.");
+    }
+};
 
 export const startAnalysis = async (dilemma: string): Promise<IFullAnalysisResponse> => {
     const prompt = `En tant qu'assistant expert en prise de décision, pour le dilemme : "${dilemma}", veuillez fournir une analyse complète.

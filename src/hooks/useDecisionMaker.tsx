@@ -1,10 +1,11 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { toast } from "sonner";
 import { useDebounceCallback } from 'usehooks-ts';
 import { RefreshCw } from 'lucide-react';
 import { ICriterion, IResult, IDecision } from '@/types/decision';
 import { useDecisionHistory } from './useDecisionHistory';
-import { startAnalysis, generateOptions } from '@/services/decisionService';
+import { generateCriteriaOnly, generateOptions } from '@/services/decisionService';
 
 const templates = [
   {
@@ -21,10 +22,12 @@ const templates = [
   },
 ];
 
+type AnalysisStep = 'idle' | 'loading-criteria' | 'criteria-loaded' | 'loading-options' | 'done';
+
 export const useDecisionMaker = () => {
     const [dilemma, setDilemma] = useState('');
     const [emoji, setEmojiState] = useState('🤔');
-    const [analysisStep, setAnalysisStep] = useState<'idle' | 'analyzing' | 'done'>('idle');
+    const [analysisStep, setAnalysisStep] = useState<AnalysisStep>('idle');
     const [progress, setProgress] = useState(0);
     const [progressMessage, setProgressMessage] = useState('');
     const [criteria, setCriteria] = useState<ICriterion[]>([]);
@@ -36,7 +39,7 @@ export const useDecisionMaker = () => {
     
     const initialCriteriaRef = useRef<ICriterion[]>([]);
     
-    const isLoading = analysisStep === 'analyzing';
+    const isLoading = analysisStep === 'loading-criteria' || analysisStep === 'loading-options';
 
     const setEmoji = (newEmoji: string) => {
         setEmojiState(newEmoji);
@@ -61,10 +64,13 @@ export const useDecisionMaker = () => {
         }
 
         setIsUpdating(true);
+        setAnalysisStep('loading-options');
+        setProgressMessage("Analyse des options en cours...");
 
         try {
           const apiResult = await generateOptions(dilemma, currentCriteria);
           setResult(apiResult);
+          setAnalysisStep('done');
           
           if (currentDecisionId) {
             const decisionToUpdate = history.find(d => d.id === currentDecisionId);
@@ -82,51 +88,67 @@ export const useDecisionMaker = () => {
           if (e instanceof Error) {
             toast.error(`Erreur lors de la mise à jour de l'analyse : ${e.message}`);
           }
+          setAnalysisStep('criteria-loaded');
         } finally {
           setIsUpdating(false);
+          setProgressMessage('');
         }
     };
 
     const handleStartAnalysis = async () => {
-        setAnalysisStep('analyzing');
+        setAnalysisStep('loading-criteria');
         setProgress(0);
-        setProgressMessage("Initialisation de l'analyse...");
+        setProgressMessage("Génération des critères...");
         setResult(null);
         setCriteria([]);
         setEmojiState('🤔');
         setCurrentDecisionId(null);
 
-        setTimeout(() => setProgress(10), 100);
-        
         try {
-          setProgress(25);
-          setProgressMessage("Génération des critères et options...");
-          const response = await startAnalysis(dilemma);
-          setProgress(75);
-          setProgressMessage("Finalisation de l'analyse...");
-
+          // Phase 1: Générer les critères
+          const response = await generateCriteriaOnly(dilemma);
+          
           const newCriteria = response.criteria.map((name: string) => ({
             id: crypto.randomUUID(),
             name,
           }));
+          
           setCriteria(newCriteria);
-          setResult(response.result);
           setEmojiState(response.emoji || '🤔');
+          setAnalysisStep('criteria-loaded');
           
-          const newDecision: IDecision = {
-            id: crypto.randomUUID(),
-            timestamp: Date.now(),
-            dilemma,
-            emoji: response.emoji || '🤔',
-            criteria: newCriteria,
-            result: response.result
-          };
-          addDecision(newDecision);
-          setCurrentDecisionId(newDecision.id);
+          // Phase 2: Générer automatiquement les options
+          setTimeout(async () => {
+            setAnalysisStep('loading-options');
+            setProgressMessage("Génération des options...");
+            
+            try {
+              const optionsResult = await generateOptions(dilemma, newCriteria);
+              setResult(optionsResult);
+              
+              const newDecision: IDecision = {
+                id: crypto.randomUUID(),
+                timestamp: Date.now(),
+                dilemma,
+                emoji: response.emoji || '🤔',
+                criteria: newCriteria,
+                result: optionsResult
+              };
+              addDecision(newDecision);
+              setCurrentDecisionId(newDecision.id);
+              
+              setAnalysisStep('done');
+              toast.success("Analyse complète générée !");
+            } catch (e) {
+              if (e instanceof Error) {
+                toast.error(`Erreur lors de la génération des options : ${e.message}`);
+              }
+              setAnalysisStep('criteria-loaded');
+            } finally {
+              setProgressMessage('');
+            }
+          }, 1000);
           
-          setProgress(100);
-          setAnalysisStep('done');
-          toast.success("Analyse complète générée !");
         } catch (e) {
           if (e instanceof Error) {
             toast.error(`Erreur lors de l'analyse : ${e.message}`);

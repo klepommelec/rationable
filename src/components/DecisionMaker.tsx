@@ -5,7 +5,8 @@ import DilemmaSetup from './decision-maker/DilemmaSetup';
 import AnalysisResult from './decision-maker/AnalysisResult';
 import { EmojiPicker } from './EmojiPicker';
 import { CriteriaManager } from './CriteriaManager';
-import { CriteriaSkeleton } from './CriteriaSkeleton';
+import { CriteriaProgressiveSkeleton } from './CriteriaProgressiveSkeleton';
+import { OptionsLoadingSkeleton } from './OptionsLoadingSkeleton';
 
 const DecisionMaker = () => {
   const {
@@ -33,17 +34,22 @@ const DecisionMaker = () => {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      {(analysisStep === 'analyzing' || analysisStep === 'done') && (
+      {(analysisStep === 'loading-criteria' || analysisStep === 'criteria-loaded' || analysisStep === 'loading-options' || analysisStep === 'done') && (
         <>
           <div className="flex items-center gap-4 mb-6 animate-fade-in">
               <EmojiPicker emoji={emoji} setEmoji={setEmoji} />
               <h1 className="text-3xl font-bold text-left">{dilemma}</h1>
           </div>
           <div className="w-full mb-6">
-            {analysisStep === 'analyzing' ? (
-              <CriteriaSkeleton />
-            ) : (
-              criteria.length > 0 && <CriteriaManager criteria={criteria} setCriteria={setCriteria} isInteractionDisabled={isLoading || isUpdating} />
+            {analysisStep === 'loading-criteria' && (
+              <CriteriaProgressiveSkeleton />
+            )}
+            {(analysisStep === 'criteria-loaded' || analysisStep === 'loading-options' || analysisStep === 'done') && criteria.length > 0 && (
+              <CriteriaManager 
+                criteria={criteria} 
+                setCriteria={setCriteria} 
+                isInteractionDisabled={analysisStep === 'loading-options' || isLoading || isUpdating} 
+              />
             )}
           </div>
         </>
@@ -69,7 +75,11 @@ const DecisionMaker = () => {
         />
       )}
       
-      {(analysisStep === 'analyzing' || analysisStep === 'done') && (
+      {analysisStep === 'loading-options' && (
+        <OptionsLoadingSkeleton />
+      )}
+      
+      {analysisStep === 'done' && (
         <AnalysisResult
           result={result}
           isUpdating={isUpdating}
