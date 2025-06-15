@@ -4,21 +4,60 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { BrainCircuit, Plus, Trash2, Sparkles, LoaderCircle, Lightbulb } from 'lucide-react';
+import { BrainCircuit, Plus, Trash2, Sparkles, LoaderCircle, Lightbulb, BookCopy, Eraser } from 'lucide-react';
+import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 
 interface ICriterion {
   name: string;
   weight: number;
 }
 
+interface IBreakdownItem {
+  option: string;
+  pros: string[];
+  cons: string[];
+  score: number;
+}
+
 interface IResult {
   recommendation: string;
-  breakdown: {
-    option: string;
-    pros: string[];
-    cons: string[];
-  }[];
+  breakdown: IBreakdownItem[];
 }
+
+const templates = [
+  {
+    name: "💻 Choisir un ordinateur",
+    dilemma: "Quel nouvel ordinateur portable devrais-je acheter ?",
+    criteria: [
+      { name: "Prix", weight: 8 },
+      { name: "Performance", weight: 9 },
+      { name: "Autonomie de la batterie", weight: 7 },
+      { name: "Portabilité", weight: 6 },
+    ],
+  },
+  {
+    name: "✈️ Choisir des vacances",
+    dilemma: "Où devrais-je partir pour mes prochaines vacances ?",
+    criteria: [
+      { name: "Budget total", weight: 9 },
+      { name: "Activités", weight: 7 },
+      { name: "Météo", weight: 8 },
+      { name: "Temps de trajet", weight: 5 },
+    ],
+  },
+  {
+    name: "🤔 Apprendre un framework JS",
+    dilemma: "Quel framework JavaScript devrais-je apprendre en 2025 ?",
+    criteria: [
+      { name: "Courbe d'apprentissage", weight: 7 },
+      { name: "Popularité", weight: 8 },
+      { name: "Performance", weight: 9 },
+      { name: "Offres d'emploi", weight: 10 },
+    ],
+  },
+];
+
 
 const callOpenAiApi = async (prompt: string, apiKey: string) => {
   if (!apiKey) {
@@ -61,7 +100,7 @@ const callOpenAiApi = async (prompt: string, apiKey: string) => {
 
 
 const DecisionMaker = () => {
-  const [apiKey, setApiKey] = useState(localStorage.getItem('openai_api_key') || '');
+  const [apiKey, setApiKey] = useState('');
   const [dilemma, setDilemma] = useState('');
   const [criteria, setCriteria] = useState<ICriterion[]>([
     { name: '', weight: 5 },
@@ -70,16 +109,42 @@ const DecisionMaker = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingCriteria, setIsGeneratingCriteria] = useState(false);
   const [result, setResult] = useState<IResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
+  // Load state from localStorage on initial render
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('openai_api_key');
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    }
+    const savedState = localStorage.getItem('decision_maker_state');
+    if (savedState) {
+      try {
+        const { dilemma, criteria, result } = JSON.parse(savedState);
+        if (dilemma) setDilemma(dilemma);
+        if (criteria && criteria.length > 0) setCriteria(criteria);
+        if (result) setResult(result);
+      } catch (e) {
+        console.error("Failed to parse saved state from localStorage", e);
+        localStorage.removeItem('decision_maker_state');
+      }
+    }
+  }, []);
+
+  // Save API key to localStorage
   useEffect(() => {
     if (apiKey) {
       localStorage.setItem('openai_api_key', apiKey);
     }
   }, [apiKey]);
+  
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    const stateToSave = JSON.stringify({ dilemma, criteria, result });
+    localStorage.setItem('decision_maker_state', stateToSave);
+  }, [dilemma, criteria, result]);
 
   useEffect(() => {
-    if (dilemma.trim().length < 5 || !apiKey) {
+    if (dilemma.trim().length < 10 || !apiKey || isGeneratingCriteria) {
       return;
     }
 
@@ -89,7 +154,7 @@ const DecisionMaker = () => {
 
     return () => clearTimeout(debounceTimer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dilemma, apiKey]);
+  }, [dilemma]);
 
   const handleCriterionChange = (index: number, name: string) => {
     const newCriteria = [...criteria];
@@ -115,7 +180,6 @@ const DecisionMaker = () => {
   const handleGenerateCriteria = async () => {
     if (dilemma.trim() === '' || !apiKey) return;
     setIsGeneratingCriteria(true);
-    setError(null);
     setResult(null);
 
     const prompt = `Pour le dilemme suivant : "${dilemma}", générez 4 critères d'évaluation pertinents. Retournez le résultat sous la forme d'un objet JSON avec une seule clé "criteria" contenant un tableau de chaînes de caractères. Exemple : {"criteria": ["Critère 1", "Critère 2", "Critère 3", "Critère 4"]}`;
@@ -130,7 +194,7 @@ const DecisionMaker = () => {
       }
     } catch (e) {
       if (e instanceof Error) {
-        setError(`Erreur lors de la génération des critères : ${e.message}`);
+        toast.error(`Erreur lors de la génération des critères : ${e.message}`);
       }
       setCriteria([{ name: 'Coût', weight: 5 }, { name: 'Qualité', weight: 5 }, { name: 'Durabilité', weight: 5 }]);
     } finally {
@@ -140,15 +204,15 @@ const DecisionMaker = () => {
 
   const handleAnalyze = async () => {
     setIsLoading(true);
-    setError(null);
     setResult(null);
 
     const weightedCriteria = criteria.filter(c => c.name.trim() !== '').map(c => `${c.name} (importance: ${c.weight}/10)`).join(', ');
     const prompt = `Vous êtes un assistant expert en prise de décision. Analysez le dilemme suivant : "${dilemma}", en vous basant sur ces critères pondérés : ${weightedCriteria}.
     Veuillez :
-    1. Générer 3 à 4 options potentielles.
+    1. Générer 3 options potentielles.
     2. Pour chaque option, fournir une liste concise d'avantages (pros) et d'inconvénients (cons) en se basant sur les critères.
-    3. Fournir une recommandation claire pour la meilleure option et expliquer pourquoi en quelques phrases.
+    3. Pour chaque option, calculer un score de pertinence de 0 à 100, basé sur l'adéquation de l'option avec les critères pondérés. Un score plus élevé signifie une meilleure adéquation.
+    4. Fournir une recommandation claire pour la meilleure option et expliquer pourquoi en quelques phrases.
 
     Retournez le résultat sous la forme d'un objet JSON valide avec la structure suivante :
     {
@@ -157,26 +221,42 @@ const DecisionMaker = () => {
         {
           "option": "Nom de l'option 1",
           "pros": ["Avantage 1", "Avantage 2"],
-          "cons": ["Inconvénient 1", "Inconvénient 2"]
+          "cons": ["Inconvénient 1", "Inconvénient 2"],
+          "score": 85
         }
       ]
     }`;
     
     try {
-      const newResult = await callOpenAiApi(prompt, apiKey);
-      if (newResult && newResult.recommendation && newResult.breakdown) {
+      const newResult: IResult = await callOpenAiApi(prompt, apiKey);
+      if (newResult && newResult.recommendation && newResult.breakdown && Array.isArray(newResult.breakdown) && newResult.breakdown.every(item => typeof item.score === 'number')) {
           setResult(newResult);
       } else {
-        throw new Error("La structure de la réponse de l'IA est invalide.");
+        throw new Error("La structure de la réponse de l'IA est invalide ou le score est manquant.");
       }
     } catch (e) {
       if (e instanceof Error) {
-        setError(`Erreur lors de l'analyse : ${e.message}`);
+        toast.error(`Erreur lors de l'analyse : ${e.message}`);
       }
     } finally {
       setIsLoading(false);
     }
   };
+  
+  const applyTemplate = (template: typeof templates[0]) => {
+    setDilemma(template.dilemma);
+    setCriteria(template.criteria);
+    setResult(null);
+    toast.success(`Modèle "${template.name}" appliqué !`);
+  }
+
+  const clearSession = () => {
+    setDilemma('');
+    setCriteria([{ name: '', weight: 5 }, { name: '', weight: 5 }]);
+    setResult(null);
+    localStorage.removeItem('decision_maker_state');
+    toast.info("Session réinitialisée.");
+  }
 
   const isAnalyzeDisabled = !apiKey || dilemma.trim() === '' || criteria.filter(c => c.name.trim() !== '').length < 1 || isLoading || isGeneratingCriteria;
 
@@ -188,7 +268,7 @@ const DecisionMaker = () => {
             <BrainCircuit className="h-12 w-12 text-cyan-400" />
           </div>
           <CardTitle className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-200 to-slate-400">Assistant de Décision IA</CardTitle>
-          <CardDescription className="text-slate-400">Posez votre dilemme, listez vos options, et laissez l'IA vous éclairer.</CardDescription>
+          <CardDescription className="text-slate-400">Posez votre dilemme, et laissez l'IA vous éclairer.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
@@ -206,12 +286,23 @@ const DecisionMaker = () => {
             </p>
           </div>
 
-          {error && (
-            <div className="p-4 my-4 rounded-md bg-red-900/50 border border-red-500/50 text-red-300 text-sm">
-              <p className="font-bold mb-1">Une erreur est survenue</p>
-              <p>{error}</p>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <label className="text-slate-300 font-medium">Ou utilisez un modèle</label>
+               <Button variant="ghost" size="sm" onClick={clearSession} className="text-slate-400 hover:text-white">
+                <Eraser className="h-4 w-4 mr-2" />
+                Réinitialiser
+              </Button>
             </div>
-          )}
+            <div className="flex flex-wrap gap-2">
+              {templates.map(template => (
+                <Button key={template.name} variant="outline" size="sm" onClick={() => applyTemplate(template)} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+                  <BookCopy className="h-4 w-4 mr-2" />
+                  {template.name}
+                </Button>
+              ))}
+            </div>
+          </div>
 
           <div className="space-y-2">
             <label className="text-slate-300 font-medium">1. Votre dilemme</label>
@@ -290,9 +381,16 @@ const DecisionMaker = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <h3 className="font-semibold text-lg text-slate-300">Analyse détaillée :</h3>
-            {result.breakdown.map((item, index) => (
+            {result.breakdown.sort((a, b) => b.score - a.score).map((item, index) => (
               <div key={index} className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <h4 className="font-bold text-cyan-400 text-md">{item.option}</h4>
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="font-bold text-cyan-400 text-md">{item.option}</h4>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-slate-200">{item.score}/100</span>
+                    <Progress value={item.score} className="w-24 h-2 bg-slate-700" />
+                  </div>
+                </div>
+
                 <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h5 className="font-semibold text-green-400">Avantages</h5>
