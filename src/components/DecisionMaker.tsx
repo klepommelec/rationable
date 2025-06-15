@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,9 +17,9 @@ interface IResult {
 
 const DecisionMaker = () => {
   const [dilemma, setDilemma] = useState('');
-  const [options, setOptions] = useState<string[]>(['', '']);
+  const [criteria, setCriteria] = useState<string[]>(['', '']);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGeneratingOptions, setIsGeneratingOptions] = useState(false);
+  const [isGeneratingCriteria, setIsGeneratingCriteria] = useState(false);
   const [result, setResult] = useState<IResult | null>(null);
 
   useEffect(() => {
@@ -27,42 +28,42 @@ const DecisionMaker = () => {
     }
 
     const debounceTimer = setTimeout(() => {
-      handleGenerateOptions();
-    }, 1500); // Déclenche la génération 1.5s après la fin de la saisie
+      handleGenerateCriteria();
+    }, 1500);
 
     return () => clearTimeout(debounceTimer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dilemma]);
 
-  const handleOptionChange = (index: number, value: string) => {
-    const newOptions = [...options];
-    newOptions[index] = value;
-    setOptions(newOptions);
+  const handleCriterionChange = (index: number, value: string) => {
+    const newCriteria = [...criteria];
+    newCriteria[index] = value;
+    setCriteria(newCriteria);
   };
 
-  const addOption = () => {
-    setOptions([...options, '']);
+  const addCriterion = () => {
+    setCriteria([...criteria, '']);
   };
 
-  const removeOption = (index: number) => {
-    const newOptions = options.filter((_, i) => i !== index);
-    setOptions(newOptions);
+  const removeCriterion = (index: number) => {
+    const newCriteria = criteria.filter((_, i) => i !== index);
+    setCriteria(newCriteria);
   };
 
-  const handleGenerateOptions = () => {
+  const handleGenerateCriteria = () => {
     if (dilemma.trim() === '') return;
-    setIsGeneratingOptions(true);
+    setIsGeneratingCriteria(true);
     setResult(null);
-    // Simulation d'un appel à une IA pour générer des options
+    // Simulation d'un appel à une IA pour générer des critères
     setTimeout(() => {
       if (dilemma.toLowerCase().includes("framework js")) {
-        setOptions(["React", "Vue", "Svelte", "Angular"]);
+        setCriteria(["Facilité d'apprentissage", "Performance", "Écosystème", "Demande sur le marché"]);
       } else if (dilemma.toLowerCase().includes("vacances")) {
-        setOptions(["Aller à la montagne", "Partir à la mer", "Visiter une capitale", "Road trip"]);
+        setCriteria(["Budget", "Météo", "Activités", "Type de séjour"]);
       } else {
-        setOptions(["Option générée A", "Option générée B", "Option générée C"]);
+        setCriteria(["Coût", "Qualité", "Durabilité"]);
       }
-      setIsGeneratingOptions(false);
+      setIsGeneratingCriteria(false);
     }, 2000);
   };
 
@@ -70,14 +71,22 @@ const DecisionMaker = () => {
     setIsLoading(true);
     setResult(null);
 
-    // Simulation d'un appel à une IA
+    // Simulation d'un appel à une IA qui génère les options et l'analyse
     setTimeout(() => {
-      const validOptions = options.filter(o => o.trim() !== '');
-      const recommendation = validOptions[Math.floor(Math.random() * validOptions.length)] || "Aucune option valide";
+      let generatedOptions: string[] = [];
+      if (dilemma.toLowerCase().includes("framework js")) {
+        generatedOptions = ["React", "Vue", "Svelte", "Angular"];
+      } else if (dilemma.toLowerCase().includes("vacances")) {
+        generatedOptions = ["Plage en Italie", "Randonnée en Suisse", "City-trip à Lisbonne", "Road-trip en Ecosse"];
+      } else {
+        generatedOptions = ["Option A générée par l'IA", "Option B générée par l'IA", "Option C générée par l'IA"];
+      }
+      
+      const recommendation = generatedOptions[Math.floor(Math.random() * generatedOptions.length)];
       
       const newResult: IResult = {
         recommendation,
-        breakdown: validOptions.map(option => ({
+        breakdown: generatedOptions.map(option => ({
           option,
           pros: ["C'est une option viable.", "Potentiel de croissance élevé.", "Aligné avec les objectifs à long terme."],
           cons: ["Nécessite un investissement initial.", "Risque de marché modéré."]
@@ -89,7 +98,7 @@ const DecisionMaker = () => {
     }, 2500);
   };
 
-  const isAnalyzeDisabled = dilemma.trim() === '' || options.filter(o => o.trim() !== '').length < 2 || isLoading || isGeneratingOptions;
+  const isAnalyzeDisabled = dilemma.trim() === '' || criteria.filter(c => c.trim() !== '').length < 1 || isLoading || isGeneratingCriteria;
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -109,37 +118,37 @@ const DecisionMaker = () => {
               value={dilemma}
               onChange={(e) => setDilemma(e.target.value)}
               className="bg-slate-800 border-slate-700 focus:ring-cyan-500"
-              disabled={isLoading || isGeneratingOptions}
+              disabled={isLoading || isGeneratingCriteria}
             />
           </div>
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <label className="text-slate-300 font-medium">2. Vos options</label>
-              {isGeneratingOptions && (
+              <label className="text-slate-300 font-medium">2. Critères d'évaluation</label>
+              {isGeneratingCriteria && (
                   <div className="flex items-center text-xs text-cyan-400">
                     <LoaderCircle className="h-3 w-3 mr-1 animate-spin" />
-                    Génération...
+                    Génération des critères...
                   </div>
               )}
             </div>
 
-            {options.map((option, index) => (
+            {criteria.map((criterion, index) => (
               <div key={index} className="flex items-center gap-2">
                 <Input
-                  placeholder={`Option ${index + 1}`}
-                  value={option}
-                  onChange={(e) => handleOptionChange(index, e.target.value)}
+                  placeholder={`Critère ${index + 1}`}
+                  value={criterion}
+                  onChange={(e) => handleCriterionChange(index, e.target.value)}
                   className="bg-slate-800 border-slate-700 focus:ring-cyan-500"
-                  disabled={isGeneratingOptions}
+                  disabled={isGeneratingCriteria}
                 />
-                <Button variant="ghost" size="icon" onClick={() => removeOption(index)} disabled={options.length <= 2 || isGeneratingOptions}>
+                <Button variant="ghost" size="icon" onClick={() => removeCriterion(index)} disabled={criteria.length <= 1 || isGeneratingCriteria}>
                   <Trash2 className="h-4 w-4 text-slate-500 hover:text-red-500 transition-colors" />
                 </Button>
               </div>
             ))}
-            <Button variant="outline" onClick={addOption} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white" disabled={isGeneratingOptions}>
+            <Button variant="outline" onClick={addCriterion} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white" disabled={isGeneratingCriteria}>
               <Plus className="h-4 w-4 mr-2" />
-              Ajouter une option
+              Ajouter un critère
             </Button>
           </div>
         </CardContent>
