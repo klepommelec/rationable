@@ -294,39 +294,41 @@ const DecisionMaker = () => {
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <label className="text-slate-300 font-medium">2. Critères (glissez pour réordonner par importance)</label>
-              {isGeneratingCriteria && (
-                  <div className="flex items-center text-xs text-cyan-400">
-                    <LoaderCircle className="h-3 w-3 mr-1 animate-spin" />
-                    Génération des critères...
+          {dilemma.trim() !== '' && (
+            <div className="space-y-3 animate-fade-in">
+              <div className="flex items-center gap-2">
+                <label className="text-slate-300 font-medium">2. Critères (glissez pour réordonner par importance)</label>
+                {isGeneratingCriteria && (
+                    <div className="flex items-center text-xs text-cyan-400">
+                      <LoaderCircle className="h-3 w-3 mr-1 animate-spin" />
+                      Génération des critères...
+                    </div>
+                )}
+              </div>
+              
+              <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={criteria.map(c => c.id)} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-2">
+                    {criteria.map((criterion) => (
+                      <CriterionRow
+                        key={criterion.id}
+                        criterion={criterion}
+                        onNameChange={handleCriterionChange}
+                        onRemove={removeCriterion}
+                        isRemoveDisabled={criteria.length <= 1}
+                        isDragDisabled={isGeneratingCriteria}
+                      />
+                    ))}
                   </div>
-              )}
-            </div>
-            
-            <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={criteria.map(c => c.id)} strategy={verticalListSortingStrategy}>
-                <div className="space-y-2">
-                  {criteria.map((criterion) => (
-                    <CriterionRow
-                      key={criterion.id}
-                      criterion={criterion}
-                      onNameChange={handleCriterionChange}
-                      onRemove={removeCriterion}
-                      isRemoveDisabled={criteria.length <= 1}
-                      isDragDisabled={isGeneratingCriteria}
-                    />
-                  ))}
-                </div>
-              </SortableContext>
-            </DndContext>
+                </SortableContext>
+              </DndContext>
 
-            <Button variant="outline" onClick={addCriterion} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white" disabled={isGeneratingCriteria}>
-              <Plus className="h-4 w-4 mr-2" />
-              Ajouter un critère
-            </Button>
-          </div>
+              <Button variant="outline" onClick={addCriterion} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white" disabled={isGeneratingCriteria}>
+                <Plus className="h-4 w-4 mr-2" />
+                Ajouter un critère
+              </Button>
+            </div>
+          )}
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Button onClick={handleAnalyze} disabled={isAnalyzeDisabled} className="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold text-lg py-6 transition-all duration-300 ease-in-out transform hover:scale-105">
