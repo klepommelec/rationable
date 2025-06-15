@@ -5,7 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ICriterion } from './DecisionMaker';
+import { ICriterion } from '@/types/decision';
 
 interface CriterionRowProps {
   criterion: ICriterion;
