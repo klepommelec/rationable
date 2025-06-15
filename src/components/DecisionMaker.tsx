@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -109,6 +109,7 @@ const DecisionMaker = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingCriteria, setIsGeneratingCriteria] = useState(false);
   const [result, setResult] = useState<IResult | null>(null);
+  const justAppliedTemplate = useRef(false);
 
   // Load state from localStorage on initial render
   useEffect(() => {
@@ -144,6 +145,11 @@ const DecisionMaker = () => {
   }, [dilemma, criteria, result]);
 
   useEffect(() => {
+    if (justAppliedTemplate.current) {
+      justAppliedTemplate.current = false;
+      return;
+    }
+
     if (dilemma.trim().length < 10 || !apiKey || isGeneratingCriteria) {
       return;
     }
@@ -247,6 +253,7 @@ const DecisionMaker = () => {
     setDilemma(template.dilemma);
     setCriteria(template.criteria);
     setResult(null);
+    justAppliedTemplate.current = true;
     toast.success(`Modèle "${template.name}" appliqué !`);
   }
 
