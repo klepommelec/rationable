@@ -8,12 +8,12 @@ import { BrainCircuit, BookCopy, Eraser, History } from 'lucide-react';
 import { ThemeToggle } from '../ThemeToggle';
 import { DecisionHistory } from '../DecisionHistory';
 import MainActionButton from './MainActionButton';
-import { IDecision } from '@/types/decision';
+import { IDecision, AnalysisStep } from '@/types/decision';
 
 interface DilemmaSetupProps {
     dilemma: string;
     setDilemma: (dilemma: string) => void;
-    analysisStep: 'idle' | 'analyzing' | 'done';
+    analysisStep: AnalysisStep;
     isLoading: boolean;
     isUpdating: boolean;
     applyTemplate: (template: any) => void;

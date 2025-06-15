@@ -21,7 +21,6 @@ const MainActionButton: React.FC<MainActionButtonProps> = ({
     progressMessage
 }) => {
     switch (analysisStep) {
-        case 'analyzing':
         case 'generating-criteria':
         case 'validating-criteria':
         case 'final-analysis':
