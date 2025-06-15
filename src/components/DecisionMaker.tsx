@@ -12,6 +12,7 @@ import { CriterionRow } from './CriterionRow';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { DecisionHistory } from './DecisionHistory';
 import { ICriterion, IResult, IDecision } from '@/types/decision';
+import { supabase } from '@/integrations/supabase/client';
 
 
 const templates = [
@@ -48,56 +49,22 @@ const templates = [
 ];
 
 
-const callOpenAiApi = async (prompt: string, apiKey: string) => {
-  if (!apiKey) {
-    throw new Error("Veuillez entrer votre clé API OpenAI.");
-  }
-
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-4-turbo',
-      messages: [
-        { role: 'system', content: 'You are a world-class decision making assistant. Your responses must be in French and in valid JSON format.' },
-        { role: 'user', content: prompt }
-      ],
-      temperature: 0.7,
-      response_format: { type: "json_object" },
-    }),
+const callOpenAiApi = async (prompt: string) => {
+  const { data, error } = await supabase.functions.invoke('openai-decision-maker', {
+    body: { prompt },
   });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    console.error("OpenAI API Error:", errorData);
-    throw new Error(`Erreur de l'API OpenAI: ${errorData.error?.message || response.statusText}`);
+  if (error) {
+    console.error("Supabase function error:", error);
+    const errorMessage = error.context?.data?.error || error.message || "Une erreur inconnue est survenue.";
+    throw new Error(`Erreur de l'assistant IA: ${errorMessage}`);
   }
 
-  // Fix for text encoding issues
-  const text = await response.text();
-  const data = JSON.parse(text);
-
-  if (!data.choices || data.choices.length === 0) {
-      console.error("OpenAI API response has no choices:", data);
-      throw new Error("La réponse de l'API OpenAI est malformée.");
-  }
-
-  const content = data.choices[0].message.content;
-  
-  try {
-    return JSON.parse(content);
-  } catch(e) {
-    console.error("Failed to parse JSON from API response:", content);
-    throw new Error("La réponse de l'API n'était pas un JSON valide.");
-  }
+  return data;
 };
 
 
 const DecisionMaker = () => {
-  const [apiKey, setApiKey] = useState('');
   const [dilemma, setDilemma] = useState('');
   const [criteria, setCriteria] = useState<ICriterion[]>([
     { id: crypto.randomUUID(), name: '' },
@@ -110,7 +77,7 @@ const DecisionMaker = () => {
   const justAppliedTemplate = useRef(false);
 
   useEffect(() => {
-    if (dilemma.trim().length < 10 || !apiKey || isGeneratingCriteria) {
+    if (dilemma.trim().length < 10 || isGeneratingCriteria) {
       return;
     }
 
@@ -148,14 +115,14 @@ const DecisionMaker = () => {
     };
 
   const handleGenerateCriteria = async () => {
-    if (dilemma.trim() === '' || !apiKey) return;
+    if (dilemma.trim() === '') return;
     setIsGeneratingCriteria(true);
     setResult(null);
 
     const prompt = `Pour le dilemme suivant : "${dilemma}", générez 4 critères d'évaluation pertinents. Retournez le résultat sous la forme d'un objet JSON avec une seule clé "criteria" contenant un tableau de chaînes de caractères. Exemple : {"criteria": ["Critère 1", "Critère 2", "Critère 3", "Critère 4"]}`;
 
     try {
-      const response = await callOpenAiApi(prompt, apiKey);
+      const response = await callOpenAiApi(prompt);
       const generatedCriteriaNames = response.criteria;
       if (Array.isArray(generatedCriteriaNames) && generatedCriteriaNames.every(c => typeof c === 'string')) {
         setCriteria(generatedCriteriaNames.slice(0, 4).map(name => ({ id: crypto.randomUUID(), name })));
@@ -202,7 +169,7 @@ const DecisionMaker = () => {
     }`;
     
     try {
-      const newResult: IResult = await callOpenAiApi(prompt, apiKey);
+      const newResult: IResult = await callOpenAiApi(prompt);
       if (newResult && newResult.recommendation && newResult.breakdown && Array.isArray(newResult.breakdown) && newResult.breakdown.every(item => typeof item.score === 'number')) {
           setResult(newResult);
           const newDecision: IDecision = {
@@ -260,7 +227,7 @@ const DecisionMaker = () => {
     toast.info("L'historique des décisions a été effacé.");
   };
 
-  const isAnalyzeDisabled = !apiKey || dilemma.trim() === '' || criteria.filter(c => c.name.trim() !== '').length < 1 || isLoading || isGeneratingCriteria;
+  const isAnalyzeDisabled = dilemma.trim() === '' || criteria.filter(c => c.name.trim() !== '').length < 1 || isLoading || isGeneratingCriteria;
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -273,21 +240,6 @@ const DecisionMaker = () => {
           <CardDescription className="text-slate-400">Posez votre dilemme, et laissez l'IA vous éclairer.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <label htmlFor="api-key" className="text-slate-300 font-medium">Clé API OpenAI</label>
-            <Input
-              id="api-key"
-              type="password"
-              placeholder="Entrez votre clé API OpenAI"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="bg-slate-800 border-slate-700 focus:ring-cyan-500"
-            />
-            <p className="text-xs text-slate-500">
-              Votre clé est stockée localement. Obtenez votre clé sur <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer" className="underline text-cyan-400">le site d'OpenAI</a>.
-            </p>
-          </div>
-
           <div className="space-y-2">
             <label className="text-slate-300 font-medium">1. Votre dilemme</label>
             <Input
