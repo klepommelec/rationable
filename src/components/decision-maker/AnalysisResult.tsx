@@ -27,6 +27,13 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
 }) => {
   const averageScore = result.breakdown.length > 0 ? Math.round(result.breakdown.reduce((acc, item) => acc + item.score, 0) / result.breakdown.length) : 0;
   const topOption = result.breakdown.length > 0 ? result.breakdown.reduce((prev, current) => prev.score > current.score ? prev : current) : null;
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    // If unsplash fails, show a placeholder
+    e.currentTarget.src = '/placeholder.svg';
+    e.currentTarget.onerror = null; // Prevent infinite loops
+  };
+
   return <div className="mt-8 space-y-6 animate-fade-in">
             <Card className="overflow-hidden backdrop-blur-sm bg-card/70">
                 <div className="grid grid-cols-1 md:grid-cols-2">
@@ -80,10 +87,11 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     <div className="relative min-h-[250px] md:min-h-0">
                         {result.imageQuery &&
                             <img 
-                                src={`https://source.unsplash.com/800x600/?${encodeURIComponent(result.imageQuery)}`} 
+                                src={`https://source.unsplash.com/800x600/?${encodeURIComponent(result.imageQuery.replace(/ /g, ','))}`} 
                                 alt={result.recommendation} 
                                 className="absolute inset-0 w-full h-full object-cover" 
                                 key={result.imageQuery}
+                                onError={handleImageError}
                             />
                         }
                          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent md:bg-gradient-to-l"></div>
