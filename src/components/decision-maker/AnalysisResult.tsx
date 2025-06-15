@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,10 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
 
   let imageSrc: string = '/placeholder.svg';
   if (result.imageQuery) {
-    imageSrc = `https://source.unsplash.com/800x600/?${encodeURIComponent(result.imageQuery)}`;
+    // Format query for Unsplash: use commas, no extra spaces
+    const query = result.imageQuery.replace(/ /g, ',').replace(/,,+/g, ',').trim();
+    console.log(`[AnalysisResult] Attempting to fetch image with query: "${query}"`);
+    imageSrc = `https://source.unsplash.com/800x600/?${encodeURIComponent(query)}`;
   } else if (result.imageBase64) {
     // Fallback for old history items
     imageSrc = `data:image/png;base64,${result.imageBase64}`;

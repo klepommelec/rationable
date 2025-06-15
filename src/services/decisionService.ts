@@ -9,7 +9,7 @@ interface IFullAnalysisResponse {
 
 export const startAnalysis = async (dilemma: string): Promise<IFullAnalysisResponse> => {
     const prompt = `En tant qu'assistant expert en prise de décision, pour le dilemme : "${dilemma}", veuillez fournir une analyse complète.
-    La réponse DOIT être un objet JSON valide.
+    La réponse DOIT être un objet JSON valide. Le champ "imageQuery" DOIT contenir une requête de recherche d'image en ANGLAIS de 2-3 mots-clés.
     JSON attendu :
     {
       "criteria": ["Critère 1", "Critère 2", "Critère 3", "Critère 4"],
@@ -52,7 +52,8 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[]): 
     const criteriaNames = criteria.map(c => c.name);
     const prompt = `Pour le dilemme "${dilemma}", en utilisant les critères importants : ${criteriaNames.join(', ')}.
     Veuillez générer 3 options, les évaluer (pros/cons, score de 0 à 100) et fournir une recommandation enrichie.
-    Le résultat doit être un objet JSON avec la structure suivante :
+    Le résultat DOIT être un objet JSON valide. Le champ "imageQuery" DOIT contenir une requête de recherche d'image en ANGLAIS de 2-3 mots-clés pour l'option recommandée.
+    JSON attendu :
     {
       "recommendation": "Option Recommandée",
       "imageQuery": "English search query for a background image for the recommended option, 2-3 keywords",
