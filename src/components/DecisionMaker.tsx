@@ -36,7 +36,9 @@ const DecisionMaker = () => {
     useProgressiveMode,
     setUseProgressiveMode,
     progressiveState,
-    isProgressiveAnalyzing
+    isProgressiveAnalyzing,
+    classicState,
+    isClassicAnalyzing
   } = useDecisionMaker();
 
   // Affichage de la configuration initiale
@@ -66,6 +68,22 @@ const DecisionMaker = () => {
     );
   }
 
+  // Messages pour les différentes phases du mode classique
+  const getClassicMessage = () => {
+    switch (classicState.phase) {
+      case 'generating-emoji':
+        return 'Génération de l\'emoji...';
+      case 'generating-criteria':
+        return 'Génération des critères...';
+      case 'thinking':
+        return 'L\'IA réfléchit aux meilleures options...';
+      case 'analyzing-options':
+        return 'Analyse et évaluation des options...';
+      default:
+        return 'Analyse en cours...';
+    }
+  };
+
   // Affichage unifié pour l'analyse (mode classique et progressif)
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -73,7 +91,8 @@ const DecisionMaker = () => {
       <div className="flex items-center gap-4 mb-6 animate-fade-in">
         <div className="relative">
           <EmojiPicker emoji={emoji} setEmoji={setEmoji} />
-          {useProgressiveMode && progressiveState.phase === 'generating-emoji' && (
+          {((useProgressiveMode && progressiveState.phase === 'generating-emoji') ||
+            (!useProgressiveMode && classicState.phase === 'generating-emoji')) && (
             <div className="absolute -bottom-1 -right-1 flex space-x-0.5">
               <div className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
               <div className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse" style={{ animationDelay: '150ms' }}></div>
@@ -84,7 +103,7 @@ const DecisionMaker = () => {
         <h1 className="text-3xl font-bold text-left">{dilemma}</h1>
       </div>
 
-      {/* Barre de progression et message - en mode progressif */}
+      {/* Barre de progression - en mode progressif */}
       {useProgressiveMode && isProgressiveAnalyzing && (
         <Card className="backdrop-blur-sm bg-card/70 mb-6">
           <CardContent className="p-6">
@@ -107,27 +126,58 @@ const DecisionMaker = () => {
 
       {/* Section des critères */}
       <div className="w-full mb-6">
+        {/* Mode progressif */}
         {useProgressiveMode && isProgressiveAnalyzing ? (
-          // Mode progressif : affichage progressif des critères
           progressiveState.phase !== 'idle' && progressiveState.phase !== 'generating-emoji' && (
             <CriteriaGenerator 
               progressiveState={progressiveState}
               finalCriteria={criteria}
             />
           )
-        ) : analysisStep === 'analyzing' ? (
-          // Mode classique : skeleton pendant le chargement
-          <CriteriaSkeleton />
-        ) : (
-          // Mode terminé : gestion des critères
-          criteria.length > 0 && (
-            <CriteriaManager 
-              criteria={criteria} 
-              setCriteria={setCriteria} 
-              isInteractionDisabled={isLoading || isUpdating} 
+        ) : 
+        /* Mode classique progressif */
+        !useProgressiveMode && isClassicAnalyzing ? (
+          classicState.phase === 'generating-criteria' ? (
+            <CriteriaGenerator 
+              progressiveState={{
+                phase: 'generating-criteria',
+                progress: 0,
+                message: 'Génération des critères...',
+                criteriaGenerated: classicState.criteriaGenerated,
+                optionsAnalyzed: 0,
+                totalOptions: 0
+              }}
+              finalCriteria={criteria}
             />
-          )
-        )}
+          ) : classicState.phase === 'thinking' || classicState.phase === 'analyzing-options' ? (
+            <div className="space-y-6">
+              <CriteriaGenerator 
+                progressiveState={{
+                  phase: 'done',
+                  progress: 100,
+                  message: '',
+                  criteriaGenerated: criteria.map(c => c.name),
+                  optionsAnalyzed: 0,
+                  totalOptions: 0
+                }}
+                finalCriteria={criteria}
+              />
+              <CriteriaSkeleton message={getClassicMessage()} />
+            </div>
+          ) : null
+        ) : 
+        /* Mode analyse classique (fallback) */
+        analysisStep === 'analyzing' ? (
+          <CriteriaSkeleton />
+        ) : 
+        /* Mode terminé : gestion des critères */
+        criteria.length > 0 ? (
+          <CriteriaManager 
+            criteria={criteria} 
+            setCriteria={setCriteria} 
+            isInteractionDisabled={isLoading || isUpdating} 
+          />
+        ) : null}
       </div>
 
       {/* Section des options analysées - mode progressif */}

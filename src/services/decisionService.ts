@@ -1,3 +1,4 @@
+
 import { ICriterion, IResult } from '@/types/decision';
 import { callOpenAiApi } from '@/services/openai';
 
@@ -5,6 +6,11 @@ interface IFullAnalysisResponse {
     emoji: string;
     criteria: string[];
     result: IResult;
+}
+
+interface IEmojiAndCriteriaResponse {
+    emoji: string;
+    criteria: string[];
 }
 
 export const startAnalysis = async (dilemma: string): Promise<IFullAnalysisResponse> => {
@@ -47,6 +53,25 @@ export const startAnalysis = async (dilemma: string): Promise<IFullAnalysisRespo
         return response as IFullAnalysisResponse;
     } else {
         throw new Error("La structure de la réponse de l'IA est invalide.");
+    }
+};
+
+export const generateEmojiAndCriteria = async (dilemma: string): Promise<IEmojiAndCriteriaResponse> => {
+    const prompt = `Pour le dilemme : "${dilemma}", génère seulement un emoji pertinent et 4 critères de décision importants.
+    La réponse DOIT être un objet JSON valide avec seulement l'emoji et les critères :
+    {
+      "emoji": "🤔",
+      "criteria": ["Critère 1", "Critère 2", "Critère 3", "Critère 4"]
+    }`;
+
+    const response = await callOpenAiApi(prompt);
+    const isValidEmoji = response && typeof response.emoji === 'string';
+    const isValidCriteria = response && response.criteria && Array.isArray(response.criteria) && response.criteria.length >= 3;
+
+    if (isValidEmoji && isValidCriteria) {
+        return response as IEmojiAndCriteriaResponse;
+    } else {
+        throw new Error("La structure de la réponse de l'IA pour l'emoji et les critères est invalide.");
     }
 };
 
