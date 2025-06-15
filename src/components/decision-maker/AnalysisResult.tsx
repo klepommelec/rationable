@@ -1,6 +1,6 @@
 
 import * as React from 'react';
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Eraser, Trophy, BookOpen, ShoppingCart, ExternalLink } from 'lucide-react';
