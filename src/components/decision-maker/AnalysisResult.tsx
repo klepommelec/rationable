@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -53,8 +52,16 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 </CardContent>
             </Card>
 
+            {criteria.length > 0 && (
+                <CriteriaManager
+                    criteria={criteria}
+                    setCriteria={setCriteria}
+                    isInteractionDisabled={isLoading || isUpdating}
+                />
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1 flex flex-col gap-6">
+                <div className="lg:col-span-1">
                     <Card>
                         <CardHeader>
                             <CardTitle>Statistiques Clés</CardTitle>
@@ -74,13 +81,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                            </div>}
                         </CardContent>
                     </Card>
-                    {criteria.length > 0 && (
-                        <CriteriaManager
-                            criteria={criteria}
-                            setCriteria={setCriteria}
-                            isInteractionDisabled={isLoading || isUpdating}
-                        />
-                    )}
                 </div>
                 <div className="lg:col-span-2">
                     <ScoreChart data={result.breakdown} />
