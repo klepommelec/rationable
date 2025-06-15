@@ -4,6 +4,7 @@ import { useDebounceCallback } from 'usehooks-ts';
 import { RefreshCw } from 'lucide-react';
 import { ICriterion, IResult, IDecision } from '@/types/decision';
 import { useDecisionHistory } from './useDecisionHistory';
+import { useProgressiveAnalysis } from './useProgressiveAnalysis';
 import { startAnalysis, generateOptions } from '@/services/decisionService';
 
 const templates = [
@@ -31,12 +32,22 @@ export const useDecisionMaker = () => {
     const [result, setResult] = useState<IResult | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [currentDecisionId, setCurrentDecisionId] = useState<string | null>(null);
+    const [useProgressiveMode, setUseProgressiveMode] = useState(false);
 
     const { history, addDecision, updateDecision, deleteDecision, clearHistory } = useDecisionHistory();
+    const {
+        progressiveState,
+        generatedCriteria,
+        finalResult,
+        emoji: progressiveEmoji,
+        startProgressiveAnalysis,
+        resetProgressiveAnalysis,
+        isAnalyzing: isProgressiveAnalyzing
+    } = useProgressiveAnalysis();
     
     const initialCriteriaRef = useRef<ICriterion[]>([]);
     
-    const isLoading = analysisStep === 'analyzing';
+    const isLoading = analysisStep === 'analyzing' || isProgressiveAnalyzing;
 
     const setEmoji = (newEmoji: string) => {
         setEmojiState(newEmoji);
@@ -88,6 +99,49 @@ export const useDecisionMaker = () => {
     };
 
     const handleStartAnalysis = async () => {
+        if (useProgressiveMode) {
+            await handleStartProgressiveAnalysis();
+        } else {
+            await handleStartClassicAnalysis();
+        }
+    };
+
+    const handleStartProgressiveAnalysis = async () => {
+        setAnalysisStep('analyzing');
+        resetProgressiveAnalysis();
+        setResult(null);
+        setCriteria([]);
+        setCurrentDecisionId(null);
+
+        try {
+            const progressiveResult = await startProgressiveAnalysis(dilemma);
+            
+            setEmojiState(progressiveResult.emoji);
+            setCriteria(progressiveResult.criteria);
+            setResult(progressiveResult.result);
+            
+            const newDecision: IDecision = {
+                id: crypto.randomUUID(),
+                timestamp: Date.now(),
+                dilemma,
+                emoji: progressiveResult.emoji,
+                criteria: progressiveResult.criteria,
+                result: progressiveResult.result
+            };
+            addDecision(newDecision);
+            setCurrentDecisionId(newDecision.id);
+            
+            setAnalysisStep('done');
+            toast.success("Analyse progressive complète !");
+        } catch (e) {
+            if (e instanceof Error) {
+                toast.error(`Erreur lors de l'analyse progressive : ${e.message}`);
+            }
+            setAnalysisStep('idle');
+        }
+    };
+
+    const handleStartClassicAnalysis = async () => {
         setAnalysisStep('analyzing');
         setProgress(0);
         setProgressMessage("Initialisation de l'analyse...");
@@ -162,6 +216,8 @@ export const useDecisionMaker = () => {
         setProgress(0);
         setProgressMessage('');
         setCurrentDecisionId(null);
+        setUseProgressiveMode(false);
+        resetProgressiveAnalysis();
         toast.success(`Modèle "${template.name}" appliqué !`);
     }
 
@@ -174,6 +230,8 @@ export const useDecisionMaker = () => {
         setProgress(0);
         setProgressMessage('');
         setCurrentDecisionId(null);
+        setUseProgressiveMode(false);
+        resetProgressiveAnalysis();
         toast.info("Session réinitialisée.");
     }
     
@@ -215,14 +273,14 @@ export const useDecisionMaker = () => {
     return {
         dilemma,
         setDilemma,
-        emoji,
+        emoji: useProgressiveMode && isProgressiveAnalyzing ? progressiveEmoji : emoji,
         setEmoji,
         analysisStep,
-        progress,
-        progressMessage,
-        criteria,
+        progress: useProgressiveMode ? progressiveState.progress : progress,
+        progressMessage: useProgressiveMode ? progressiveState.message : progressMessage,
+        criteria: useProgressiveMode && isProgressiveAnalyzing ? generatedCriteria : criteria,
         setCriteria,
-        result,
+        result: useProgressiveMode && finalResult ? finalResult : result,
         history,
         isUpdating,
         isLoading,
@@ -232,6 +290,10 @@ export const useDecisionMaker = () => {
         loadDecision,
         deleteDecision: handleDeleteDecision,
         clearHistory: handleClearHistory,
-        templates
+        templates,
+        useProgressiveMode,
+        setUseProgressiveMode,
+        progressiveState,
+        isProgressiveAnalyzing
     };
 };

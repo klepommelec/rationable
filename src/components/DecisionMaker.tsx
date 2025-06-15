@@ -3,6 +3,7 @@ import * as React from 'react';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
 import DilemmaSetup from './decision-maker/DilemmaSetup';
 import AnalysisResult from './decision-maker/AnalysisResult';
+import { ProgressiveInterface } from './decision-maker/ProgressiveInterface';
 import { EmojiPicker } from './EmojiPicker';
 import { CriteriaManager } from './CriteriaManager';
 import { CriteriaSkeleton } from './CriteriaSkeleton';
@@ -29,7 +30,25 @@ const DecisionMaker = () => {
     deleteDecision,
     clearHistory,
     templates,
+    useProgressiveMode,
+    setUseProgressiveMode,
+    progressiveState,
+    isProgressiveAnalyzing
   } = useDecisionMaker();
+
+  // Mode progressif actif
+  if (useProgressiveMode && isProgressiveAnalyzing) {
+    return (
+      <ProgressiveInterface
+        dilemma={dilemma}
+        emoji={emoji}
+        setEmoji={setEmoji}
+        progressiveState={progressiveState}
+        criteria={criteria}
+        result={result}
+      />
+    );
+  }
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -66,6 +85,8 @@ const DecisionMaker = () => {
           progress={progress}
           progressMessage={progressMessage}
           templates={templates}
+          useProgressiveMode={useProgressiveMode}
+          setUseProgressiveMode={setUseProgressiveMode}
         />
       )}
       
