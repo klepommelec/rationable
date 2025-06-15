@@ -50,7 +50,7 @@ const callOpenAiApi = async (prompt: string) => {
 
 const DecisionMaker = () => {
   const [dilemma, setDilemma] = useState('');
-  const [analysisStep, setAnalysisStep] = useState<'idle' | 'generating-criteria' | 'criteria-ready' | 'generating-options' | 'done'>('idle');
+  const [analysisStep, setAnalysisStep] = useState<'idle' | 'generating-criteria' | 'generating-options' | 'done'>('idle');
   const [criteria, setCriteria] = useState<ICriterion[]>([]);
   const [result, setResult] = useState<IResult | null>(null);
   const [history, setHistory] = useState<IDecision[]>([]);
@@ -59,52 +59,27 @@ const DecisionMaker = () => {
   
   const isLoading = analysisStep === 'generating-criteria' || analysisStep === 'generating-options';
 
-  const handleGenerateCriteria = async () => {
-    setAnalysisStep('generating-criteria');
-    setResult(null);
-    setCriteria([]);
-
-    const prompt = `Vous êtes un assistant expert en prise de décision. Pour le dilemme suivant : "${dilemma}", veuillez déterminer les 4 critères d'évaluation les plus pertinents.
+  const handleGenerateOptions = async (criteriaOverride?: ICriterion[]) => {
+    const currentCriteria = criteriaOverride || criteria;
     
-    Retournez le résultat sous la forme d'un objet JSON valide avec la structure suivante :
-    {
-      "criteria": ["Critère 1", "Critère 2", "Critère 3", "Critère 4"]
-    }`;
-    
-    try {
-      const response = await callOpenAiApi(prompt);
-      if (response && response.criteria && Array.isArray(response.criteria)) {
-          const newCriteria = response.criteria.map((name: string) => ({
-            id: crypto.randomUUID(),
-            name,
-          }));
-          setCriteria(newCriteria);
-          setAnalysisStep('criteria-ready');
-          toast.success("Critères générés ! Vous pouvez maintenant les ajuster.");
-      } else {
-        throw new Error("La structure de la réponse de l'IA pour les critères est invalide.");
-      }
-    } catch (e) {
-      if (e instanceof Error) {
-        toast.error(`Erreur lors de la génération des critères : ${e.message}`);
-      }
-      setAnalysisStep('idle');
-    }
-  };
-
-  const handleGenerateOptions = async () => {
-    if (criteria.length < 2) {
+    if (currentCriteria.length < 2) {
       toast.error("Veuillez définir au moins 2 critères.");
+      if (criteriaOverride) {
+        setAnalysisStep('idle');
+      }
       return;
     }
-    if (criteria.some(c => c.name.trim() === '')) {
+    if (currentCriteria.some(c => c.name.trim() === '')) {
       toast.error("Veuillez nommer tous les critères avant de continuer.");
+      if (criteriaOverride) {
+        setAnalysisStep('idle');
+      }
       return;
     }
 
     setAnalysisStep('generating-options');
 
-    const criteriaNames = criteria.map(c => c.name);
+    const criteriaNames = currentCriteria.map(c => c.name);
     
     const prompt = `Vous êtes un assistant expert en prise de décision. Analysez le dilemme suivant : "${dilemma}" en vous basant sur les critères suivants, qui sont classés par ordre d'importance : ${criteriaNames.join(', ')}.
     Veuillez :
@@ -136,14 +111,16 @@ const DecisionMaker = () => {
           };
           setResult(newResult);
           
-          const newDecision: IDecision = {
-            id: crypto.randomUUID(),
-            timestamp: Date.now(),
-            dilemma,
-            criteria,
-            result: newResult
-          };
-          setHistory(prevHistory => [newDecision, ...prevHistory]);
+          if (!result) {
+            const newDecision: IDecision = {
+              id: crypto.randomUUID(),
+              timestamp: Date.now(),
+              dilemma,
+              criteria: currentCriteria,
+              result: newResult
+            };
+            setHistory(prevHistory => [newDecision, ...prevHistory]);
+          }
           setAnalysisStep('done');
           toast.success("Analyse complète générée !");
 
@@ -154,10 +131,43 @@ const DecisionMaker = () => {
       if (e instanceof Error) {
         toast.error(`Erreur lors de la génération des options : ${e.message}`);
       }
-      setAnalysisStep('criteria-ready');
+      setAnalysisStep(result ? 'done' : 'idle');
     }
   };
 
+  const handleStartAnalysis = async () => {
+    setAnalysisStep('generating-criteria');
+    setResult(null);
+    setCriteria([]);
+
+    const prompt = `Vous êtes un assistant expert en prise de décision. Pour le dilemme suivant : "${dilemma}", veuillez déterminer les 4 critères d'évaluation les plus pertinents.
+    
+    Retournez le résultat sous la forme d'un objet JSON valide avec la structure suivante :
+    {
+      "criteria": ["Critère 1", "Critère 2", "Critère 3", "Critère 4"]
+    }`;
+    
+    try {
+      const response = await callOpenAiApi(prompt);
+      if (response && response.criteria && Array.isArray(response.criteria)) {
+          const newCriteria = response.criteria.map((name: string) => ({
+            id: crypto.randomUUID(),
+            name,
+          }));
+          setCriteria(newCriteria);
+          toast.success("Critères générés ! Génération des options en cours...");
+          await handleGenerateOptions(newCriteria);
+      } else {
+        throw new Error("La structure de la réponse de l'IA pour les critères est invalide.");
+      }
+    } catch (e) {
+      if (e instanceof Error) {
+        toast.error(`Erreur lors de la génération des critères : ${e.message}`);
+      }
+      setAnalysisStep('idle');
+    }
+  };
+  
   const debouncedGenerateOptions = useDebounceCallback(handleGenerateOptions, 2000);
 
   useEffect(() => {
@@ -222,13 +232,6 @@ const DecisionMaker = () => {
             Génération des critères...
           </Button>
         );
-      case 'criteria-ready':
-        return (
-          <Button onClick={handleGenerateOptions} className="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold text-lg py-6 transition-all duration-300 ease-in-out transform hover:scale-105">
-            <Sparkles className="h-5 w-5 mr-2" />
-            Générer les options
-          </Button>
-        );
       case 'generating-options':
         return (
           <Button disabled className="w-full bg-cyan-500 text-slate-900 font-bold text-lg py-6">
@@ -246,7 +249,7 @@ const DecisionMaker = () => {
       case 'idle':
       default:
         return (
-          <Button onClick={handleGenerateCriteria} disabled={isMainButtonDisabled} className="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold text-lg py-6 transition-all duration-300 ease-in-out transform hover:scale-105">
+          <Button onClick={handleStartAnalysis} disabled={isMainButtonDisabled} className="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold text-lg py-6 transition-all duration-300 ease-in-out transform hover:scale-105">
             <Sparkles className="h-5 w-5 mr-2" />
             Lancer l'analyse
           </Button>
@@ -324,7 +327,7 @@ const DecisionMaker = () => {
           </div>
            {analysisStep === 'generating-criteria' && <CriteriaSkeleton />}
 
-           { (analysisStep === 'criteria-ready' || analysisStep === 'generating-options' || analysisStep === 'done') && criteria.length > 0 && (
+           { (analysisStep === 'generating-options' || analysisStep === 'done') && criteria.length > 0 && (
             <CriteriaManager
               criteria={criteria}
               setCriteria={setCriteria}
