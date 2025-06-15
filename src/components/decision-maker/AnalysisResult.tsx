@@ -111,33 +111,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 <CriteriaManager criteria={criteria} setCriteria={setCriteria} isInteractionDisabled={isLoading || isUpdating} />
             </div>}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1">
-                    <Card className="h-full ">
-                        <CardHeader>
-                            <CardTitle>Statistiques Clés</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                           <div className="flex justify-between items-center">
-                               <span className="text-muted-foreground">Options Analysées</span>
-                               <span className="font-bold text-xl">{result.breakdown.length}</span>
-                           </div>
-                           <div className="flex justify-between items-center">
-                               <span className="text-muted-foreground">Score Moyen</span>
-                               <span className="font-bold text-xl">{averageScore}</span>
-                           </div>
-                           {topOption && <div className="flex justify-between items-center">
-                               <span className="text-muted-foreground">Meilleur Score</span>
-                               <span className="font-bold text-xl">{topOption.score}</span>
-                           </div>}
-                        </CardContent>
-                    </Card>
-                </div>
-                <div className="lg:col-span-2">
-                    <ScoreChart data={result.breakdown} />
-                </div>
-            </div>
-
             <Card>
                 <CardHeader>
                     <CardTitle>Analyse Détaillée des Options</CardTitle>
@@ -169,6 +142,33 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                         </div>)}
                 </CardContent>
             </Card>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-1">
+                    <Card className="h-full ">
+                        <CardHeader>
+                            <CardTitle>Statistiques Clés</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                           <div className="flex justify-between items-center">
+                               <span className="text-muted-foreground">Options Analysées</span>
+                               <span className="font-bold text-xl">{result.breakdown.length}</span>
+                           </div>
+                           <div className="flex justify-between items-center">
+                               <span className="text-muted-foreground">Score Moyen</span>
+                               <span className="font-bold text-xl">{averageScore}</span>
+                           </div>
+                           {topOption && <div className="flex justify-between items-center">
+                               <span className="text-muted-foreground">Meilleur Score</span>
+                               <span className="font-bold text-xl">{topOption.score}</span>
+                           </div>}
+                        </CardContent>
+                    </Card>
+                </div>
+                <div className="lg:col-span-2">
+                    <ScoreChart data={result.breakdown} />
+                </div>
+            </div>
 
             <Card>
                 <CardFooter className="p-0">
