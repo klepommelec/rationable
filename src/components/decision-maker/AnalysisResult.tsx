@@ -7,14 +7,18 @@ import { Eraser, Trophy, BookOpen, ShoppingCart, ExternalLink } from 'lucide-rea
 import { CriteriaManager } from '../CriteriaManager';
 import { ICriterion, IResult } from '@/types/decision';
 import { ScoreChart } from './ScoreChart';
+import { Skeleton } from '@/components/ui/skeleton';
+import { CriteriaSkeleton } from '../CriteriaSkeleton';
+
 
 interface AnalysisResultProps {
-  result: IResult;
+  result: IResult | null;
   criteria: ICriterion[];
   setCriteria: React.Dispatch<React.SetStateAction<ICriterion[]>>;
   isLoading: boolean;
   isUpdating: boolean;
   clearSession: () => void;
+  analysisStep: 'idle' | 'analyzing' | 'done';
 }
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
@@ -22,8 +26,81 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   setCriteria,
   isLoading,
   isUpdating,
-  clearSession
+  clearSession,
+  analysisStep
 }) => {
+  if (analysisStep === 'analyzing' || !result) {
+    return (
+        <div className="space-y-6 animate-fade-in">
+            <Card className="overflow-hidden backdrop-blur-sm bg-card/70">
+                <div className="grid grid-cols-1 md:grid-cols-2">
+                    <div className="p-6 flex flex-col">
+                        <CardContent className="p-0 flex-grow space-y-4">
+                            <Skeleton className="h-5 w-2/3" />
+                            <Skeleton className="h-12 w-full" />
+                            <Skeleton className="h-20 w-full" />
+                        </CardContent>
+                        <CardFooter className="p-0 pt-6">
+                            <Skeleton className="h-10 w-1/2" />
+                        </CardFooter>
+                    </div>
+                    <div className="relative min-h-[250px] md:min-h-0 bg-muted"></div>
+                </div>
+            </Card>
+
+            <CriteriaSkeleton />
+
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-7 w-1/2" />
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                        <div key={i} className="p-4 rounded-lg bg-accent border space-y-3">
+                            <div className="flex justify-between items-center">
+                                <Skeleton className="h-6 w-1/3" />
+                                <Skeleton className="h-6 w-1/4" />
+                            </div>
+                            <Skeleton className="h-16 w-full" />
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-1">
+                    <Card className="h-full ">
+                        <CardHeader>
+                            <Skeleton className="h-7 w-2/3" />
+                        </CardHeader>
+                        <CardContent className="space-y-4 pt-2">
+                           <Skeleton className="h-6 w-full" />
+                           <Skeleton className="h-6 w-full" />
+                           <Skeleton className="h-6 w-full" />
+                        </CardContent>
+                    </Card>
+                </div>
+                <div className="lg:col-span-2">
+                    <Card className="h-full">
+                        <CardHeader>
+                            <Skeleton className="h-7 w-2/3" />
+                        </CardHeader>
+                        <CardContent>
+                           <Skeleton className="w-full h-[250px]" />
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+
+            <Card>
+                <CardFooter className="p-0">
+                    <Skeleton className="h-16 w-full rounded-md" />
+                </CardFooter>
+            </Card>
+        </div>
+    );
+  }
+
   const averageScore = result.breakdown.length > 0 ? Math.round(result.breakdown.reduce((acc, item) => acc + item.score, 0) / result.breakdown.length) : 0;
   const topOption = result.breakdown.length > 0 ? result.breakdown.reduce((prev, current) => prev.score > current.score ? prev : current) : null;
 

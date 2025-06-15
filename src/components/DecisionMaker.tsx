@@ -31,14 +31,14 @@ const DecisionMaker = () => {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      {analysisStep === 'done' && result && (
+      {(analysisStep === 'analyzing' || analysisStep === 'done') && (
         <div className="flex items-center gap-4 mb-6 animate-fade-in">
             <EmojiPicker emoji={emoji} setEmoji={setEmoji} />
             <h1 className="text-3xl font-bold text-left">{dilemma}</h1>
         </div>
       )}
 
-      {analysisStep !== 'done' && (
+      {analysisStep === 'idle' && (
         <DilemmaSetup
           dilemma={dilemma}
           setDilemma={setDilemma}
@@ -58,7 +58,7 @@ const DecisionMaker = () => {
         />
       )}
       
-      {result && analysisStep === 'done' && (
+      {(analysisStep === 'analyzing' || analysisStep === 'done') && (
         <AnalysisResult
           result={result}
           criteria={criteria}
@@ -66,6 +66,7 @@ const DecisionMaker = () => {
           isLoading={isLoading}
           isUpdating={isUpdating}
           clearSession={clearSession}
+          analysisStep={analysisStep}
         />
       )}
     </div>
