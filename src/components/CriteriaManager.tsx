@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -46,7 +45,7 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled, 
       criteria.forEach((criterion, index) => {
         setTimeout(() => {
           setVisibleCriteria(prev => [...prev, criterion.id]);
-        }, index * 80); // Délai très court entre chaque critère
+        }, index * 100); // Délai mis à jour à 100ms entre chaque critère
       });
     } else if (isLoadingCriteria) {
       setVisibleCriteria([]);
