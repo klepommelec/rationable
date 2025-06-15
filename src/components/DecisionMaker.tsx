@@ -4,7 +4,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
 import { BrainCircuit, Plus, Trash2, Sparkles, LoaderCircle, Lightbulb } from 'lucide-react';
+
+interface ICriterion {
+  name: string;
+  weight: number;
+}
 
 interface IResult {
   recommendation: string;
@@ -15,15 +21,69 @@ interface IResult {
   }[];
 }
 
+const callPerplexityApi = async (prompt: string, apiKey: string) => {
+  if (!apiKey) {
+    throw new Error("Veuillez entrer votre clé API Perplexity.");
+  }
+
+  const response = await fetch('https://api.perplexity.ai/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'llama-3.1-sonar-large-128k-online',
+      messages: [
+        { role: 'system', content: 'You are a world-class decision making assistant. Your responses must be in French and in valid JSON format.' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.7,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("Perplexity API Error:", errorData);
+    throw new Error(`Erreur de l'API Perplexity: ${errorData.error?.message || response.statusText}`);
+  }
+
+  const data = await response.json();
+  const content = data.choices[0].message.content;
+  
+  const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/);
+  try {
+    if (jsonMatch && jsonMatch[1]) {
+      return JSON.parse(jsonMatch[1]);
+    }
+    return JSON.parse(content);
+  } catch(e) {
+    console.error("Failed to parse JSON from API response:", content);
+    throw new Error("La réponse de l'API n'était pas un JSON valide.");
+  }
+};
+
+
 const DecisionMaker = () => {
+  const [apiKey, setApiKey] = useState(localStorage.getItem('perplexity_api_key') || '');
   const [dilemma, setDilemma] = useState('');
-  const [criteria, setCriteria] = useState<string[]>(['', '']);
+  const [criteria, setCriteria] = useState<ICriterion[]>([
+    { name: '', weight: 5 },
+    { name: '', weight: 5 }
+  ]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingCriteria, setIsGeneratingCriteria] = useState(false);
   const [result, setResult] = useState<IResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (dilemma.trim().length < 5) {
+    if (apiKey) {
+      localStorage.setItem('perplexity_api_key', apiKey);
+    }
+  }, [apiKey]);
+
+  useEffect(() => {
+    if (dilemma.trim().length < 5 || !apiKey) {
       return;
     }
 
@@ -33,16 +93,22 @@ const DecisionMaker = () => {
 
     return () => clearTimeout(debounceTimer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dilemma]);
+  }, [dilemma, apiKey]);
 
-  const handleCriterionChange = (index: number, value: string) => {
+  const handleCriterionChange = (index: number, name: string) => {
     const newCriteria = [...criteria];
-    newCriteria[index] = value;
+    newCriteria[index].name = name;
+    setCriteria(newCriteria);
+  };
+
+  const handleWeightChange = (index: number, newWeight: number[]) => {
+    const newCriteria = [...criteria];
+    newCriteria[index].weight = newWeight[0];
     setCriteria(newCriteria);
   };
 
   const addCriterion = () => {
-    setCriteria([...criteria, '']);
+    setCriteria([...criteria, { name: '', weight: 5 }]);
   };
 
   const removeCriterion = (index: number) => {
@@ -50,55 +116,72 @@ const DecisionMaker = () => {
     setCriteria(newCriteria);
   };
 
-  const handleGenerateCriteria = () => {
-    if (dilemma.trim() === '') return;
+  const handleGenerateCriteria = async () => {
+    if (dilemma.trim() === '' || !apiKey) return;
     setIsGeneratingCriteria(true);
+    setError(null);
     setResult(null);
-    // Simulation d'un appel à une IA pour générer des critères
-    setTimeout(() => {
-      if (dilemma.toLowerCase().includes("framework js")) {
-        setCriteria(["Facilité d'apprentissage", "Performance", "Écosystème", "Demande sur le marché"]);
-      } else if (dilemma.toLowerCase().includes("vacances")) {
-        setCriteria(["Budget", "Météo", "Activités", "Type de séjour"]);
+
+    const prompt = `Pour le dilemme suivant : "${dilemma}", générez 4 critères d'évaluation pertinents. Retournez le résultat sous la forme d'un tableau JSON de chaînes de caractères. Exemple : ["Critère 1", "Critère 2", "Critère 3", "Critère 4"]`;
+
+    try {
+      const generatedCriteriaNames = await callPerplexityApi(prompt, apiKey);
+      if (Array.isArray(generatedCriteriaNames) && generatedCriteriaNames.every(c => typeof c === 'string')) {
+        setCriteria(generatedCriteriaNames.slice(0, 4).map(name => ({ name, weight: 5 })));
       } else {
-        setCriteria(["Coût", "Qualité", "Durabilité"]);
+        throw new Error("Le format des critères générés est incorrect.");
       }
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(`Erreur lors de la génération des critères : ${e.message}`);
+      }
+      setCriteria([{ name: 'Coût', weight: 5 }, { name: 'Qualité', weight: 5 }, { name: 'Durabilité', weight: 5 }]);
+    } finally {
       setIsGeneratingCriteria(false);
-    }, 2000);
+    }
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     setIsLoading(true);
+    setError(null);
     setResult(null);
 
-    // Simulation d'un appel à une IA qui génère les options et l'analyse
-    setTimeout(() => {
-      let generatedOptions: string[] = [];
-      if (dilemma.toLowerCase().includes("framework js")) {
-        generatedOptions = ["React", "Vue", "Svelte", "Angular"];
-      } else if (dilemma.toLowerCase().includes("vacances")) {
-        generatedOptions = ["Plage en Italie", "Randonnée en Suisse", "City-trip à Lisbonne", "Road-trip en Ecosse"];
-      } else {
-        generatedOptions = ["Option A générée par l'IA", "Option B générée par l'IA", "Option C générée par l'IA"];
-      }
-      
-      const recommendation = generatedOptions[Math.floor(Math.random() * generatedOptions.length)];
-      
-      const newResult: IResult = {
-        recommendation,
-        breakdown: generatedOptions.map(option => ({
-          option,
-          pros: ["C'est une option viable.", "Potentiel de croissance élevé.", "Aligné avec les objectifs à long terme."],
-          cons: ["Nécessite un investissement initial.", "Risque de marché modéré."]
-        }))
-      };
+    const weightedCriteria = criteria.filter(c => c.name.trim() !== '').map(c => `${c.name} (importance: ${c.weight}/10)`).join(', ');
+    const prompt = `Vous êtes un assistant expert en prise de décision. Analysez le dilemme suivant : "${dilemma}", en vous basant sur ces critères pondérés : ${weightedCriteria}.
+    Veuillez :
+    1. Générer 3 à 4 options potentielles.
+    2. Pour chaque option, fournir une liste concise d'avantages (pros) et d'inconvénients (cons) en se basant sur les critères.
+    3. Fournir une recommandation claire pour la meilleure option et expliquer pourquoi en quelques phrases.
 
-      setResult(newResult);
+    Retournez le résultat sous la forme d'un objet JSON valide avec la structure suivante :
+    {
+      "recommendation": "Nom de l'option recommandée",
+      "breakdown": [
+        {
+          "option": "Nom de l'option 1",
+          "pros": ["Avantage 1", "Avantage 2"],
+          "cons": ["Inconvénient 1", "Inconvénient 2"]
+        }
+      ]
+    }`;
+    
+    try {
+      const newResult = await callPerplexityApi(prompt, apiKey);
+      if (newResult && newResult.recommendation && newResult.breakdown) {
+          setResult(newResult);
+      } else {
+        throw new Error("La structure de la réponse de l'IA est invalide.");
+      }
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(`Erreur lors de l'analyse : ${e.message}`);
+      }
+    } finally {
       setIsLoading(false);
-    }, 2500);
+    }
   };
 
-  const isAnalyzeDisabled = dilemma.trim() === '' || criteria.filter(c => c.trim() !== '').length < 1 || isLoading || isGeneratingCriteria;
+  const isAnalyzeDisabled = !apiKey || dilemma.trim() === '' || criteria.filter(c => c.name.trim() !== '').length < 1 || isLoading || isGeneratingCriteria;
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -112,6 +195,28 @@ const DecisionMaker = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
+            <label htmlFor="api-key" className="text-slate-300 font-medium">Clé API Perplexity</label>
+            <Input
+              id="api-key"
+              type="password"
+              placeholder="Entrez votre clé API Perplexity"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              className="bg-slate-800 border-slate-700 focus:ring-cyan-500"
+            />
+            <p className="text-xs text-slate-500">
+              Votre clé est stockée localement. Obtenez votre clé sur <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noreferrer" className="underline text-cyan-400">le site de Perplexity</a>.
+            </p>
+          </div>
+
+          {error && (
+            <div className="p-4 my-4 rounded-md bg-red-900/50 border border-red-500/50 text-red-300 text-sm">
+              <p className="font-bold mb-1">Une erreur est survenue</p>
+              <p>{error}</p>
+            </div>
+          )}
+
+          <div className="space-y-2">
             <label className="text-slate-300 font-medium">1. Votre dilemme</label>
             <Input
               placeholder="Ex: Quel framework JS devrais-je apprendre en 2025 ?"
@@ -123,7 +228,7 @@ const DecisionMaker = () => {
           </div>
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <label className="text-slate-300 font-medium">2. Critères d'évaluation</label>
+              <label className="text-slate-300 font-medium">2. Critères d'évaluation (Pondération)</label>
               {isGeneratingCriteria && (
                   <div className="flex items-center text-xs text-cyan-400">
                     <LoaderCircle className="h-3 w-3 mr-1 animate-spin" />
@@ -133,14 +238,25 @@ const DecisionMaker = () => {
             </div>
 
             {criteria.map((criterion, index) => (
-              <div key={index} className="flex items-center gap-2">
+              <div key={index} className="flex items-center gap-4">
                 <Input
                   placeholder={`Critère ${index + 1}`}
-                  value={criterion}
+                  value={criterion.name}
                   onChange={(e) => handleCriterionChange(index, e.target.value)}
-                  className="bg-slate-800 border-slate-700 focus:ring-cyan-500"
+                  className="bg-slate-800 border-slate-700 focus:ring-cyan-500 flex-grow"
                   disabled={isGeneratingCriteria}
                 />
+                <div className="flex items-center gap-2 w-48 flex-shrink-0">
+                  <Slider
+                    value={[criterion.weight]}
+                    max={10}
+                    step={1}
+                    onValueChange={(value) => handleWeightChange(index, value)}
+                    disabled={isGeneratingCriteria}
+                    className="w-full"
+                  />
+                  <span className="w-6 text-center text-slate-400 font-mono">{criterion.weight}</span>
+                </div>
                 <Button variant="ghost" size="icon" onClick={() => removeCriterion(index)} disabled={criteria.length <= 1 || isGeneratingCriteria}>
                   <Trash2 className="h-4 w-4 text-slate-500 hover:text-red-500 transition-colors" />
                 </Button>
