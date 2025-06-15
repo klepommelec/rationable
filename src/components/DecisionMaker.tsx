@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -110,61 +109,7 @@ const DecisionMaker = () => {
   const [history, setHistory] = useState<IDecision[]>([]);
   const justAppliedTemplate = useRef(false);
 
-  // Load state from localStorage on initial render
   useEffect(() => {
-    const savedApiKey = localStorage.getItem('openai_api_key');
-    if (savedApiKey) {
-      setApiKey(savedApiKey);
-    }
-    const savedState = localStorage.getItem('decision_maker_state');
-    if (savedState) {
-      try {
-        const { dilemma, criteria, result } = JSON.parse(savedState);
-        if (dilemma) setDilemma(dilemma);
-        if (criteria && criteria.length > 0) {
-            setCriteria(criteria.map((c: any) => ({ ...c, id: c.id || crypto.randomUUID() })));
-        }
-        if (result) setResult(result);
-      } catch (e) {
-        console.error("Failed to parse saved state from localStorage", e);
-        localStorage.removeItem('decision_maker_state');
-      }
-    }
-    const savedHistory = localStorage.getItem('decision_maker_history');
-    if (savedHistory) {
-      try {
-        setHistory(JSON.parse(savedHistory));
-      } catch (e) {
-        console.error("Failed to parse history from localStorage", e);
-        localStorage.removeItem('decision_maker_history');
-      }
-    }
-  }, []);
-
-  // Save API key to localStorage
-  useEffect(() => {
-    if (apiKey) {
-      localStorage.setItem('openai_api_key', apiKey);
-    }
-  }, [apiKey]);
-  
-  // Save state to localStorage whenever it changes
-  useEffect(() => {
-    const stateToSave = JSON.stringify({ dilemma, criteria, result });
-    localStorage.setItem('decision_maker_state', stateToSave);
-  }, [dilemma, criteria, result]);
-  
-  // Save history to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('decision_maker_history', JSON.stringify(history));
-  }, [history]);
-
-  useEffect(() => {
-    if (justAppliedTemplate.current) {
-      justAppliedTemplate.current = false;
-      return;
-    }
-
     if (dilemma.trim().length < 10 || !apiKey || isGeneratingCriteria) {
       return;
     }
@@ -292,7 +237,6 @@ const DecisionMaker = () => {
     setDilemma('');
     setCriteria([{ id: crypto.randomUUID(), name: '' }, { id: crypto.randomUUID(), name: '' }]);
     setResult(null);
-    localStorage.removeItem('decision_maker_state');
     toast.info("Session réinitialisée.");
   }
   
