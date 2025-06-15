@@ -45,7 +45,18 @@ const callOpenAiApi = async (prompt: string) => {
     throw new Error(`Erreur de l'assistant IA: ${errorMessage}`);
   }
 
-  return data;
+  // The API might be returning strings with double-escaped unicode characters.
+  // To fix this, we stringify the received data, replace the double escapes (`\\u`)
+  // with single escapes (`\u`), and then parse it back.
+  // This corrects the encoding issue on the client-side.
+  try {
+    const jsonString = JSON.stringify(data);
+    const correctedString = jsonString.replace(/\\\\u/g, '\\u');
+    return JSON.parse(correctedString);
+  } catch (e) {
+    console.error("Could not correct AI response encoding, returning as is.", e);
+    return data; // Fallback to original data if anything goes wrong.
+  }
 };
 
 
