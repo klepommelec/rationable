@@ -1,6 +1,5 @@
 
 import * as React from 'react';
-import { ResultSkeleton } from './ResultSkeleton';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
 import DilemmaSetup from './decision-maker/DilemmaSetup';
 import AnalysisResult from './decision-maker/AnalysisResult';
@@ -58,8 +57,6 @@ const DecisionMaker = () => {
           templates={templates}
         />
       )}
-      
-      {analysisStep === 'analyzing' && <ResultSkeleton />}
       
       {result && analysisStep === 'done' && (
         <AnalysisResult
