@@ -237,12 +237,7 @@ const DecisionMaker = () => {
           </Button>
         );
       case 'done':
-         return (
-          <Button onClick={clearSession} variant="secondary" className="w-full font-bold text-lg py-6">
-            <Eraser className="h-5 w-5 mr-2" />
-            Recommencer une nouvelle analyse
-          </Button>
-        );
+         return null;
       case 'idle':
       default:
         return (
@@ -375,6 +370,14 @@ const DecisionMaker = () => {
               </div>
             ))}
           </CardContent>
+          {analysisStep === 'done' && (
+            <CardFooter>
+              <Button onClick={clearSession} variant="secondary" className="w-full font-bold text-lg py-6">
+                <Eraser className="h-5 w-5 mr-2" />
+                Recommencer une nouvelle analyse
+              </Button>
+            </CardFooter>
+          )}
         </Card>
       )}
     </div>
