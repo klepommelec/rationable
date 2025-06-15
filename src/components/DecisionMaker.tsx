@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
 import DilemmaSetup from './decision-maker/DilemmaSetup';
+import ConversationInterface from './decision-maker/ConversationInterface';
 import AnalysisResult from './decision-maker/AnalysisResult';
 import { EmojiPicker } from './EmojiPicker';
 import { CriteriaManager } from './CriteriaManager';
@@ -22,7 +23,12 @@ const DecisionMaker = () => {
     history,
     isUpdating,
     isLoading,
+    conversationQuestions,
+    isLoadingQuestions,
     handleStartAnalysis,
+    handleStartConversation,
+    handleConversationComplete,
+    handleBackToSetup,
     applyTemplate,
     clearSession,
     loadDecision,
@@ -63,9 +69,19 @@ const DecisionMaker = () => {
           deleteDecision={deleteDecision}
           clearHistory={clearHistory}
           handleStartAnalysis={handleStartAnalysis}
+          handleStartConversation={handleStartConversation}
           progress={progress}
           progressMessage={progressMessage}
           templates={templates}
+        />
+      )}
+
+      {analysisStep === 'conversation' && (
+        <ConversationInterface
+          questions={conversationQuestions}
+          onComplete={handleConversationComplete}
+          onBack={handleBackToSetup}
+          isLoading={isLoadingQuestions}
         />
       )}
       
