@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BrainCircuit, Plus, Sparkles, LoaderCircle, Lightbulb, BookCopy, Eraser, History } from 'lucide-react';
@@ -242,12 +243,13 @@ const DecisionMaker = () => {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <label className="text-slate-300 font-medium">1. Votre dilemme</label>
-            <Input
+            <Textarea
               placeholder="Ex: Quel framework JS devrais-je apprendre en 2025 ?"
               value={dilemma}
               onChange={(e) => setDilemma(e.target.value)}
-              className="bg-slate-800 border-slate-700 focus:ring-cyan-500"
+              className="bg-slate-800 border-slate-700 focus:ring-cyan-500 text-base md:text-sm"
               disabled={isLoading || isGeneratingCriteria}
+              rows={3}
             />
           </div>
 
