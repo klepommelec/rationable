@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ChevronDown } from 'lucide-react';
+import { PlusCircle, ChevronDown, Info } from 'lucide-react';
 import { ICriterion } from '@/types/decision';
 import { CriterionRow } from './CriterionRow';
 import { toast } from 'sonner';
@@ -11,6 +12,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface CriteriaManagerProps {
   criteria: ICriterion[];
@@ -74,14 +81,21 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled }
             Gérez les critères de décision
           </h3>
           <span className="text-sm font-medium text-muted-foreground">({criteria.length}/8)</span>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Modifiez, réorganisez (par glisser-déposer) ou supprimez les critères. L'ordre est important et reflète leur poids dans la décision.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
 
       <CollapsibleContent className="space-y-4 pt-4">
-        <p className="text-sm text-muted-foreground">
-          Modifiez, réorganisez (par glisser-déposer) ou supprimez les critères. L'ordre est important et reflète leur poids dans la décision.
-        </p>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={criteria} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
