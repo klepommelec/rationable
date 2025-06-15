@@ -4,7 +4,7 @@ import { useDebounceCallback } from 'usehooks-ts';
 import { RefreshCw } from 'lucide-react';
 import { ICriterion, IResult, IDecision } from '@/types/decision';
 import { useDecisionHistory } from './useDecisionHistory';
-import { startAnalysis, generateOptions, generateConversationQuestions, analyzeWithConversationContext } from '@/services/decisionService';
+import { startAnalysis, generateOptions } from '@/services/decisionService';
 
 const templates = [
   {
@@ -24,18 +24,13 @@ const templates = [
 export const useDecisionMaker = () => {
     const [dilemma, setDilemma] = useState('');
     const [emoji, setEmojiState] = useState('🤔');
-    const [analysisStep, setAnalysisStep] = useState<'idle' | 'conversation' | 'analyzing' | 'done'>('idle');
+    const [analysisStep, setAnalysisStep] = useState<'idle' | 'analyzing' | 'done'>('idle');
     const [progress, setProgress] = useState(0);
     const [progressMessage, setProgressMessage] = useState('');
     const [criteria, setCriteria] = useState<ICriterion[]>([]);
     const [result, setResult] = useState<IResult | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [currentDecisionId, setCurrentDecisionId] = useState<string | null>(null);
-    
-    // États pour la conversation
-    const [conversationQuestions, setConversationQuestions] = useState<IConversationQuestion[]>([]);
-    const [conversationAnswers, setConversationAnswers] = useState<Record<string, string>>({});
-    const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
 
     const { history, addDecision, updateDecision, deleteDecision, clearHistory } = useDecisionHistory();
     
@@ -92,76 +87,6 @@ export const useDecisionMaker = () => {
         }
     };
 
-    const handleStartConversation = async () => {
-        setAnalysisStep('conversation');
-        setIsLoadingQuestions(true);
-        setConversationQuestions([]);
-        setConversationAnswers({});
-
-        try {
-            const response = await generateConversationQuestions(dilemma);
-            setConversationQuestions(response.questions);
-            toast.success(`Questions prêtes ! Temps estimé : ${response.estimatedTime}`);
-        } catch (e) {
-            if (e instanceof Error) {
-                toast.error(`Erreur lors de la génération des questions : ${e.message}`);
-            }
-            setAnalysisStep('idle');
-        } finally {
-            setIsLoadingQuestions(false);
-        }
-    };
-
-    const handleConversationComplete = async (answers: Record<string, string>) => {
-        setConversationAnswers(answers);
-        setAnalysisStep('analyzing');
-        setProgress(0);
-        setProgressMessage("Analyse personnalisée en cours...");
-        setResult(null);
-        setCriteria([]);
-        setCurrentDecisionId(null);
-
-        setTimeout(() => setProgress(10), 100);
-        
-        try {
-            setProgress(25);
-            setProgressMessage("Intégration du contexte conversationnel...");
-            const response = await analyzeWithConversationContext(dilemma, answers);
-            setProgress(75);
-            setProgressMessage("Finalisation de l'analyse personnalisée...");
-
-            const newCriteria = response.criteria.map((name: string) => ({
-                id: crypto.randomUUID(),
-                name,
-            }));
-            setCriteria(newCriteria);
-            setResult(response.result);
-            setEmojiState(response.emoji || '🤔');
-            
-            const newDecision: IDecision = {
-                id: crypto.randomUUID(),
-                timestamp: Date.now(),
-                dilemma,
-                emoji: response.emoji || '🤔',
-                criteria: newCriteria,
-                result: response.result
-            };
-            addDecision(newDecision);
-            setCurrentDecisionId(newDecision.id);
-            
-            setProgress(100);
-            setAnalysisStep('done');
-            toast.success("Analyse personnalisée terminée !");
-        } catch (e) {
-            if (e instanceof Error) {
-                toast.error(`Erreur lors de l'analyse : ${e.message}`);
-            }
-            setAnalysisStep('idle');
-            setProgress(0);
-            setProgressMessage('');
-        }
-    };
-
     const handleStartAnalysis = async () => {
         setAnalysisStep('analyzing');
         setProgress(0);
@@ -174,52 +99,44 @@ export const useDecisionMaker = () => {
         setTimeout(() => setProgress(10), 100);
         
         try {
-            setProgress(25);
-            setProgressMessage("Génération des critères et options...");
-            const response = await startAnalysis(dilemma);
-            setProgress(75);
-            setProgressMessage("Finalisation de l'analyse...");
+          setProgress(25);
+          setProgressMessage("Génération des critères et options...");
+          const response = await startAnalysis(dilemma);
+          setProgress(75);
+          setProgressMessage("Finalisation de l'analyse...");
 
-            const newCriteria = response.criteria.map((name: string) => ({
-                id: crypto.randomUUID(),
-                name,
-            }));
-            setCriteria(newCriteria);
-            setResult(response.result);
-            setEmojiState(response.emoji || '🤔');
-            
-            const newDecision: IDecision = {
-                id: crypto.randomUUID(),
-                timestamp: Date.now(),
-                dilemma,
-                emoji: response.emoji || '🤔',
-                criteria: newCriteria,
-                result: response.result
-            };
-            addDecision(newDecision);
-            setCurrentDecisionId(newDecision.id);
-            
-            setProgress(100);
-            setAnalysisStep('done');
-            toast.success("Analyse complète générée !");
+          const newCriteria = response.criteria.map((name: string) => ({
+            id: crypto.randomUUID(),
+            name,
+          }));
+          setCriteria(newCriteria);
+          setResult(response.result);
+          setEmojiState(response.emoji || '🤔');
+          
+          const newDecision: IDecision = {
+            id: crypto.randomUUID(),
+            timestamp: Date.now(),
+            dilemma,
+            emoji: response.emoji || '🤔',
+            criteria: newCriteria,
+            result: response.result
+          };
+          addDecision(newDecision);
+          setCurrentDecisionId(newDecision.id);
+          
+          setProgress(100);
+          setAnalysisStep('done');
+          toast.success("Analyse complète générée !");
         } catch (e) {
-            if (e instanceof Error) {
-                toast.error(`Erreur lors de l'analyse : ${e.message}`);
-            }
-            setAnalysisStep('idle');
-            setProgress(0);
-            setProgressMessage('');
+          if (e instanceof Error) {
+            toast.error(`Erreur lors de l'analyse : ${e.message}`);
+          }
+          setAnalysisStep('idle');
+          setProgress(0);
+          setProgressMessage('');
         }
     };
-
-    const handleBackToSetup = () => {
-        setAnalysisStep('idle');
-        setConversationQuestions([]);
-        setConversationAnswers({});
-        setProgress(0);
-        setProgressMessage('');
-    };
-
+    
     const debouncedGenerateOptions = useDebounceCallback(handleGenerateOptions, 2000);
 
     useEffect(() => {
@@ -245,8 +162,6 @@ export const useDecisionMaker = () => {
         setProgress(0);
         setProgressMessage('');
         setCurrentDecisionId(null);
-        setConversationQuestions([]);
-        setConversationAnswers({});
         toast.success(`Modèle "${template.name}" appliqué !`);
     }
 
@@ -259,8 +174,6 @@ export const useDecisionMaker = () => {
         setProgress(0);
         setProgressMessage('');
         setCurrentDecisionId(null);
-        setConversationQuestions([]);
-        setConversationAnswers({});
         toast.info("Session réinitialisée.");
     }
     
@@ -313,12 +226,7 @@ export const useDecisionMaker = () => {
         history,
         isUpdating,
         isLoading,
-        conversationQuestions,
-        isLoadingQuestions,
         handleStartAnalysis,
-        handleStartConversation,
-        handleConversationComplete,
-        handleBackToSetup,
         applyTemplate,
         clearSession,
         loadDecision,
