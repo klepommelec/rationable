@@ -56,7 +56,6 @@ export const useDecisionMaker = () => {
         {
           "recommendation": "Option Recommandée",
           "description": "Un texte descriptif (2-3 phrases) et engageant expliquant pourquoi c'est la meilleure option. Sois convaincant.",
-          "imageQuery": "une requête de recherche d'image pertinente en anglais pour Unsplash (ex: 'modern laptop on desk')",
           "infoLinks": [ { "title": "Titre du lien info 1", "url": "https://example.com/info1" } ],
           "shoppingLinks": [ { "title": "Titre du lien achat 1", "url": "https://example.com/shop1" } ],
           "breakdown": [
@@ -72,7 +71,7 @@ export const useDecisionMaker = () => {
         try {
           const apiResult: IResult = await callOpenAiApi(prompt);
 
-          const isValidResult = apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number') && apiResult.description && apiResult.imageQuery && Array.isArray(apiResult.infoLinks) && Array.isArray(apiResult.shoppingLinks);
+          const isValidResult = apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number') && apiResult.description && Array.isArray(apiResult.infoLinks) && Array.isArray(apiResult.shoppingLinks);
 
           if (isValidResult) {
               setResult(apiResult);
@@ -116,7 +115,6 @@ export const useDecisionMaker = () => {
           "result": {
             "recommendation": "Option Recommandée",
             "description": "Un texte descriptif (2-3 phrases) et engageant expliquant pourquoi c'est la meilleure option. Sois convaincant.",
-            "imageQuery": "une requête de recherche d'image pertinente en anglais pour Unsplash (ex: 'modern laptop on desk')",
             "infoLinks": [
               { "title": "Titre du lien d'information 1", "url": "https://example.com/info1" },
               { "title": "Titre du lien d'information 2", "url": "https://example.com/info2" }
@@ -145,7 +143,7 @@ export const useDecisionMaker = () => {
 
           const isValidCriteria = response && response.criteria && Array.isArray(response.criteria);
           const apiResult = response.result;
-          const isValidResult = apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number') && apiResult.description && apiResult.imageQuery && Array.isArray(apiResult.infoLinks) && Array.isArray(apiResult.shoppingLinks);
+          const isValidResult = apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number') && apiResult.description && Array.isArray(apiResult.infoLinks) && Array.isArray(apiResult.shoppingLinks);
 
           if (isValidCriteria && isValidResult) {
               const newCriteria = response.criteria.map((name: string) => ({
@@ -224,7 +222,6 @@ export const useDecisionMaker = () => {
             // Ensure backward compatibility for old history items
             const resultWithDefaults: IResult = {
                 description: '',
-                imageQuery: 'decision',
                 infoLinks: [],
                 shoppingLinks: [],
                 ...decisionToLoad.result,

@@ -19,7 +19,8 @@ export interface ILink {
 export interface IResult {
   recommendation: string;
   description: string;
-  imageQuery: string;
+  imageQuery?: string; // Gardé pour la compatibilité ascendante
+  imageBase64?: string; // Nouvelle image générée par l'IA
   infoLinks: ILink[];
   shoppingLinks: ILink[];
   breakdown: IBreakdownItem[];

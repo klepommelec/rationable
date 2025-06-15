@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,14 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
     e.currentTarget.src = '/placeholder.svg';
     e.currentTarget.onerror = null; // Prevent infinite loops
   };
+
+  let imageSrc: string | null = null;
+  if (result.imageBase64) {
+    imageSrc = `data:image/png;base64,${result.imageBase64}`;
+  } else if (result.imageQuery) {
+    // Fallback for old history items
+    imageSrc = `https://source.unsplash.com/800x600/?${encodeURIComponent(result.imageQuery.replace(/ /g, ','))}`;
+  }
 
   return <div className="mt-8 space-y-6 animate-fade-in">
             <Card className="overflow-hidden backdrop-blur-sm bg-card/70">
@@ -85,15 +94,19 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                         </CardFooter>
                     </div>
                     <div className="relative min-h-[250px] md:min-h-0">
-                        {result.imageQuery &&
+                        {imageSrc ? (
                             <img 
-                                src={`https://source.unsplash.com/800x600/?${encodeURIComponent(result.imageQuery.replace(/ /g, ','))}`} 
+                                src={imageSrc} 
                                 alt={result.recommendation} 
                                 className="absolute inset-0 w-full h-full object-cover" 
-                                key={result.imageQuery}
+                                key={result.imageBase64 || result.imageQuery}
                                 onError={handleImageError}
                             />
-                        }
+                        ) : (
+                           <div className="absolute inset-0 w-full h-full bg-secondary flex items-center justify-center">
+                                <img src="/placeholder.svg" alt="Placeholder" className="h-24 w-24 opacity-50" />
+                           </div>
+                        )}
                          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent md:bg-gradient-to-l"></div>
                     </div>
                 </div>

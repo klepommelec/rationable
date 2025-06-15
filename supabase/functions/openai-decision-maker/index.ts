@@ -64,18 +64,58 @@ serve(async (req) => {
     }
 
     const content = data.choices[0].message.content;
-    
+    let jsonContent;
     try {
       // We parse it here to ensure it's valid JSON before sending to client
-      const jsonContent = JSON.parse(content);
-      return new Response(JSON.stringify(jsonContent), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      });
+      jsonContent = JSON.parse(content);
     } catch (e) {
       console.error("Failed to parse JSON from API response content:", content);
       throw new Error("La réponse de l'API n'était pas un JSON valide.");
     }
+    
+    const recommendation = jsonContent.result?.recommendation || jsonContent.recommendation;
+    if (recommendation) {
+        console.log(`Generating image for recommendation: "${recommendation}"`);
+        try {
+            const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${openAIApiKey}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model: 'dall-e-3',
+                    prompt: `Photorealistic, cinematic, high-detail image representing the concept of "${recommendation}". No text in the image.`,
+                    n: 1,
+                    size: "1024x1024",
+                    response_format: 'b64_json',
+                    quality: 'standard',
+                }),
+            });
+
+            if (imageResponse.ok) {
+                const imageData = await imageResponse.json();
+                const b64_json = imageData.data[0].b64_json;
+                if (jsonContent.result) {
+                    jsonContent.result.imageBase64 = b64_json;
+                } else {
+                    jsonContent.imageBase64 = b64_json;
+                }
+            } else {
+                const errorData = await imageResponse.json();
+                console.error("OpenAI Image Generation API Error:", errorData);
+            }
+        } catch (imgError) {
+            console.error("Failed to generate image:", imgError.message);
+        }
+    }
+
+
+    return new Response(JSON.stringify(jsonContent), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+    });
+
 
   } catch (error) {
     console.error(error.message)
