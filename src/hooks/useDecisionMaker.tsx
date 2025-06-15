@@ -1,10 +1,12 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { toast } from "sonner";
 import { useDebounceCallback } from 'usehooks-ts';
 import { RefreshCw } from 'lucide-react';
-import { ICriterion, IResult, IDecision } from '@/types/decision';
+import { ICriterion, IResult, IDecision, AnalysisStep } from '@/types/decision';
 import { useDecisionHistory } from './useDecisionHistory';
 import { startAnalysis, generateOptions } from '@/services/decisionService';
+import { useProgressiveAnalysis } from './useProgressiveAnalysis';
 
 const templates = [
   {
@@ -23,23 +25,48 @@ const templates = [
 
 export const useDecisionMaker = () => {
     const [dilemma, setDilemma] = useState('');
-    const [emoji, setEmojiState] = useState('🤔');
-    const [analysisStep, setAnalysisStep] = useState<'idle' | 'analyzing' | 'done'>('idle');
-    const [progress, setProgress] = useState(0);
-    const [progressMessage, setProgressMessage] = useState('');
     const [criteria, setCriteria] = useState<ICriterion[]>([]);
-    const [result, setResult] = useState<IResult | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [currentDecisionId, setCurrentDecisionId] = useState<string | null>(null);
+    const [useProgressiveMode, setUseProgressiveMode] = useState(true);
+
+    // Mode classique
+    const [classicAnalysisStep, setClassicAnalysisStep] = useState<'idle' | 'analyzing' | 'done'>('idle');
+    const [progress, setProgress] = useState(0);
+    const [progressMessage, setProgressMessage] = useState('');
+    const [classicResult, setClassicResult] = useState<IResult | null>(null);
+    const [classicEmoji, setClassicEmojiState] = useState('🤔');
+
+    // Mode progressif
+    const {
+        analysisStep: progressiveAnalysisStep,
+        generatedCriteria,
+        validatedCriteria,
+        result: progressiveResult,
+        emoji: progressiveEmoji,
+        startProgressiveAnalysis,
+        handleCriteriaValidation,
+        resetAnalysis,
+        setEmoji: setProgressiveEmoji
+    } = useProgressiveAnalysis();
 
     const { history, addDecision, updateDecision, deleteDecision, clearHistory } = useDecisionHistory();
     
     const initialCriteriaRef = useRef<ICriterion[]>([]);
     
-    const isLoading = analysisStep === 'analyzing';
+    // États unifiés basés sur le mode
+    const analysisStep = useProgressiveMode ? progressiveAnalysisStep : classicAnalysisStep;
+    const result = useProgressiveMode ? progressiveResult : classicResult;
+    const emoji = useProgressiveMode ? progressiveEmoji : classicEmoji;
+    const isLoading = analysisStep === 'analyzing' || analysisStep === 'generating-criteria' || analysisStep === 'final-analysis';
 
     const setEmoji = (newEmoji: string) => {
-        setEmojiState(newEmoji);
+        if (useProgressiveMode) {
+            setProgressiveEmoji(newEmoji);
+        } else {
+            setClassicEmojiState(newEmoji);
+        }
+        
         if (analysisStep === 'done' && currentDecisionId) {
             const decision = history.find(d => d.id === currentDecisionId);
             if (decision && decision.emoji !== newEmoji) {
@@ -47,6 +74,13 @@ export const useDecisionMaker = () => {
             }
         }
     };
+
+    // Mise à jour des critères selon le mode
+    useEffect(() => {
+        if (useProgressiveMode && validatedCriteria.length > 0) {
+            setCriteria(validatedCriteria);
+        }
+    }, [validatedCriteria, useProgressiveMode]);
 
     const handleGenerateOptions = async () => {
         const currentCriteria = criteria;
@@ -64,7 +98,11 @@ export const useDecisionMaker = () => {
 
         try {
           const apiResult = await generateOptions(dilemma, currentCriteria);
-          setResult(apiResult);
+          if (useProgressiveMode) {
+            // Le mode progressif gère déjà le résultat
+          } else {
+            setClassicResult(apiResult);
+          }
           
           if (currentDecisionId) {
             const decisionToUpdate = history.find(d => d.id === currentDecisionId);
@@ -88,52 +126,75 @@ export const useDecisionMaker = () => {
     };
 
     const handleStartAnalysis = async () => {
-        setAnalysisStep('analyzing');
-        setProgress(0);
-        setProgressMessage("Initialisation de l'analyse...");
-        setResult(null);
-        setCriteria([]);
-        setEmojiState('🤔');
-        setCurrentDecisionId(null);
+        if (useProgressiveMode) {
+            await startProgressiveAnalysis(dilemma);
+        } else {
+            // Mode classique existant
+            setClassicAnalysisStep('analyzing');
+            setProgress(0);
+            setProgressMessage("Initialisation de l'analyse...");
+            setClassicResult(null);
+            setCriteria([]);
+            setClassicEmojiState('🤔');
+            setCurrentDecisionId(null);
 
-        setTimeout(() => setProgress(10), 100);
+            setTimeout(() => setProgress(10), 100);
+            
+            try {
+              setProgress(25);
+              setProgressMessage("Génération des critères et options...");
+              const response = await startAnalysis(dilemma);
+              setProgress(75);
+              setProgressMessage("Finalisation de l'analyse...");
+
+              const newCriteria = response.criteria.map((name: string) => ({
+                id: crypto.randomUUID(),
+                name,
+              }));
+              setCriteria(newCriteria);
+              setClassicResult(response.result);
+              setClassicEmojiState(response.emoji || '🤔');
+              
+              const newDecision: IDecision = {
+                id: crypto.randomUUID(),
+                timestamp: Date.now(),
+                dilemma,
+                emoji: response.emoji || '🤔',
+                criteria: newCriteria,
+                result: response.result
+              };
+              addDecision(newDecision);
+              setCurrentDecisionId(newDecision.id);
+              
+              setProgress(100);
+              setClassicAnalysisStep('done');
+              toast.success("Analyse complète générée !");
+            } catch (e) {
+              if (e instanceof Error) {
+                toast.error(`Erreur lors de l'analyse : ${e.message}`);
+              }
+              setClassicAnalysisStep('idle');
+              setProgress(0);
+              setProgressMessage('');
+            }
+        }
+    };
+
+    const handleProgressiveCriteriaValidation = async (validatedCriteria: ICriterion[]) => {
+        await handleCriteriaValidation(dilemma, validatedCriteria);
         
-        try {
-          setProgress(25);
-          setProgressMessage("Génération des critères et options...");
-          const response = await startAnalysis(dilemma);
-          setProgress(75);
-          setProgressMessage("Finalisation de l'analyse...");
-
-          const newCriteria = response.criteria.map((name: string) => ({
-            id: crypto.randomUUID(),
-            name,
-          }));
-          setCriteria(newCriteria);
-          setResult(response.result);
-          setEmojiState(response.emoji || '🤔');
-          
-          const newDecision: IDecision = {
-            id: crypto.randomUUID(),
-            timestamp: Date.now(),
-            dilemma,
-            emoji: response.emoji || '🤔',
-            criteria: newCriteria,
-            result: response.result
-          };
-          addDecision(newDecision);
-          setCurrentDecisionId(newDecision.id);
-          
-          setProgress(100);
-          setAnalysisStep('done');
-          toast.success("Analyse complète générée !");
-        } catch (e) {
-          if (e instanceof Error) {
-            toast.error(`Erreur lors de l'analyse : ${e.message}`);
-          }
-          setAnalysisStep('idle');
-          setProgress(0);
-          setProgressMessage('');
+        // Sauvegarder la décision
+        if (progressiveResult) {
+            const newDecision: IDecision = {
+                id: crypto.randomUUID(),
+                timestamp: Date.now(),
+                dilemma,
+                emoji: progressiveEmoji || '🤔',
+                criteria: validatedCriteria,
+                result: progressiveResult
+            };
+            addDecision(newDecision);
+            setCurrentDecisionId(newDecision.id);
         }
     };
     
@@ -147,33 +208,45 @@ export const useDecisionMaker = () => {
 
     useEffect(() => {
         const criteriaHaveChanged = JSON.stringify(criteria) !== JSON.stringify(initialCriteriaRef.current);
-        if (analysisStep === 'done' && criteriaHaveChanged && !isUpdating) {
+        if (analysisStep === 'done' && criteriaHaveChanged && !isUpdating && !useProgressiveMode) {
         toast.info("Les critères ont changé, mise à jour de l'analyse...", { icon: <RefreshCw className="animate-spin" />, duration: 2000 });
         debouncedGenerateOptions();
         }
-    }, [criteria, analysisStep, debouncedGenerateOptions, isUpdating]);
+    }, [criteria, analysisStep, debouncedGenerateOptions, isUpdating, useProgressiveMode]);
     
     const applyTemplate = (template: typeof templates[0]) => {
         setDilemma(template.dilemma);
-        setResult(null);
         setCriteria([]);
-        setEmojiState('🤔');
-        setAnalysisStep('idle');
-        setProgress(0);
-        setProgressMessage('');
         setCurrentDecisionId(null);
+        
+        if (useProgressiveMode) {
+            resetAnalysis();
+        } else {
+            setClassicResult(null);
+            setClassicEmojiState('🤔');
+            setClassicAnalysisStep('idle');
+            setProgress(0);
+            setProgressMessage('');
+        }
+        
         toast.success(`Modèle "${template.name}" appliqué !`);
     }
 
     const clearSession = () => {
         setDilemma('');
-        setResult(null);
         setCriteria([]);
-        setEmojiState('🤔');
-        setAnalysisStep('idle');
-        setProgress(0);
-        setProgressMessage('');
         setCurrentDecisionId(null);
+        
+        if (useProgressiveMode) {
+            resetAnalysis();
+        } else {
+            setClassicResult(null);
+            setClassicEmojiState('🤔');
+            setClassicAnalysisStep('idle');
+            setProgress(0);
+            setProgressMessage('');
+        }
+        
         toast.info("Session réinitialisée.");
     }
     
@@ -182,16 +255,23 @@ export const useDecisionMaker = () => {
         if (decisionToLoad) {
             setDilemma(decisionToLoad.dilemma);
             setCriteria(decisionToLoad.criteria);
-            setEmojiState(decisionToLoad.emoji || '🤔');
+            
             const resultWithDefaults: IResult = {
                 description: '',
                 infoLinks: [],
                 shoppingLinks: [],
                 ...decisionToLoad.result,
             };
-            setResult(resultWithDefaults);
+            
+            if (useProgressiveMode) {
+                // Mode progressif - pas encore implémenté pour le chargement
+                setUseProgressiveMode(false);
+            }
+            
+            setClassicResult(resultWithDefaults);
+            setClassicEmojiState(decisionToLoad.emoji || '🤔');
             setCurrentDecisionId(decisionToLoad.id);
-            setAnalysisStep('done');
+            setClassicAnalysisStep('done');
             setProgress(0);
             setProgressMessage('');
             toast.info("Décision précédente chargée.");
@@ -232,6 +312,12 @@ export const useDecisionMaker = () => {
         loadDecision,
         deleteDecision: handleDeleteDecision,
         clearHistory: handleClearHistory,
-        templates
+        templates,
+        
+        // Mode progressif
+        useProgressiveMode,
+        setUseProgressiveMode,
+        generatedCriteria,
+        handleProgressiveCriteriaValidation
     };
 };
