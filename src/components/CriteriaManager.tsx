@@ -27,12 +27,31 @@ interface CriteriaManagerProps {
 }
 
 export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled, isLoadingCriteria = false }: CriteriaManagerProps) => {
+  const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  // Animation subtile d'apparition des critères
+  useEffect(() => {
+    if (!isLoadingCriteria && criteria.length > 0) {
+      // Reset d'abord
+      setVisibleCriteria([]);
+      
+      // Puis apparition progressive très rapide et subtile
+      criteria.forEach((criterion, index) => {
+        setTimeout(() => {
+          setVisibleCriteria(prev => [...prev, criterion.id]);
+        }, index * 80); // Délai très court entre chaque critère
+      });
+    } else if (isLoadingCriteria) {
+      setVisibleCriteria([]);
+    }
+  }, [criteria, isLoadingCriteria]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -119,14 +138,22 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled, 
                 renderCriteriaSkeletons()
               ) : (
                 criteria.map((criterion) => (
-                  <CriterionRow
+                  <div
                     key={criterion.id}
-                    criterion={criterion}
-                    onNameChange={handleNameChange}
-                    onRemove={handleRemove}
-                    isRemoveDisabled={criteria.length <= 2}
-                    isDragDisabled={isInteractionDisabled}
-                  />
+                    className={`transition-all duration-300 ease-out ${
+                      visibleCriteria.includes(criterion.id)
+                        ? 'opacity-100 translate-y-0'
+                        : 'opacity-0 translate-y-1'
+                    }`}
+                  >
+                    <CriterionRow
+                      criterion={criterion}
+                      onNameChange={handleNameChange}
+                      onRemove={handleRemove}
+                      isRemoveDisabled={criteria.length <= 2}
+                      isDragDisabled={isInteractionDisabled}
+                    />
+                  </div>
                 ))
               )}
             </div>
