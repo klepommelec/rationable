@@ -9,7 +9,21 @@ export const useDecisionHistory = () => {
         try {
             const storedHistory = localStorage.getItem('decisionHistory');
             if (storedHistory) {
-                setHistory(JSON.parse(storedHistory));
+                const parsedHistory: IDecision[] = JSON.parse(storedHistory);
+                // Data migration for old history items
+                const migratedHistory = parsedHistory.map(decision => {
+                    if (!decision.result.imageQuery && decision.result.recommendation) {
+                        return {
+                            ...decision,
+                            result: {
+                                ...decision.result,
+                                imageQuery: decision.result.recommendation,
+                            }
+                        };
+                    }
+                    return decision;
+                });
+                setHistory(migratedHistory);
             }
         } catch (error) {
             console.error("Failed to load history from localStorage", error);

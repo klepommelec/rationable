@@ -37,7 +37,7 @@ export const startAnalysis = async (dilemma: string): Promise<IFullAnalysisRespo
     const response = await callOpenAiApi(prompt);
     const isValidCriteria = response && response.criteria && Array.isArray(response.criteria);
     const apiResult = response.result;
-    const isValidResult = apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number') && apiResult.description && Array.isArray(apiResult.infoLinks) && Array.isArray(apiResult.shoppingLinks);
+    const isValidResult = apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number') && apiResult.description && Array.isArray(apiResult.infoLinks) && Array.isArray(apiResult.shoppingLinks) && typeof apiResult.imageQuery === 'string';
 
     if (isValidCriteria && isValidResult) {
         return response as IFullAnalysisResponse;
@@ -67,7 +67,7 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[]): 
     }`;
 
     const apiResult: IResult = await callOpenAiApi(prompt);
-    const isValidResult = apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number') && apiResult.description && Array.isArray(apiResult.infoLinks) && Array.isArray(apiResult.shoppingLinks);
+    const isValidResult = apiResult && apiResult.recommendation && apiResult.breakdown && Array.isArray(apiResult.breakdown) && apiResult.breakdown.every(item => typeof item.score === 'number') && apiResult.description && Array.isArray(apiResult.infoLinks) && Array.isArray(apiResult.shoppingLinks) && typeof apiResult.imageQuery === 'string';
 
     if (isValidResult) {
         return apiResult;

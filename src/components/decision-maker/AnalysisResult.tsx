@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,12 +34,12 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
     e.currentTarget.onerror = null; // Prevent infinite loops
   };
 
-  let imageSrc: string | null = null;
-  if (result.imageBase64) {
-    imageSrc = `data:image/png;base64,${result.imageBase64}`;
-  } else if (result.imageQuery) {
-    // Fallback for old history items
+  let imageSrc: string = '/placeholder.svg';
+  if (result.imageQuery) {
     imageSrc = `https://source.unsplash.com/800x600/?${encodeURIComponent(result.imageQuery.replace(/ /g, ','))}`;
+  } else if (result.imageBase64) {
+    // Fallback for old history items
+    imageSrc = `data:image/png;base64,${result.imageBase64}`;
   }
 
   return <div className="mt-8 space-y-6 animate-fade-in">
@@ -99,7 +98,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                                 src={imageSrc} 
                                 alt={result.recommendation} 
                                 className="absolute inset-0 w-full h-full object-cover" 
-                                key={result.imageBase64 || result.imageQuery}
+                                key={imageSrc}
                                 onError={handleImageError}
                             />
                         ) : (

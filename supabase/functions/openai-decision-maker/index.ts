@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 
 const corsHeaders = {
@@ -75,38 +74,10 @@ serve(async (req) => {
     
     const recommendation = jsonContent.result?.recommendation || jsonContent.recommendation;
     if (recommendation) {
-        console.log(`Generating image for recommendation: "${recommendation}"`);
-        try {
-            const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${openAIApiKey}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    model: 'dall-e-3',
-                    prompt: `Photorealistic, cinematic, high-detail image representing the concept of "${recommendation}". No text in the image.`,
-                    n: 1,
-                    size: "1024x1024",
-                    response_format: 'b64_json',
-                    quality: 'standard',
-                }),
-            });
-
-            if (imageResponse.ok) {
-                const imageData = await imageResponse.json();
-                const b64_json = imageData.data[0].b64_json;
-                if (jsonContent.result) {
-                    jsonContent.result.imageBase64 = b64_json;
-                } else {
-                    jsonContent.imageBase64 = b64_json;
-                }
-            } else {
-                const errorData = await imageResponse.json();
-                console.error("OpenAI Image Generation API Error:", errorData);
-            }
-        } catch (imgError) {
-            console.error("Failed to generate image:", imgError.message);
+        if (jsonContent.result) {
+            jsonContent.result.imageQuery = recommendation;
+        } else {
+            jsonContent.imageQuery = recommendation;
         }
     }
 
