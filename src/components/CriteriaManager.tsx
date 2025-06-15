@@ -3,10 +3,15 @@ import React from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, ChevronDown } from 'lucide-react';
 import { ICriterion } from '@/types/decision';
 import { CriterionRow } from './CriterionRow';
 import { toast } from 'sonner';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface CriteriaManagerProps {
   criteria: ICriterion[];
@@ -63,33 +68,39 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled }
   };
 
   return (
-    <div className="space-y-4 p-4 rounded-lg bg-accent border animate-fade-in">
-      <h3 className="font-semibold text-lg">
-        Gérez les critères de décision
-      </h3>
-      <p className="text-sm text-muted-foreground">
-        Modifiez, réorganisez (par glisser-déposer) ou supprimez les critères. L'ordre est important et reflète leur poids dans la décision.
-      </p>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={criteria} strategy={verticalListSortingStrategy}>
-          <div className="space-y-2">
-            {criteria.map((criterion) => (
-              <CriterionRow
-                key={criterion.id}
-                criterion={criterion}
-                onNameChange={handleNameChange}
-                onRemove={handleRemove}
-                isRemoveDisabled={criteria.length <= 2}
-                isDragDisabled={isInteractionDisabled}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
-      <Button onClick={handleAdd} disabled={isInteractionDisabled || criteria.length >= 8} variant="outline" size="sm">
-        <PlusCircle className="h-4 w-4 mr-2" />
-        Ajouter un critère
-      </Button>
-    </div>
+    <Collapsible defaultOpen className="p-4 rounded-lg bg-accent border animate-fade-in">
+      <CollapsibleTrigger className="flex justify-between items-center w-full group">
+        <h3 className="font-semibold text-lg text-left">
+          Gérez les critères de décision
+        </h3>
+        <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+
+      <CollapsibleContent className="space-y-4 pt-4">
+        <p className="text-sm text-muted-foreground">
+          Modifiez, réorganisez (par glisser-déposer) ou supprimez les critères. L'ordre est important et reflète leur poids dans la décision.
+        </p>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={criteria} strategy={verticalListSortingStrategy}>
+            <div className="space-y-2">
+              {criteria.map((criterion) => (
+                <CriterionRow
+                  key={criterion.id}
+                  criterion={criterion}
+                  onNameChange={handleNameChange}
+                  onRemove={handleRemove}
+                  isRemoveDisabled={criteria.length <= 2}
+                  isDragDisabled={isInteractionDisabled}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+        <Button onClick={handleAdd} disabled={isInteractionDisabled || criteria.length >= 8} variant="outline" size="sm">
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Ajouter un critère
+        </Button>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
