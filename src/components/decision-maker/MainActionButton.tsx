@@ -3,9 +3,10 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { LoaderCircle, Sparkles } from 'lucide-react';
+import { AnalysisStep } from '@/types/decision';
 
 interface MainActionButtonProps {
-    analysisStep: 'idle' | 'analyzing' | 'done';
+    analysisStep: AnalysisStep;
     handleStartAnalysis: () => void;
     isMainButtonDisabled: boolean;
     progress: number;
@@ -21,6 +22,9 @@ const MainActionButton: React.FC<MainActionButtonProps> = ({
 }) => {
     switch (analysisStep) {
         case 'analyzing':
+        case 'generating-criteria':
+        case 'validating-criteria':
+        case 'final-analysis':
             return (
                 <div className="w-full space-y-2">
                     <Button disabled className="w-full bg-cyan-500 text-slate-900 font-bold text-lg py-6">

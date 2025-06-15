@@ -100,7 +100,7 @@ const DecisionMaker = () => {
         />
       )}
       
-      {(analysisStep === 'analyzing' || analysisStep === 'final-analysis' || analysisStep === 'done') && (
+      {analysisStep === 'done' && (
         <AnalysisResult
           result={result}
           isUpdating={isUpdating}
