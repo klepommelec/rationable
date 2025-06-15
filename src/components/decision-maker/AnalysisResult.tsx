@@ -6,35 +6,27 @@ import { Lightbulb, Eraser, Trophy } from 'lucide-react';
 import { CriteriaManager } from '../CriteriaManager';
 import { ICriterion, IResult } from '@/types/decision';
 import { ScoreChart } from './ScoreChart';
-
 interface AnalysisResultProps {
-    dilemma: string;
-    result: IResult;
-    criteria: ICriterion[];
-    setCriteria: React.Dispatch<React.SetStateAction<ICriterion[]>>;
-    isLoading: boolean;
-    isUpdating: boolean;
-    clearSession: () => void;
+  dilemma: string;
+  result: IResult;
+  criteria: ICriterion[];
+  setCriteria: React.Dispatch<React.SetStateAction<ICriterion[]>>;
+  isLoading: boolean;
+  isUpdating: boolean;
+  clearSession: () => void;
 }
-
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
-    dilemma,
-    result,
-    criteria,
-    setCriteria,
-    isLoading,
-    isUpdating,
-    clearSession
+  dilemma,
+  result,
+  criteria,
+  setCriteria,
+  isLoading,
+  isUpdating,
+  clearSession
 }) => {
-    const averageScore = result.breakdown.length > 0 
-      ? Math.round(result.breakdown.reduce((acc, item) => acc + item.score, 0) / result.breakdown.length) 
-      : 0;
-    const topOption = result.breakdown.length > 0 
-      ? result.breakdown.reduce((prev, current) => (prev.score > current.score) ? prev : current)
-      : null;
-
-    return (
-        <div className="mt-8 space-y-6 animate-fade-in">
+  const averageScore = result.breakdown.length > 0 ? Math.round(result.breakdown.reduce((acc, item) => acc + item.score, 0) / result.breakdown.length) : 0;
+  const topOption = result.breakdown.length > 0 ? result.breakdown.reduce((prev, current) => prev.score > current.score ? prev : current) : null;
+  return <div className="mt-8 space-y-6 animate-fade-in">
             <Card className="backdrop-blur-sm bg-card/70">
                 <CardHeader>
                     <CardTitle className="text-2xl flex items-start gap-3">
@@ -52,17 +44,11 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 </CardContent>
             </Card>
 
-            {criteria.length > 0 && (
-                <CriteriaManager
-                    criteria={criteria}
-                    setCriteria={setCriteria}
-                    isInteractionDisabled={isLoading || isUpdating}
-                />
-            )}
+            {criteria.length > 0 && <CriteriaManager criteria={criteria} setCriteria={setCriteria} isInteractionDisabled={isLoading || isUpdating} />}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-1">
-                    <Card>
+                    <Card className="h-full ">
                         <CardHeader>
                             <CardTitle>Statistiques Clés</CardTitle>
                         </CardHeader>
@@ -92,8 +78,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     <CardTitle>Analyse Détaillée des Options</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {result.breakdown.sort((a, b) => b.score - a.score).map((item, index) => (
-                        <div key={index} className="p-4 rounded-lg bg-accent border">
+                    {result.breakdown.sort((a, b) => b.score - a.score).map((item, index) => <div key={index} className="p-4 rounded-lg bg-accent border">
                             <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
                                 <h4 className="font-bold text-cyan-400 text-md">{item.option}</h4>
                                 <div className="flex items-center gap-2">
@@ -116,8 +101,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                                     </ul>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        </div>)}
                 </CardContent>
             </Card>
 
@@ -129,8 +113,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     </Button>
                 </CardFooter>
             </Card>
-        </div>
-    );
+        </div>;
 };
-
 export default AnalysisResult;
