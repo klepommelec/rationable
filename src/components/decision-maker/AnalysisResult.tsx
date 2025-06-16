@@ -1,11 +1,13 @@
+
 import * as React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Eraser, Trophy, BookOpen, ShoppingCart, ExternalLink } from 'lucide-react';
+import { Eraser, Trophy, BookOpen, ShoppingCart } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { ScoreChart } from './ScoreChart';
 import { Skeleton } from '@/components/ui/skeleton';
+import ValidatedLink from '@/components/ValidatedLink';
 
 interface AnalysisResultProps {
   result: IResult | null;
@@ -117,23 +119,25 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 {result.infoLinks && result.infoLinks.length > 0 && <div>
                     <h4 className="font-semibold flex items-center gap-2 text-sm"><BookOpen /> Pour en savoir plus</h4>
                     <div className="flex flex-col items-start gap-1.5 mt-2">
-                        {result.infoLinks.map((link, i) => <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5">
-                                {link.title}
-                                <ExternalLink className="h-3 w-3" />
-                            </a>)}
+                        {result.infoLinks.map((link, i) => (
+                          <ValidatedLink 
+                            key={i} 
+                            link={link} 
+                            fallbackSearchQuery={result.recommendation}
+                          />
+                        ))}
                     </div>
                 </div>}
                 {result.shoppingLinks && result.shoppingLinks.length > 0 && <div>
                     <h4 className="font-semibold flex items-center gap-2 text-sm"><ShoppingCart /> Où l'acheter ?</h4>
                     <div className="flex flex-col items-start gap-1.5 mt-2">
-                        {result.shoppingLinks.map((link, i) => {
-                    // Clean up the URL to ensure it's valid
-                    const cleanUrl = link.url.startsWith('http') ? link.url : `https://${link.url}`;
-                    return <a key={i} href={cleanUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5">
-                                {link.title}
-                                <ExternalLink className="h-3 w-3" />
-                            </a>;
-                  })}
+                        {result.shoppingLinks.map((link, i) => (
+                          <ValidatedLink 
+                            key={i} 
+                            link={link} 
+                            fallbackSearchQuery={result.recommendation}
+                          />
+                        ))}
                     </div>
                 </div>}
               </div>
