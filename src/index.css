@@ -74,23 +74,3 @@
     background-color: #020617; /* slate-950 */
   }
 }
-
-/* Fix pour le contraste des graphiques en mode light */
-@layer components {
-  .recharts-cartesian-axis-tick-value {
-    @apply fill-foreground;
-  }
-  
-  .recharts-cartesian-grid-horizontal line,
-  .recharts-cartesian-grid-vertical line {
-    @apply stroke-muted-foreground/30;
-  }
-  
-  .recharts-bar {
-    @apply fill-primary;
-  }
-  
-  .recharts-tooltip-wrapper .recharts-default-tooltip {
-    @apply bg-popover border-border text-popover-foreground;
-  }
-}
