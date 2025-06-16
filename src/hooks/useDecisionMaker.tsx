@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { toast } from "sonner";
 import { useDebounceCallback } from 'usehooks-ts';
@@ -35,6 +36,8 @@ export const useDecisionMaker = () => {
     const [currentDecisionId, setCurrentDecisionId] = useState<string | null>(null);
     const [hasChanges, setHasChanges] = useState(false);
     const [retryCount, setRetryCount] = useState(0);
+    const [debugMode, setDebugMode] = useState(false);
+    const [lastApiResponse, setLastApiResponse] = useState<any>(null);
 
     const { history, addDecision, updateDecision, deleteDecision, clearHistory } = useDecisionHistory();
     
@@ -65,11 +68,20 @@ export const useDecisionMaker = () => {
     const handleGenerateOptions = async (isRetry = false) => {
         const currentCriteria = criteria;
         
+        console.log("🔄 [DEBUG] Starting options generation", {
+            isRetry,
+            retryCount,
+            criteriaCount: currentCriteria.length,
+            dilemma: dilemma.substring(0, 50) + "..."
+        });
+        
         if (currentCriteria.length < 2) {
+          console.log("❌ [DEBUG] Not enough criteria");
           toast.error("Veuillez définir au moins 2 critères.");
           return;
         }
         if (currentCriteria.some(c => c.name.trim() === '')) {
+          console.log("❌ [DEBUG] Empty criteria names found");
           toast.error("Veuillez nommer tous les critères avant de continuer.");
           return;
         }
@@ -80,14 +92,28 @@ export const useDecisionMaker = () => {
         
         if (isRetry) {
             setRetryCount(prev => prev + 1);
-            console.log(`Tentative de génération d'options n°${retryCount + 1}`);
+            console.log(`🔄 [DEBUG] Retry attempt #${retryCount + 1}`);
         }
 
         try {
-          console.log("Generating options with criteria:", currentCriteria);
-          const apiResult = await generateOptions(dilemma, currentCriteria);
-          console.log("Options generated successfully:", apiResult);
+          console.log("📡 [DEBUG] Calling generateOptions API...");
+          const startTime = Date.now();
           
+          const apiResult = await generateOptions(dilemma, currentCriteria);
+          
+          const endTime = Date.now();
+          console.log("✅ [DEBUG] API call successful", {
+            duration: `${endTime - startTime}ms`,
+            resultStructure: {
+              hasRecommendation: !!apiResult.recommendation,
+              hasDescription: !!apiResult.description,
+              breakdownCount: apiResult.breakdown?.length || 0,
+              infoLinksCount: apiResult.infoLinks?.length || 0,
+              shoppingLinksCount: apiResult.shoppingLinks?.length || 0
+            }
+          });
+          
+          setLastApiResponse(apiResult);
           setResult(apiResult);
           setAnalysisStep('done');
           setRetryCount(0);
@@ -97,6 +123,7 @@ export const useDecisionMaker = () => {
           setHasChanges(false);
           
           if (currentDecisionId) {
+            console.log("💾 [DEBUG] Updating existing decision", { decisionId: currentDecisionId });
             const decisionToUpdate = history.find(d => d.id === currentDecisionId);
             if (decisionToUpdate) {
                 const updated: IDecision = {
@@ -109,14 +136,23 @@ export const useDecisionMaker = () => {
           }
           
           toast.success(isRetry ? "Options générées avec succès !" : "Analyse mise à jour !");
-        } catch (e) {
-          console.error("Error generating options:", e);
-          const errorMessage = e instanceof Error ? e.message : "Erreur inconnue";
+          
+        } catch (error) {
+          console.error("❌ [DEBUG] Error in generateOptions:", {
+            error: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined,
+            retryCount,
+            currentCriteria: currentCriteria.map(c => c.name)
+          });
+          
+          const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
           
           if (retryCount < 2) {
+            console.log(`🔄 [DEBUG] Will retry in 1.5s (attempt ${retryCount + 1}/3)`);
             toast.error(`${errorMessage} - Nouvelle tentative...`);
             setTimeout(() => handleGenerateOptions(true), 1500);
           } else {
+            console.log("💀 [DEBUG] Max retries reached, giving up");
             toast.error(`Impossible de générer les options après ${retryCount + 1} tentatives. ${errorMessage}`);
             setAnalysisStep('criteria-loaded');
             setRetryCount(0);
@@ -128,13 +164,14 @@ export const useDecisionMaker = () => {
     };
 
     const handleManualUpdate = () => {
+        console.log("🔄 [DEBUG] Manual update triggered", { hasChanges });
         if (hasChanges) {
             handleGenerateOptions();
         }
     };
 
     const handleStartAnalysis = async () => {
-        console.log("Starting analysis for dilemma:", dilemma);
+        console.log("🚀 [DEBUG] Starting full analysis", { dilemma: dilemma.substring(0, 50) + "..." });
         setProgress(0);
         setProgressMessage("Génération des critères...");
         setResult(null);
@@ -143,12 +180,17 @@ export const useDecisionMaker = () => {
         setCurrentDecisionId(null);
         setHasChanges(false);
         setRetryCount(0);
+        setLastApiResponse(null);
 
         try {
           // Phase 1: Générer les critères
-          console.log("Phase 1: Generating criteria");
+          console.log("📡 [DEBUG] Phase 1: Generating criteria");
           const response = await generateCriteriaOnly(dilemma);
-          console.log("Criteria generated:", response);
+          console.log("✅ [DEBUG] Criteria generated:", {
+            emoji: response.emoji,
+            criteriaCount: response.criteria?.length || 0,
+            criteria: response.criteria
+          });
           
           const newCriteria = response.criteria.map((name: string) => ({
             id: crypto.randomUUID(),
@@ -161,13 +203,14 @@ export const useDecisionMaker = () => {
           
           // Phase 2: Générer automatiquement les options
           setTimeout(async () => {
-            console.log("Phase 2: Generating options automatically");
+            console.log("📡 [DEBUG] Phase 2: Auto-generating options");
             setAnalysisStep('loading-options');
             setProgressMessage("Génération des options...");
             
             try {
               const optionsResult = await generateOptions(dilemma, newCriteria);
-              console.log("Options generated automatically:", optionsResult);
+              console.log("✅ [DEBUG] Auto-options generated successfully");
+              setLastApiResponse(optionsResult);
               setResult(optionsResult);
               
               // Définir les critères de référence
@@ -186,9 +229,9 @@ export const useDecisionMaker = () => {
               
               setAnalysisStep('done');
               toast.success("Analyse complète générée !");
-            } catch (e) {
-              console.error("Error in automatic options generation:", e);
-              const errorMessage = e instanceof Error ? e.message : "Erreur inconnue";
+            } catch (error) {
+              console.error("❌ [DEBUG] Error in auto-options generation:", error);
+              const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
               toast.error(`Erreur lors de la génération automatique : ${errorMessage}`);
               setAnalysisStep('criteria-loaded');
             } finally {
@@ -196,9 +239,9 @@ export const useDecisionMaker = () => {
             }
           }, 800);
           
-        } catch (e) {
-          console.error("Error in analysis start:", e);
-          const errorMessage = e instanceof Error ? e.message : "Erreur inconnue";
+        } catch (error) {
+          console.error("❌ [DEBUG] Error in analysis start:", error);
+          const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
           toast.error(`Erreur lors de l'analyse : ${errorMessage}`);
           setAnalysisStep('idle');
           setProgress(0);
@@ -287,6 +330,9 @@ export const useDecisionMaker = () => {
         isUpdating,
         isLoading,
         hasChanges,
+        debugMode,
+        setDebugMode,
+        lastApiResponse,
         handleStartAnalysis,
         handleManualUpdate,
         applyTemplate,

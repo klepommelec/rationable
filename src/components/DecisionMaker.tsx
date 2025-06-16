@@ -7,6 +7,7 @@ import { EmojiPicker } from './EmojiPicker';
 import { CriteriaManager } from './CriteriaManager';
 import { OptionsLoadingSkeleton } from './OptionsLoadingSkeleton';
 import ManualOptionsGenerator from './ManualOptionsGenerator';
+import DebugPanel from './DebugPanel';
 
 const DecisionMaker = () => {
   const {
@@ -32,6 +33,9 @@ const DecisionMaker = () => {
     templates,
     hasChanges,
     handleManualUpdate,
+    debugMode,
+    setDebugMode,
+    lastApiResponse,
   } = useDecisionMaker();
 
   return (
@@ -96,6 +100,15 @@ const DecisionMaker = () => {
           analysisStep={analysisStep}
         />
       )}
+
+      <DebugPanel
+        debugMode={debugMode}
+        setDebugMode={setDebugMode}
+        analysisStep={analysisStep}
+        lastApiResponse={lastApiResponse}
+        criteria={criteria}
+        result={result}
+      />
     </div>
   );
 };

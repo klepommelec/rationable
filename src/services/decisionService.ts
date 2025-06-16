@@ -13,7 +13,70 @@ interface IFullAnalysisResponse {
     result: IResult;
 }
 
+const validateAndSanitize = {
+    emoji: (value: any): string => {
+        if (typeof value === 'string' && value.length > 0) {
+            return value;
+        }
+        console.warn('⚠️ Invalid emoji, using default');
+        return '🤔';
+    },
+    
+    criteria: (value: any): string[] => {
+        if (Array.isArray(value) && value.length >= 2) {
+            return value.filter(c => typeof c === 'string' && c.trim().length > 0);
+        }
+        console.warn('⚠️ Invalid criteria array');
+        throw new Error('Critères invalides reçus de l\'IA');
+    },
+    
+    result: (value: any): IResult => {
+        const fallbackResult: IResult = {
+            recommendation: 'Option recommandée',
+            imageQuery: 'decision choice',
+            description: 'Analyse en cours de traitement...',
+            infoLinks: [{ title: "Guide de décision", url: "https://example.com" }],
+            shoppingLinks: [{ title: "Comparateur", url: "https://example.com" }],
+            breakdown: [{
+                option: "Option par défaut",
+                pros: ["En cours d'analyse"],
+                cons: ["Données incomplètes"],
+                score: 75
+            }]
+        };
+
+        if (!value || typeof value !== 'object') {
+            console.warn('⚠️ Invalid result object, using fallback');
+            return fallbackResult;
+        }
+
+        return {
+            recommendation: typeof value.recommendation === 'string' ? value.recommendation : fallbackResult.recommendation,
+            imageQuery: typeof value.imageQuery === 'string' ? value.imageQuery : fallbackResult.imageQuery,
+            description: typeof value.description === 'string' ? value.description : fallbackResult.description,
+            infoLinks: Array.isArray(value.infoLinks) 
+                ? value.infoLinks.filter(link => link && typeof link.title === 'string' && typeof link.url === 'string')
+                : fallbackResult.infoLinks,
+            shoppingLinks: Array.isArray(value.shoppingLinks)
+                ? value.shoppingLinks.filter(link => link && typeof link.title === 'string' && typeof link.url === 'string')
+                : fallbackResult.shoppingLinks,
+            breakdown: Array.isArray(value.breakdown) && value.breakdown.length > 0
+                ? value.breakdown.map((item, index) => ({
+                    option: typeof item?.option === 'string' ? item.option : `Option ${index + 1}`,
+                    pros: Array.isArray(item?.pros) ? item.pros.filter(p => typeof p === 'string') : [`Avantage ${index + 1}`],
+                    cons: Array.isArray(item?.cons) ? item.cons.filter(c => typeof c === 'string') : [`Inconvénient ${index + 1}`],
+                    score: typeof item?.score === 'number' && item.score >= 0 && item.score <= 100 
+                        ? item.score 
+                        : Math.max(50, 80 - (index * 10))
+                }))
+                : fallbackResult.breakdown
+        };
+    }
+};
+
 export const generateCriteriaOnly = async (dilemma: string): Promise<ICriteriaResponse> => {
+    console.log('📡 [Service] generateCriteriaOnly called');
+    
     const prompt = `Pour le dilemme : "${dilemma}", générez un emoji pertinent et 4 critères de décision importants.
     
     Répondez UNIQUEMENT avec un objet JSON valide dans ce format exact :
@@ -29,24 +92,21 @@ export const generateCriteriaOnly = async (dilemma: string): Promise<ICriteriaRe
 
     try {
         const response = await callOpenAiApi(prompt);
-        console.log("Raw API response for criteria:", response);
+        console.log('✅ [Service] Raw criteria response received');
         
-        const isValidEmoji = response && typeof response.emoji === 'string' && response.emoji.length > 0;
-        const isValidCriteria = response && response.criteria && Array.isArray(response.criteria) && response.criteria.length >= 2;
-
-        if (isValidEmoji && isValidCriteria) {
-            return response as ICriteriaResponse;
-        } else {
-            console.error("Invalid criteria response structure:", response);
-            throw new Error("La structure de la réponse de l'IA pour les critères est invalide.");
-        }
+        return {
+            emoji: validateAndSanitize.emoji(response?.emoji),
+            criteria: validateAndSanitize.criteria(response?.criteria)
+        };
     } catch (error) {
-        console.error("Error in generateCriteriaOnly:", error);
+        console.error('❌ [Service] Error in generateCriteriaOnly:', error);
         throw error;
     }
 };
 
 export const startAnalysis = async (dilemma: string): Promise<IFullAnalysisResponse> => {
+    console.log('📡 [Service] startAnalysis called');
+    
     const prompt = `En tant qu'assistant expert en prise de décision, pour le dilemme : "${dilemma}", veuillez fournir une analyse complète.
     
     Répondez UNIQUEMENT avec un objet JSON valide dans ce format exact :
@@ -82,42 +142,25 @@ export const startAnalysis = async (dilemma: string): Promise<IFullAnalysisRespo
 
     try {
         const response = await callOpenAiApi(prompt);
-        console.log("Raw API response for full analysis:", response);
+        console.log('✅ [Service] Raw full analysis response received');
         
-        // Validation assouplie avec valeurs par défaut
-        const processedResponse = {
-            emoji: response?.emoji || '🤔',
-            criteria: Array.isArray(response?.criteria) ? response.criteria : [],
-            result: {
-                recommendation: response?.result?.recommendation || 'Option recommandée',
-                imageQuery: response?.result?.imageQuery || 'decision making',
-                description: response?.result?.description || 'Analyse en cours...',
-                infoLinks: Array.isArray(response?.result?.infoLinks) ? response.result.infoLinks : [],
-                shoppingLinks: Array.isArray(response?.result?.shoppingLinks) ? response.result.shoppingLinks : [],
-                breakdown: Array.isArray(response?.result?.breakdown) ? response.result.breakdown.map(item => ({
-                    option: item.option || 'Option',
-                    pros: Array.isArray(item.pros) ? item.pros : [],
-                    cons: Array.isArray(item.cons) ? item.cons : [],
-                    score: typeof item.score === 'number' ? Math.max(0, Math.min(100, item.score)) : 50
-                })) : []
-            }
+        return {
+            emoji: validateAndSanitize.emoji(response?.emoji),
+            criteria: validateAndSanitize.criteria(response?.criteria),
+            result: validateAndSanitize.result(response?.result)
         };
-
-        console.log("Processed response:", processedResponse);
-        
-        if (processedResponse.criteria.length >= 2 && processedResponse.result.breakdown.length >= 1) {
-            return processedResponse as IFullAnalysisResponse;
-        } else {
-            console.error("Insufficient data in response:", processedResponse);
-            throw new Error("Réponse incomplète de l'IA. Veuillez réessayer.");
-        }
     } catch (error) {
-        console.error("Error in startAnalysis:", error);
+        console.error('❌ [Service] Error in startAnalysis:', error);
         throw error;
     }
 };
 
 export const generateOptions = async (dilemma: string, criteria: ICriterion[]): Promise<IResult> => {
+    console.log('📡 [Service] generateOptions called', { 
+        criteriaCount: criteria.length,
+        dilemmaLength: dilemma.length 
+    });
+    
     const criteriaNames = criteria.map(c => c.name);
     const prompt = `Pour le dilemme "${dilemma}", en utilisant les critères : ${criteriaNames.join(', ')}.
 
@@ -164,50 +207,19 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[]): 
 
     try {
         const rawResponse = await callOpenAiApi(prompt);
-        console.log("Raw API response for options:", rawResponse);
+        console.log('✅ [Service] Raw options response received');
         
-        // Validation assouplie avec valeurs par défaut robustes
-        const processedResult: IResult = {
-            recommendation: rawResponse?.recommendation || 'Option recommandée',
-            imageQuery: rawResponse?.imageQuery || 'decision choice',
-            description: rawResponse?.description || 'Analyse complète de vos options disponibles.',
-            infoLinks: Array.isArray(rawResponse?.infoLinks) ? rawResponse.infoLinks.filter(link => 
-                link && typeof link.title === 'string' && typeof link.url === 'string'
-            ) : [
-                { title: "Guide de décision", url: "https://example.com/guide" }
-            ],
-            shoppingLinks: Array.isArray(rawResponse?.shoppingLinks) ? rawResponse.shoppingLinks.filter(link => 
-                link && typeof link.title === 'string' && typeof link.url === 'string'
-            ) : [
-                { title: "Comparateur de prix", url: "https://example.com/compare" }
-            ],
-            breakdown: Array.isArray(rawResponse?.breakdown) && rawResponse.breakdown.length > 0 ? 
-                rawResponse.breakdown.map((item, index) => ({
-                    option: item?.option || `Option ${index + 1}`,
-                    pros: Array.isArray(item?.pros) ? item.pros : [`Avantage de l'option ${index + 1}`],
-                    cons: Array.isArray(item?.cons) ? item.cons : [`Inconvénient de l'option ${index + 1}`],
-                    score: typeof item?.score === 'number' ? Math.max(0, Math.min(100, item.score)) : Math.max(50, 80 - (index * 10))
-                })) : [
-                {
-                    option: "Option par défaut",
-                    pros: ["Analyse en cours"],
-                    cons: ["Données insuffisantes"],
-                    score: 75
-                }
-            ]
-        };
-
-        console.log("Final processed result:", processedResult);
+        const processedResult = validateAndSanitize.result(rawResponse);
         
-        // Validation minimale
-        if (processedResult.breakdown.length >= 1) {
-            return processedResult;
-        } else {
-            console.error("No valid options in breakdown");
-            throw new Error("Impossible de générer des options valides. Veuillez réessayer.");
-        }
+        console.log('✅ [Service] Options validation completed', {
+            hasRecommendation: !!processedResult.recommendation,
+            breakdownCount: processedResult.breakdown.length,
+            infoLinksCount: processedResult.infoLinks.length
+        });
+        
+        return processedResult;
     } catch (error) {
-        console.error("Error in generateOptions:", error);
+        console.error('❌ [Service] Error in generateOptions:', error);
         throw new Error(`Erreur lors de la génération des options : ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
 };
