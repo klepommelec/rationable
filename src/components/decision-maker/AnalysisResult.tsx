@@ -149,7 +149,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           const cleanOptionName = item.option.replace(/^Option\s+\d+:\s*/i, '').trim();
           return <div key={index} className="p-4 rounded-lg bg-accent border">
                 <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
-                  <h4 className="font-bold text-md text-foreground">{cleanOptionName}</h4>
+                  <h4 className="text-md text-foreground font-medium">{cleanOptionName}</h4>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold">{item.score}/100</span>
                     <Progress value={item.score} className="w-24 h-2 bg-secondary" />
