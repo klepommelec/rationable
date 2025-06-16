@@ -107,7 +107,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                         <CardContent className="p-0 flex-grow">
                              <p className="text-muted-foreground pb-2">Basé sur votre analyse, voici la meilleure option :</p>
                              <div className="bg-accent border p-4 rounded-lg">
-                                <h3 className="text-xl font-bold flex items-center gap-2 text-foreground">
+                                <h3 className="text-xl flex items-center gap-2 text-foreground font-medium">
                                    <Trophy /> {result.recommendation}
                                 </h3>
                              </div>
