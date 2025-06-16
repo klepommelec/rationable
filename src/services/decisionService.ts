@@ -74,19 +74,20 @@ const validateAndSanitize = {
     }
 };
 
-// Function to generate fallback links based on the dilemma topic
-const generateFallbackLinks = (dilemma: string) => {
-    const searchQuery = encodeURIComponent(dilemma);
+// Function to generate reliable fallback links based on the dilemma topic
+const generateReliableLinks = (dilemma: string, recommendation: string) => {
+    const searchQuery = encodeURIComponent(`${recommendation} ${dilemma}`);
+    const recommendationQuery = encodeURIComponent(recommendation);
     
     return {
         infoLinks: [
-            { title: "Rechercher sur Google", url: `https://www.google.com/search?q=${searchQuery}` },
-            { title: "Voir sur Wikipédia", url: `https://fr.wikipedia.org/wiki/Spécial:Recherche/${searchQuery}` }
+            { title: "Rechercher des guides", url: `https://www.google.fr/search?q=${searchQuery}+guide+comparatif` },
+            { title: "Avis et tests", url: `https://www.google.fr/search?q=${searchQuery}+avis+test` }
         ],
         shoppingLinks: [
-            { title: "Comparer sur Google Shopping", url: `https://shopping.google.com/search?q=${searchQuery}` },
-            { title: "Rechercher sur Amazon", url: `https://www.amazon.fr/s?k=${searchQuery}` },
-            { title: "Voir sur Cdiscount", url: `https://www.cdiscount.com/search/10/${searchQuery}.html` }
+            { title: "Amazon France", url: `https://www.amazon.fr/s?k=${recommendationQuery}` },
+            { title: "Fnac", url: `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${recommendationQuery}` },
+            { title: "Google Shopping", url: `https://shopping.google.fr/search?q=${recommendationQuery}` }
         ]
     };
 };
@@ -179,38 +180,43 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[]): 
     });
     
     const criteriaNames = criteria.map(c => c.name);
-    const fallbackLinks = generateFallbackLinks(dilemma);
     
     const prompt = `Pour le dilemme "${dilemma}", en utilisant les critères : ${criteriaNames.join(', ')}.
 
-    Générez 3 options détaillées et évaluez-les. Répondez UNIQUEMENT avec un objet JSON valide :
+    Générez 3 options détaillées et évaluez-les. 
+
+    IMPORTANT pour les liens - NE GÉNÉREZ PAS de liens fictifs. Utilisez UNIQUEMENT cette approche :
+    - Pour infoLinks : utilisez "RECHERCHE:" suivi du terme à rechercher
+    - Pour shoppingLinks : utilisez "ACHAT:" suivi du produit à acheter
+
+    Répondez UNIQUEMENT avec un objet JSON valide :
     {
-      "recommendation": "Nom de la meilleure option",
+      "recommendation": "Nom précis de la meilleure option",
       "imageQuery": "english keywords",
       "description": "Description engageante de pourquoi c'est le meilleur choix (2-3 phrases)",
       "infoLinks": [
-        { "title": "Guide complet", "url": "https://www.exemple-reel.com/guide" },
-        { "title": "Avis d'experts", "url": "https://www.site-fiable.fr/avis" }
+        { "title": "Guide comparatif", "url": "RECHERCHE:guide comparatif lunettes de soleil Ray-Ban" },
+        { "title": "Avis d'experts", "url": "RECHERCHE:test avis Ray-Ban lunettes soleil" }
       ],
       "shoppingLinks": [
-        { "title": "Amazon France", "url": "https://www.amazon.fr/recherche-specifique" },
-        { "title": "Fnac", "url": "https://www.fnac.com/produit-concret" }
+        { "title": "Acheter Ray-Ban", "url": "ACHAT:Ray-Ban lunettes de soleil" },
+        { "title": "Comparer les prix", "url": "ACHAT:lunettes de soleil Ray-Ban prix" }
       ],
       "breakdown": [
         {
-          "option": "Option 1",
+          "option": "Option 1 spécifique",
           "pros": ["Avantage important 1", "Avantage important 2"],
           "cons": ["Inconvénient notable"],
           "score": 85
         },
         {
-          "option": "Option 2", 
+          "option": "Option 2 spécifique", 
           "pros": ["Avantage 1"],
           "cons": ["Inconvénient 1", "Inconvénient 2"],
           "score": 70
         },
         {
-          "option": "Option 3",
+          "option": "Option 3 spécifique",
           "pros": ["Avantage unique"],
           "cons": ["Inconvénient majeur"],
           "score": 60
@@ -218,13 +224,11 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[]): 
       ]
     }
     
-    IMPORTANT - Liens fonctionnels obligatoires :
-    - Pour infoLinks : utilisez uniquement des sites web réels et populaires comme Wikipedia, sites officiels de marques, guides reconnus, forums spécialisés
-    - Pour shoppingLinks : utilisez UNIQUEMENT des sites e-commerce français réels : Amazon.fr, Fnac.com, Cdiscount.com, Darty.com, Boulanger.com, Leclerc.com
-    - URLs complètes et fonctionnelles requises
-    - Scores entre 0-100, différents pour chaque option
+    CRITIQUES :
+    - Options concrètes et spécifiques au dilemme (pas "Option 1", "Option 2")
+    - Scores différents entre 0-100 pour chaque option
     - imageQuery : 2-3 mots-clés en anglais
-    - Options concrètes et spécifiques au dilemme`;
+    - Pour les liens, utilisez UNIQUEMENT les préfixes "RECHERCHE:" ou "ACHAT:" comme indiqué`;
 
     try {
         const rawResponse = await callOpenAiApi(prompt);
@@ -232,7 +236,25 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[]): 
         
         let processedResult = validateAndSanitize.result(rawResponse);
         
-        // Add fallback links if the AI didn't provide functional ones
+        // Transform RECHERCHE: and ACHAT: URLs into proper search URLs
+        const transformUrl = (link: { title: string; url: string }) => {
+            if (link.url.startsWith('RECHERCHE:')) {
+                const searchTerm = encodeURIComponent(link.url.replace('RECHERCHE:', '').trim());
+                return { ...link, url: `https://www.google.fr/search?q=${searchTerm}` };
+            }
+            if (link.url.startsWith('ACHAT:')) {
+                const searchTerm = encodeURIComponent(link.url.replace('ACHAT:', '').trim());
+                return { ...link, url: `https://www.google.fr/search?q=${searchTerm}&tbm=shop` };
+            }
+            return link;
+        };
+
+        processedResult.infoLinks = processedResult.infoLinks.map(transformUrl);
+        processedResult.shoppingLinks = processedResult.shoppingLinks.map(transformUrl);
+        
+        // Add reliable fallback links if needed
+        const fallbackLinks = generateReliableLinks(dilemma, processedResult.recommendation);
+        
         if (!processedResult.infoLinks || processedResult.infoLinks.length === 0) {
             processedResult.infoLinks = fallbackLinks.infoLinks;
         }
@@ -252,13 +274,12 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[]): 
     } catch (error) {
         console.error('❌ [Service] Error in generateOptions:', error);
         
-        // Return fallback result with functional links
+        // Return fallback result with reliable links
         const fallbackResult: IResult = {
             recommendation: 'Analyse en cours...',
             imageQuery: 'decision making',
             description: 'Une erreur est survenue lors de la génération des options. Utilisez les liens de recherche ci-dessous pour explorer vos options.',
-            infoLinks: fallbackLinks.infoLinks,
-            shoppingLinks: fallbackLinks.shoppingLinks,
+            ...generateReliableLinks(dilemma, 'Analyse en cours...'),
             breakdown: [{
                 option: "Option en cours d'analyse",
                 pros: ["Recherche en cours"],
