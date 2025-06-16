@@ -6,14 +6,12 @@ import { Eraser, Trophy, BookOpen, ShoppingCart, ExternalLink } from 'lucide-rea
 import { IResult } from '@/types/decision';
 import { ScoreChart } from './ScoreChart';
 import { Skeleton } from '@/components/ui/skeleton';
-
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
   clearSession: () => void;
   analysisStep: 'idle' | 'analyzing' | 'done';
 }
-
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
   isUpdating,
@@ -85,19 +83,16 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </Card>
         </div>;
   }
-  
   const averageScore = result.breakdown.length > 0 ? Math.round(result.breakdown.reduce((acc, item) => acc + item.score, 0) / result.breakdown.length) : 0;
   const topOption = result.breakdown.length > 0 ? result.breakdown.reduce((prev, current) => prev.score > current.score ? prev : current) : null;
-
-  return (
-    <div className="space-y-6 animate-fade-in">
+  return <div className="space-y-6 animate-fade-in">
       <Card className="overflow-hidden backdrop-blur-sm bg-card/70">
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="p-6 flex flex-col">
             <CardContent className="p-0 flex-grow">
               <p className="text-muted-foreground pb-2">Basé sur votre analyse, voici la meilleure option :</p>
               <div className="bg-accent border p-4 rounded-lg">
-                <h3 className="text-xl flex items-center gap-2 text-foreground font-medium">
+                <h3 className="text-xl flex items-center gap-2 text-foreground font-semibold">
                   <Trophy /> {result.recommendation}
                 </h3>
               </div>
@@ -119,15 +114,13 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     <h4 className="font-semibold flex items-center gap-2 text-sm"><ShoppingCart /> Où l'acheter ?</h4>
                     <div className="flex flex-col items-start gap-1.5 mt-2">
                         {result.shoppingLinks.map((link, i) => {
-                          // Clean up the URL to ensure it's valid
-                          const cleanUrl = link.url.startsWith('http') ? link.url : `https://${link.url}`;
-                          return (
-                            <a key={i} href={cleanUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5">
+                    // Clean up the URL to ensure it's valid
+                    const cleanUrl = link.url.startsWith('http') ? link.url : `https://${link.url}`;
+                    return <a key={i} href={cleanUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5">
                                 {link.title}
                                 <ExternalLink className="h-3 w-3" />
-                            </a>
-                          );
-                        })}
+                            </a>;
+                  })}
                     </div>
                 </div>}
               </div>
@@ -152,11 +145,9 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         </CardHeader>
         <CardContent className="space-y-4">
           {result.breakdown.sort((a, b) => b.score - a.score).map((item, index) => {
-            // Clean the option name by removing any "Option X:" prefix
-            const cleanOptionName = item.option.replace(/^Option\s+\d+:\s*/i, '').trim();
-            
-            return (
-              <div key={index} className="p-4 rounded-lg bg-accent border">
+          // Clean the option name by removing any "Option X:" prefix
+          const cleanOptionName = item.option.replace(/^Option\s+\d+:\s*/i, '').trim();
+          return <div key={index} className="p-4 rounded-lg bg-accent border">
                 <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
                   <h4 className="font-bold text-md text-foreground">{cleanOptionName}</h4>
                   <div className="flex items-center gap-2">
@@ -179,9 +170,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     </ul>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              </div>;
+        })}
         </CardContent>
       </Card>
 
@@ -220,8 +210,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </Button>
         </CardFooter>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default AnalysisResult;
