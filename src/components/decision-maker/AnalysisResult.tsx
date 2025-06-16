@@ -98,19 +98,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   const averageScore = result.breakdown.length > 0 ? Math.round(result.breakdown.reduce((acc, item) => acc + item.score, 0) / result.breakdown.length) : 0;
   const topOption = result.breakdown.length > 0 ? result.breakdown.reduce((prev, current) => prev.score > current.score ? prev : current) : null;
 
-  // Generate image URL from recommendation
-  const generateImageUrl = (recommendation: string) => {
-    const keywords = recommendation
-      .toLowerCase()
-      .replace(/[^\w\s]/g, '')
-      .split(' ')
-      .slice(0, 2)
-      .join(',');
-    return `https://images.unsplash.com/photo-1500080209535-717dd4ebaa6b?auto=format&fit=crop&w=800&h=600&q=80`;
-  };
-
-  const imageUrl = generateImageUrl(result.recommendation);
-
   return <div className="space-y-6 animate-fade-in">
       <Card className="overflow-hidden backdrop-blur-sm bg-card/70">
         <div className="grid grid-cols-1 md:grid-cols-2">
@@ -154,28 +141,12 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </div>
           
           <div className="relative min-h-[250px] md:min-h-0">
-            {!imageError && (
-              <img
-                src={imageUrl}
-                alt={result.recommendation}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-                  imageLoaded ? 'opacity-100' : 'opacity-0'
-                }`}
-                onLoad={() => setImageLoaded(true)}
-                onError={() => setImageError(true)}
-              />
-            )}
-            
-            {/* Fallback design (gradient + icon) */}
-            <div className={`absolute inset-0 w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center transition-opacity duration-300 ${
-              imageLoaded && !imageError ? 'opacity-0' : 'opacity-100'
-            }`}>
+            <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
               <div className="text-center space-y-2">
                 <Trophy className="h-16 w-16 mx-auto text-primary/40" />
                 <p className="text-sm text-muted-foreground font-medium">{result.recommendation}</p>
               </div>
             </div>
-            
             <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent md:bg-gradient-to-l"></div>
           </div>
         </div>
