@@ -6,14 +6,12 @@ import { Eraser, Trophy, BookOpen, ShoppingCart, ExternalLink } from 'lucide-rea
 import { IResult } from '@/types/decision';
 import { ScoreChart } from './ScoreChart';
 import { Skeleton } from '@/components/ui/skeleton';
-
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
   clearSession: () => void;
   analysisStep: 'idle' | 'analyzing' | 'done';
 }
-
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
   isUpdating,
@@ -87,14 +85,13 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   }
   const averageScore = result.breakdown.length > 0 ? Math.round(result.breakdown.reduce((acc, item) => acc + item.score, 0) / result.breakdown.length) : 0;
   const topOption = result.breakdown.length > 0 ? result.breakdown.reduce((prev, current) => prev.score > current.score ? prev : current) : null;
-  
   return <div className="space-y-6 animate-fade-in">
       <Card className="overflow-hidden backdrop-blur-sm bg-card/70">
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="p-6 flex flex-col">
             <CardContent className="p-0 flex-grow">
               <p className="text-muted-foreground pb-2">Basé sur votre analyse, voici la meilleure option :</p>
-              <div className="bg-gradient-to-b from-white to-gray-100 border p-4 rounded-lg">
+              <div className="bg-accent border p-4 rounded-lg">
                 <h3 className="text-xl flex items-center gap-2 text-foreground font-semibold">
                   <Trophy /> {result.recommendation}
                 </h3>
@@ -187,15 +184,15 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Options Analysées</span>
-                <span className="font-bold text-xl">{result.breakdown.length}</span>
+                <span className="text-xl font-medium">{result.breakdown.length}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Score Moyen</span>
-                <span className="font-bold text-xl">{averageScore}</span>
+                <span className="text-xl font-medium">{averageScore}</span>
               </div>
               {topOption && <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Meilleur Score</span>
-                <span className="font-bold text-xl">{topOption.score}</span>
+                <span className="text-xl font-medium">{topOption.score}</span>
               </div>}
             </CardContent>
           </Card>
@@ -215,5 +212,4 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
       </Card>
     </div>;
 };
-
 export default AnalysisResult;
