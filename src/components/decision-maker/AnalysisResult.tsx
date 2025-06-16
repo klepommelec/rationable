@@ -152,7 +152,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 <CardContent className="space-y-4">
                     {result.breakdown.sort((a, b) => b.score - a.score).map((item, index) => <div key={index} className="p-4 rounded-lg bg-accent border">
                             <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
-                                <h4 className="font-bold text-cyan-400 text-md">{item.option}</h4>
+                                <h4 className="font-bold text-md text-gray-50">{item.option}</h4>
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm font-bold">{item.score}/100</span>
                                     <Progress value={item.score} className="w-24 h-2 bg-secondary" />
@@ -161,13 +161,13 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
 
                             <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <h5 className="font-semibold text-green-400">Avantages</h5>
+                                    <h5 className="text-green-400 font-medium">Avantages</h5>
                                     <ul className="list-disc list-inside text-sm text-muted-foreground">
                                         {item.pros.map((pro, i) => <li key={i}>{pro}</li>)}
                                     </ul>
                                 </div>
                                 <div>
-                                    <h5 className="font-semibold text-red-400">Inconvénients</h5>
+                                    <h5 className="text-red-400 font-medium">Inconvénients</h5>
                                     <ul className="list-disc list-inside text-sm text-muted-foreground">
                                         {item.cons.map((con, i) => <li key={i}>{con}</li>)}
                                     </ul>
