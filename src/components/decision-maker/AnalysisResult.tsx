@@ -6,7 +6,6 @@ import { Eraser, Trophy, BookOpen, ShoppingCart, ExternalLink } from 'lucide-rea
 import { IResult } from '@/types/decision';
 import { ScoreChart } from './ScoreChart';
 import { Skeleton } from '@/components/ui/skeleton';
-
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
@@ -20,8 +19,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   analysisStep
 }) => {
   if (analysisStep === 'analyzing' || !result) {
-    return (
-        <div className="space-y-6 animate-fade-in">
+    return <div className="space-y-6 animate-fade-in">
             <Card className="overflow-hidden backdrop-blur-sm bg-card/70">
                 <div className="grid grid-cols-1 md:grid-cols-2">
                     <div className="p-6 flex flex-col">
@@ -43,15 +41,13 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     <Skeleton className="h-7 w-1/2" />
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {[...Array(3)].map((_, i) => (
-                        <div key={i} className="p-4 rounded-lg bg-accent border space-y-3">
+                    {[...Array(3)].map((_, i) => <div key={i} className="p-4 rounded-lg bg-accent border space-y-3">
                             <div className="flex justify-between items-center">
                                 <Skeleton className="h-6 w-1/3" />
                                 <Skeleton className="h-6 w-1/4" />
                             </div>
                             <Skeleton className="h-16 w-full" />
-                        </div>
-                    ))}
+                        </div>)}
                 </CardContent>
             </Card>
 
@@ -85,19 +81,15 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     <Skeleton className="h-16 w-full rounded-md" />
                 </CardFooter>
             </Card>
-        </div>
-    );
+        </div>;
   }
-
   const averageScore = result.breakdown.length > 0 ? Math.round(result.breakdown.reduce((acc, item) => acc + item.score, 0) / result.breakdown.length) : 0;
   const topOption = result.breakdown.length > 0 ? result.breakdown.reduce((prev, current) => prev.score > current.score ? prev : current) : null;
-
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     // If unsplash fails, show a placeholder
     e.currentTarget.src = '/placeholder.svg';
     e.currentTarget.onerror = null; // Prevent infinite loops
   };
-
   let imageSrc: string = '/placeholder.svg';
   if (result.imageQuery) {
     // Format query for Unsplash: use commas, no extra spaces
@@ -108,7 +100,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
     // Fallback for old history items
     imageSrc = `data:image/png;base64,${result.imageBase64}`;
   }
-
   return <div className="space-y-6 animate-fade-in">
             <Card className="overflow-hidden backdrop-blur-sm bg-card/70">
                 <div className="grid grid-cols-1 md:grid-cols-2">
@@ -116,7 +107,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                         <CardContent className="p-0 flex-grow">
                              <p className="text-muted-foreground pb-2">Basé sur votre analyse, voici la meilleure option :</p>
                              <div className="bg-cyan-900/50 border border-cyan-700 p-4 rounded-lg">
-                                <h3 className="text-xl font-bold text-cyan-400 flex items-center gap-2">
+                                <h3 className="text-xl font-bold flex items-center gap-2 text-gray-50">
                                    <Trophy /> {result.recommendation}
                                 </h3>
                              </div>
@@ -124,49 +115,31 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                         </CardContent>
                         <CardFooter className="p-0 pt-6">
                             <div className="w-full space-y-4">
-                                {result.infoLinks && result.infoLinks.length > 0 && (
-                                    <div>
+                                {result.infoLinks && result.infoLinks.length > 0 && <div>
                                         <h4 className="font-semibold flex items-center gap-2 text-sm"><BookOpen /> Pour en savoir plus</h4>
                                         <div className="flex flex-col items-start gap-1.5 mt-2">
-                                            {result.infoLinks.map((link, i) => (
-                                                <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1.5">
+                                            {result.infoLinks.map((link, i) => <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1.5">
                                                     {link.title}
                                                     <ExternalLink className="h-3 w-3" />
-                                                </a>
-                                            ))}
+                                                </a>)}
                                         </div>
-                                    </div>
-                                )}
-                                {result.shoppingLinks && result.shoppingLinks.length > 0 && (
-                                     <div>
+                                    </div>}
+                                {result.shoppingLinks && result.shoppingLinks.length > 0 && <div>
                                         <h4 className="font-semibold flex items-center gap-2 text-sm"><ShoppingCart /> Où l'acheter ?</h4>
                                         <div className="flex flex-col items-start gap-1.5 mt-2">
-                                            {result.shoppingLinks.map((link, i) => (
-                                                <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1.5">
+                                            {result.shoppingLinks.map((link, i) => <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1.5">
                                                     {link.title}
                                                     <ExternalLink className="h-3 w-3" />
-                                                </a>
-                                            ))}
+                                                </a>)}
                                         </div>
-                                    </div>
-                                )}
+                                    </div>}
                              </div>
                         </CardFooter>
                     </div>
                     <div className="relative min-h-[250px] md:min-h-0">
-                        {imageSrc ? (
-                            <img 
-                                src={imageSrc} 
-                                alt={result.recommendation} 
-                                className="absolute inset-0 w-full h-full object-cover" 
-                                key={imageSrc}
-                                onError={handleImageError}
-                            />
-                        ) : (
-                           <div className="absolute inset-0 w-full h-full bg-secondary flex items-center justify-center">
+                        {imageSrc ? <img src={imageSrc} alt={result.recommendation} className="absolute inset-0 w-full h-full object-cover" key={imageSrc} onError={handleImageError} /> : <div className="absolute inset-0 w-full h-full bg-secondary flex items-center justify-center">
                                 <img src="/placeholder.svg" alt="Placeholder" className="h-24 w-24 opacity-50" />
-                           </div>
-                        )}
+                           </div>}
                          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent md:bg-gradient-to-l"></div>
                     </div>
                 </div>
