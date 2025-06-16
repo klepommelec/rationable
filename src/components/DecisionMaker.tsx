@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
 import DilemmaSetup from './decision-maker/DilemmaSetup';
@@ -33,7 +32,7 @@ const DecisionMaker = () => {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      {(analysisStep === 'loading-criteria' || analysisStep === 'criteria-loaded' || analysisStep === 'loading-options' || analysisStep === 'done') && (
+      {(analysisStep === 'criteria-loaded' || analysisStep === 'loading-options' || analysisStep === 'done') && (
         <>
           <div className="flex items-center gap-4 mb-6 animate-fade-in">
               <EmojiPicker emoji={emoji} setEmoji={setEmoji} />
@@ -44,7 +43,6 @@ const DecisionMaker = () => {
               criteria={criteria} 
               setCriteria={setCriteria} 
               isInteractionDisabled={analysisStep === 'loading-options' || isLoading || isUpdating} 
-              isLoadingCriteria={analysisStep === 'loading-criteria'}
             />
           </div>
         </>

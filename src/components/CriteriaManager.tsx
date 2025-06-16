@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -22,10 +23,9 @@ interface CriteriaManagerProps {
   criteria: ICriterion[];
   setCriteria: React.Dispatch<React.SetStateAction<ICriterion[]>>;
   isInteractionDisabled: boolean;
-  isLoadingCriteria?: boolean;
 }
 
-export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled, isLoadingCriteria = false }: CriteriaManagerProps) => {
+export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled }: CriteriaManagerProps) => {
   const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
 
   const sensors = useSensors(
@@ -37,7 +37,7 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled, 
 
   // Animation subtile d'apparition des critères
   useEffect(() => {
-    if (!isLoadingCriteria && criteria.length > 0) {
+    if (criteria.length > 0) {
       // Reset d'abord
       setVisibleCriteria([]);
       
@@ -45,12 +45,12 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled, 
       criteria.forEach((criterion, index) => {
         setTimeout(() => {
           setVisibleCriteria(prev => [...prev, criterion.id]);
-        }, index * 100); // Délai mis à jour à 100ms entre chaque critère
+        }, index * 100);
       });
-    } else if (isLoadingCriteria) {
+    } else {
       setVisibleCriteria([]);
     }
-  }, [criteria, isLoadingCriteria]);
+  }, [criteria]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -92,39 +92,26 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled, 
     toast.success("Nouveau critère ajouté.");
   };
 
-  // Skeleton pour les critères en cours de chargement
-  const renderCriteriaSkeletons = () => {
-    return [...Array(4)].map((_, i) => (
-      <div key={`skeleton-${i}`} className="flex items-center gap-2 animate-pulse">
-        <div className="h-10 w-10 rounded-md bg-gradient-to-r from-cyan-500/20 to-blue-500/20" />
-        <div className="h-10 flex-grow rounded-md bg-gradient-to-r from-cyan-500/20 to-blue-500/20" />
-        <div className="h-10 w-10 rounded-md bg-muted" />
-      </div>
-    ));
-  };
-
   return (
     <Collapsible defaultOpen className="p-4 rounded-lg bg-accent border animate-fade-in">
       <CollapsibleTrigger className="flex justify-between items-center w-full group">
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-lg text-left">
-            {isLoadingCriteria ? "Génération des critères..." : "Gérez les critères de décision"}
+            Gérez les critères de décision
           </h3>
           <span className="text-sm font-medium text-muted-foreground">
-            {isLoadingCriteria ? "(0/4)" : `(${criteria.length}/8)`}
+            ({criteria.length}/8)
           </span>
-          {!isLoadingCriteria && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Modifiez, réorganisez (par glisser-déposer) ou supprimez les critères. L'ordre est important et reflète leur poids dans la décision.</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Modifiez, réorganisez (par glisser-déposer) ou supprimez les critères. L'ordre est important et reflète leur poids dans la décision.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-160 group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
@@ -133,44 +120,32 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled, 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={criteria} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
-              {isLoadingCriteria ? (
-                renderCriteriaSkeletons()
-              ) : (
-                criteria.map((criterion) => (
-                  <div
-                    key={criterion.id}
-                    className={`transition-all duration-300 ease-out ${
-                      visibleCriteria.includes(criterion.id)
-                        ? 'opacity-100 translate-y-0'
-                        : 'opacity-0 translate-y-1'
-                    }`}
-                  >
-                    <CriterionRow
-                      criterion={criterion}
-                      onNameChange={handleNameChange}
-                      onRemove={handleRemove}
-                      isRemoveDisabled={criteria.length <= 2}
-                      isDragDisabled={isInteractionDisabled}
-                    />
-                  </div>
-                ))
-              )}
+              {criteria.map((criterion) => (
+                <div
+                  key={criterion.id}
+                  className={`transition-all duration-300 ease-out ${
+                    visibleCriteria.includes(criterion.id)
+                      ? 'opacity-100 translate-y-0'
+                      : 'opacity-0 translate-y-1'
+                  }`}
+                >
+                  <CriterionRow
+                    criterion={criterion}
+                    onNameChange={handleNameChange}
+                    onRemove={handleRemove}
+                    isRemoveDisabled={criteria.length <= 2}
+                    isDragDisabled={isInteractionDisabled}
+                  />
+                </div>
+              ))}
             </div>
           </SortableContext>
         </DndContext>
         
-        {!isLoadingCriteria && (
-          <Button onClick={handleAdd} disabled={isInteractionDisabled || criteria.length >= 8} variant="outline" size="sm">
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Ajouter un critère
-          </Button>
-        )}
-        
-        {isLoadingCriteria && (
-          <div className="text-sm text-muted-foreground animate-pulse">
-            L'IA génère vos critères de décision...
-          </div>
-        )}
+        <Button onClick={handleAdd} disabled={isInteractionDisabled || criteria.length >= 8} variant="outline" size="sm">
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Ajouter un critère
+        </Button>
       </CollapsibleContent>
     </Collapsible>
   );

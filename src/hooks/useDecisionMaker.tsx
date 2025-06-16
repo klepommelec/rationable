@@ -21,7 +21,7 @@ const templates = [
   },
 ];
 
-type AnalysisStep = 'idle' | 'loading-criteria' | 'criteria-loaded' | 'loading-options' | 'done';
+type AnalysisStep = 'idle' | 'criteria-loaded' | 'loading-options' | 'done';
 
 export const useDecisionMaker = () => {
     const [dilemma, setDilemma] = useState('');
@@ -38,7 +38,7 @@ export const useDecisionMaker = () => {
     
     const initialCriteriaRef = useRef<ICriterion[]>([]);
     
-    const isLoading = analysisStep === 'loading-criteria' || analysisStep === 'loading-options';
+    const isLoading = analysisStep === 'loading-options';
 
     const setEmoji = (newEmoji: string) => {
         setEmojiState(newEmoji);
@@ -95,7 +95,6 @@ export const useDecisionMaker = () => {
     };
 
     const handleStartAnalysis = async () => {
-        setAnalysisStep('loading-criteria');
         setProgress(0);
         setProgressMessage("Génération des critères...");
         setResult(null);
