@@ -28,6 +28,8 @@ const DecisionMaker = () => {
     deleteDecision,
     clearHistory,
     templates,
+    hasChanges,
+    handleManualUpdate,
   } = useDecisionMaker();
 
   return (
@@ -42,7 +44,9 @@ const DecisionMaker = () => {
             <CriteriaManager 
               criteria={criteria} 
               setCriteria={setCriteria} 
-              isInteractionDisabled={analysisStep === 'loading-options' || isLoading || isUpdating} 
+              isInteractionDisabled={analysisStep === 'loading-options' || isLoading || isUpdating}
+              onUpdateAnalysis={handleManualUpdate}
+              hasChanges={hasChanges}
             />
           </div>
         </>

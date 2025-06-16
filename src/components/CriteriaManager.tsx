@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ChevronDown, Info } from 'lucide-react';
+import { PlusCircle, ChevronDown, Info, RefreshCw } from 'lucide-react';
 import { ICriterion } from '@/types/decision';
 import { CriterionRow } from './CriterionRow';
 import { toast } from 'sonner';
@@ -23,10 +23,19 @@ interface CriteriaManagerProps {
   criteria: ICriterion[];
   setCriteria: React.Dispatch<React.SetStateAction<ICriterion[]>>;
   isInteractionDisabled: boolean;
+  onUpdateAnalysis?: () => void;
+  hasChanges?: boolean;
 }
 
-export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled }: CriteriaManagerProps) => {
+export const CriteriaManager = ({ 
+  criteria, 
+  setCriteria, 
+  isInteractionDisabled, 
+  onUpdateAnalysis,
+  hasChanges = false 
+}: CriteriaManagerProps) => {
   const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
+  const [lastCriteriaCount, setLastCriteriaCount] = useState(0);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -35,22 +44,34 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled }
     })
   );
 
-  // Animation subtile d'apparition des critères
+  // Animation seulement pour les nouveaux critères
   useEffect(() => {
-    if (criteria.length > 0) {
-      // Reset d'abord
-      setVisibleCriteria([]);
-      
-      // Puis apparition progressive très rapide et subtile
-      criteria.forEach((criterion, index) => {
+    if (criteria.length > lastCriteriaCount) {
+      // Seulement animer les nouveaux critères
+      const newCriteria = criteria.slice(lastCriteriaCount);
+      newCriteria.forEach((criterion, index) => {
         setTimeout(() => {
           setVisibleCriteria(prev => [...prev, criterion.id]);
         }, index * 100);
       });
-    } else {
+    } else if (criteria.length === 0) {
+      // Reset complet si plus de critères
       setVisibleCriteria([]);
+    } else {
+      // Pour les suppressions ou réorganisations, montrer tous les critères existants immédiatement
+      setVisibleCriteria(criteria.map(c => c.id));
     }
-  }, [criteria]);
+    
+    setLastCriteriaCount(criteria.length);
+  }, [criteria, lastCriteriaCount]);
+
+  // Initialiser tous les critères comme visibles au premier rendu
+  useEffect(() => {
+    if (criteria.length > 0 && visibleCriteria.length === 0 && lastCriteriaCount === 0) {
+      setVisibleCriteria(criteria.map(c => c.id));
+      setLastCriteriaCount(criteria.length);
+    }
+  }, [criteria, visibleCriteria.length, lastCriteriaCount]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -76,6 +97,7 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled }
       return;
     }
     setCriteria((items) => items.filter((item) => item.id !== id));
+    setVisibleCriteria(prev => prev.filter(criterionId => criterionId !== id));
     toast.success("Critère supprimé.");
   };
 
@@ -142,10 +164,25 @@ export const CriteriaManager = ({ criteria, setCriteria, isInteractionDisabled }
           </SortableContext>
         </DndContext>
         
-        <Button onClick={handleAdd} disabled={isInteractionDisabled || criteria.length >= 8} variant="outline" size="sm">
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Ajouter un critère
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleAdd} disabled={isInteractionDisabled || criteria.length >= 8} variant="outline" size="sm">
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Ajouter un critère
+          </Button>
+          
+          {hasChanges && onUpdateAnalysis && (
+            <Button 
+              onClick={onUpdateAnalysis} 
+              disabled={isInteractionDisabled} 
+              variant="default" 
+              size="sm"
+              className="bg-cyan-500 hover:bg-cyan-600 text-slate-900"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Mettre à jour l'analyse
+            </Button>
+          )}
+        </div>
       </CollapsibleContent>
     </Collapsible>
   );

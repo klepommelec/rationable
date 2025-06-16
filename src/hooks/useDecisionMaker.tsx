@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { toast } from "sonner";
 import { useDebounceCallback } from 'usehooks-ts';
@@ -33,6 +34,7 @@ export const useDecisionMaker = () => {
     const [result, setResult] = useState<IResult | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [currentDecisionId, setCurrentDecisionId] = useState<string | null>(null);
+    const [hasChanges, setHasChanges] = useState(false);
 
     const { history, addDecision, updateDecision, deleteDecision, clearHistory } = useDecisionHistory();
     
@@ -49,6 +51,16 @@ export const useDecisionMaker = () => {
             }
         }
     };
+
+    // Vérifier si les critères ont changé
+    useEffect(() => {
+        if (analysisStep === 'done') {
+            const criteriaHaveChanged = JSON.stringify(criteria) !== JSON.stringify(initialCriteriaRef.current);
+            setHasChanges(criteriaHaveChanged);
+        } else {
+            setHasChanges(false);
+        }
+    }, [criteria, analysisStep]);
 
     const handleGenerateOptions = async () => {
         const currentCriteria = criteria;
@@ -70,6 +82,10 @@ export const useDecisionMaker = () => {
           const apiResult = await generateOptions(dilemma, currentCriteria);
           setResult(apiResult);
           setAnalysisStep('done');
+          
+          // Mettre à jour les critères de référence
+          initialCriteriaRef.current = currentCriteria;
+          setHasChanges(false);
           
           if (currentDecisionId) {
             const decisionToUpdate = history.find(d => d.id === currentDecisionId);
@@ -94,6 +110,12 @@ export const useDecisionMaker = () => {
         }
     };
 
+    const handleManualUpdate = () => {
+        if (hasChanges) {
+            handleGenerateOptions();
+        }
+    };
+
     const handleStartAnalysis = async () => {
         setProgress(0);
         setProgressMessage("Génération des critères...");
@@ -101,6 +123,7 @@ export const useDecisionMaker = () => {
         setCriteria([]);
         setEmojiState('🤔');
         setCurrentDecisionId(null);
+        setHasChanges(false);
 
         try {
           // Phase 1: Générer les critères
@@ -115,7 +138,7 @@ export const useDecisionMaker = () => {
           setEmojiState(response.emoji || '🤔');
           setAnalysisStep('criteria-loaded');
           
-          // Phase 2: Générer automatiquement les options (délai réduit de 20%)
+          // Phase 2: Générer automatiquement les options
           setTimeout(async () => {
             setAnalysisStep('loading-options');
             setProgressMessage("Génération des options...");
@@ -123,6 +146,9 @@ export const useDecisionMaker = () => {
             try {
               const optionsResult = await generateOptions(dilemma, newCriteria);
               setResult(optionsResult);
+              
+              // Définir les critères de référence
+              initialCriteriaRef.current = newCriteria;
               
               const newDecision: IDecision = {
                 id: crypto.randomUUID(),
@@ -145,7 +171,7 @@ export const useDecisionMaker = () => {
             } finally {
               setProgressMessage('');
             }
-          }, 800); // Réduit de 1000ms à 800ms (20% plus rapide)
+          }, 800);
           
         } catch (e) {
           if (e instanceof Error) {
@@ -157,22 +183,6 @@ export const useDecisionMaker = () => {
         }
     };
     
-    const debouncedGenerateOptions = useDebounceCallback(handleGenerateOptions, 1600); // Réduit de 2000ms à 1600ms (20% plus rapide)
-
-    useEffect(() => {
-        if (analysisStep === 'done') {
-        initialCriteriaRef.current = criteria;
-        }
-    }, [analysisStep, criteria]);
-
-    useEffect(() => {
-        const criteriaHaveChanged = JSON.stringify(criteria) !== JSON.stringify(initialCriteriaRef.current);
-        if (analysisStep === 'done' && criteriaHaveChanged && !isUpdating) {
-        toast.info("Les critères ont changé, mise à jour de l'analyse...", { icon: <RefreshCw className="animate-spin" />, duration: 2000 });
-        debouncedGenerateOptions();
-        }
-    }, [criteria, analysisStep, debouncedGenerateOptions, isUpdating]);
-    
     const applyTemplate = (template: typeof templates[0]) => {
         setDilemma(template.dilemma);
         setResult(null);
@@ -182,6 +192,7 @@ export const useDecisionMaker = () => {
         setProgress(0);
         setProgressMessage('');
         setCurrentDecisionId(null);
+        setHasChanges(false);
         toast.success(`Modèle "${template.name}" appliqué !`);
     }
 
@@ -194,6 +205,7 @@ export const useDecisionMaker = () => {
         setProgress(0);
         setProgressMessage('');
         setCurrentDecisionId(null);
+        setHasChanges(false);
         toast.info("Session réinitialisée.");
     }
     
@@ -214,6 +226,11 @@ export const useDecisionMaker = () => {
             setAnalysisStep('done');
             setProgress(0);
             setProgressMessage('');
+            
+            // Définir les critères de référence pour éviter les changements fantômes
+            initialCriteriaRef.current = decisionToLoad.criteria;
+            setHasChanges(false);
+            
             toast.info("Décision précédente chargée.");
         }
     };
@@ -246,7 +263,9 @@ export const useDecisionMaker = () => {
         history,
         isUpdating,
         isLoading,
+        hasChanges,
         handleStartAnalysis,
+        handleManualUpdate,
         applyTemplate,
         clearSession,
         loadDecision,
