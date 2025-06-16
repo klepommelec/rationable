@@ -22,18 +22,31 @@ export const ScoreChart: React.FC<ScoreChartProps> = ({ data }) => {
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground) / 0.3)" />
-            <XAxis dataKey="name" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} interval={0} />
-            <YAxis tick={{ fill: "hsl(var(--muted-foreground))" }} />
+            <CartesianGrid strokeDasharray="3 3" className="stroke-muted-foreground/30" />
+            <XAxis 
+              dataKey="name" 
+              tick={{ fontSize: 12 }} 
+              className="fill-foreground" 
+              interval={0} 
+            />
+            <YAxis 
+              tick={{ fontSize: 12 }} 
+              className="fill-foreground" 
+            />
             <Tooltip
               cursor={{ fill: 'hsl(var(--accent))' }}
               contentStyle={{
                 background: "hsl(var(--popover))",
                 borderColor: "hsl(var(--border))",
                 borderRadius: "var(--radius)",
+                color: "hsl(var(--popover-foreground))",
               }}
             />
-            <Bar dataKey="score" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+            <Bar 
+              dataKey="score" 
+              className="fill-primary" 
+              radius={[4, 4, 0, 0]} 
+            />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
