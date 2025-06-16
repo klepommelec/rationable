@@ -88,31 +88,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   
   const averageScore = result.breakdown.length > 0 ? Math.round(result.breakdown.reduce((acc, item) => acc + item.score, 0) / result.breakdown.length) : 0;
   const topOption = result.breakdown.length > 0 ? result.breakdown.reduce((prev, current) => prev.score > current.score ? prev : current) : null;
-  
-  const [imageLoaded, setImageLoaded] = React.useState(false);
-  const [imageError, setImageError] = React.useState(false);
-  
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-    setImageError(false);
-  };
-  
-  const handleImageError = () => {
-    console.log('[AnalysisResult] Image failed to load, showing placeholder');
-    setImageError(true);
-    setImageLoaded(false);
-  };
-  
-  let imageSrc: string | null = null;
-  if (result.imageQuery && !imageError) {
-    // Format query for Unsplash: use commas, no extra spaces
-    const query = result.imageQuery.replace(/ /g, ',').replace(/,,+/g, ',').trim();
-    console.log(`[AnalysisResult] Attempting to fetch image with query: "${query}"`);
-    imageSrc = `https://source.unsplash.com/800x600/?${encodeURIComponent(query)}`;
-  } else if (result.imageBase64 && !imageError) {
-    // Fallback for old history items
-    imageSrc = `data:image/png;base64,${result.imageBase64}`;
-  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -154,24 +129,12 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </div>
           
           <div className="relative min-h-[250px] md:min-h-0">
-            {imageSrc && !imageError ? (
-              <img 
-                src={imageSrc} 
-                alt={result.recommendation} 
-                className="absolute inset-0 w-full h-full object-cover" 
-                onLoad={handleImageLoad}
-                onError={handleImageError}
-                style={{ display: imageLoaded ? 'block' : 'none' }}
-              />
-            ) : null}
-            
-            {/* Show placeholder when no image or error */}
-            {(!imageSrc || imageError || !imageLoaded) && (
-              <div className="absolute inset-0 w-full h-full bg-secondary flex items-center justify-center">
-                <img src="/placeholder.svg" alt="Placeholder" className="h-24 w-24 opacity-50" />
+            <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+              <div className="text-center space-y-2">
+                <Trophy className="h-16 w-16 mx-auto text-primary/40" />
+                <p className="text-sm text-muted-foreground font-medium">{result.recommendation}</p>
               </div>
-            )}
-            
+            </div>
             <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent md:bg-gradient-to-l"></div>
           </div>
         </div>
