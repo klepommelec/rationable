@@ -157,14 +157,14 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 </div>
 
                 <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h5 className="text-green-400 font-medium text-xs">Avantages</h5>
+                  <div className="">
+                    <h5 className="text-green-400 font-medium text-xs pb-1">Avantages</h5>
                     <ul className="list-disc list-inside text-sm text-muted-foreground">
                       {item.pros.map((pro, i) => <li key={i}>{pro}</li>)}
                     </ul>
                   </div>
                   <div>
-                    <h5 className="text-red-400 text-xs font-medium">Inconvénients</h5>
+                    <h5 className="text-red-400 text-xs font-medium pb-1 ">Inconvénients</h5>
                     <ul className="list-disc list-inside text-sm text-muted-foreground">
                       {item.cons.map((con, i) => <li key={i}>{con}</li>)}
                     </ul>
