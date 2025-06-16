@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,14 +7,12 @@ import { IResult } from '@/types/decision';
 import { ScoreChart } from './ScoreChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import ValidatedLink from '@/components/ValidatedLink';
-
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
   clearSession: () => void;
   analysisStep: 'idle' | 'analyzing' | 'done';
 }
-
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
   isUpdating,
@@ -30,7 +27,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
     setImageLoaded(false);
     setImageError(false);
   }, [result?.recommendation]);
-
   if (analysisStep === 'analyzing' || !result) {
     return <div className="space-y-6 animate-fade-in">
             <Card className="overflow-hidden backdrop-blur-sm bg-card/70">
@@ -96,14 +92,12 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </Card>
         </div>;
   }
-
   const averageScore = result.breakdown.length > 0 ? Math.round(result.breakdown.reduce((acc, item) => acc + item.score, 0) / result.breakdown.length) : 0;
   const topOption = result.breakdown.length > 0 ? result.breakdown.reduce((prev, current) => prev.score > current.score ? prev : current) : null;
-
   return <div className="space-y-6 animate-fade-in">
       <Card className="overflow-hidden backdrop-blur-sm bg-card/70">
-        <div className="grid grid-cols-1 md:grid-cols-2">
-          <div className="p-6 flex flex-col">
+        <div className="">
+          <div className="p-6 ">
             <CardContent className="p-0 flex-grow">
               <p className="text-muted-foreground pb-2">Basé sur votre analyse, voici la meilleure option :</p>
               <div className="bg-gradient-to-b from-white to-gray-100 border p-4 rounded-lg">
@@ -119,40 +113,20 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 {result.infoLinks && result.infoLinks.length > 0 && <div>
                     <h4 className="font-semibold flex items-center gap-2 text-sm"><BookOpen /> Pour en savoir plus</h4>
                     <div className="flex flex-col items-start gap-1.5 mt-2">
-                        {result.infoLinks.map((link, i) => (
-                          <ValidatedLink 
-                            key={i} 
-                            link={link} 
-                            fallbackSearchQuery={result.recommendation}
-                          />
-                        ))}
+                        {result.infoLinks.map((link, i) => <ValidatedLink key={i} link={link} fallbackSearchQuery={result.recommendation} />)}
                     </div>
                 </div>}
                 {result.shoppingLinks && result.shoppingLinks.length > 0 && <div>
                     <h4 className="font-semibold flex items-center gap-2 text-sm"><ShoppingCart /> Où l'acheter ?</h4>
                     <div className="flex flex-col items-start gap-1.5 mt-2">
-                        {result.shoppingLinks.map((link, i) => (
-                          <ValidatedLink 
-                            key={i} 
-                            link={link} 
-                            fallbackSearchQuery={result.recommendation}
-                          />
-                        ))}
+                        {result.shoppingLinks.map((link, i) => <ValidatedLink key={i} link={link} fallbackSearchQuery={result.recommendation} />)}
                     </div>
                 </div>}
               </div>
             </CardFooter>
           </div>
           
-          <div className="relative min-h-[250px] md:min-h-0">
-            <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
-              <div className="text-center space-y-2">
-                <Trophy className="h-16 w-16 mx-auto text-primary/40" />
-                <p className="text-sm text-muted-foreground font-medium">{result.recommendation}</p>
-              </div>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent md:bg-gradient-to-l"></div>
-          </div>
+          
         </div>
       </Card>
 
@@ -229,5 +203,4 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
       </Card>
     </div>;
 };
-
 export default AnalysisResult;
