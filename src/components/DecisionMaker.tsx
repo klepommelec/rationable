@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
 import DilemmaSetup from './decision-maker/DilemmaSetup';
@@ -5,6 +6,7 @@ import AnalysisResult from './decision-maker/AnalysisResult';
 import { EmojiPicker } from './EmojiPicker';
 import { CriteriaManager } from './CriteriaManager';
 import { OptionsLoadingSkeleton } from './OptionsLoadingSkeleton';
+import ManualOptionsGenerator from './ManualOptionsGenerator';
 
 const DecisionMaker = () => {
   const {
@@ -70,6 +72,16 @@ const DecisionMaker = () => {
           progressMessage={progressMessage}
           templates={templates}
         />
+      )}
+      
+      {analysisStep === 'criteria-loaded' && (
+        <div className="mb-6">
+          <ManualOptionsGenerator
+            onGenerateOptions={handleManualUpdate}
+            isLoading={isUpdating}
+            hasChanges={hasChanges}
+          />
+        </div>
       )}
       
       {analysisStep === 'loading-options' && (

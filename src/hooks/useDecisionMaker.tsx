@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { toast } from "sonner";
 import { useDebounceCallback } from 'usehooks-ts';
@@ -35,6 +34,7 @@ export const useDecisionMaker = () => {
     const [isUpdating, setIsUpdating] = useState(false);
     const [currentDecisionId, setCurrentDecisionId] = useState<string | null>(null);
     const [hasChanges, setHasChanges] = useState(false);
+    const [retryCount, setRetryCount] = useState(0);
 
     const { history, addDecision, updateDecision, deleteDecision, clearHistory } = useDecisionHistory();
     
@@ -62,7 +62,7 @@ export const useDecisionMaker = () => {
         }
     }, [criteria, analysisStep]);
 
-    const handleGenerateOptions = async () => {
+    const handleGenerateOptions = async (isRetry = false) => {
         const currentCriteria = criteria;
         
         if (currentCriteria.length < 2) {
@@ -77,11 +77,20 @@ export const useDecisionMaker = () => {
         setIsUpdating(true);
         setAnalysisStep('loading-options');
         setProgressMessage("Analyse des options en cours...");
+        
+        if (isRetry) {
+            setRetryCount(prev => prev + 1);
+            console.log(`Tentative de génération d'options n°${retryCount + 1}`);
+        }
 
         try {
+          console.log("Generating options with criteria:", currentCriteria);
           const apiResult = await generateOptions(dilemma, currentCriteria);
+          console.log("Options generated successfully:", apiResult);
+          
           setResult(apiResult);
           setAnalysisStep('done');
+          setRetryCount(0);
           
           // Mettre à jour les critères de référence
           initialCriteriaRef.current = currentCriteria;
@@ -98,12 +107,20 @@ export const useDecisionMaker = () => {
                 updateDecision(updated);
             }
           }
-          toast.success("Analyse mise à jour !");
+          
+          toast.success(isRetry ? "Options générées avec succès !" : "Analyse mise à jour !");
         } catch (e) {
-          if (e instanceof Error) {
-            toast.error(`Erreur lors de la mise à jour de l'analyse : ${e.message}`);
+          console.error("Error generating options:", e);
+          const errorMessage = e instanceof Error ? e.message : "Erreur inconnue";
+          
+          if (retryCount < 2) {
+            toast.error(`${errorMessage} - Nouvelle tentative...`);
+            setTimeout(() => handleGenerateOptions(true), 1500);
+          } else {
+            toast.error(`Impossible de générer les options après ${retryCount + 1} tentatives. ${errorMessage}`);
+            setAnalysisStep('criteria-loaded');
+            setRetryCount(0);
           }
-          setAnalysisStep('criteria-loaded');
         } finally {
           setIsUpdating(false);
           setProgressMessage('');
@@ -117,6 +134,7 @@ export const useDecisionMaker = () => {
     };
 
     const handleStartAnalysis = async () => {
+        console.log("Starting analysis for dilemma:", dilemma);
         setProgress(0);
         setProgressMessage("Génération des critères...");
         setResult(null);
@@ -124,10 +142,13 @@ export const useDecisionMaker = () => {
         setEmojiState('🤔');
         setCurrentDecisionId(null);
         setHasChanges(false);
+        setRetryCount(0);
 
         try {
           // Phase 1: Générer les critères
+          console.log("Phase 1: Generating criteria");
           const response = await generateCriteriaOnly(dilemma);
+          console.log("Criteria generated:", response);
           
           const newCriteria = response.criteria.map((name: string) => ({
             id: crypto.randomUUID(),
@@ -140,11 +161,13 @@ export const useDecisionMaker = () => {
           
           // Phase 2: Générer automatiquement les options
           setTimeout(async () => {
+            console.log("Phase 2: Generating options automatically");
             setAnalysisStep('loading-options');
             setProgressMessage("Génération des options...");
             
             try {
               const optionsResult = await generateOptions(dilemma, newCriteria);
+              console.log("Options generated automatically:", optionsResult);
               setResult(optionsResult);
               
               // Définir les critères de référence
@@ -164,9 +187,9 @@ export const useDecisionMaker = () => {
               setAnalysisStep('done');
               toast.success("Analyse complète générée !");
             } catch (e) {
-              if (e instanceof Error) {
-                toast.error(`Erreur lors de la génération des options : ${e.message}`);
-              }
+              console.error("Error in automatic options generation:", e);
+              const errorMessage = e instanceof Error ? e.message : "Erreur inconnue";
+              toast.error(`Erreur lors de la génération automatique : ${errorMessage}`);
               setAnalysisStep('criteria-loaded');
             } finally {
               setProgressMessage('');
@@ -174,9 +197,9 @@ export const useDecisionMaker = () => {
           }, 800);
           
         } catch (e) {
-          if (e instanceof Error) {
-            toast.error(`Erreur lors de l'analyse : ${e.message}`);
-          }
+          console.error("Error in analysis start:", e);
+          const errorMessage = e instanceof Error ? e.message : "Erreur inconnue";
+          toast.error(`Erreur lors de l'analyse : ${errorMessage}`);
           setAnalysisStep('idle');
           setProgress(0);
           setProgressMessage('');
