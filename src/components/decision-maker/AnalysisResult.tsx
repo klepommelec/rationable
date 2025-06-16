@@ -109,7 +109,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 {result.infoLinks && result.infoLinks.length > 0 && <div>
                     <h4 className="font-semibold flex items-center gap-2 text-sm"><BookOpen /> Pour en savoir plus</h4>
                     <div className="flex flex-col items-start gap-1.5 mt-2">
-                        {result.infoLinks.map((link, i) => <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1.5">
+                        {result.infoLinks.map((link, i) => <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5">
                                 {link.title}
                                 <ExternalLink className="h-3 w-3" />
                             </a>)}
@@ -118,10 +118,16 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 {result.shoppingLinks && result.shoppingLinks.length > 0 && <div>
                     <h4 className="font-semibold flex items-center gap-2 text-sm"><ShoppingCart /> Où l'acheter ?</h4>
                     <div className="flex flex-col items-start gap-1.5 mt-2">
-                        {result.shoppingLinks.map((link, i) => <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1.5">
+                        {result.shoppingLinks.map((link, i) => {
+                          // Clean up the URL to ensure it's valid
+                          const cleanUrl = link.url.startsWith('http') ? link.url : `https://${link.url}`;
+                          return (
+                            <a key={i} href={cleanUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5">
                                 {link.title}
                                 <ExternalLink className="h-3 w-3" />
-                            </a>)}
+                            </a>
+                          );
+                        })}
                     </div>
                 </div>}
               </div>
@@ -145,32 +151,37 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           <CardTitle>Analyse Détaillée des Options</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {result.breakdown.sort((a, b) => b.score - a.score).map((item, index) => (
-            <div key={index} className="p-4 rounded-lg bg-accent border">
-              <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
-                <h4 className="font-bold text-md text-foreground">{item.option}</h4>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold">{item.score}/100</span>
-                  <Progress value={item.score} className="w-24 h-2 bg-secondary" />
+          {result.breakdown.sort((a, b) => b.score - a.score).map((item, index) => {
+            // Clean the option name by removing any "Option X:" prefix
+            const cleanOptionName = item.option.replace(/^Option\s+\d+:\s*/i, '').trim();
+            
+            return (
+              <div key={index} className="p-4 rounded-lg bg-accent border">
+                <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
+                  <h4 className="font-bold text-md text-foreground">{cleanOptionName}</h4>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold">{item.score}/100</span>
+                    <Progress value={item.score} className="w-24 h-2 bg-secondary" />
+                  </div>
                 </div>
-              </div>
 
-              <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h5 className="text-green-400 font-medium">Avantages</h5>
-                  <ul className="list-disc list-inside text-sm text-muted-foreground">
-                    {item.pros.map((pro, i) => <li key={i}>{pro}</li>)}
-                  </ul>
-                </div>
-                <div>
-                  <h5 className="text-red-400 font-medium">Inconvénients</h5>
-                  <ul className="list-disc list-inside text-sm text-muted-foreground">
-                    {item.cons.map((con, i) => <li key={i}>{con}</li>)}
-                  </ul>
+                <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h5 className="text-green-400 font-medium">Avantages</h5>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground">
+                      {item.pros.map((pro, i) => <li key={i}>{pro}</li>)}
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-red-400 font-medium">Inconvénients</h5>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground">
+                      {item.cons.map((con, i) => <li key={i}>{con}</li>)}
+                    </ul>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </CardContent>
       </Card>
 
