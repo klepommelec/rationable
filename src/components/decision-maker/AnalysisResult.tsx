@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { RotateCcw, BarChart3 } from 'lucide-react';
+import { RotateCcw, BarChart3, CheckCircle, XCircle } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { DecisionExplanation } from './DecisionExplanation';
 import { ComparisonTable } from './ComparisonTable';
@@ -13,6 +13,7 @@ import { EnhancedRadarChart } from './EnhancedRadarChart';
 import { MetricsVisual } from './MetricsVisual';
 import { ScoreChart } from './ScoreChart';
 import { ExportMenu } from '../ExportMenu';
+
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
@@ -29,6 +30,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
 }) => {
   if (!result) return null;
   const topOption = result.breakdown.reduce((prev, current) => current.score > prev.score ? current : prev);
+  
   return <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
             {/* Header with actions */}
             <Card>
@@ -55,6 +57,48 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                         </div>
                     </div>
                 </CardHeader>
+            </Card>
+
+            {/* Pros/Cons de l'option recommandée */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-lg">
+                        Analyse de l'option recommandée
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 rounded-lg bg-green-50 border border-green-200">
+                            <div className="flex items-center gap-2 mb-3">
+                                <CheckCircle className="h-5 w-5 text-green-600" />
+                                <h3 className="font-semibold text-green-800">Points forts ({topOption.pros.length})</h3>
+                            </div>
+                            <ul className="space-y-2">
+                                {topOption.pros.map((pro, index) => (
+                                    <li key={index} className="text-sm text-green-700 flex items-start gap-2">
+                                        <span className="text-green-600 mt-1">•</span>
+                                        <span>{pro}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        
+                        <div className="p-4 rounded-lg bg-red-50 border border-red-200">
+                            <div className="flex items-center gap-2 mb-3">
+                                <XCircle className="h-5 w-5 text-red-600" />
+                                <h3 className="font-semibold text-red-800">Points faibles ({topOption.cons.length})</h3>
+                            </div>
+                            <ul className="space-y-2">
+                                {topOption.cons.map((con, index) => (
+                                    <li key={index} className="text-sm text-red-700 flex items-start gap-2">
+                                        <span className="text-red-600 mt-1">•</span>
+                                        <span>{con}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                </CardContent>
             </Card>
 
             {/* Decision explanation */}
