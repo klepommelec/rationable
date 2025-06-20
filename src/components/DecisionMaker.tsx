@@ -5,6 +5,7 @@ import DilemmaSetup from './decision-maker/DilemmaSetup';
 import AnalysisResult from './decision-maker/AnalysisResult';
 import { EmojiPicker } from './EmojiPicker';
 import { CriteriaManager } from './CriteriaManager';
+import { CriteriaWeightManager } from './CriteriaWeightManager';
 import { OptionsLoadingSkeleton } from './OptionsLoadingSkeleton';
 import ManualOptionsGenerator from './ManualOptionsGenerator';
 import DebugPanel from './DebugPanel';
@@ -33,10 +34,14 @@ const DecisionMaker = () => {
     templates,
     hasChanges,
     handleManualUpdate,
+    handleWeightChange,
+    handleResetWeights,
     debugMode,
     setDebugMode,
     lastApiResponse,
   } = useDecisionMaker();
+
+  const showWeightManager = analysisStep === 'done' && result && criteria.length > 0;
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -53,8 +58,21 @@ const DecisionMaker = () => {
               isInteractionDisabled={analysisStep === 'loading-options' || isLoading || isUpdating}
               onUpdateAnalysis={handleManualUpdate}
               hasChanges={hasChanges}
+              onWeightChange={handleWeightChange}
+              onResetWeights={handleResetWeights}
             />
           </div>
+          
+          {showWeightManager && (
+            <div className="w-full mb-6">
+              <CriteriaWeightManager
+                criteria={criteria}
+                onWeightChange={handleWeightChange}
+                onResetWeights={handleResetWeights}
+                isDisabled={isUpdating || isLoading}
+              />
+            </div>
+          )}
         </>
       )}
 
