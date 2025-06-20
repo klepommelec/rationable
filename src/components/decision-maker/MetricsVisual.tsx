@@ -66,7 +66,7 @@ export const MetricsVisual: React.FC<MetricsVisualProps> = ({
       {/* Métriques principales */}
       <Card>
         <CardHeader>
-          <CardTitle>Métriques importantes</CardTitle>
+          <CardTitle className="text-lg">Métriques importantes</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -93,7 +93,7 @@ export const MetricsVisual: React.FC<MetricsVisualProps> = ({
       {/* Analyse des options */}
       <Card>
         <CardHeader>
-          <CardTitle>Classement des Options</CardTitle>
+          <CardTitle className="text-lg">Classement des Options</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
