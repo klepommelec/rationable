@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,9 +56,9 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </div>
         </CardHeader>
         <CardContent>
-          {/* Image principale de la recommandation avec contexte amélioré */}
+          {/* Image principale de la recommandation avec taille réduite de 50% */}
           <div className="mb-4 flex justify-start">
-            <DecisionImage imageQuery={result.imageQuery} alt={`Illustration pour ${result.recommendation}`} size="large" className="max-w-md" option={topOption.option} dilemma={dilemma} index={0} />
+            <DecisionImage imageQuery={result.imageQuery} alt={`Illustration pour ${result.recommendation}`} size="large" className="max-w-xs" option={topOption.option} dilemma={dilemma} index={0} />
           </div>
           
           {/* ... keep existing code (grid with pros/cons) */}
