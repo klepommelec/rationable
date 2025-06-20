@@ -1,10 +1,10 @@
-
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, TrendingDown, Minus, Star, Award, Medal, CheckCircle, XCircle } from 'lucide-react';
 import { IBreakdownItem } from '@/types/decision';
+
 interface VisualIndicatorsProps {
   data: IBreakdownItem[];
 }
@@ -92,11 +92,11 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({
                         </Badge>}
                     </div>
                     <div className="flex items-center gap-2">
-                      {getTrendIcon(item.score)}
                       <span className="text-xs text-muted-foreground">
                         {item.score > averageScore ? '+' : ''}
                         {Math.round(item.score - averageScore)} vs moyenne
                       </span>
+                      {getTrendIcon(item.score)}
                       <span className="text-sm font-semibold">{item.score}</span>
                     </div>
                   </div>
