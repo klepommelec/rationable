@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,30 +13,23 @@ import { EnhancedRadarChart } from './EnhancedRadarChart';
 import { MetricsVisual } from './MetricsVisual';
 import { ScoreChart } from './ScoreChart';
 import { ExportMenu } from '../ExportMenu';
-
 interface AnalysisResultProps {
-    result: IResult | null;
-    isUpdating: boolean;
-    clearSession: () => void;
-    analysisStep: string;
-    currentDecision?: any;
+  result: IResult | null;
+  isUpdating: boolean;
+  clearSession: () => void;
+  analysisStep: string;
+  currentDecision?: any;
 }
-
-const AnalysisResult: React.FC<AnalysisResultProps> = ({ 
-  result, 
-  isUpdating, 
-  clearSession, 
+const AnalysisResult: React.FC<AnalysisResultProps> = ({
+  result,
+  isUpdating,
+  clearSession,
   analysisStep,
-  currentDecision 
+  currentDecision
 }) => {
-    if (!result) return null;
-
-    const topOption = result.breakdown.reduce((prev, current) => 
-        current.score > prev.score ? current : prev
-    );
-
-    return (
-        <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
+  if (!result) return null;
+  const topOption = result.breakdown.reduce((prev, current) => current.score > prev.score ? current : prev);
+  return <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
             {/* Header with actions */}
             <Card>
                 <CardHeader>
@@ -46,10 +38,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                             <CardTitle className="text-xl sm:text-2xl mb-2 break-words">
                                 Résultat de l'analyse
                             </CardTitle>
-                            <Badge 
-                                variant="secondary" 
-                                className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs sm:text-sm inline-flex items-center gap-1 max-w-full"
-                            >
+                            <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs sm:text-sm inline-flex items-center gap-1 max-w-full">
                                 <span className="flex-shrink-0" aria-hidden="true">✅</span>
                                 <span className="truncate">
                                     Recommandation: {topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
@@ -57,18 +46,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                             </Badge>
                         </div>
                         <div className="flex gap-2 flex-wrap justify-end">
-                            {currentDecision && (
-                                <ExportMenu 
-                                    decisions={[]} 
-                                    singleDecision={currentDecision} 
-                                />
-                            )}
-                            <Button 
-                                variant="outline" 
-                                onClick={clearSession}
-                                className="text-xs sm:text-sm"
-                                aria-label="Commencer une nouvelle analyse"
-                            >
+                            {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
+                            <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm" aria-label="Commencer une nouvelle analyse">
                                 <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
                                 <span className="hidden sm:inline">Nouvelle analyse</span>
                                 <span className="sm:hidden">Nouveau</span>
@@ -86,29 +65,17 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                         <BarChart3 className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
-                        <span>Visualisations et Analyses</span>
+                        <span>Analyse IA</span>
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-6">
-                    <Tabs 
-                        defaultValue="metrics" 
-                        className="w-full"
-                        aria-label="Onglets de visualisation des données"
-                    >
+                    <Tabs defaultValue="metrics" className="w-full" aria-label="Onglets de visualisation des données">
                         <TabsList className="grid w-full grid-cols-2 gap-1 h-auto p-1">
-                            <TabsTrigger 
-                                value="metrics"
-                                className="text-xs sm:text-sm p-2 sm:p-3"
-                                aria-label="Métriques détaillées"
-                            >
+                            <TabsTrigger value="metrics" className="text-xs sm:text-sm p-2 sm:p-3" aria-label="Métriques détaillées">
                                 <span className="hidden sm:inline">Métriques</span>
                                 <span className="sm:hidden">Métr.</span>
                             </TabsTrigger>
-                            <TabsTrigger 
-                                value="comparison"
-                                className="text-xs sm:text-sm p-2 sm:p-3"
-                                aria-label="Tableau de comparaison"
-                            >
+                            <TabsTrigger value="comparison" className="text-xs sm:text-sm p-2 sm:p-3" aria-label="Tableau de comparaison">
                                 <span className="hidden sm:inline">Comparaison</span>
                                 <span className="sm:hidden">Comp.</span>
                             </TabsTrigger>
@@ -149,8 +116,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     </Tabs>
                 </CardContent>
             </Card>
-        </div>
-    );
+        </div>;
 };
-
 export default AnalysisResult;
