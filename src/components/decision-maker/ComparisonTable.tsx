@@ -7,7 +7,7 @@ import { DecisionImage } from './DecisionImage';
 
 interface ComparisonTableProps {
   breakdown: IBreakdownItem[];
-  dilemma?: string; // Ajouter le contexte du dilemme
+  dilemma?: string;
 }
 
 export const ComparisonTable: React.FC<ComparisonTableProps> = ({ breakdown, dilemma }) => {
@@ -44,6 +44,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ breakdown, dil
                   size="small"
                   option={item.option}
                   dilemma={dilemma}
+                  index={index}
                 />
               </TableCell>
               <TableCell>

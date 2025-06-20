@@ -21,7 +21,7 @@ interface AnalysisResultProps {
   clearSession: () => void;
   analysisStep: string;
   currentDecision?: any;
-  dilemma?: string; // Ajouter le dilemma comme prop
+  dilemma?: string;
 }
 
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
@@ -64,7 +64,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </div>
         </CardHeader>
         <CardContent>
-          {/* Image principale de la recommandation avec contexte */}
+          {/* Image principale de la recommandation avec contexte amélioré */}
           <div className="mb-4 flex justify-center">
             <DecisionImage 
               imageQuery={result.imageQuery} 
@@ -73,9 +73,11 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               className="max-w-md"
               option={topOption.option}
               dilemma={dilemma}
+              index={0}
             />
           </div>
           
+          {/* ... keep existing code (grid with pros/cons) */}
           <div className="grid grid-cols-2 gap-2">
             <div className="text-green-700 bg-green-50 p-2 rounded">
               <div className="font-medium mb-1 text-xs pb-0.5">Points forts ({topOption.pros.length})</div>
@@ -126,10 +128,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
 
             <TabsContent value="comparison" className="mt-6">
               <div className="space-y-6">
-                {/* Visualisation des scores en haut */}
                 <ScoreChart data={result.breakdown} />
                 
-                {/* Graphiques au milieu */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="w-full overflow-hidden">
                     <ScorePieChart data={result.breakdown} />
@@ -139,7 +139,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                   </div>
                 </div>
                 
-                {/* Tableau de comparaison en bas avec contexte */}
                 <div className="w-full overflow-x-auto">
                   <ComparisonTable breakdown={result.breakdown} dilemma={dilemma} />
                 </div>
