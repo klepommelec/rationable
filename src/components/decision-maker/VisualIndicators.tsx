@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, TrendingDown, Minus, Star, Award, Medal, CheckCircle, XCircle } from 'lucide-react';
 import { IBreakdownItem } from '@/types/decision';
-
 interface VisualIndicatorsProps {
   data: IBreakdownItem[];
 }
@@ -82,7 +81,7 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({
             const cleanName = item.option.replace(/^Option\s+\d+:\s*/i, '').trim();
             return <div key={item.option} style={{
               animationDelay: `${index * 100}ms`
-            }} className="space-y-2 p-3 rounded-lg border transition-colors animate-fade-in bg-gray-100 hover:bg-gray-200">
+            }} className="space-y-2 p-3 rounded-lg border transition-colors animate-fade-in bg-white">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {getScoreIcon(item.score, index)}
