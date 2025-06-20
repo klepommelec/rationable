@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,7 @@ interface AnalysisResultProps {
   clearSession: () => void;
   analysisStep: string;
   currentDecision?: any;
+  dilemma?: string; // Ajouter le dilemma comme prop
 }
 
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
@@ -29,7 +29,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   isUpdating,
   clearSession,
   analysisStep,
-  currentDecision
+  currentDecision,
+  dilemma
 }) => {
   if (!result) return null;
   
@@ -63,13 +64,15 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </div>
         </CardHeader>
         <CardContent>
-          {/* Image principale de la recommandation */}
+          {/* Image principale de la recommandation avec contexte */}
           <div className="mb-4 flex justify-center">
             <DecisionImage 
               imageQuery={result.imageQuery} 
               alt={`Illustration pour ${result.recommendation}`}
               size="large"
               className="max-w-md"
+              option={topOption.option}
+              dilemma={dilemma}
             />
           </div>
           
@@ -136,9 +139,9 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                   </div>
                 </div>
                 
-                {/* Tableau de comparaison en bas */}
+                {/* Tableau de comparaison en bas avec contexte */}
                 <div className="w-full overflow-x-auto">
-                  <ComparisonTable breakdown={result.breakdown} />
+                  <ComparisonTable breakdown={result.breakdown} dilemma={dilemma} />
                 </div>
               </div>
             </TabsContent>

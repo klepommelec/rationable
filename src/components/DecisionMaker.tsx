@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
 import { EmojiPicker } from './EmojiPicker';
@@ -135,6 +134,7 @@ const DecisionMaker = () => {
               clearSession={clearSession}
               analysisStep={analysisStep}
               currentDecision={getCurrentDecision()}
+              dilemma={dilemma}
             />
           </React.Suspense>
         )}

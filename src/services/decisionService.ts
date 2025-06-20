@@ -154,7 +154,7 @@ export const startAnalysis = async (dilemma: string): Promise<IFullAnalysisRespo
     
     Important :
     - Le score doit être un nombre entre 0 et 100
-    - imageQuery en anglais, 2-3 mots-clés
+    - imageQuery en anglais, 2-3 mots-clés spécifiques au sujet principal
     - Au moins 3 options dans breakdown
     - URLs valides pour les liens`;
 
@@ -192,7 +192,7 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[]): 
     Répondez UNIQUEMENT avec un objet JSON valide :
     {
       "recommendation": "Nom précis de la meilleure option",
-      "imageQuery": "english keywords",
+      "imageQuery": "english keywords specific",
       "description": "Description engageante de pourquoi c'est le meilleur choix (2-3 phrases)",
       "infoLinks": [
         { "title": "Guide comparatif", "url": "RECHERCHE:guide comparatif lunettes de soleil Ray-Ban" },
@@ -227,7 +227,7 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[]): 
     CRITIQUES :
     - Options concrètes et spécifiques au dilemme (pas "Option 1", "Option 2")
     - Scores différents entre 0-100 pour chaque option
-    - imageQuery : 2-3 mots-clés en anglais
+    - imageQuery : 2-3 mots-clés SPÉCIFIQUES en anglais liés au sujet principal
     - Pour les liens, utilisez UNIQUEMENT les préfixes "RECHERCHE:" ou "ACHAT:" comme indiqué`;
 
     try {

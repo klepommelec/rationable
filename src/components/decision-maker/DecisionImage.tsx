@@ -1,19 +1,23 @@
 
 import React, { useState, useEffect } from 'react';
-import { getImageFromUnsplash, getPlaceholderImage } from '@/services/imageService';
+import { getImageFromUnsplash, getPlaceholderImage, generateContextualImageQuery } from '@/services/imageService';
 
 interface DecisionImageProps {
   imageQuery: string;
   alt: string;
   className?: string;
   size?: 'small' | 'medium' | 'large';
+  option?: string; // Nouvelle prop pour l'option spécifique
+  dilemma?: string; // Nouvelle prop pour le contexte du dilemme
 }
 
 export const DecisionImage: React.FC<DecisionImageProps> = ({ 
   imageQuery, 
   alt, 
   className = "",
-  size = 'medium'
+  size = 'medium',
+  option,
+  dilemma
 }) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,25 +35,32 @@ export const DecisionImage: React.FC<DecisionImageProps> = ({
       setHasError(false);
       
       try {
-        const url = await getImageFromUnsplash(imageQuery);
+        // Utiliser l'option pour générer une requête plus contextuelle
+        const contextualQuery = option 
+          ? generateContextualImageQuery(option, dilemma)
+          : imageQuery;
+        
+        console.log('Fetching image for query:', contextualQuery);
+        
+        const url = await getImageFromUnsplash(contextualQuery);
         if (url) {
           setImageUrl(url);
         } else {
-          setImageUrl(getPlaceholderImage(imageQuery));
+          setImageUrl(getPlaceholderImage(contextualQuery));
         }
       } catch (error) {
         console.error('Error loading image:', error);
-        setImageUrl(getPlaceholderImage(imageQuery));
+        setImageUrl(getPlaceholderImage(option || imageQuery));
         setHasError(true);
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (imageQuery) {
+    if (imageQuery || option) {
       fetchImage();
     }
-  }, [imageQuery]);
+  }, [imageQuery, option, dilemma]);
 
   if (isLoading) {
     return (
@@ -62,13 +73,13 @@ export const DecisionImage: React.FC<DecisionImageProps> = ({
   return (
     <div className={`${sizeClasses[size]} overflow-hidden rounded-lg ${className}`}>
       <img
-        src={imageUrl || getPlaceholderImage(imageQuery)}
+        src={imageUrl || getPlaceholderImage(option || imageQuery)}
         alt={alt}
         className="w-full h-full object-cover"
         onError={() => {
           if (!hasError) {
             setHasError(true);
-            setImageUrl(getPlaceholderImage(imageQuery));
+            setImageUrl(getPlaceholderImage(option || imageQuery));
           }
         }}
       />

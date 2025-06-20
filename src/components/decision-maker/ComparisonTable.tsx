@@ -7,9 +7,10 @@ import { DecisionImage } from './DecisionImage';
 
 interface ComparisonTableProps {
   breakdown: IBreakdownItem[];
+  dilemma?: string; // Ajouter le contexte du dilemme
 }
 
-export const ComparisonTable: React.FC<ComparisonTableProps> = ({ breakdown }) => {
+export const ComparisonTable: React.FC<ComparisonTableProps> = ({ breakdown, dilemma }) => {
   const getScoreBadgeColor = (score: number) => {
     if (score >= 80) return "bg-green-100 text-green-800";
     if (score >= 60) return "bg-yellow-100 text-yellow-800";
@@ -41,6 +42,8 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ breakdown }) =
                   imageQuery={`${item.option} product`}
                   alt={`Image pour ${item.option}`}
                   size="small"
+                  option={item.option}
+                  dilemma={dilemma}
                 />
               </TableCell>
               <TableCell>
