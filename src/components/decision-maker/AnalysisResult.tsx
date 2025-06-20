@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -60,35 +59,18 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="p-4 rounded-lg bg-green-50 border border-green-200">
-                            <div className="flex items-center gap-2 mb-3">
-                                <CheckCircle className="h-5 w-5 text-green-600" />
-                                <h3 className="font-semibold text-green-800">Points forts ({topOption.pros.length})</h3>
-                            </div>
-                            <ul className="space-y-2">
-                                {topOption.pros.map((pro, index) => (
-                                    <li key={index} className="text-sm text-green-700 flex items-start gap-2">
-                                        <span className="text-green-600 mt-1">•</span>
-                                        <span>{pro}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className="text-green-700 bg-green-50 p-2 rounded">
+                            <div className="font-medium mb-1">Points forts ({topOption.pros.length})</div>
+                            {topOption.pros.map((pro, i) => (
+                                <div key={i} className="text-xs">• {pro}</div>
+                            ))}
                         </div>
-                        
-                        <div className="p-4 rounded-lg bg-red-50 border border-red-200">
-                            <div className="flex items-center gap-2 mb-3">
-                                <XCircle className="h-5 w-5 text-red-600" />
-                                <h3 className="font-semibold text-red-800">Points faibles ({topOption.cons.length})</h3>
-                            </div>
-                            <ul className="space-y-2">
-                                {topOption.cons.map((con, index) => (
-                                    <li key={index} className="text-sm text-red-700 flex items-start gap-2">
-                                        <span className="text-red-600 mt-1">•</span>
-                                        <span>{con}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                        <div className="text-red-700 bg-red-50 p-2 rounded">
+                            <div className="font-medium mb-1">Points faibles ({topOption.cons.length})</div>
+                            {topOption.cons.map((con, i) => (
+                                <div key={i} className="text-xs">• {con}</div>
+                            ))}
                         </div>
                     </div>
                 </CardContent>
@@ -156,4 +138,3 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         </div>;
 };
 export default AnalysisResult;
-
