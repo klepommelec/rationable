@@ -24,12 +24,6 @@ export const MetricsVisual: React.FC<MetricsVisualProps> = ({ data }) => {
   const maxScore = Math.max(...data.map(item => item.score));
   const minScore = Math.min(...data.map(item => item.score));
   const scoreRange = maxScore - minScore;
-  
-  // Calculer les statistiques des pros/cons
-  const totalPros = data.reduce((acc, item) => acc + item.pros.length, 0);
-  const totalCons = data.reduce((acc, item) => acc + item.cons.length, 0);
-  const avgPros = Math.round(totalPros / data.length);
-  const avgCons = Math.round(totalCons / data.length);
 
   const metrics = [
     {
@@ -63,23 +57,6 @@ export const MetricsVisual: React.FC<MetricsVisualProps> = ({ data }) => {
       color: 'bg-green-50 border-green-200',
       textColor: 'text-green-900',
       description: 'Alternatives évaluées'
-    }
-  ];
-
-  const prosConsMetrics = [
-    {
-      title: 'Points Forts',
-      value: totalPros,
-      avg: avgPros,
-      icon: <CheckCircle className="h-4 w-4 text-green-600" />,
-      color: 'text-green-700 bg-green-50'
-    },
-    {
-      title: 'Points Faibles',
-      value: totalCons,
-      avg: avgCons,
-      icon: <XCircle className="h-4 w-4 text-red-600" />,
-      color: 'text-red-700 bg-red-50'
     }
   ];
 
@@ -165,33 +142,6 @@ export const MetricsVisual: React.FC<MetricsVisualProps> = ({ data }) => {
                 </div>
               );
             })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Statistiques Pros/Cons */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Analyse Pros/Cons</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            {prosConsMetrics.map((metric, index) => (
-              <div 
-                key={metric.title}
-                className={`p-4 rounded-lg ${metric.color} animate-fade-in`}
-                style={{ animationDelay: `${index * 200}ms` }}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  {metric.icon}
-                  <span className="font-medium text-sm">{metric.title}</span>
-                </div>
-                <div className="text-2xl font-bold mb-1">{metric.value}</div>
-                <div className="text-xs opacity-75">
-                  Moyenne: {metric.avg} par option
-                </div>
-              </div>
-            ))}
           </div>
         </CardContent>
       </Card>
