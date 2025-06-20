@@ -2,7 +2,6 @@
 export interface ICriterion {
   id: string;
   name: string;
-  weight: number; // Poids de 1 à 5, par défaut 3
 }
 
 export interface IBreakdownItem {
@@ -10,7 +9,6 @@ export interface IBreakdownItem {
   pros: string[];
   cons: string[];
   score: number;
-  weightedScore: number; // Nouveau score calculé avec les poids
 }
 
 export interface ILink {

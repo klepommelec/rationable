@@ -30,7 +30,7 @@ const validateAndSanitize = {
         throw new Error('Critères invalides reçus de l\'IA');
     },
     
-    result: (value: any, criteria?: ICriterion[]): IResult => {
+    result: (value: any): IResult => {
         const fallbackResult: IResult = {
             recommendation: 'Option recommandée',
             imageQuery: 'decision choice',
@@ -41,42 +41,13 @@ const validateAndSanitize = {
                 option: "Option par défaut",
                 pros: ["En cours d'analyse"],
                 cons: ["Données incomplètes"],
-                score: 75,
-                weightedScore: 75
+                score: 75
             }]
         };
 
         if (!value || typeof value !== 'object') {
             console.warn('⚠️ Invalid result object, using fallback');
             return fallbackResult;
-        }
-
-        const processedBreakdown = Array.isArray(value.breakdown) && value.breakdown.length > 0
-            ? value.breakdown.map((item, index) => {
-                const baseScore = typeof item?.score === 'number' && item.score >= 0 && item.score <= 100 
-                    ? item.score 
-                    : Math.max(50, 80 - (index * 10));
-                
-                return {
-                    option: typeof item?.option === 'string' ? item.option : `Option ${index + 1}`,
-                    pros: Array.isArray(item?.pros) ? item.pros.filter(p => typeof p === 'string') : [`Avantage ${index + 1}`],
-                    cons: Array.isArray(item?.cons) ? item.cons.filter(c => typeof c === 'string') : [`Inconvénient ${index + 1}`],
-                    score: baseScore,
-                    weightedScore: baseScore // Will be recalculated if criteria with weights are provided
-                };
-            })
-            : fallbackResult.breakdown;
-
-        // Recalculate weighted scores if criteria with weights are provided
-        if (criteria && criteria.length > 0) {
-            const totalWeight = criteria.reduce((sum, c) => sum + c.weight, 0);
-            const avgWeight = totalWeight / criteria.length;
-            
-            processedBreakdown.forEach(item => {
-                // Apply weight adjustment: scores are adjusted based on how criteria weights deviate from average
-                const weightMultiplier = avgWeight / 3; // 3 is the default weight
-                item.weightedScore = Math.round(Math.min(100, Math.max(0, item.score * weightMultiplier)));
-            });
         }
 
         return {
@@ -89,36 +60,18 @@ const validateAndSanitize = {
             shoppingLinks: Array.isArray(value.shoppingLinks)
                 ? value.shoppingLinks.filter(link => link && typeof link.title === 'string' && typeof link.url === 'string')
                 : fallbackResult.shoppingLinks,
-            breakdown: processedBreakdown
+            breakdown: Array.isArray(value.breakdown) && value.breakdown.length > 0
+                ? value.breakdown.map((item, index) => ({
+                    option: typeof item?.option === 'string' ? item.option : `Option ${index + 1}`,
+                    pros: Array.isArray(item?.pros) ? item.pros.filter(p => typeof p === 'string') : [`Avantage ${index + 1}`],
+                    cons: Array.isArray(item?.cons) ? item.cons.filter(c => typeof c === 'string') : [`Inconvénient ${index + 1}`],
+                    score: typeof item?.score === 'number' && item.score >= 0 && item.score <= 100 
+                        ? item.score 
+                        : Math.max(50, 80 - (index * 10))
+                }))
+                : fallbackResult.breakdown
         };
     }
-};
-
-// Function to recalculate weighted scores based on criteria weights
-export const recalculateWeightedScores = (result: IResult, criteria: ICriterion[]): IResult => {
-    if (!criteria || criteria.length === 0) {
-        return result;
-    }
-
-    const totalWeight = criteria.reduce((sum, c) => sum + c.weight, 0);
-    const avgWeight = totalWeight / criteria.length;
-    const weightMultiplier = avgWeight / 3; // 3 is the default/neutral weight
-
-    const updatedBreakdown = result.breakdown.map(item => ({
-        ...item,
-        weightedScore: Math.round(Math.min(100, Math.max(0, item.score * weightMultiplier)))
-    }));
-
-    // Update recommendation based on new weighted scores
-    const topOption = updatedBreakdown.reduce((prev, current) => 
-        prev.weightedScore > current.weightedScore ? prev : current
-    );
-
-    return {
-        ...result,
-        recommendation: topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim(),
-        breakdown: updatedBreakdown
-    };
 };
 
 // Function to generate reliable fallback links based on the dilemma topic
@@ -227,11 +180,10 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[]): 
     });
     
     const criteriaNames = criteria.map(c => c.name);
-    const criteriaWithWeights = criteria.map(c => `${c.name} (importance: ${c.weight}/5)`);
     
-    const prompt = `Pour le dilemme "${dilemma}", en utilisant les critères avec leur importance : ${criteriaWithWeights.join(', ')}.
+    const prompt = `Pour le dilemme "${dilemma}", en utilisant les critères : ${criteriaNames.join(', ')}.
 
-    Générez 3 options détaillées et évaluez-les. Tenez compte de l'importance relative de chaque critère dans votre évaluation.
+    Générez 3 options détaillées et évaluez-les. 
 
     IMPORTANT pour les liens - NE GÉNÉREZ PAS de liens fictifs. Utilisez UNIQUEMENT cette approche :
     - Pour infoLinks : utilisez "RECHERCHE:" suivi du terme à rechercher
@@ -274,7 +226,7 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[]): 
     
     CRITIQUES :
     - Options concrètes et spécifiques au dilemme (pas "Option 1", "Option 2")
-    - Scores différents entre 0-100 pour chaque option, pondérés selon l'importance des critères
+    - Scores différents entre 0-100 pour chaque option
     - imageQuery : 2-3 mots-clés en anglais
     - Pour les liens, utilisez UNIQUEMENT les préfixes "RECHERCHE:" ou "ACHAT:" comme indiqué`;
 
@@ -282,7 +234,7 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[]): 
         const rawResponse = await callOpenAiApi(prompt);
         console.log('✅ [Service] Raw options response received');
         
-        let processedResult = validateAndSanitize.result(rawResponse, criteria);
+        let processedResult = validateAndSanitize.result(rawResponse);
         
         // Transform RECHERCHE: and ACHAT: URLs into proper search URLs
         const transformUrl = (link: { title: string; url: string }) => {
@@ -332,8 +284,7 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[]): 
                 option: "Option en cours d'analyse",
                 pros: ["Recherche en cours"],
                 cons: ["Données temporairement indisponibles"],
-                score: 75,
-                weightedScore: 75
+                score: 75
             }]
         };
         

@@ -8,25 +8,19 @@ import { CriterionRow } from './CriterionRow';
 import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
 interface CriteriaManagerProps {
   criteria: ICriterion[];
   setCriteria: React.Dispatch<React.SetStateAction<ICriterion[]>>;
   isInteractionDisabled: boolean;
   onUpdateAnalysis?: () => void;
   hasChanges?: boolean;
-  onWeightChange?: (criteriaId: string, weight: number) => void;
-  onResetWeights?: () => void;
 }
-
 export const CriteriaManager = ({
   criteria,
   setCriteria,
   isInteractionDisabled,
   onUpdateAnalysis,
-  hasChanges = false,
-  onWeightChange,
-  onResetWeights
+  hasChanges = false
 }: CriteriaManagerProps) => {
   const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
   const [lastCriteriaCount, setLastCriteriaCount] = useState(0);
@@ -99,8 +93,7 @@ export const CriteriaManager = ({
     }
     const newCriterion: ICriterion = {
       id: crypto.randomUUID(),
-      name: '',
-      weight: 3 // Default weight
+      name: ''
     };
     setCriteria(items => [...items, newCriterion]);
     toast.success("Nouveau critère ajouté.");
@@ -133,14 +126,7 @@ export const CriteriaManager = ({
           <SortableContext items={criteria} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
               {criteria.map(criterion => <div key={criterion.id} className={`transition-all duration-300 ease-out ${visibleCriteria.includes(criterion.id) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'}`}>
-                  <CriterionRow 
-                    criterion={criterion} 
-                    onNameChange={handleNameChange} 
-                    onRemove={handleRemove} 
-                    isRemoveDisabled={criteria.length <= 2} 
-                    isDragDisabled={isInteractionDisabled} 
-                    onWeightChange={onWeightChange}
-                  />
+                  <CriterionRow criterion={criterion} onNameChange={handleNameChange} onRemove={handleRemove} isRemoveDisabled={criteria.length <= 2} isDragDisabled={isInteractionDisabled} />
                 </div>)}
             </div>
           </SortableContext>

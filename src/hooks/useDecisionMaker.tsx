@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { toast } from "sonner";
 import { useDebounceCallback } from 'usehooks-ts';
@@ -169,62 +170,6 @@ export const useDecisionMaker = () => {
         }
     };
 
-    const handleWeightChange = (criteriaId: string, weight: number) => {
-        setCriteria(prevCriteria => 
-            prevCriteria.map(c => 
-                c.id === criteriaId ? { ...c, weight } : c
-            )
-        );
-        
-        // If we have a result, recalculate weighted scores immediately
-        if (result) {
-            const updatedCriteria = criteria.map(c => 
-                c.id === criteriaId ? { ...c, weight } : c
-            );
-            const { recalculateWeightedScores } = require('@/services/decisionService');
-            const updatedResult = recalculateWeightedScores(result, updatedCriteria);
-            setResult(updatedResult);
-            
-            // Update the current decision if it exists
-            if (currentDecisionId) {
-                const decision = history.find(d => d.id === currentDecisionId);
-                if (decision) {
-                    updateDecision({ 
-                        ...decision, 
-                        criteria: updatedCriteria,
-                        result: updatedResult 
-                    });
-                }
-            }
-        }
-    };
-
-    const handleResetWeights = () => {
-        setCriteria(prevCriteria => 
-            prevCriteria.map(c => ({ ...c, weight: 3 }))
-        );
-        
-        // If we have a result, recalculate with default weights
-        if (result) {
-            const resetCriteria = criteria.map(c => ({ ...c, weight: 3 }));
-            const { recalculateWeightedScores } = require('@/services/decisionService');
-            const updatedResult = recalculateWeightedScores(result, resetCriteria);
-            setResult(updatedResult);
-            
-            // Update the current decision if it exists
-            if (currentDecisionId) {
-                const decision = history.find(d => d.id === currentDecisionId);
-                if (decision) {
-                    updateDecision({ 
-                        ...decision, 
-                        criteria: resetCriteria,
-                        result: updatedResult 
-                    });
-                }
-            }
-        }
-    };
-
     const handleStartAnalysis = async () => {
         console.log("🚀 [DEBUG] Starting full analysis", { dilemma: dilemma.substring(0, 50) + "..." });
         setProgress(0);
@@ -250,7 +195,6 @@ export const useDecisionMaker = () => {
           const newCriteria = response.criteria.map((name: string) => ({
             id: crypto.randomUUID(),
             name,
-            weight: 3 // Default weight
           }));
           
           setCriteria(newCriteria);
@@ -335,14 +279,7 @@ export const useDecisionMaker = () => {
         const decisionToLoad = history.find(d => d.id === decisionId);
         if (decisionToLoad) {
             setDilemma(decisionToLoad.dilemma);
-            
-            // Ensure criteria have weights (backwards compatibility)
-            const criteriaWithWeights = decisionToLoad.criteria.map(c => ({
-                ...c,
-                weight: c.weight || 3 // Default weight if not present
-            }));
-            setCriteria(criteriaWithWeights);
-            
+            setCriteria(decisionToLoad.criteria);
             setEmojiState(decisionToLoad.emoji || '🤔');
             const resultWithDefaults: IResult = {
                 description: '',
@@ -357,7 +294,7 @@ export const useDecisionMaker = () => {
             setProgressMessage('');
             
             // Définir les critères de référence pour éviter les changements fantômes
-            initialCriteriaRef.current = criteriaWithWeights;
+            initialCriteriaRef.current = decisionToLoad.criteria;
             setHasChanges(false);
             
             toast.info("Décision précédente chargée.");
@@ -398,8 +335,6 @@ export const useDecisionMaker = () => {
         lastApiResponse,
         handleStartAnalysis,
         handleManualUpdate,
-        handleWeightChange,
-        handleResetWeights,
         applyTemplate,
         clearSession,
         loadDecision,
