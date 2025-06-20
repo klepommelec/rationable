@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { RotateCcw, BarChart3, PieChart, Radar, TrendingUp } from 'lucide-react';
+import { RotateCcw, BarChart3, TrendingUp } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { DecisionExplanation } from './DecisionExplanation';
 import { ComparisonTable } from './ComparisonTable';
@@ -95,7 +95,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                         className="w-full"
                         aria-label="Onglets de visualisation des données"
                     >
-                        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1 h-auto p-1">
+                        <TabsList className="grid w-full grid-cols-3 gap-1 h-auto p-1">
                             <TabsTrigger 
                                 value="metrics"
                                 className="text-xs sm:text-sm p-2 sm:p-3"
@@ -112,24 +112,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                                 <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" />
                                 <span className="hidden sm:inline">Vue d'ensemble</span>
                                 <span className="sm:hidden">Vue</span>
-                            </TabsTrigger>
-                            <TabsTrigger 
-                                value="pie" 
-                                className="flex items-center gap-1 text-xs sm:text-sm p-2 sm:p-3"
-                                aria-label="Graphique en secteurs"
-                            >
-                                <PieChart className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" />
-                                <span className="hidden sm:inline">Répartition</span>
-                                <span className="sm:hidden">Pie</span>
-                            </TabsTrigger>
-                            <TabsTrigger 
-                                value="radar" 
-                                className="flex items-center gap-1 text-xs sm:text-sm p-2 sm:p-3"
-                                aria-label="Graphique radar"
-                            >
-                                <Radar className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" />
-                                <span className="hidden sm:inline">Radar</span>
-                                <span className="sm:hidden">Radar</span>
                             </TabsTrigger>
                             <TabsTrigger 
                                 value="comparison"
@@ -156,21 +138,22 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                             </div>
                         </TabsContent>
 
-                        <TabsContent value="pie" className="mt-6">
-                            <div className="w-full overflow-hidden">
-                                <ScorePieChart data={result.breakdown} />
-                            </div>
-                        </TabsContent>
-
-                        <TabsContent value="radar" className="mt-6">
-                            <div className="w-full overflow-hidden">
-                                <EnhancedRadarChart data={result.breakdown} />
-                            </div>
-                        </TabsContent>
-
                         <TabsContent value="comparison" className="mt-6">
-                            <div className="w-full overflow-x-auto">
-                                <ComparisonTable breakdown={result.breakdown} />
+                            <div className="space-y-6">
+                                {/* Graphiques en haut */}
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div className="w-full overflow-hidden">
+                                        <ScorePieChart data={result.breakdown} />
+                                    </div>
+                                    <div className="w-full overflow-hidden">
+                                        <EnhancedRadarChart data={result.breakdown} />
+                                    </div>
+                                </div>
+                                
+                                {/* Tableau de comparaison en bas */}
+                                <div className="w-full overflow-x-auto">
+                                    <ComparisonTable breakdown={result.breakdown} />
+                                </div>
                             </div>
                         </TabsContent>
                     </Tabs>
