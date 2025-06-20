@@ -96,65 +96,69 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({ data }) => {
           </div>
         </div>
 
-        <div className="space-y-4">
-          {sortedData.map((item, index) => {
-            const cleanName = item.option.replace(/^Option\s+\d+:\s*/i, '').trim();
-            return (
-              <div 
-                key={item.option}
-                className="space-y-2 p-3 rounded-lg border bg-card/50 hover:bg-card transition-colors animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {getScoreIcon(item.score, index)}
-                    <span className="font-medium text-sm">{cleanName}</span>
-                    {index < 3 && (
-                      <Badge variant="secondary" className="text-xs">
-                        #{index + 1}
-                      </Badge>
-                    )}
+        {/* Analyse détaillée */}
+        <div>
+          <h3 className="text-sm font-medium text-gray-500 mb-3">Analyse détaillée</h3>
+          <div className="space-y-4">
+            {sortedData.map((item, index) => {
+              const cleanName = item.option.replace(/^Option\s+\d+:\s*/i, '').trim();
+              return (
+                <div 
+                  key={item.option}
+                  className="space-y-2 p-3 rounded-lg border bg-card/50 hover:bg-card transition-colors animate-fade-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {getScoreIcon(item.score, index)}
+                      <span className="font-medium text-sm">{cleanName}</span>
+                      {index < 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          #{index + 1}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {getTrendIcon(item.score)}
+                      <span className="text-sm font-semibold">{item.score}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {getTrendIcon(item.score)}
-                    <span className="text-sm font-semibold">{item.score}</span>
+                  
+                  <div className="space-y-1">
+                    <Progress 
+                      value={item.score} 
+                      className="h-2"
+                      style={{
+                        background: 'hsl(var(--muted))'
+                      }}
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Score: {item.score}/100</span>
+                      <span>
+                        {item.score > averageScore ? '+' : ''}
+                        {Math.round(item.score - averageScore)} vs moyenne
+                      </span>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="space-y-1">
-                  <Progress 
-                    value={item.score} 
-                    className="h-2"
-                    style={{
-                      background: 'hsl(var(--muted))'
-                    }}
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Score: {item.score}/100</span>
-                    <span>
-                      {item.score > averageScore ? '+' : ''}
-                      {Math.round(item.score - averageScore)} vs moyenne
-                    </span>
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="text-green-700 bg-green-50 p-2 rounded">
-                    <div className="font-medium mb-1">Points forts ({item.pros.length})</div>
-                    {item.pros.slice(0, 2).map((pro, i) => (
-                      <div key={i} className="text-xs opacity-80">• {pro}</div>
-                    ))}
-                  </div>
-                  <div className="text-red-700 bg-red-50 p-2 rounded">
-                    <div className="font-medium mb-1">Points faibles ({item.cons.length})</div>
-                    {item.cons.slice(0, 2).map((con, i) => (
-                      <div key={i} className="text-xs opacity-80">• {con}</div>
-                    ))}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="text-green-700 bg-green-50 p-2 rounded">
+                      <div className="font-medium mb-1">Points forts ({item.pros.length})</div>
+                      {item.pros.slice(0, 2).map((pro, i) => (
+                        <div key={i} className="text-xs opacity-80">• {pro}</div>
+                      ))}
+                    </div>
+                    <div className="text-red-700 bg-red-50 p-2 rounded">
+                      <div className="font-medium mb-1">Points faibles ({item.cons.length})</div>
+                      {item.cons.slice(0, 2).map((con, i) => (
+                        <div key={i} className="text-xs opacity-80">• {con}</div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </CardContent>
     </Card>
