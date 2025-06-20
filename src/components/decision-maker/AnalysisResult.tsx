@@ -1,17 +1,13 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { RotateCcw, BarChart3, CheckCircle, XCircle } from 'lucide-react';
+import { RotateCcw, BarChart3 } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { DecisionExplanation } from './DecisionExplanation';
-import { ScorePieChart } from './PieChart';
 import { VisualIndicators } from './VisualIndicators';
 import { EnhancedRadarChart } from './EnhancedRadarChart';
 import { MetricsVisual } from './MetricsVisual';
-import { ScoreChart } from './ScoreChart';
 import { ExportMenu } from '../ExportMenu';
 import { DecisionImage } from './DecisionImage';
 
@@ -94,7 +90,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
       {/* Decision explanation */}
       <DecisionExplanation result={result} />
 
-      {/* Visualizations in tabs */}
+      {/* Metrics visualization */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
@@ -103,48 +99,21 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="p-3 sm:p-6">
-          <Tabs defaultValue="metrics" className="w-full" aria-label="Onglets de visualisation des données">
-            <TabsList className="grid w-full grid-cols-2 gap-1 h-auto p-1">
-              <TabsTrigger value="metrics" className="text-xs sm:text-sm p-2 sm:p-3" aria-label="Métriques détaillées">
-                <span className="hidden sm:inline">Métriques</span>
-                <span className="sm:hidden">Métr.</span>
-              </TabsTrigger>
-              <TabsTrigger value="comparison" className="text-xs sm:text-sm p-2 sm:p-3" aria-label="Graphiques de comparaison">
-                <span className="hidden sm:inline">Graphiques</span>
-                <span className="sm:hidden">Graph.</span>
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="metrics" className="mt-6">
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  <div className="order-1">
-                    <MetricsVisual data={result.breakdown} dilemma={dilemma} />
-                  </div>
-                  <div className="order-2">
-                    <VisualIndicators data={result.breakdown} />
-                  </div>
-                </div>
-                
-                {/* Moved EnhancedRadarChart to metrics tab */}
-                <div className="w-full overflow-hidden">
-                  <EnhancedRadarChart data={result.breakdown} />
-                </div>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <div className="order-1">
+                <MetricsVisual data={result.breakdown} dilemma={dilemma} />
               </div>
-            </TabsContent>
-
-            <TabsContent value="comparison" className="mt-6">
-              <div className="space-y-6">
-                <ScoreChart data={result.breakdown} />
-                
-                <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
-                  <div className="w-full overflow-hidden">
-                    <ScorePieChart data={result.breakdown} />
-                  </div>
-                </div>
+              <div className="order-2">
+                <VisualIndicators data={result.breakdown} />
               </div>
-            </TabsContent>
-          </Tabs>
+            </div>
+            
+            {/* Radar chart */}
+            <div className="w-full overflow-hidden">
+              <EnhancedRadarChart data={result.breakdown} />
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
