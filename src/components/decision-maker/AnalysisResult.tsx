@@ -65,7 +65,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                         <BarChart3 className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
-                        <span>Analyse IA</span>
+                        <span className="text-2xl">Analyse IA</span>
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-6">
