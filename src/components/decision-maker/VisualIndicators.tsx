@@ -1,7 +1,7 @@
-
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { TrendingUp, TrendingDown, Minus, Star, Award, Medal, CheckCircle, XCircle } from 'lucide-react';
 import { IBreakdownItem } from '@/types/decision';
 interface VisualIndicatorsProps {
@@ -22,13 +22,13 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({
     title: 'Points Forts',
     value: totalPros,
     avg: avgPros,
-    icon: <CheckCircle className="h-4 w-4 text-green-600" />,
+    icon: <CheckCircle className="h-4 w-4" />,
     color: 'text-green-700 bg-gray-100'
   }, {
     title: 'Points Faibles',
     value: totalCons,
     avg: avgCons,
-    icon: <XCircle className="h-4 w-4 text-red-600" />,
+    icon: <XCircle className="h-4 w-4" />,
     color: 'text-red-700 bg-gray-100'
   }];
   const getScoreColor = (score: number) => {
@@ -97,6 +97,15 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({
                       </span>
                       {getTrendIcon(item.score)}
                       <span className="text-sm font-semibold">{item.score}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Progress value={item.score} className="h-2" style={{
+                  background: 'hsl(var(--muted))'
+                }} />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Score: {item.score}/100</span>
                     </div>
                   </div>
 
