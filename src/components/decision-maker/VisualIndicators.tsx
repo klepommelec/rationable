@@ -56,7 +56,7 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({
       <CardContent className="space-y-6">
         {/* Analyse Pros/Cons */}
         <div>
-          <h3 className="text-sm font-medium text-gray-500 mb-3">Analyse Pros/Cons</h3>
+          <h3 className="text-sm font-medium text-gray-500 mb-3">Analyse option recommandée par l'IA</h3>
           <div className="grid grid-cols-2 gap-4">
             {prosConsMetrics.map((metric, index) => <div key={metric.title} className={`p-4 rounded-lg ${metric.color} animate-fade-in`} style={{
             animationDelay: `${index * 200}ms`
