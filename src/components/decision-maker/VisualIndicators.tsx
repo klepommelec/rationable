@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -35,14 +34,14 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({ data }) => {
       value: totalPros,
       avg: avgPros,
       icon: <CheckCircle className="h-4 w-4 text-green-600" />,
-      color: 'text-green-700 bg-green-50'
+      color: 'text-green-700 bg-gray-100'
     },
     {
       title: 'Points Faibles',
       value: totalCons,
       avg: avgCons,
       icon: <XCircle className="h-4 w-4 text-red-600" />,
-      color: 'text-red-700 bg-red-50'
+      color: 'text-red-700 bg-gray-100'
     }
   ];
   
@@ -105,7 +104,7 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({ data }) => {
               return (
                 <div 
                   key={item.option}
-                  className="space-y-2 p-3 rounded-lg border bg-card/50 hover:bg-card transition-colors animate-fade-in"
+                  className="space-y-2 p-3 rounded-lg border bg-gray-100 hover:bg-gray-200 transition-colors animate-fade-in"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex items-center justify-between">
