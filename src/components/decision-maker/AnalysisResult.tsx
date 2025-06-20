@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -56,15 +57,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                             </Button>
                         </div>
                     </div>
-                </CardHeader>
-            </Card>
-
-            {/* Pros/Cons de l'option recommandée */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-lg">
-                        Analyse de l'option recommandée
-                    </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
