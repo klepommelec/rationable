@@ -27,9 +27,9 @@ export const DecisionImage: React.FC<DecisionImageProps> = ({
   const [progress, setProgress] = useState(0);
 
   const sizeClasses = {
-    small: 'w-8 h-6',
-    medium: 'w-12 h-9',
-    large: 'w-1/2 aspect-[4/3]'
+    small: 'w-16 h-12',
+    medium: 'w-24 h-18',
+    large: 'w-full aspect-[4/3]'
   };
 
   useEffect(() => {
