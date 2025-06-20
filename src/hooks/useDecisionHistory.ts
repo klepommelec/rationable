@@ -25,6 +25,13 @@ export const useDecisionHistory = () => {
                     if (!newDecision.emoji) {
                         newDecision.emoji = '🤔';
                     }
+                    // Migration pour les nouvelles propriétés
+                    if (!newDecision.category) {
+                        newDecision.category = undefined;
+                    }
+                    if (!newDecision.tags) {
+                        newDecision.tags = [];
+                    }
                     return newDecision;
                 });
                 setHistory(migratedHistory);
@@ -62,6 +69,21 @@ export const useDecisionHistory = () => {
         });
     };
     
+    const updateDecisionCategory = (decisionId: string, categoryId: string | undefined) => {
+        setHistory(prevHistory => {
+            const index = prevHistory.findIndex(d => d.id === decisionId);
+            if (index > -1) {
+                const newHistory = [...prevHistory];
+                newHistory[index] = {
+                    ...newHistory[index],
+                    category: categoryId
+                };
+                return newHistory;
+            }
+            return prevHistory;
+        });
+    };
+    
     const deleteDecision = (decisionId: string) => {
         setHistory(prevHistory => prevHistory.filter(d => d.id !== decisionId));
     };
@@ -70,5 +92,12 @@ export const useDecisionHistory = () => {
         setHistory([]);
     };
 
-    return { history, addDecision, updateDecision, deleteDecision, clearHistory };
+    return { 
+        history, 
+        addDecision, 
+        updateDecision, 
+        updateDecisionCategory,
+        deleteDecision, 
+        clearHistory 
+    };
 };

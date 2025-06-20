@@ -33,4 +33,25 @@ export interface IDecision {
   emoji: string;
   criteria: ICriterion[];
   result: IResult;
+  category?: string;
+  tags?: string[];
 }
+
+export interface IDecisionCategory {
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+}
+
+// Catégories prédéfinies
+export const DEFAULT_CATEGORIES: IDecisionCategory[] = [
+  { id: 'tech', name: 'Technologie', emoji: '💻', color: 'blue' },
+  { id: 'travel', name: 'Voyages', emoji: '✈️', color: 'green' },
+  { id: 'career', name: 'Carrière', emoji: '🚀', color: 'purple' },
+  { id: 'lifestyle', name: 'Style de vie', emoji: '🏠', color: 'orange' },
+  { id: 'finance', name: 'Finance', emoji: '💰', color: 'yellow' },
+  { id: 'health', name: 'Santé', emoji: '🏥', color: 'red' },
+  { id: 'education', name: 'Éducation', emoji: '📚', color: 'indigo' },
+  { id: 'other', name: 'Autre', emoji: '🤔', color: 'gray' }
+];

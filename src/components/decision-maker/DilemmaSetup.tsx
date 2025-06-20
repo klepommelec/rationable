@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { BrainCircuit, BookCopy, Eraser, History } from 'lucide-react';
 import { ThemeToggle } from '../ThemeToggle';
 import { DecisionHistory } from '../DecisionHistory';
+import { CategorySelector } from '../CategorySelector';
 import MainActionButton from './MainActionButton';
 import { IDecision } from '@/types/decision';
 
@@ -26,6 +27,9 @@ interface DilemmaSetupProps {
     progress: number;
     progressMessage: string;
     templates: { name: string; dilemma: string; }[];
+    selectedCategory?: string;
+    onCategoryChange: (categoryId: string | undefined) => void;
+    onUpdateCategory: (decisionId: string, categoryId: string | undefined) => void;
 }
 
 const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
@@ -43,7 +47,10 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   handleStartAnalysis,
   progress,
   progressMessage,
-  templates
+  templates,
+  selectedCategory,
+  onCategoryChange,
+  onUpdateCategory
 }) => {
     return (
         <Card className="backdrop-blur-sm relative">
@@ -69,6 +76,16 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         rows={3}
                     />
                 </div>
+
+                <div className="space-y-2">
+                    <label className="font-medium">Catégorie (optionnel)</label>
+                    <CategorySelector
+                        selectedCategory={selectedCategory}
+                        onCategoryChange={onCategoryChange}
+                        showLabel={false}
+                    />
+                </div>
+
                 <div className="space-y-3">
                     <div className="flex justify-between items-center">
                         <label className="font-medium">Ou utilisez un modèle</label>
@@ -93,6 +110,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                         onDelete={deleteDecision}
                                         onClear={clearHistory}
                                         onClose={() => {}}
+                                        onUpdateCategory={onUpdateCategory}
                                     />
                                 </SheetContent>
                             </Sheet>
