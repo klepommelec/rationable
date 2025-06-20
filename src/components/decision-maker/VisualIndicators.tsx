@@ -65,7 +65,7 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({
                   {metric.icon}
                   <span className="font-medium text-sm">{metric.title}</span>
                 </div>
-                <div className="text-2xl font-bold mb-1">{metric.value}</div>
+                <div className="text-2xl font-medium mb-1 text-black">{metric.value}</div>
                 <div className="text-xs opacity-75 text-gray-600 ">
                   Moyenne: {metric.avg} par option
                 </div>
