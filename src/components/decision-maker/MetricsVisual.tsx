@@ -29,33 +29,25 @@ export const MetricsVisual: React.FC<MetricsVisualProps> = ({ data }) => {
     {
       title: 'Meilleur Score',
       value: maxScore,
-      icon: <Award className="h-5 w-5 text-yellow-600" />,
-      color: 'bg-yellow-50 border-yellow-200',
-      textColor: 'text-yellow-900',
+      icon: <Award className="h-5 w-5 text-gray-600" />,
       description: sortedData[0]?.option.replace(/^Option\s+\d+:\s*/i, '').trim()
     },
     {
       title: 'Score Moyen',
       value: averageScore,
-      icon: <Target className="h-5 w-5 text-blue-600" />,
-      color: 'bg-blue-50 border-blue-200',
-      textColor: 'text-blue-900',
+      icon: <Target className="h-5 w-5 text-gray-600" />,
       description: 'Moyenne générale'
     },
     {
       title: 'Écart de Scores',
       value: scoreRange,
-      icon: <BarChart3 className="h-5 w-5 text-purple-600" />,
-      color: 'bg-purple-50 border-purple-200',
-      textColor: 'text-purple-900',
+      icon: <BarChart3 className="h-5 w-5 text-gray-600" />,
       description: `${minScore} - ${maxScore} points`
     },
     {
       title: 'Options Analysées',
       value: data.length,
-      icon: <TrendingUp className="h-5 w-5 text-green-600" />,
-      color: 'bg-green-50 border-green-200',
-      textColor: 'text-green-900',
+      icon: <TrendingUp className="h-5 w-5 text-gray-600" />,
       description: 'Alternatives évaluées'
     }
   ];
@@ -80,19 +72,19 @@ export const MetricsVisual: React.FC<MetricsVisualProps> = ({ data }) => {
             {metrics.map((metric, index) => (
               <div 
                 key={metric.title}
-                className={`p-4 rounded-lg border-2 ${metric.color} animate-fade-in transition-all hover:scale-105`}
+                className="p-4 rounded-lg border-2 bg-gray-50 border-gray-200 animate-fade-in transition-all hover:scale-105"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="flex items-center justify-between mb-2">
                   {metric.icon}
-                  <span className={`text-2xl font-bold ${metric.textColor}`}>
+                  <span className="text-2xl font-bold text-gray-900">
                     {metric.value}
                   </span>
                 </div>
-                <div className={`text-sm font-medium ${metric.textColor} mb-1`}>
+                <div className="text-sm font-medium text-gray-900 mb-1">
                   {metric.title}
                 </div>
-                <div className={`text-xs ${metric.textColor} opacity-75`}>
+                <div className="text-xs text-gray-600">
                   {metric.description}
                 </div>
               </div>
