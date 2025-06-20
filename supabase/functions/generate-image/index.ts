@@ -24,7 +24,7 @@ serve(async (req) => {
       throw new Error('Prompt is required');
     }
 
-    console.log('Generating image for prompt:', prompt);
+    console.log('Generating image with DALL-E 2 for prompt:', prompt);
 
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
@@ -33,12 +33,11 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-image-1',
+        model: 'dall-e-2',
         prompt: prompt,
         n: 1,
         size: '1024x1024',
-        quality: 'high',
-        output_format: 'png'
+        response_format: 'url'
       }),
     });
 
@@ -54,11 +53,11 @@ serve(async (req) => {
       throw new Error('No image generated');
     }
 
-    // OpenAI gpt-image-1 returns base64 directly
-    const imageBase64 = data.data[0].b64_json;
+    // DALL-E 2 returns a URL
+    const imageUrl = data.data[0].url;
     
     return new Response(JSON.stringify({ 
-      imageUrl: `data:image/png;base64,${imageBase64}`,
+      imageUrl: imageUrl,
       success: true 
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
