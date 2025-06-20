@@ -91,11 +91,19 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 </CardHeader>
                 <CardContent className="p-3 sm:p-6">
                     <Tabs 
-                        defaultValue="overview" 
+                        defaultValue="metrics" 
                         className="w-full"
                         aria-label="Onglets de visualisation des données"
                     >
                         <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1 h-auto p-1">
+                            <TabsTrigger 
+                                value="metrics"
+                                className="text-xs sm:text-sm p-2 sm:p-3"
+                                aria-label="Métriques détaillées"
+                            >
+                                <span className="hidden sm:inline">Métriques</span>
+                                <span className="sm:hidden">Métr.</span>
+                            </TabsTrigger>
                             <TabsTrigger 
                                 value="overview" 
                                 className="flex items-center gap-1 text-xs sm:text-sm p-2 sm:p-3"
@@ -131,15 +139,11 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                                 <span className="hidden sm:inline">Comparaison</span>
                                 <span className="sm:hidden">Comp.</span>
                             </TabsTrigger>
-                            <TabsTrigger 
-                                value="metrics"
-                                className="text-xs sm:text-sm p-2 sm:p-3"
-                                aria-label="Métriques détaillées"
-                            >
-                                <span className="hidden sm:inline">Métriques</span>
-                                <span className="sm:hidden">Métr.</span>
-                            </TabsTrigger>
                         </TabsList>
+
+                        <TabsContent value="metrics" className="mt-6">
+                            <MetricsVisual data={result.breakdown} />
+                        </TabsContent>
 
                         <TabsContent value="overview" className="mt-6">
                             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -168,10 +172,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                             <div className="w-full overflow-x-auto">
                                 <ComparisonTable breakdown={result.breakdown} />
                             </div>
-                        </TabsContent>
-
-                        <TabsContent value="metrics" className="mt-6">
-                            <MetricsVisual data={result.breakdown} />
                         </TabsContent>
                     </Tabs>
                 </CardContent>
