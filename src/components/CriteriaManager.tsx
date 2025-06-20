@@ -98,7 +98,7 @@ export const CriteriaManager = ({
     setCriteria(items => [...items, newCriterion]);
     toast.success("Nouveau critère ajouté.");
   };
-  return <Collapsible defaultOpen className="p-4 border animate-fade-in bg-white shadow-neutral-500 rounded-md">
+  return <Collapsible defaultOpen className="p-4 border animate-fade-in bg-white shadow-neutral-500 rounded-xl">
       <CollapsibleTrigger className="flex justify-between items-center w-full group">
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-lg text-left">
