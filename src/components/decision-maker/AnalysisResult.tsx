@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -124,6 +125,11 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     <VisualIndicators data={result.breakdown} />
                   </div>
                 </div>
+                
+                {/* Moved EnhancedRadarChart to metrics tab */}
+                <div className="w-full overflow-hidden">
+                  <EnhancedRadarChart data={result.breakdown} />
+                </div>
               </div>
             </TabsContent>
 
@@ -131,12 +137,9 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               <div className="space-y-6">
                 <ScoreChart data={result.breakdown} />
                 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                   <div className="w-full overflow-hidden">
                     <ScorePieChart data={result.breakdown} />
-                  </div>
-                  <div className="w-full overflow-hidden">
-                    <EnhancedRadarChart data={result.breakdown} />
                   </div>
                 </div>
               </div>
