@@ -51,7 +51,7 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({
   };
   return <Card>
       <CardHeader>
-        <CardTitle>Indicateurs Visuels</CardTitle>
+        <CardTitle>Pros/Cons</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Analyse Pros/Cons */}
