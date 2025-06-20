@@ -3,11 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, Target, BarChart3, Award, AlertTriangle, CheckCircle, XCircle, Zap } from 'lucide-react';
 import { IBreakdownItem } from '@/types/decision';
+import { ComparisonTable } from './ComparisonTable';
+
 interface MetricsVisualProps {
   data: IBreakdownItem[];
+  dilemma?: string;
 }
+
 export const MetricsVisual: React.FC<MetricsVisualProps> = ({
-  data
+  data,
+  dilemma
 }) => {
   const sortedData = [...data].sort((a, b) => b.score - a.score);
   const averageScore = Math.round(data.reduce((acc, item) => acc + item.score, 0) / data.length);
@@ -90,42 +95,50 @@ export const MetricsVisual: React.FC<MetricsVisualProps> = ({
         </CardContent>
       </Card>
 
-      {/* Analyse des options */}
+      {/* Analyse des options avec tableau intégré */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Classement des Options</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {sortedData.map((item, index) => {
-            const cleanName = item.option.replace(/^Option\s+\d+:\s*/i, '').trim();
-            const quality = getScoreQuality(item.score);
-            return <div key={item.option} className="flex items-center justify-between p-3 rounded-lg bg-card border hover:bg-accent/50 transition-colors animate-fade-in" style={{
-              animationDelay: `${index * 150}ms`
-            }}>
-                  <div className="flex items-center gap-3">
-                    <div className="text-sm font-medium text-muted-foreground">
-                      #{index + 1}
-                    </div>
-                    <div>
-                      <div className="font-medium text-sm">{cleanName}</div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge className={`text-xs ${quality.color} flex items-center gap-1`}>
-                          {quality.icon}
-                          {quality.label}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {item.pros.length} pros, {item.cons.length} cons
-                        </span>
+          <div className="space-y-6">
+            {/* Classement simplifié */}
+            <div className="space-y-3">
+              {sortedData.map((item, index) => {
+              const cleanName = item.option.replace(/^Option\s+\d+:\s*/i, '').trim();
+              const quality = getScoreQuality(item.score);
+              return <div key={item.option} className="flex items-center justify-between p-3 rounded-lg bg-card border hover:bg-accent/50 transition-colors animate-fade-in" style={{
+                animationDelay: `${index * 150}ms`
+              }}>
+                    <div className="flex items-center gap-3">
+                      <div className="text-sm font-medium text-muted-foreground">
+                        #{index + 1}
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm">{cleanName}</div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge className={`text-xs ${quality.color} flex items-center gap-1`}>
+                            {quality.icon}
+                            {quality.label}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {item.pros.length} pros, {item.cons.length} cons
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold">{item.score}</div>
-                    <div className="text-xs text-muted-foreground">/100</div>
-                  </div>
-                </div>;
-          })}
+                    <div className="text-right">
+                      <div className="text-lg font-bold">{item.score}</div>
+                      <div className="text-xs text-muted-foreground">/100</div>
+                    </div>
+                  </div>;
+            })}
+            </div>
+            
+            {/* Tableau de comparaison détaillé */}
+            <div className="w-full overflow-x-auto">
+              <ComparisonTable breakdown={data} dilemma={dilemma} />
+            </div>
           </div>
         </CardContent>
       </Card>

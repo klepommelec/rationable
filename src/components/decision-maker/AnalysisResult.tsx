@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { RotateCcw, BarChart3, CheckCircle, XCircle } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { DecisionExplanation } from './DecisionExplanation';
-import { ComparisonTable } from './ComparisonTable';
 import { ScorePieChart } from './PieChart';
 import { VisualIndicators } from './VisualIndicators';
 import { EnhancedRadarChart } from './EnhancedRadarChart';
@@ -120,16 +118,11 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               <div className="space-y-6">
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                   <div className="order-1">
-                    <MetricsVisual data={result.breakdown} />
+                    <MetricsVisual data={result.breakdown} dilemma={dilemma} />
                   </div>
                   <div className="order-2">
                     <VisualIndicators data={result.breakdown} />
                   </div>
-                </div>
-                
-                {/* Tableau de comparaison déplacé dans l'onglet Métriques */}
-                <div className="w-full overflow-x-auto">
-                  <ComparisonTable breakdown={result.breakdown} dilemma={dilemma} />
                 </div>
               </div>
             </TabsContent>
