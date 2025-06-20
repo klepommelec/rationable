@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { BrainCircuit, BookCopy, Eraser, History } from 'lucide-react';
+import { BrainCircuit, BookCopy, History } from 'lucide-react';
 import { ThemeToggle } from '../ThemeToggle';
 import { DecisionHistory } from '../DecisionHistory';
 import MainActionButton from './MainActionButton';
@@ -132,16 +132,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                     />
                                 </SheetContent>
                             </Sheet>
-                            <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={clearSession}
-                                className="text-xs sm:text-sm"
-                                aria-label="Réinitialiser la session"
-                            >
-                                <Eraser className="h-4 w-4 mr-2" aria-hidden="true" />
-                                Réinitialiser
-                            </Button>
                         </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
