@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,6 @@ import { EnhancedRadarChart } from './EnhancedRadarChart';
 import { MetricsVisual } from './MetricsVisual';
 import { ScoreChart } from './ScoreChart';
 import { ExportMenu } from '../ExportMenu';
-
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
@@ -31,7 +29,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
 }) => {
   if (!result) return null;
   const topOption = result.breakdown.reduce((prev, current) => current.score > prev.score ? current : prev);
-  
   return <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
             {/* Header with actions */}
             <Card>
@@ -61,16 +58,12 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 <CardContent>
                     <div className="grid grid-cols-2 gap-2">
                         <div className="text-green-700 bg-green-50 p-2 rounded">
-                            <div className="font-medium mb-1">Points forts ({topOption.pros.length})</div>
-                            {topOption.pros.map((pro, i) => (
-                                <div key={i} className="text-xs">• {pro}</div>
-                            ))}
+                            <div className="font-medium mb-1 text-xs pb-1">Points forts ({topOption.pros.length})</div>
+                            {topOption.pros.map((pro, i) => <div key={i} className="text-sm">• {pro}</div>)}
                         </div>
                         <div className="text-red-700 bg-red-50 p-2 rounded">
-                            <div className="font-medium mb-1">Points faibles ({topOption.cons.length})</div>
-                            {topOption.cons.map((con, i) => (
-                                <div key={i} className="text-xs">• {con}</div>
-                            ))}
+                            <div className="font-medium mb-1 si text-xs text pb-1">Points faibles ({topOption.cons.length})</div>
+                            {topOption.cons.map((con, i) => <div key={i} className="text-sm">• {con}</div>)}
                         </div>
                     </div>
                 </CardContent>
