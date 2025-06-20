@@ -4,8 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { RotateCcw, BarChart3, PieChart, Radar, TrendingUp, Share2 } from 'lucide-react';
+import { RotateCcw, BarChart3, PieChart, Radar, TrendingUp } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { DecisionExplanation } from './DecisionExplanation';
 import { ComparisonTable } from './ComparisonTable';
@@ -38,79 +37,137 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
     );
 
     return (
-        <div className="space-y-6 animate-fade-in">
-            {/* En-tête avec actions */}
+        <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
+            {/* Header with actions */}
             <Card>
                 <CardHeader>
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <CardTitle className="text-2xl mb-2">Résultat de l'analyse</CardTitle>
-                            <Badge variant="secondary" className="bg-green-100 text-green-800">
-                                ✅ Recommandation: {topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                        <div className="flex-1 min-w-0">
+                            <CardTitle className="text-xl sm:text-2xl mb-2 break-words">
+                                Résultat de l'analyse
+                            </CardTitle>
+                            <Badge 
+                                variant="secondary" 
+                                className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs sm:text-sm inline-flex items-center gap-1 max-w-full"
+                            >
+                                <span className="flex-shrink-0" aria-hidden="true">✅</span>
+                                <span className="truncate">
+                                    Recommandation: {topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
+                                </span>
                             </Badge>
                         </div>
-                        <div className="flex gap-2">
-                            {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
-                            <Button variant="outline" onClick={clearSession}>
-                                <RotateCcw className="h-4 w-4 mr-2" />
-                                Nouvelle analyse
+                        <div className="flex gap-2 flex-wrap justify-end">
+                            {currentDecision && (
+                                <ExportMenu 
+                                    decisions={[]} 
+                                    singleDecision={currentDecision} 
+                                />
+                            )}
+                            <Button 
+                                variant="outline" 
+                                onClick={clearSession}
+                                className="text-xs sm:text-sm"
+                                aria-label="Commencer une nouvelle analyse"
+                            >
+                                <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
+                                <span className="hidden sm:inline">Nouvelle analyse</span>
+                                <span className="sm:hidden">Nouveau</span>
                             </Button>
                         </div>
                     </div>
                 </CardHeader>
             </Card>
 
-            {/* Explication de la décision */}
+            {/* Decision explanation */}
             <DecisionExplanation result={result} />
 
-            {/* Visualisations dans des onglets */}
+            {/* Visualizations in tabs */}
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <BarChart3 className="h-5 w-5" />
-                        Visualisations et Analyses
+                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                        <BarChart3 className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+                        <span>Visualisations et Analyses</span>
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <Tabs defaultValue="overview" className="w-full">
-                        <TabsList className="grid w-full grid-cols-5">
-                            <TabsTrigger value="overview" className="flex items-center gap-1">
-                                <TrendingUp className="h-4 w-4" />
-                                Vue d'ensemble
+                <CardContent className="p-3 sm:p-6">
+                    <Tabs 
+                        defaultValue="overview" 
+                        className="w-full"
+                        aria-label="Onglets de visualisation des données"
+                    >
+                        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1 h-auto p-1">
+                            <TabsTrigger 
+                                value="overview" 
+                                className="flex items-center gap-1 text-xs sm:text-sm p-2 sm:p-3"
+                                aria-label="Vue d'ensemble des résultats"
+                            >
+                                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" />
+                                <span className="hidden sm:inline">Vue d'ensemble</span>
+                                <span className="sm:hidden">Vue</span>
                             </TabsTrigger>
-                            <TabsTrigger value="pie" className="flex items-center gap-1">
-                                <PieChart className="h-4 w-4" />
-                                Répartition
+                            <TabsTrigger 
+                                value="pie" 
+                                className="flex items-center gap-1 text-xs sm:text-sm p-2 sm:p-3"
+                                aria-label="Graphique en secteurs"
+                            >
+                                <PieChart className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" />
+                                <span className="hidden sm:inline">Répartition</span>
+                                <span className="sm:hidden">Pie</span>
                             </TabsTrigger>
-                            <TabsTrigger value="radar" className="flex items-center gap-1">
-                                <Radar className="h-4 w-4" />
-                                Radar
+                            <TabsTrigger 
+                                value="radar" 
+                                className="flex items-center gap-1 text-xs sm:text-sm p-2 sm:p-3"
+                                aria-label="Graphique radar"
+                            >
+                                <Radar className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" />
+                                <span className="hidden sm:inline">Radar</span>
+                                <span className="sm:hidden">Radar</span>
                             </TabsTrigger>
-                            <TabsTrigger value="comparison">
-                                Comparaison
+                            <TabsTrigger 
+                                value="comparison"
+                                className="text-xs sm:text-sm p-2 sm:p-3"
+                                aria-label="Tableau de comparaison"
+                            >
+                                <span className="hidden sm:inline">Comparaison</span>
+                                <span className="sm:hidden">Comp.</span>
                             </TabsTrigger>
-                            <TabsTrigger value="metrics">
-                                Métriques
+                            <TabsTrigger 
+                                value="metrics"
+                                className="text-xs sm:text-sm p-2 sm:p-3"
+                                aria-label="Métriques détaillées"
+                            >
+                                <span className="hidden sm:inline">Métriques</span>
+                                <span className="sm:hidden">Métr.</span>
                             </TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="overview" className="mt-6">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <VisualIndicators data={result.breakdown} />
-                                <ScoreChart data={result.breakdown} />
+                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                                <div className="order-2 xl:order-1">
+                                    <VisualIndicators data={result.breakdown} />
+                                </div>
+                                <div className="order-1 xl:order-2">
+                                    <ScoreChart data={result.breakdown} />
+                                </div>
                             </div>
                         </TabsContent>
 
                         <TabsContent value="pie" className="mt-6">
-                            <ScorePieChart data={result.breakdown} />
+                            <div className="w-full overflow-hidden">
+                                <ScorePieChart data={result.breakdown} />
+                            </div>
                         </TabsContent>
 
                         <TabsContent value="radar" className="mt-6">
-                            <EnhancedRadarChart data={result.breakdown} />
+                            <div className="w-full overflow-hidden">
+                                <EnhancedRadarChart data={result.breakdown} />
+                            </div>
                         </TabsContent>
 
                         <TabsContent value="comparison" className="mt-6">
-                            <ComparisonTable breakdown={result.breakdown} />
+                            <div className="w-full overflow-x-auto">
+                                <ComparisonTable breakdown={result.breakdown} />
+                            </div>
                         </TabsContent>
 
                         <TabsContent value="metrics" className="mt-6">
