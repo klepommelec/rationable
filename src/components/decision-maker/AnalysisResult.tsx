@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { RotateCcw, BarChart3, TrendingUp } from 'lucide-react';
+import { RotateCcw, BarChart3 } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { DecisionExplanation } from './DecisionExplanation';
 import { ComparisonTable } from './ComparisonTable';
@@ -95,7 +95,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                         className="w-full"
                         aria-label="Onglets de visualisation des données"
                     >
-                        <TabsList className="grid w-full grid-cols-3 gap-1 h-auto p-1">
+                        <TabsList className="grid w-full grid-cols-2 gap-1 h-auto p-1">
                             <TabsTrigger 
                                 value="metrics"
                                 className="text-xs sm:text-sm p-2 sm:p-3"
@@ -103,15 +103,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                             >
                                 <span className="hidden sm:inline">Métriques</span>
                                 <span className="sm:hidden">Métr.</span>
-                            </TabsTrigger>
-                            <TabsTrigger 
-                                value="overview" 
-                                className="flex items-center gap-1 text-xs sm:text-sm p-2 sm:p-3"
-                                aria-label="Vue d'ensemble des résultats"
-                            >
-                                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" />
-                                <span className="hidden sm:inline">Vue d'ensemble</span>
-                                <span className="sm:hidden">Vue</span>
                             </TabsTrigger>
                             <TabsTrigger 
                                 value="comparison"
@@ -131,13 +122,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                                 <div className="order-2">
                                     <VisualIndicators data={result.breakdown} />
                                 </div>
-                            </div>
-                        </TabsContent>
-
-                        <TabsContent value="overview" className="mt-6">
-                            {/* L'onglet Vue d'ensemble est maintenant vide */}
-                            <div className="flex items-center justify-center h-64 text-muted-foreground">
-                                <p>Contenu à définir pour la vue d'ensemble</p>
                             </div>
                         </TabsContent>
 
