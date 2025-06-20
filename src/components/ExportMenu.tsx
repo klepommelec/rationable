@@ -2,9 +2,10 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { FileDown, Share2, FileText, Link, Download } from 'lucide-react';
+import { FileDown, FileText, Download } from 'lucide-react';
 import { toast } from "sonner";
 import { IDecision } from '@/types/decision';
+import ShareButton from './ShareButton';
 
 interface ExportMenuProps {
   decisions: IDecision[];
@@ -53,31 +54,6 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ decisions, singleDecisio
     }
   };
 
-  const shareLink = async () => {
-    if (singleDecision) {
-      // Créer un lien partageable pour une décision unique
-      const shareData = {
-        title: `Analyse de décision: ${singleDecision.dilemma}`,
-        text: `Découvrez mon analyse de décision: ${singleDecision.result.recommendation}`,
-        url: window.location.href
-      };
-
-      try {
-        if (navigator.share && /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-          await navigator.share(shareData);
-          toast.success("Lien partagé avec succès !");
-        } else {
-          await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${shareData.url}`);
-          toast.success("Lien copié dans le presse-papiers !");
-        }
-      } catch (error) {
-        toast.error("Erreur lors du partage");
-      }
-    } else {
-      toast.info("Fonctionnalité de partage disponible pour les décisions individuelles uniquement");
-    }
-  };
-
   const copyToClipboard = async () => {
     try {
       const textData = dataToExport.map(decision => 
@@ -92,34 +68,34 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ decisions, singleDecisio
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
-          {singleDecision ? <Share2 className="h-4 w-4 mr-2" /> : <FileDown className="h-4 w-4 mr-2" />}
-          {singleDecision ? "Partager" : "Exporter"}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={exportToPDF}>
-          <FileText className="mr-2 h-4 w-4" />
-          <span>Exporter en PDF</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={exportToJSON}>
-          <Download className="mr-2 h-4 w-4" />
-          <span>Exporter en JSON</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={copyToClipboard}>
-          <FileText className="mr-2 h-4 w-4" />
-          <span>Copier le texte</span>
-        </DropdownMenuItem>
-        {singleDecision && (
-          <DropdownMenuItem onClick={shareLink}>
-            <Link className="mr-2 h-4 w-4" />
-            <span>Partager le lien</span>
+    <div className="flex gap-2">
+      {singleDecision && (
+        <ShareButton decision={singleDecision} />
+      )}
+      
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm">
+            <FileDown className="h-4 w-4 mr-2" />
+            Exporter
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem onClick={exportToPDF}>
+            <FileText className="mr-2 h-4 w-4" />
+            <span>Exporter en PDF</span>
           </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <DropdownMenuItem onClick={exportToJSON}>
+            <Download className="mr-2 h-4 w-4" />
+            <span>Exporter en JSON</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={copyToClipboard}>
+            <FileText className="mr-2 h-4 w-4" />
+            <span>Copier le texte</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };

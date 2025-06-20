@@ -9,13 +9,49 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      shared_decisions: {
+        Row: {
+          created_at: string
+          decision_data: Json
+          expires_at: string | null
+          id: string
+          public_id: string
+          title: string
+          view_count: number
+        }
+        Insert: {
+          created_at?: string
+          decision_data: Json
+          expires_at?: string | null
+          id?: string
+          public_id: string
+          title: string
+          view_count?: number
+        }
+        Update: {
+          created_at?: string
+          decision_data?: Json
+          expires_at?: string | null
+          id?: string
+          public_id?: string
+          title?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cleanup_expired_shared_decisions: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      generate_public_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

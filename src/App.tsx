@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import SharedDecision from "./pages/SharedDecision";
 import { ThemeProvider } from "./components/theme-provider";
 import Layout from "./components/Layout";
 
@@ -23,6 +24,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             </Route>
+            <Route path="/shared/:publicId" element={<SharedDecision />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
