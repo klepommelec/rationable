@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -81,7 +82,7 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({
             const cleanName = item.option.replace(/^Option\s+\d+:\s*/i, '').trim();
             return <div key={item.option} style={{
               animationDelay: `${index * 100}ms`
-            }} className="space-y-2 p-3 rounded-lg border transition-colors animate-fade-in bg-white">
+            }} className="space-y-2 p-3 rounded-lg border transition-colors animate-fade-in bg-gray-100 hover:bg-gray-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {getScoreIcon(item.score, index)}
@@ -92,6 +93,10 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({
                     </div>
                     <div className="flex items-center gap-2">
                       {getTrendIcon(item.score)}
+                      <span className="text-xs text-muted-foreground">
+                        {item.score > averageScore ? '+' : ''}
+                        {Math.round(item.score - averageScore)} vs moyenne
+                      </span>
                       <span className="text-sm font-semibold">{item.score}</span>
                     </div>
                   </div>
@@ -102,10 +107,6 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({
                 }} />
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span>Score: {item.score}/100</span>
-                      <span>
-                        {item.score > averageScore ? '+' : ''}
-                        {Math.round(item.score - averageScore)} vs moyenne
-                      </span>
                     </div>
                   </div>
 
