@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { toast } from "sonner";
 import { useDebounceCallback } from 'usehooks-ts';
@@ -18,6 +19,42 @@ const templates = [
   {
     name: "🤔 Apprendre un framework JS",
     dilemma: "Quel framework JavaScript devrais-je apprendre en 2025 ?",
+  },
+  {
+    name: "🚗 Acheter une voiture",
+    dilemma: "Quelle voiture devrais-je acheter selon mon budget et mes besoins ?",
+  },
+  {
+    name: "🏠 Choisir un logement",
+    dilemma: "Dans quel quartier devrais-je déménager ?",
+  },
+  {
+    name: "💼 Opportunité de carrière",
+    dilemma: "Devrais-je accepter cette nouvelle offre d'emploi ?",
+  },
+  {
+    name: "🎓 Formation professionnelle",
+    dilemma: "Quelle formation devrais-je suivre pour évoluer dans ma carrière ?",
+  },
+  {
+    name: "📱 Smartphone",
+    dilemma: "Quel smartphone choisir pour remplacer mon ancien téléphone ?",
+  },
+  {
+    name: "🍽️ Restaurant pour dîner",
+    dilemma: "Dans quel restaurant devrions-nous aller ce soir ?",
+  },
+  {
+    name: "💰 Investissement financier",
+    dilemma: "Comment devrais-je investir mes économies cette année ?",
+  },
+  {
+    name: "🎮 Console de jeux",
+    dilemma: "Quelle console de jeux vidéo devrais-je acheter ?",
+  },
+  {
+    name: "🏋️ Salle de sport",
+    dilemma: "Dans quelle salle de sport devrais-je m'inscrire ?",
   },
 ];
 
