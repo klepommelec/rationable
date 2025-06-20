@@ -7,7 +7,6 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { BrainCircuit, BookCopy, Eraser, History } from 'lucide-react';
 import { ThemeToggle } from '../ThemeToggle';
 import { DecisionHistory } from '../DecisionHistory';
-import { CategorySelector } from '../CategorySelector';
 import MainActionButton from './MainActionButton';
 import { IDecision } from '@/types/decision';
 
@@ -93,17 +92,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     <p id="dilemma-help" className="sr-only">
                         Décrivez le problème ou la décision que vous devez prendre
                     </p>
-                </div>
-
-                <div className="space-y-2">
-                    <label className="font-medium text-sm sm:text-base">
-                        Catégorie (optionnel)
-                    </label>
-                    <CategorySelector
-                        selectedCategory={selectedCategory}
-                        onCategoryChange={onCategoryChange}
-                        showLabel={false}
-                    />
                 </div>
 
                 <div className="space-y-3">

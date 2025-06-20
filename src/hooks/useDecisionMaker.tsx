@@ -56,13 +56,8 @@ export const useDecisionMaker = () => {
     };
 
     const handleCategoryChange = (categoryId: string | undefined) => {
-        setSelectedCategory(categoryId);
-        if (analysisStep === 'done' && currentDecisionId) {
-            const decision = history.find(d => d.id === currentDecisionId);
-            if (decision && decision.category !== categoryId) {
-                updateDecision({ ...decision, category: categoryId });
-            }
-        }
+        // Ne fait rien car la catégorie est maintenant automatique
+        console.log('Category change ignored - now automatic:', categoryId);
     };
 
     const handleUpdateCategory = (decisionId: string, categoryId: string | undefined) => {
@@ -197,13 +192,14 @@ export const useDecisionMaker = () => {
         setLastApiResponse(null);
 
         try {
-          // Phase 1: Générer les critères
-          console.log("📡 [DEBUG] Phase 1: Generating criteria");
+          // Phase 1: Générer les critères et obtenir la catégorie suggérée
+          console.log("📡 [DEBUG] Phase 1: Generating criteria and category");
           const response = await generateCriteriaOnly(dilemma);
-          console.log("✅ [DEBUG] Criteria generated:", {
+          console.log("✅ [DEBUG] Criteria and category generated:", {
             emoji: response.emoji,
             criteriaCount: response.criteria?.length || 0,
-            criteria: response.criteria
+            criteria: response.criteria,
+            suggestedCategory: response.suggestedCategory
           });
           
           const newCriteria = response.criteria.map((name: string) => ({
@@ -213,6 +209,7 @@ export const useDecisionMaker = () => {
           
           setCriteria(newCriteria);
           setEmojiState(response.emoji || '🤔');
+          setSelectedCategory(response.suggestedCategory);
           setAnalysisStep('criteria-loaded');
           
           // Phase 2: Générer automatiquement les options
@@ -237,7 +234,7 @@ export const useDecisionMaker = () => {
                 emoji: response.emoji || '🤔',
                 criteria: newCriteria,
                 result: optionsResult,
-                category: selectedCategory
+                category: response.suggestedCategory // Utiliser la catégorie suggérée par l'IA
               };
               addDecision(newDecision);
               setCurrentDecisionId(newDecision.id);
