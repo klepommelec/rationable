@@ -93,7 +93,7 @@ export const MetricsVisual: React.FC<MetricsVisualProps> = ({
       {/* Analyse des options */}
       <Card>
         <CardHeader>
-          <CardTitle>Qualité des Options</CardTitle>
+          <CardTitle>Classement des Options</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
