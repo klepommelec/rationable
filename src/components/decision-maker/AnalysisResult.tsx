@@ -124,18 +124,18 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                         </TabsList>
 
                         <TabsContent value="metrics" className="mt-6">
-                            <MetricsVisual data={result.breakdown} />
+                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                                <div className="order-1">
+                                    <MetricsVisual data={result.breakdown} />
+                                </div>
+                                <div className="order-2">
+                                    <VisualIndicators data={result.breakdown} />
+                                </div>
+                            </div>
                         </TabsContent>
 
                         <TabsContent value="overview" className="mt-6">
-                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                                <div className="order-2 xl:order-1">
-                                    <VisualIndicators data={result.breakdown} />
-                                </div>
-                                <div className="order-1 xl:order-2">
-                                    <ScoreChart data={result.breakdown} />
-                                </div>
-                            </div>
+                            <ScoreChart data={result.breakdown} />
                         </TabsContent>
 
                         <TabsContent value="comparison" className="mt-6">
