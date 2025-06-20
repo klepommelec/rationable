@@ -65,7 +65,7 @@ export const getSharedDecision = async (publicId: string): Promise<SharedDecisio
     id: data.id,
     public_id: data.public_id,
     title: data.title,
-    decision_data: data.decision_data as IDecision,
+    decision_data: data.decision_data as unknown as IDecision,
     created_at: data.created_at,
     expires_at: data.expires_at,
     view_count: data.view_count
