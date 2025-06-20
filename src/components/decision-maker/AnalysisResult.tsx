@@ -135,12 +135,18 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                         </TabsContent>
 
                         <TabsContent value="overview" className="mt-6">
-                            <ScoreChart data={result.breakdown} />
+                            {/* L'onglet Vue d'ensemble est maintenant vide */}
+                            <div className="flex items-center justify-center h-64 text-muted-foreground">
+                                <p>Contenu à définir pour la vue d'ensemble</p>
+                            </div>
                         </TabsContent>
 
                         <TabsContent value="comparison" className="mt-6">
                             <div className="space-y-6">
-                                {/* Graphiques en haut */}
+                                {/* Visualisation des scores en haut */}
+                                <ScoreChart data={result.breakdown} />
+                                
+                                {/* Graphiques au milieu */}
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     <div className="w-full overflow-hidden">
                                         <ScorePieChart data={result.breakdown} />
