@@ -29,7 +29,7 @@ export const shareDecision = async (decision: IDecision): Promise<string> => {
     .insert({
       public_id: publicId,
       title: decision.dilemma,
-      decision_data: decision
+      decision_data: decision as any // Cast to any for JSON compatibility
     });
 
   if (error) {
@@ -60,5 +60,14 @@ export const getSharedDecision = async (publicId: string): Promise<SharedDecisio
     .update({ view_count: data.view_count + 1 })
     .eq('public_id', publicId);
 
-  return data;
+  // Cast the returned data to our SharedDecision interface
+  return {
+    id: data.id,
+    public_id: data.public_id,
+    title: data.title,
+    decision_data: data.decision_data as IDecision,
+    created_at: data.created_at,
+    expires_at: data.expires_at,
+    view_count: data.view_count
+  };
 };
