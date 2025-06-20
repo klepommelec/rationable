@@ -24,6 +24,7 @@ export const DecisionImage: React.FC<DecisionImageProps> = ({
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const sizeClasses = {
     small: 'w-16 h-16',
@@ -35,11 +36,20 @@ export const DecisionImage: React.FC<DecisionImageProps> = ({
     const fetchImage = async () => {
       setIsLoading(true);
       setHasError(false);
+      setProgress(0);
+      
+      // Animation de progression simulée pour améliorer l'UX
+      const progressInterval = setInterval(() => {
+        setProgress(prev => Math.min(prev + 10, 90));
+      }, 200);
       
       try {
         if (option) {
           console.log('Generating contextual image for option:', option);
           const generatedImage = await generateContextualImage(option, dilemma);
+          
+          clearInterval(progressInterval);
+          setProgress(100);
           
           if (generatedImage) {
             setImageUrl(generatedImage);
@@ -50,14 +60,17 @@ export const DecisionImage: React.FC<DecisionImageProps> = ({
           }
         } else {
           // Fallback générique
+          clearInterval(progressInterval);
+          setProgress(100);
           setImageUrl(getVariedPlaceholder(imageQuery, index));
         }
       } catch (error) {
+        clearInterval(progressInterval);
         console.error('Error loading image:', error);
         setImageUrl(getVariedPlaceholder(option || imageQuery, index));
         setHasError(true);
       } finally {
-        setIsLoading(false);
+        setTimeout(() => setIsLoading(false), 300); // Petite transition pour l'UX
       }
     };
 
@@ -66,20 +79,28 @@ export const DecisionImage: React.FC<DecisionImageProps> = ({
 
   if (isLoading) {
     return (
-      <div className={`${sizeClasses[size]} bg-gray-200 animate-pulse rounded-lg ${className}`}>
-        <div className="w-full h-full bg-gray-300 rounded-lg flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+      <div className={`${sizeClasses[size]} bg-gradient-to-br from-gray-200 via-gray-300 to-gray-200 animate-pulse rounded-lg ${className} relative overflow-hidden`}>
+        <div className="w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer absolute"></div>
+        <div className="w-full h-full flex flex-col items-center justify-center text-gray-500">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mb-1"></div>
+          <div className="text-xs font-medium">FLUX</div>
+          <div className="w-8 h-1 bg-gray-300 rounded-full overflow-hidden mt-1">
+            <div 
+              className="h-full bg-primary transition-all duration-300 ease-out"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`${sizeClasses[size]} overflow-hidden rounded-lg ${className} relative`}>
+    <div className={`${sizeClasses[size]} overflow-hidden rounded-lg ${className} relative group`}>
       <img
         src={imageUrl || getVariedPlaceholder(option || imageQuery, index)}
         alt={alt}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         onError={() => {
           if (!hasError) {
             setHasError(true);
@@ -92,6 +113,11 @@ export const DecisionImage: React.FC<DecisionImageProps> = ({
           <span className="text-white text-xs text-center px-1">
             {option?.slice(0, 10) || 'Image'}
           </span>
+        </div>
+      )}
+      {!hasError && (
+        <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+          ⚡ FLUX
         </div>
       )}
     </div>

@@ -4,33 +4,32 @@ import { supabase } from '@/integrations/supabase/client';
 // Cache pour éviter de régénérer les mêmes images
 const imageCache = new Map<string, string>();
 
-// Fonction pour générer un prompt contextuel spécifique optimisé pour DALL-E 2
+// Fonction pour générer un prompt contextuel spécifique optimisé pour FLUX.1-schnell
 export const generateContextualPrompt = (option: string, dilemma?: string): string => {
   // Nettoyer l'option des préfixes comme "Option 1:", etc.
   const cleanOption = option.replace(/^Option\s+\d+:\s*/i, '').trim();
   
   // Détecter le type de décision pour adapter le style
   const dilemmaLower = dilemma?.toLowerCase() || '';
-  let style = 'high quality, professional';
+  let style = 'high quality, professional, detailed, vibrant colors';
   
   if (dilemmaLower.includes('voyage') || dilemmaLower.includes('destination') || dilemmaLower.includes('vacances')) {
-    style = 'beautiful destination, travel photography';
+    style = 'beautiful destination, travel photography, scenic landscape, vibrant colors';
   } else if (dilemmaLower.includes('restaurant') || dilemmaLower.includes('manger') || dilemmaLower.includes('cuisine')) {
-    style = 'delicious food photography';
+    style = 'delicious food photography, appetizing presentation, professional lighting';
   } else if (dilemmaLower.includes('voiture') || dilemmaLower.includes('acheter') || dilemmaLower.includes('produit')) {
-    style = 'product photography, clean background';
+    style = 'product photography, clean background, commercial style, sharp focus';
   } else if (dilemmaLower.includes('emploi') || dilemmaLower.includes('travail') || dilemmaLower.includes('carrière')) {
-    style = 'professional workplace';
+    style = 'professional workplace, modern office environment, business setting';
   } else if (dilemmaLower.includes('maison') || dilemmaLower.includes('appartement') || dilemmaLower.includes('logement')) {
-    style = 'real estate photography';
+    style = 'real estate photography, modern interior design, architectural';
   }
   
-  // Construire le prompt final optimisé pour DALL-E 2 (limité à 1000 caractères)
-  const prompt = `${cleanOption}, ${style}, detailed`;
-  return prompt.length > 900 ? prompt.substring(0, 900) + '...' : prompt;
+  // Construire le prompt final optimisé pour FLUX.1-schnell
+  return `${cleanOption}, ${style}, sharp focus`;
 };
 
-// Fonction pour générer une image via l'edge function OpenAI DALL-E 2
+// Fonction pour générer une image via l'edge function Hugging Face FLUX.1-schnell (rapide)
 export const generateContextualImage = async (option: string, dilemma?: string): Promise<string | null> => {
   const cacheKey = `${option}-${dilemma}`;
   
@@ -41,14 +40,32 @@ export const generateContextualImage = async (option: string, dilemma?: string):
   
   try {
     const prompt = generateContextualPrompt(option, dilemma);
-    console.log('Generating image with DALL-E 2, prompt:', prompt);
+    console.log('Generating image with FLUX.1-schnell, prompt:', prompt);
     
-    const { data, error } = await supabase.functions.invoke('generate-image', {
+    // Essayer FLUX.1-schnell d'abord (rapide)
+    const { data, error } = await supabase.functions.invoke('generate-image-hf', {
       body: { prompt }
     });
     
     if (error) {
-      console.error('Error calling generate-image function:', error);
+      console.error('Error calling generate-image-hf function:', error);
+      
+      // Fallback vers DALL-E 2 si FLUX échoue
+      console.log('Falling back to DALL-E 2...');
+      const fallbackData = await supabase.functions.invoke('generate-image', {
+        body: { prompt: generateContextualPrompt(option, dilemma).substring(0, 900) }
+      });
+      
+      if (fallbackData.error) {
+        console.error('Both image generation methods failed');
+        return null;
+      }
+      
+      if (fallbackData.data?.success && fallbackData.data?.imageUrl) {
+        imageCache.set(cacheKey, fallbackData.data.imageUrl);
+        return fallbackData.data.imageUrl;
+      }
+      
       return null;
     }
     
@@ -60,7 +77,7 @@ export const generateContextualImage = async (option: string, dilemma?: string):
     
     return null;
   } catch (error) {
-    console.error('Error generating contextual image with DALL-E 2:', error);
+    console.error('Error generating contextual image with FLUX.1-schnell:', error);
     return null;
   }
 };
