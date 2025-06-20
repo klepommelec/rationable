@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -109,19 +110,26 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 <span className="hidden sm:inline">Métriques</span>
                 <span className="sm:hidden">Métr.</span>
               </TabsTrigger>
-              <TabsTrigger value="comparison" className="text-xs sm:text-sm p-2 sm:p-3" aria-label="Tableau de comparaison">
-                <span className="hidden sm:inline">Comparaison</span>
-                <span className="sm:hidden">Comp.</span>
+              <TabsTrigger value="comparison" className="text-xs sm:text-sm p-2 sm:p-3" aria-label="Graphiques de comparaison">
+                <span className="hidden sm:inline">Graphiques</span>
+                <span className="sm:hidden">Graph.</span>
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="metrics" className="mt-6">
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <div className="order-1">
-                  <MetricsVisual data={result.breakdown} />
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  <div className="order-1">
+                    <MetricsVisual data={result.breakdown} />
+                  </div>
+                  <div className="order-2">
+                    <VisualIndicators data={result.breakdown} />
+                  </div>
                 </div>
-                <div className="order-2">
-                  <VisualIndicators data={result.breakdown} />
+                
+                {/* Tableau de comparaison déplacé dans l'onglet Métriques */}
+                <div className="w-full overflow-x-auto">
+                  <ComparisonTable breakdown={result.breakdown} dilemma={dilemma} />
                 </div>
               </div>
             </TabsContent>
@@ -137,10 +145,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                   <div className="w-full overflow-hidden">
                     <EnhancedRadarChart data={result.breakdown} />
                   </div>
-                </div>
-                
-                <div className="w-full overflow-x-auto">
-                  <ComparisonTable breakdown={result.breakdown} dilemma={dilemma} />
                 </div>
               </div>
             </TabsContent>
