@@ -36,6 +36,10 @@ const DecisionMaker = () => {
     debugMode,
     setDebugMode,
     lastApiResponse,
+    selectedCategory,
+    handleCategoryChange,
+    handleUpdateCategory,
+    getCurrentDecision,
   } = useDecisionMaker();
 
   return (
@@ -75,6 +79,9 @@ const DecisionMaker = () => {
           progress={progress}
           progressMessage={progressMessage}
           templates={templates}
+          selectedCategory={selectedCategory}
+          onCategoryChange={handleCategoryChange}
+          onUpdateCategory={handleUpdateCategory}
         />
       )}
       
@@ -98,6 +105,7 @@ const DecisionMaker = () => {
           isUpdating={isUpdating}
           clearSession={clearSession}
           analysisStep={analysisStep}
+          currentDecision={getCurrentDecision()}
         />
       )}
 

@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { RotateCcw, BarChart3, PieChart, Radar, TrendingUp, Share2 } from 'lucide-react';
 import { IResult } from '@/types/decision';
-import DecisionExplanation from './DecisionExplanation';
-import ComparisonTable from './ComparisonTable';
+import { DecisionExplanation } from './DecisionExplanation';
+import { ComparisonTable } from './ComparisonTable';
 import { ScorePieChart } from './PieChart';
 import { VisualIndicators } from './VisualIndicators';
 import { EnhancedRadarChart } from './EnhancedRadarChart';
@@ -50,7 +50,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                             </Badge>
                         </div>
                         <div className="flex gap-2">
-                            {currentDecision && <ExportMenu singleDecision={currentDecision} />}
+                            {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
                             <Button variant="outline" onClick={clearSession}>
                                 <RotateCcw className="h-4 w-4 mr-2" />
                                 Nouvelle analyse

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { toast } from "sonner";
 import { useDebounceCallback } from 'usehooks-ts';
@@ -38,8 +37,9 @@ export const useDecisionMaker = () => {
     const [retryCount, setRetryCount] = useState(0);
     const [debugMode, setDebugMode] = useState(false);
     const [lastApiResponse, setLastApiResponse] = useState<any>(null);
+    const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
 
-    const { history, addDecision, updateDecision, deleteDecision, clearHistory } = useDecisionHistory();
+    const { history, addDecision, updateDecision, updateDecisionCategory, deleteDecision, clearHistory } = useDecisionHistory();
     
     const initialCriteriaRef = useRef<ICriterion[]>([]);
     
@@ -53,6 +53,20 @@ export const useDecisionMaker = () => {
                 updateDecision({ ...decision, emoji: newEmoji });
             }
         }
+    };
+
+    const handleCategoryChange = (categoryId: string | undefined) => {
+        setSelectedCategory(categoryId);
+        if (analysisStep === 'done' && currentDecisionId) {
+            const decision = history.find(d => d.id === currentDecisionId);
+            if (decision && decision.category !== categoryId) {
+                updateDecision({ ...decision, category: categoryId });
+            }
+        }
+    };
+
+    const handleUpdateCategory = (decisionId: string, categoryId: string | undefined) => {
+        updateDecisionCategory(decisionId, categoryId);
     };
 
     // Vérifier si les critères ont changé
@@ -222,7 +236,8 @@ export const useDecisionMaker = () => {
                 dilemma,
                 emoji: response.emoji || '🤔',
                 criteria: newCriteria,
-                result: optionsResult
+                result: optionsResult,
+                category: selectedCategory
               };
               addDecision(newDecision);
               setCurrentDecisionId(newDecision.id);
@@ -259,6 +274,7 @@ export const useDecisionMaker = () => {
         setProgressMessage('');
         setCurrentDecisionId(null);
         setHasChanges(false);
+        setSelectedCategory(undefined);
         toast.success(`Modèle "${template.name}" appliqué !`);
     }
 
@@ -272,6 +288,7 @@ export const useDecisionMaker = () => {
         setProgressMessage('');
         setCurrentDecisionId(null);
         setHasChanges(false);
+        setSelectedCategory(undefined);
         toast.info("Session réinitialisée.");
     }
     
@@ -281,6 +298,7 @@ export const useDecisionMaker = () => {
             setDilemma(decisionToLoad.dilemma);
             setCriteria(decisionToLoad.criteria);
             setEmojiState(decisionToLoad.emoji || '🤔');
+            setSelectedCategory(decisionToLoad.category);
             const resultWithDefaults: IResult = {
                 description: '',
                 infoLinks: [],
@@ -315,6 +333,11 @@ export const useDecisionMaker = () => {
         toast.info("L'historique des décisions a été effacé.");
     };
 
+    const getCurrentDecision = () => {
+        if (!currentDecisionId) return null;
+        return history.find(d => d.id === currentDecisionId) || null;
+    };
+
     return {
         dilemma,
         setDilemma,
@@ -333,6 +356,9 @@ export const useDecisionMaker = () => {
         debugMode,
         setDebugMode,
         lastApiResponse,
+        selectedCategory,
+        handleCategoryChange,
+        handleUpdateCategory,
         handleStartAnalysis,
         handleManualUpdate,
         applyTemplate,
@@ -340,6 +366,7 @@ export const useDecisionMaker = () => {
         loadDecision,
         deleteDecision: handleDeleteDecision,
         clearHistory: handleClearHistory,
+        getCurrentDecision,
         templates
     };
 };
