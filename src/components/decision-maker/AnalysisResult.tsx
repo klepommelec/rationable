@@ -10,7 +10,6 @@ import { EnhancedRadarChart } from './EnhancedRadarChart';
 import { MetricsVisual } from './MetricsVisual';
 import { ExportMenu } from '../ExportMenu';
 import { DecisionImage } from './DecisionImage';
-
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
@@ -19,7 +18,6 @@ interface AnalysisResultProps {
   currentDecision?: any;
   dilemma?: string;
 }
-
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
   isUpdating,
@@ -29,11 +27,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   dilemma
 }) => {
   if (!result) return null;
-  
   const topOption = result.breakdown.reduce((prev, current) => current.score > prev.score ? current : prev);
-  
-  return (
-    <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
+  return <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
       {/* Header with actions and main image */}
       <Card>
         <CardHeader>
@@ -61,16 +56,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         </CardHeader>
         <CardContent>
           {/* Image principale de la recommandation avec contexte amélioré */}
-          <div className="mb-4 flex justify-center">
-            <DecisionImage 
-              imageQuery={result.imageQuery} 
-              alt={`Illustration pour ${result.recommendation}`}
-              size="large"
-              className="max-w-md"
-              option={topOption.option}
-              dilemma={dilemma}
-              index={0}
-            />
+          <div className="mb-4 flex justify-start">
+            <DecisionImage imageQuery={result.imageQuery} alt={`Illustration pour ${result.recommendation}`} size="large" className="max-w-md" option={topOption.option} dilemma={dilemma} index={0} />
           </div>
           
           {/* ... keep existing code (grid with pros/cons) */}
@@ -116,8 +103,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default AnalysisResult;
