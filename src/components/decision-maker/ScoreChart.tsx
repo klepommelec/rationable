@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart3, Target } from 'lucide-react';
+import { BarChart3, Target, PieChart } from 'lucide-react';
 import { IBreakdownItem } from '@/types/decision';
 
 interface ScoreChartProps {
@@ -11,7 +11,8 @@ interface ScoreChartProps {
 }
 
 export const ScoreChart: React.FC<ScoreChartProps> = ({ data }) => {
-  const [chartType, setChartType] = React.useState<'bar' | 'radar'>('bar');
+  const [chartType, setChartType] = React.useState<'bar' | 'radar' | 'pie'>('bar');
+  const [isInteractive, setIsInteractive] = React.useState(false);
   
   const chartData = data.map(item => ({
     name: item.option.replace(/^Option\s+\d+:\s*/i, '').trim(),
@@ -49,6 +50,21 @@ export const ScoreChart: React.FC<ScoreChartProps> = ({ data }) => {
 
   const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#8dd1e1'];
 
+  const CustomBarTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-lg animate-fade-in">
+          <p className="font-semibold text-sm mb-1">{label}</p>
+          <p className="text-primary">Score: {payload[0].value}/100</p>
+          <div className="mt-2 text-xs text-muted-foreground">
+            Cliquez pour voir les détails
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -75,9 +91,12 @@ export const ScoreChart: React.FC<ScoreChartProps> = ({ data }) => {
         </div>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={250}>
+        <ResponsiveContainer width="100%" height={300}>
           {chartType === 'bar' ? (
-            <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+            <BarChart 
+              data={chartData} 
+              margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+            >
               <CartesianGrid 
                 strokeDasharray="3 3" 
                 stroke="hsl(var(--muted-foreground))"
@@ -98,19 +117,18 @@ export const ScoreChart: React.FC<ScoreChartProps> = ({ data }) => {
                 }} 
               />
               <Tooltip
-                cursor={{ fill: 'hsl(var(--accent))' }}
-                contentStyle={{
-                  background: "hsl(var(--popover))",
-                  borderColor: "hsl(var(--border))",
-                  borderRadius: "var(--radius)",
-                  color: "hsl(var(--popover-foreground))",
-                  border: "1px solid hsl(var(--border))",
+                content={<CustomBarTooltip />}
+                cursor={{ 
+                  fill: 'hsl(var(--accent))',
+                  opacity: 0.1
                 }}
               />
               <Bar 
                 dataKey="score" 
                 fill="hsl(var(--primary))"
-                radius={[4, 4, 0, 0]} 
+                radius={[4, 4, 0, 0]}
+                animationBegin={0}
+                animationDuration={1000}
               />
             </BarChart>
           ) : (
@@ -134,6 +152,8 @@ export const ScoreChart: React.FC<ScoreChartProps> = ({ data }) => {
                   fill={colors[index % colors.length]}
                   fillOpacity={0.1}
                   strokeWidth={2}
+                  animationBegin={index * 200}
+                  animationDuration={1000}
                 />
               ))}
               <Legend 

@@ -1,11 +1,16 @@
+
 import * as React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Eraser, Trophy, BookOpen, ShoppingCart, Star, TrendingUp } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Eraser, Trophy, BookOpen, ShoppingCart, Star, TrendingUp, BarChart3, PieChart, Radar, Activity } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { ScoreChart } from './ScoreChart';
+import { ScorePieChart } from './PieChart';
+import { EnhancedRadarChart } from './EnhancedRadarChart';
+import { VisualIndicators } from './VisualIndicators';
+import { MetricsVisual } from './MetricsVisual';
 import { ComparisonTable } from './ComparisonTable';
 import { DecisionExplanation } from './DecisionExplanation';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -185,36 +190,48 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
 
       <DecisionExplanation result={result} />
 
-      <ComparisonTable breakdown={result.breakdown} />
+      {/* Nouvelles visualisations interactives avec onglets */}
+      <Tabs defaultValue="charts" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="charts" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Graphiques
+          </TabsTrigger>
+          <TabsTrigger value="indicators" className="flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            Indicateurs
+          </TabsTrigger>
+          <TabsTrigger value="radar" className="flex items-center gap-2">
+            <Radar className="h-4 w-4" />
+            Radar
+          </TabsTrigger>
+          <TabsTrigger value="metrics" className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Métriques
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="charts" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ScoreChart data={result.breakdown} />
+            <ScorePieChart data={result.breakdown} />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="indicators" className="space-y-6">
+          <VisualIndicators data={result.breakdown} />
+        </TabsContent>
+        
+        <TabsContent value="radar" className="space-y-6">
+          <EnhancedRadarChart data={result.breakdown} />
+        </TabsContent>
+        
+        <TabsContent value="metrics" className="space-y-6">
+          <MetricsVisual data={result.breakdown} />
+        </TabsContent>
+      </Tabs>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <Card className="h-full">
-            <CardHeader>
-              <CardTitle>Statistiques Clés</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Options Analysées</span>
-                <span className="text-xl font-medium">{result.breakdown.length}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Score Moyen</span>
-                <span className="text-xl font-medium">{averageScore}</span>
-              </div>
-              {topOption && (
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Meilleur Score</span>
-                  <span className="text-xl font-medium">{topOption.score}</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-        <div className="lg:col-span-2">
-          <ScoreChart data={result.breakdown} />
-        </div>
-      </div>
+      <ComparisonTable breakdown={result.breakdown} />
 
       <Card>
         <CardFooter className="p-0">
