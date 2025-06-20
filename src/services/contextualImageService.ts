@@ -11,25 +11,25 @@ export const generateContextualPrompt = (option: string, dilemma?: string): stri
   
   // Détecter le type de décision pour adapter le style
   const dilemmaLower = dilemma?.toLowerCase() || '';
-  let style = 'high quality, professional';
+  let style = 'high quality, professional, realistic';
   
   if (dilemmaLower.includes('voyage') || dilemmaLower.includes('destination') || dilemmaLower.includes('vacances')) {
-    style = 'beautiful destination, travel photography, scenic view';
+    style = 'beautiful destination, travel photography, scenic landscape';
   } else if (dilemmaLower.includes('restaurant') || dilemmaLower.includes('manger') || dilemmaLower.includes('cuisine')) {
-    style = 'delicious food photography, restaurant ambiance';
+    style = 'delicious food photography, appetizing presentation';
   } else if (dilemmaLower.includes('voiture') || dilemmaLower.includes('acheter') || dilemmaLower.includes('produit')) {
-    style = 'product photography, clean background, commercial';
+    style = 'product photography, clean background, commercial style';
   } else if (dilemmaLower.includes('emploi') || dilemmaLower.includes('travail') || dilemmaLower.includes('carrière')) {
     style = 'professional workplace, modern office environment';
   } else if (dilemmaLower.includes('maison') || dilemmaLower.includes('appartement') || dilemmaLower.includes('logement')) {
     style = 'real estate photography, modern interior design';
   }
   
-  // Construire le prompt final
-  return `${cleanOption}, ${style}, realistic, detailed, 4k quality`;
+  // Construire le prompt final optimisé pour FLUX
+  return `${cleanOption}, ${style}, detailed, vibrant colors, sharp focus`;
 };
 
-// Fonction pour générer une image via l'edge function
+// Fonction pour générer une image via l'edge function Hugging Face
 export const generateContextualImage = async (option: string, dilemma?: string): Promise<string | null> => {
   const cacheKey = `${option}-${dilemma}`;
   
@@ -40,14 +40,14 @@ export const generateContextualImage = async (option: string, dilemma?: string):
   
   try {
     const prompt = generateContextualPrompt(option, dilemma);
-    console.log('Generating image with prompt:', prompt);
+    console.log('Generating image with FLUX.1-schnell, prompt:', prompt);
     
-    const { data, error } = await supabase.functions.invoke('generate-image', {
+    const { data, error } = await supabase.functions.invoke('generate-image-hf', {
       body: { prompt }
     });
     
     if (error) {
-      console.error('Error calling generate-image function:', error);
+      console.error('Error calling generate-image-hf function:', error);
       return null;
     }
     
@@ -59,7 +59,7 @@ export const generateContextualImage = async (option: string, dilemma?: string):
     
     return null;
   } catch (error) {
-    console.error('Error generating contextual image:', error);
+    console.error('Error generating contextual image with FLUX:', error);
     return null;
   }
 };
