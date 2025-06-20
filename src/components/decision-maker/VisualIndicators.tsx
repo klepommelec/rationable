@@ -68,12 +68,12 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({ data }) => {
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Indicateurs Visuels</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+    <Card>
+      <CardHeader>
+        <CardTitle>Indicateurs Visuels</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
           {sortedData.map((item, index) => {
             const cleanName = item.option.replace(/^Option\s+\d+:\s*/i, '').trim();
             return (
@@ -132,15 +132,11 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({ data }) => {
               </div>
             );
           })}
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Statistiques Pros/Cons */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Analyse Pros/Cons</CardTitle>
-        </CardHeader>
-        <CardContent>
+        {/* Analyse Pros/Cons */}
+        <div>
+          <h3 className="text-sm font-medium text-gray-500 mb-3">Analyse Pros/Cons</h3>
           <div className="grid grid-cols-2 gap-4">
             {prosConsMetrics.map((metric, index) => (
               <div 
@@ -159,8 +155,8 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({ data }) => {
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
