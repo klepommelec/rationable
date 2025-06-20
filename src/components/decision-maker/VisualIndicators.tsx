@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { TrendingUp, TrendingDown, Minus, Star, Award, Medal, CheckCircle, XCircle } from 'lucide-react';
 import { IBreakdownItem } from '@/types/decision';
 interface VisualIndicatorsProps {
@@ -100,15 +99,6 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({
                     </div>
                   </div>
                   
-                  <div className="space-y-1">
-                    <Progress value={item.score} className="h-2" style={{
-                  background: 'hsl(var(--muted))'
-                }} />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Score: {item.score}/100</span>
-                    </div>
-                  </div>
-
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="text-green-700 bg-green-50 p-2 rounded">
                       <div className="font-medium mb-1">Points forts ({item.pros.length})</div>
