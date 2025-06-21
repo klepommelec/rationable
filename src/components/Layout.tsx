@@ -13,6 +13,14 @@ const Layout = () => {
   const currentDecision = getCurrentDecision();
   const showShareButton = isHomePage && analysisStep === 'done' && currentDecision;
 
+  // Debug logs pour comprendre pourquoi le bouton n'apparaît pas
+  console.log('🔍 [DEBUG] Layout conditions:', {
+    isHomePage,
+    analysisStep,
+    currentDecision: !!currentDecision,
+    showShareButton
+  });
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar 
