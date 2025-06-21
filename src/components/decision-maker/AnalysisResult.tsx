@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -56,12 +55,10 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </div>
         </CardHeader>
         <CardContent>
-          {/* Image principale de la recommandation avec taille réduite de 50% */}
           <div className="mb-4 flex justify-start">
             <DecisionImage imageQuery={result.imageQuery} alt={`Illustration pour ${result.recommendation}`} size="large" className="max-w-xs" option={topOption.option} dilemma={dilemma} index={0} />
           </div>
           
-          {/* ... keep existing code (grid with pros/cons) */}
           <div className="grid grid-cols-2 gap-2">
             <div className="text-green-700 bg-green-50 p-2 rounded">
               <div className="font-medium mb-1 text-xs pb-0.5">Points forts ({topOption.pros.length})</div>
@@ -75,10 +72,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         </CardContent>
       </Card>
 
-      {/* Decision explanation */}
       <DecisionExplanation result={result} />
 
-      {/* Metrics visualization */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
@@ -97,7 +92,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               </div>
             </div>
             
-            {/* Radar chart */}
             <div className="w-full overflow-hidden">
               <EnhancedRadarChart data={result.breakdown} />
             </div>
