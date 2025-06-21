@@ -1,5 +1,5 @@
 
-import { BrainCircuit, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Link } from 'react-router-dom';
 import ShareButton from './ShareButton';
@@ -17,7 +17,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentDecision }) => {
           to="/" 
           className="flex items-center gap-2 mr-auto hover:underline transition-all duration-200"
         >
-          <BrainCircuit className="h-6 w-6" />
+          <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-6 w-6" />
           <span className="font-bold text-lg">Rationable</span>
         </Link>
         
