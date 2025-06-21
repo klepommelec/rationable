@@ -8,8 +8,11 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SharedDecision from "./pages/SharedDecision";
 import CommunityTemplates from "./pages/CommunityTemplates";
+import Auth from "./pages/Auth";
 import { ThemeProvider } from "./components/theme-provider";
+import { AuthProvider } from "./hooks/useAuth";
 import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -20,15 +23,25 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/templates" element={<CommunityTemplates />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            </Route>
-            <Route path="/shared/:publicId" element={<SharedDecision />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AuthProvider>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/shared/:publicId" element={<SharedDecision />} />
+              <Route element={<Layout />}>
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                } />
+                <Route path="/templates" element={
+                  <ProtectedRoute>
+                    <CommunityTemplates />
+                  </ProtectedRoute>
+                } />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

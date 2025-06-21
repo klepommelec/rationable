@@ -3,13 +3,15 @@ import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { useDecisionMaker } from "@/hooks/useDecisionMaker";
+import { useAuth } from "@/hooks/useAuth";
 
 const Layout = () => {
   const location = useLocation();
   const { getCurrentDecision } = useDecisionMaker();
+  const { user } = useAuth();
   
   // Only show share button on the main decision maker page when there's a completed decision
-  const currentDecision = location.pathname === '/' ? getCurrentDecision() : null;
+  const currentDecision = location.pathname === '/' && user ? getCurrentDecision() : null;
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
