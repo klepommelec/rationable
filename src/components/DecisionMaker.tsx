@@ -74,8 +74,10 @@ const DecisionMaker = () => {
 
     try {
       setIsGeneratingOptions(true);
-      const generatedOptions = await generateOptions(dilemma, criteria);
-      setOptions(generatedOptions);
+      const analysisResult = await generateOptions(dilemma, criteria);
+      // Extract options from the breakdown in the result
+      const extractedOptions = analysisResult.breakdown?.map(item => item.option) || [];
+      setOptions(extractedOptions);
       setIsGeneratingOptions(false);
     } catch (error) {
       setIsGeneratingOptions(false);
