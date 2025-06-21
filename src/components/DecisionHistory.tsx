@@ -20,6 +20,8 @@ export const DecisionHistory: React.FC<DecisionHistoryProps> = ({
   onClose,
   onUpdateCategory = () => {}
 }) => {
+  console.log('DecisionHistory - onLoad function:', typeof onLoad);
+  
   return (
     <EnhancedDecisionHistory
       history={history}

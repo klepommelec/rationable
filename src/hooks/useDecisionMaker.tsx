@@ -1,4 +1,3 @@
-
 import { useDecisionHistory } from './useDecisionHistory';
 import { useDecisionState } from './useDecisionState';
 import { useDecisionProgress } from './useDecisionProgress';
@@ -96,7 +95,8 @@ export const useDecisionMaker = () => {
         deleteDecision,
         clearHistory,
         currentDecisionId,
-        handleGenerateOptions
+        handleGenerateOptions,
+        setAnalysisStep
     });
 
     return {

@@ -72,6 +72,7 @@ interface UseDecisionActionsProps {
     clearHistory: () => void;
     currentDecisionId: string | null;
     handleGenerateOptions: () => void;
+    setAnalysisStep: (step: AnalysisStep) => void;
 }
 
 export const useDecisionActions = ({
@@ -91,7 +92,8 @@ export const useDecisionActions = ({
     deleteDecision,
     clearHistory,
     currentDecisionId,
-    handleGenerateOptions
+    handleGenerateOptions,
+    setAnalysisStep
 }: UseDecisionActionsProps) => {
 
     // Vérifier si les critères ont changé
@@ -135,8 +137,10 @@ export const useDecisionActions = ({
     };
     
     const loadDecision = (decisionId: string) => {
+        console.log('loadDecision called with id:', decisionId);
         const decisionToLoad = history.find(d => d.id === decisionId);
         if (decisionToLoad) {
+            console.log('Decision found, loading:', decisionToLoad);
             setDilemma(decisionToLoad.dilemma);
             setCriteria(decisionToLoad.criteria);
             setEmoji(decisionToLoad.emoji || '🤔');
@@ -149,12 +153,15 @@ export const useDecisionActions = ({
             };
             setResult(resultWithDefaults);
             setCurrentDecisionId(decisionToLoad.id);
+            setAnalysisStep('done'); // Important: mettre à jour l'étape d'analyse
             
             // Définir les critères de référence pour éviter les changements fantômes
             initialCriteriaRef.current = decisionToLoad.criteria;
             setHasChanges(false);
             
             toast.info("Décision précédente chargée.");
+        } else {
+            console.error('Decision not found with id:', decisionId);
         }
     };
 
