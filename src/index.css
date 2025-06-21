@@ -27,6 +27,16 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
+    
+    /* Sidebar variables for light theme */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 222.2 84% 4.9%;
+    --sidebar-primary: 222.2 47.4% 11.2%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 210 40% 94%;
+    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 222.2 84% 4.9%;
   }
 
   .dark {
@@ -57,6 +67,16 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+    
+    /* Sidebar variables for dark theme */
+    --sidebar-background: 217.2 32.6% 15%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 210 40% 98%;
+    --sidebar-primary-foreground: 222.2 47.4% 11.2%;
+    --sidebar-accent: 217.2 32.6% 20%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 212.7 26.8% 83.9%;
   }
 }
 
@@ -68,11 +88,55 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   .dark body {
     background: radial-gradient(ellipse 80% 50% at 50% -20%,rgba(120,119,198,0.3),hsla(0,0%,100%,0));
     background-color: #020617; /* slate-950 */
+  }
+
+  /* Amélioration des transitions pour tous les éléments interactifs */
+  button, 
+  [role="button"], 
+  a, 
+  input, 
+  textarea, 
+  select,
+  .card,
+  .border {
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Amélioration du contraste pour les cartes */
+  .card {
+    @apply bg-card text-card-foreground border border-border/50;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  }
+
+  .dark .card {
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    border-color: hsl(var(--border));
+  }
+
+  /* Amélioration des badges */
+  .badge {
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Amélioration des boutons */
+  .button {
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Amélioration des inputs */
+  input, textarea, select {
+    @apply bg-background border-input;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 
   /* Accessibility improvements */
@@ -132,12 +196,58 @@
     color: hsl(var(--primary));
     text-decoration: underline;
     text-decoration-color: transparent;
-    transition: text-decoration-color 0.2s ease;
+    transition: text-decoration-color 0.2s ease, color 0.2s ease;
   }
 
   a:hover,
   a:focus {
     text-decoration-color: currentColor;
+  }
+
+  /* Amélioration des hover states */
+  .hover\:bg-accent:hover {
+    background-color: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+  }
+
+  /* Amélioration des états disabled */
+  .disabled\:opacity-50:disabled,
+  [disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Amélioration des skeleton loaders */
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: .5;
+    }
+  }
+
+  /* Amélioration du contraste pour le thème sombre */
+  .dark .text-muted-foreground {
+    color: hsl(215 20.2% 70%);
+  }
+
+  .dark .border {
+    border-color: hsl(var(--border));
+  }
+
+  /* Amélioration des dropdown menus */
+  .dropdown-menu {
+    @apply bg-popover text-popover-foreground border border-border;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+
+  .dark .dropdown-menu {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
   }
 }
 
@@ -190,5 +300,26 @@
       font-size: 1.125rem;
       line-height: 1.75rem;
     }
+  }
+
+  /* Utility classes for better theme adaptation */
+  .theme-transition {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .card-enhanced {
+    @apply bg-card text-card-foreground border border-border/60 rounded-lg theme-transition;
+  }
+
+  .dark .card-enhanced {
+    @apply border-border/80;
+  }
+
+  .button-enhanced {
+    @apply theme-transition;
+  }
+
+  .input-enhanced {
+    @apply bg-background border-input theme-transition;
   }
 }
