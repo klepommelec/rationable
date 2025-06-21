@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,6 @@ import { DecisionExplanation } from './DecisionExplanation';
 import { VisualIndicators } from './VisualIndicators';
 import { EnhancedRadarChart } from './EnhancedRadarChart';
 import { MetricsVisual } from './MetricsVisual';
-import { ExportMenu } from '../ExportMenu';
 import { DecisionImage } from './DecisionImage';
 
 interface AnalysisResultProps {
@@ -51,7 +49,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               </Badge>
             </div>
             <div className="flex gap-2 flex-wrap justify-end">
-              {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
               <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm" aria-label="Commencer une nouvelle analyse">
                 <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
                 <span className="hidden sm:inline">Nouvelle analyse</span>
