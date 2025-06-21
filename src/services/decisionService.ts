@@ -14,11 +14,11 @@ export const generateCompleteAnalysis = async (dilemma: string) => {
 6. "imageQuery": description image (anglais)
 7. "infoLinks": [{title,url}] - 2 liens max
 8. "shoppingLinks": [{title,url}] - 2 liens max  
-9. "breakdown": 3 options avec {option,pros,cons,score}
+9. "breakdown": 3 options avec {option,pros:[],cons:[],score}
 
 Dilemme: "${dilemma}"
 
-JSON uniquement:`;
+JSON uniquement, breakdown avec tableaux pros/cons obligatoires:`;
 
   const response = await callOpenAiApi(prompt);
   
@@ -43,7 +43,9 @@ export const generateOptionsOnly = async (dilemma: string, criteria: ICriterion[
   const prompt = `Générez options pour: "${dilemma}"
 Critères: ${criteriaList}
 
-JSON avec: recommendation, description, imageQuery, infoLinks(2 max), shoppingLinks(2 max), breakdown(3 options avec pros/cons/score)`;
+JSON avec: recommendation, description, imageQuery, infoLinks(2 max), shoppingLinks(2 max), breakdown(3 options avec pros:[],cons:[],score)
+
+Breakdown obligatoirement avec tableaux pros/cons:`;
 
   return await callOpenAiApi(prompt);
 };

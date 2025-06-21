@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { EnhancedRadarChart } from './EnhancedRadarChart';
 import { MetricsVisual } from './MetricsVisual';
 import { ExportMenu } from '../ExportMenu';
 import { DecisionImage } from './DecisionImage';
+
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
@@ -18,6 +20,7 @@ interface AnalysisResultProps {
   currentDecision?: any;
   dilemma?: string;
 }
+
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
   isUpdating,
@@ -27,8 +30,37 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   dilemma
 }) => {
   if (!result) return null;
-  const topOption = result.breakdown.reduce((prev, current) => current.score > prev.score ? current : prev);
-  return <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
+
+  // Vérifications de sécurité pour éviter les erreurs
+  if (!result.breakdown || !Array.isArray(result.breakdown) || result.breakdown.length === 0) {
+    console.error("❌ [DEBUG] Invalid breakdown data:", result.breakdown);
+    return (
+      <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center text-gray-500">
+              <p>Erreur dans les données de l'analyse. Veuillez relancer l'analyse.</p>
+              <Button onClick={clearSession} className="mt-4">
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Nouvelle analyse
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const topOption = result.breakdown.reduce((prev, current) => 
+    (current.score || 0) > (prev.score || 0) ? current : prev
+  );
+
+  // Vérifications supplémentaires pour topOption
+  const safePros = Array.isArray(topOption.pros) ? topOption.pros : [];
+  const safeCons = Array.isArray(topOption.cons) ? topOption.cons : [];
+
+  return (
+    <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
       {/* Header with actions and main image */}
       <Card>
         <CardHeader>
@@ -40,7 +72,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs sm:text-sm inline-flex items-center gap-1 max-w-full">
                 <span className="flex-shrink-0" aria-hidden="true">✅</span>
                 <span className="truncate">
-                  Recommandation: {topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
+                  Recommandation: {topOption.option ? topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim() : 'Non disponible'}
                 </span>
               </Badge>
             </div>
@@ -56,17 +88,29 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex justify-start">
-            <DecisionImage imageQuery={result.imageQuery} alt={`Illustration pour ${result.recommendation}`} size="large" className="max-w-xs" option={topOption.option} dilemma={dilemma} index={0} />
+            <DecisionImage 
+              imageQuery={result.imageQuery} 
+              alt={`Illustration pour ${result.recommendation}`} 
+              size="large" 
+              className="max-w-xs" 
+              option={topOption.option} 
+              dilemma={dilemma} 
+              index={0} 
+            />
           </div>
           
           <div className="grid grid-cols-2 gap-2">
             <div className="text-green-700 bg-green-50 p-2 rounded">
-              <div className="font-medium mb-1 text-xs pb-0.5">Points forts ({topOption.pros.length})</div>
-              {topOption.pros.map((pro, i) => <div key={i} className="text-xs text-black py-[0.5px]">• {pro}</div>)}
+              <div className="font-medium mb-1 text-xs pb-0.5">Points forts ({safePros.length})</div>
+              {safePros.map((pro, i) => (
+                <div key={i} className="text-xs text-black py-[0.5px]">• {pro}</div>
+              ))}
             </div>
             <div className="text-red-700 bg-red-50 p-2 rounded">
-              <div className="font-medium mb-1 text-xs pb-0.5">Points faibles ({topOption.cons.length})</div>
-              {topOption.cons.map((con, i) => <div key={i} className="text-xs text-black py-px">• {con}</div>)}
+              <div className="font-medium mb-1 text-xs pb-0.5">Points faibles ({safeCons.length})</div>
+              {safeCons.map((con, i) => (
+                <div key={i} className="text-xs text-black py-px">• {con}</div>
+              ))}
             </div>
           </div>
         </CardContent>
@@ -98,6 +142,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </div>
         </CardContent>
       </Card>
-    </div>;
+    </div>
+  );
 };
+
 export default AnalysisResult;
