@@ -1,8 +1,9 @@
 
-import { BrainCircuit } from 'lucide-react';
+import { BrainCircuit, Users } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Link } from 'react-router-dom';
 import ShareButton from './ShareButton';
+import { Button } from '@/components/ui/button';
 
 interface NavbarProps {
   currentDecision?: any;
@@ -21,6 +22,12 @@ const Navbar: React.FC<NavbarProps> = ({ currentDecision }) => {
         </Link>
         
         <div className="flex items-center gap-2">
+          <Link to="/templates">
+            <Button variant="ghost" size="sm">
+              <Users className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Templates</span>
+            </Button>
+          </Link>
           {currentDecision && (
             <ShareButton decision={currentDecision} />
           )}

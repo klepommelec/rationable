@@ -1,7 +1,9 @@
+
 import { useEffect } from 'react';
 import { toast } from "sonner";
 import { IDecision, IResult, ICriterion } from '@/types/decision';
 import { AnalysisStep } from './useDecisionState';
+import { getCommunityTemplates, copyTemplate } from '@/services/communityTemplateService';
 
 const templates = [
   {
@@ -131,6 +133,25 @@ export const useDecisionActions = ({
         toast.success(`Modèle "${template.name}" appliqué !`);
     };
 
+    const applyCommunityTemplate = async (templateId: string, templateData: IDecision) => {
+        try {
+            // Copy the template data
+            resetState();
+            setDilemma(templateData.dilemma);
+            setCriteria(templateData.criteria);
+            setEmoji(templateData.emoji);
+            setSelectedCategory(templateData.category);
+            
+            // Increment copy count
+            await copyTemplate(templateId);
+            
+            toast.success("Template communautaire appliqué !");
+        } catch (error) {
+            console.error('Error applying community template:', error);
+            toast.error("Erreur lors de l'application du template");
+        }
+    };
+
     const clearSession = () => {
         resetState();
         toast.info("Session réinitialisée.");
@@ -153,7 +174,7 @@ export const useDecisionActions = ({
             };
             setResult(resultWithDefaults);
             setCurrentDecisionId(decisionToLoad.id);
-            setAnalysisStep('done'); // Important: mettre à jour l'étape d'analyse
+            setAnalysisStep('done');
             
             // Définir les critères de référence pour éviter les changements fantômes
             initialCriteriaRef.current = decisionToLoad.criteria;
@@ -190,6 +211,7 @@ export const useDecisionActions = ({
         handleUpdateCategory,
         handleManualUpdate,
         applyTemplate,
+        applyCommunityTemplate,
         clearSession,
         loadDecision,
         handleDeleteDecision,

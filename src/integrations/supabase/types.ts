@@ -9,6 +9,54 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      community_templates: {
+        Row: {
+          author_name: string | null
+          category: string | null
+          copy_count: number | null
+          created_at: string
+          decision_data: Json
+          description: string | null
+          id: string
+          like_count: number | null
+          public_id: string
+          status: Database["public"]["Enums"]["template_status"] | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_name?: string | null
+          category?: string | null
+          copy_count?: number | null
+          created_at?: string
+          decision_data: Json
+          description?: string | null
+          id?: string
+          like_count?: number | null
+          public_id: string
+          status?: Database["public"]["Enums"]["template_status"] | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string | null
+          category?: string | null
+          copy_count?: number | null
+          created_at?: string
+          decision_data?: Json
+          description?: string | null
+          id?: string
+          like_count?: number | null
+          public_id?: string
+          status?: Database["public"]["Enums"]["template_status"] | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       shared_decisions: {
         Row: {
           created_at: string
@@ -52,9 +100,21 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_template_public_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      increment_template_copy_count: {
+        Args: { template_id: string }
+        Returns: undefined
+      }
+      increment_template_like_count: {
+        Args: { template_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
-      [_ in never]: never
+      template_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -169,6 +229,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      template_status: ["pending", "approved", "rejected"],
+    },
   },
 } as const
