@@ -14,6 +14,10 @@ export const DecisionExplanation: React.FC<DecisionExplanationProps> = ({ result
     ? result.breakdown.reduce((prev, current) => prev.score > current.score ? prev : current)
     : null;
 
+  // Ensure pros and cons are arrays with proper fallbacks
+  const pros = Array.isArray(topOption?.pros) ? topOption.pros : [];
+  const cons = Array.isArray(topOption?.cons) ? topOption.cons : [];
+
   const scoreRange = result.breakdown.length > 0 
     ? Math.max(...result.breakdown.map(item => item.score)) - Math.min(...result.breakdown.map(item => item.score))
     : 0;
@@ -95,7 +99,7 @@ export const DecisionExplanation: React.FC<DecisionExplanationProps> = ({ result
           <div className="p-3 bg-green-50 rounded-lg">
             <p className="text-sm text-green-900">
               <strong>{topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim()}</strong> obtient 
-              le score le plus élevé ({topOption.score}/100) grâce à ses avantages clés : {topOption.pros.slice(0, 2).join(', ')}.
+              le score le plus élevé ({topOption.score}/100) grâce à ses avantages clés : {pros.slice(0, 2).join(', ')}.
             </p>
           </div>
         )}
