@@ -38,10 +38,10 @@ export const DecisionImage: React.FC<DecisionImageProps> = ({
       setHasError(false);
       setProgress(0);
       
-      // Animation de progression simulée pour améliorer l'UX
+      // Animation de progression plus rapide pour améliorer l'UX
       const progressInterval = setInterval(() => {
-        setProgress(prev => Math.min(prev + 10, 90));
-      }, 200);
+        setProgress(prev => Math.min(prev + 15, 85));
+      }, 100);
       
       try {
         if (option) {
@@ -70,7 +70,7 @@ export const DecisionImage: React.FC<DecisionImageProps> = ({
         setImageUrl(getVariedPlaceholder(option || imageQuery, index));
         setHasError(true);
       } finally {
-        setTimeout(() => setIsLoading(false), 300); // Petite transition pour l'UX
+        setTimeout(() => setIsLoading(false), 200); // Transition plus rapide
       }
     };
 
@@ -83,7 +83,7 @@ export const DecisionImage: React.FC<DecisionImageProps> = ({
         <div className="w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer absolute"></div>
         <div className="w-full h-full flex flex-col items-center justify-center text-gray-500">
           <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mb-1"></div>
-          <div className="text-xs font-medium">FLUX</div>
+          <div className="text-xs font-medium">Génération...</div>
           <div className="w-8 h-1 bg-gray-300 rounded-full overflow-hidden mt-1">
             <div 
               className="h-full bg-primary transition-all duration-300 ease-out"
@@ -113,11 +113,6 @@ export const DecisionImage: React.FC<DecisionImageProps> = ({
           <span className="text-white text-xs text-center px-1">
             {option?.slice(0, 10) || 'Image'}
           </span>
-        </div>
-      )}
-      {!hasError && (
-        <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-          ⚡ FLUX
         </div>
       )}
     </div>
