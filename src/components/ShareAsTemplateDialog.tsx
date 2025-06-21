@@ -22,7 +22,7 @@ import { toast } from "sonner";
 interface ShareAsTemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  decision: IDecision | null;
+  decision: IDecision;
 }
 
 const ShareAsTemplateDialog: React.FC<ShareAsTemplateDialogProps> = ({ 
@@ -30,11 +30,11 @@ const ShareAsTemplateDialog: React.FC<ShareAsTemplateDialogProps> = ({
   onOpenChange, 
   decision 
 }) => {
-  const [title, setTitle] = useState(decision?.dilemma || '');
+  const [title, setTitle] = useState(decision.dilemma);
   const [description, setDescription] = useState('');
   const [authorName, setAuthorName] = useState('');
-  const [category, setCategory] = useState(decision?.category || '');
-  const [tags, setTags] = useState<string[]>(decision?.tags || []);
+  const [category, setCategory] = useState(decision.category || '');
+  const [tags, setTags] = useState<string[]>(decision.tags || []);
   const [newTag, setNewTag] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -50,8 +50,8 @@ const ShareAsTemplateDialog: React.FC<ShareAsTemplateDialogProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (!title.trim() || !decision) {
-      toast.error("Le titre est requis et une décision doit être sélectionnée");
+    if (!title.trim()) {
+      toast.error("Le titre est requis");
       return;
     }
 
@@ -70,11 +70,11 @@ const ShareAsTemplateDialog: React.FC<ShareAsTemplateDialogProps> = ({
       onOpenChange(false);
       
       // Reset form
-      setTitle(decision?.dilemma || '');
+      setTitle(decision.dilemma);
       setDescription('');
       setAuthorName('');
-      setCategory(decision?.category || '');
-      setTags(decision?.tags || []);
+      setCategory(decision.category || '');
+      setTags(decision.tags || []);
     } catch (error) {
       console.error('Error sharing template:', error);
       toast.error("Erreur lors du partage du template");
@@ -82,11 +82,6 @@ const ShareAsTemplateDialog: React.FC<ShareAsTemplateDialogProps> = ({
       setIsSubmitting(false);
     }
   };
-
-  // Don't render the dialog content if no decision is provided
-  if (!decision) {
-    return null;
-  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
