@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { toast } from "sonner";
 import { IDecision, IResult, ICriterion } from '@/types/decision';
@@ -123,8 +122,10 @@ export const useDecisionActions = ({
     };
 
     const applyTemplate = (template: typeof templates[0]) => {
-        setDilemma(template.dilemma);
+        // D'abord reset l'état
         resetState();
+        // Puis appliquer le dilemme du template
+        setDilemma(template.dilemma);
         toast.success(`Modèle "${template.name}" appliqué !`);
     };
 
