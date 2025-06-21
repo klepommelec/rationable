@@ -8,24 +8,33 @@ const Layout = () => {
   const location = useLocation();
   const { getCurrentDecision, analysisStep } = useDecisionMaker();
   
-  // Afficher le bouton de partage seulement sur la page principale quand une décision est complète
+  // Vérifier si on est sur la page principale
   const isHomePage = location.pathname === '/';
   const currentDecision = getCurrentDecision();
-  const showShareButton = isHomePage && analysisStep === 'done' && currentDecision;
+  
+  // Le bouton de partage doit apparaître quand :
+  // 1. On est sur la page d'accueil
+  // 2. Une analyse est terminée
+  // 3. Il y a une décision courante
+  const shouldShowShareButton = isHomePage && 
+                               analysisStep === 'done' && 
+                               currentDecision !== null && 
+                               currentDecision !== undefined;
 
-  // Debug logs pour comprendre pourquoi le bouton n'apparaît pas
-  console.log('🔍 [DEBUG] Layout conditions:', {
+  // Debug logs améliorés
+  console.log('🔍 [DEBUG] Layout - Share button conditions:', {
     isHomePage,
     analysisStep,
-    currentDecision: !!currentDecision,
-    showShareButton
+    hasCurrentDecision: currentDecision !== null,
+    currentDecisionId: currentDecision?.id,
+    shouldShowShareButton
   });
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar 
         currentDecision={currentDecision} 
-        showShareButton={!!showShareButton}
+        showShareButton={shouldShowShareButton}
       />
       <main 
         className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-full overflow-x-hidden"
