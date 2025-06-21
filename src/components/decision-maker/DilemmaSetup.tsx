@@ -1,10 +1,9 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { BrainCircuit, BookCopy, History, ChevronDown, ChevronUp } from 'lucide-react';
+import { BrainCircuit, BookCopy, History } from 'lucide-react';
 import { ThemeToggle } from '../ThemeToggle';
 import { DecisionHistory } from '../DecisionHistory';
 import MainActionButton from './MainActionButton';
@@ -51,9 +50,8 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   onCategoryChange,
   onUpdateCategory
 }) => {
-    const [showAllTemplates, setShowAllTemplates] = useState(false);
-    
-    const displayedTemplates = showAllTemplates ? templates : templates.slice(0, 3);
+    // Afficher seulement les 3 premiers modèles
+    const displayedTemplates = templates.slice(0, 3);
 
     return (
         <Card className="backdrop-blur-sm relative max-w-4xl mx-auto">
@@ -138,46 +136,21 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                             </Sheet>
                         </div>
                     </div>
-                    <div className="space-y-2">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                            {displayedTemplates.map(template => (
-                                <Button 
-                                    key={template.name} 
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={() => applyTemplate(template)} 
-                                    disabled={isLoading || isUpdating || analysisStep !== 'idle'}
-                                    className="text-xs sm:text-sm justify-start h-auto py-3 px-3 whitespace-normal text-left"
-                                    aria-label={`Utiliser le modèle: ${template.name}`}
-                                >
-                                    <BookCopy className="h-4 w-4 mr-2 flex-shrink-0" aria-hidden="true" />
-                                    <span className="truncate">{template.name}</span>
-                                </Button>
-                            ))}
-                        </div>
-                        {templates.length > 3 && (
-                            <div className="flex justify-center pt-2">
-                                <Button 
-                                    variant="ghost" 
-                                    size="sm"
-                                    onClick={() => setShowAllTemplates(!showAllTemplates)}
-                                    className="text-xs sm:text-sm text-muted-foreground hover:text-foreground"
-                                    disabled={isLoading || isUpdating || analysisStep !== 'idle'}
-                                >
-                                    {showAllTemplates ? (
-                                        <>
-                                            <ChevronUp className="h-4 w-4 mr-1" />
-                                            Voir moins
-                                        </>
-                                    ) : (
-                                        <>
-                                            <ChevronDown className="h-4 w-4 mr-1" />
-                                            Voir plus ({templates.length - 3} autres)
-                                        </>
-                                    )}
-                                </Button>
-                            </div>
-                        )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {displayedTemplates.map(template => (
+                            <Button 
+                                key={template.name} 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => applyTemplate(template)} 
+                                disabled={isLoading || isUpdating || analysisStep !== 'idle'}
+                                className="text-xs sm:text-sm justify-start h-auto py-3 px-3 whitespace-normal text-left"
+                                aria-label={`Utiliser le modèle: ${template.name}`}
+                            >
+                                <BookCopy className="h-4 w-4 mr-2 flex-shrink-0" aria-hidden="true" />
+                                <span className="truncate">{template.name}</span>
+                            </Button>
+                        ))}
                     </div>
                 </div>
             </CardContent>
