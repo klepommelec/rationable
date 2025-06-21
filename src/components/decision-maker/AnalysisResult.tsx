@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { EnhancedRadarChart } from './EnhancedRadarChart';
 import { MetricsVisual } from './MetricsVisual';
 import { ExportMenu } from '../ExportMenu';
 import { DecisionImage } from './DecisionImage';
+
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
@@ -18,6 +20,7 @@ interface AnalysisResultProps {
   currentDecision?: any;
   dilemma?: string;
 }
+
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
   isUpdating,
@@ -27,8 +30,15 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   dilemma
 }) => {
   if (!result) return null;
+
   const topOption = result.breakdown.reduce((prev, current) => current.score > prev.score ? current : prev);
-  return <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
+  
+  // Ensure pros and cons are arrays with proper fallbacks
+  const pros = Array.isArray(topOption.pros) ? topOption.pros : [];
+  const cons = Array.isArray(topOption.cons) ? topOption.cons : [];
+
+  return (
+    <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
       {/* Header with actions and main image */}
       <Card>
         <CardHeader>
@@ -61,12 +71,16 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           
           <div className="grid grid-cols-2 gap-2">
             <div className="text-green-700 bg-green-50 p-2 rounded">
-              <div className="font-medium mb-1 text-xs pb-0.5">Points forts ({topOption.pros.length})</div>
-              {topOption.pros.map((pro, i) => <div key={i} className="text-xs text-black py-[0.5px]">• {pro}</div>)}
+              <div className="font-medium mb-1 text-xs pb-0.5">Points forts ({pros.length})</div>
+              {pros.map((pro, i) => (
+                <div key={i} className="text-xs text-black py-[0.5px]">• {pro}</div>
+              ))}
             </div>
             <div className="text-red-700 bg-red-50 p-2 rounded">
-              <div className="font-medium mb-1 text-xs pb-0.5">Points faibles ({topOption.cons.length})</div>
-              {topOption.cons.map((con, i) => <div key={i} className="text-xs text-black py-px">• {con}</div>)}
+              <div className="font-medium mb-1 text-xs pb-0.5">Points faibles ({cons.length})</div>
+              {cons.map((con, i) => (
+                <div key={i} className="text-xs text-black py-px">• {con}</div>
+              ))}
             </div>
           </div>
         </CardContent>
@@ -98,6 +112,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </div>
         </CardContent>
       </Card>
-    </div>;
+    </div>
+  );
 };
+
 export default AnalysisResult;
