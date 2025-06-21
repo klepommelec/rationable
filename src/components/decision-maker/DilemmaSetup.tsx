@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -91,27 +92,29 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     >
                         Votre dilemme
                     </label>
-                    <Textarea
-                        id="dilemma-input"
-                        placeholder=""
-                        value={dilemma}
-                        onChange={(e) => setDilemma(e.target.value)}
-                        className="focus:ring-cyan-500 text-base md:text-sm min-h-[100px] resize-none relative"
-                        disabled={isLoading || isUpdating || analysisStep === 'done'}
-                        rows={3}
-                        aria-describedby="dilemma-help"
-                        aria-invalid={dilemma.trim() === '' ? 'true' : 'false'}
-                    />
-                    {dilemma === '' && (
-                        <div className="absolute inset-0 pointer-events-none flex items-start pt-3 px-3">
-                            <span className="text-muted-foreground text-base md:text-sm">
-                                <AnimatedPlaceholder 
-                                    placeholders={placeholders}
-                                    interval={2500}
-                                />
-                            </span>
-                        </div>
-                    )}
+                    <div className="relative">
+                        <Textarea
+                            id="dilemma-input"
+                            placeholder=""
+                            value={dilemma}
+                            onChange={(e) => setDilemma(e.target.value)}
+                            className="focus:ring-cyan-500 text-base md:text-sm min-h-[100px] resize-none"
+                            disabled={isLoading || isUpdating || analysisStep === 'done'}
+                            rows={3}
+                            aria-describedby="dilemma-help"
+                            aria-invalid={dilemma.trim() === '' ? 'true' : 'false'}
+                        />
+                        {dilemma === '' && (
+                            <div className="absolute top-2 left-3 pointer-events-none">
+                                <span className="text-muted-foreground text-base md:text-sm">
+                                    <AnimatedPlaceholder 
+                                        placeholders={placeholders}
+                                        interval={2500}
+                                    />
+                                </span>
+                            </div>
+                        )}
+                    </div>
                     <p id="dilemma-help" className="sr-only">
                         Décrivez le problème ou la décision que vous devez prendre
                     </p>
