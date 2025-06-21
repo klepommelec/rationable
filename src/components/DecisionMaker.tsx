@@ -15,7 +15,6 @@ import { ExportMenu } from './ExportMenu';
 import ShareAsTemplateDialog from './ShareAsTemplateDialog';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
 import { useDecisionHistory } from '@/hooks/useDecisionHistory';
-import { useDecisionAPI } from '@/hooks/useDecisionAPI';
 import { generateOptions } from '@/services/decisionService';
 import ManualOptionsGenerator from './ManualOptionsGenerator';
 import { OptionsLoadingSkeleton } from './OptionsLoadingSkeleton';
@@ -42,7 +41,10 @@ const DecisionMaker = () => {
     isLoading,
     handleStartAnalysis,
     progress,
-    progressMessage
+    progressMessage,
+    templates,
+    applyTemplate,
+    isUpdating
   } = useDecisionMaker();
 
   const { history, addDecision, updateDecision, updateDecisionCategory, deleteDecision, clearHistory } = useDecisionHistory();
@@ -136,6 +138,22 @@ const DecisionMaker = () => {
           <DilemmaSetup
             dilemma={dilemma}
             setDilemma={setDilemma}
+            analysisStep={analysisStep}
+            isLoading={isLoading}
+            isUpdating={isUpdating}
+            applyTemplate={applyTemplate}
+            clearSession={clearSession}
+            history={history}
+            loadDecision={handleLoadDecision}
+            deleteDecision={deleteDecision}
+            clearHistory={clearHistory}
+            handleStartAnalysis={handleDilemmaSubmit}
+            progress={progress}
+            progressMessage={progressMessage}
+            templates={templates}
+            selectedCategory={undefined}
+            onCategoryChange={() => {}}
+            onUpdateCategory={updateDecisionCategory}
           />
 
           {dilemma.trim() && (
