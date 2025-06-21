@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,8 +9,8 @@ import { DecisionExplanation } from './DecisionExplanation';
 import { VisualIndicators } from './VisualIndicators';
 import { EnhancedRadarChart } from './EnhancedRadarChart';
 import { MetricsVisual } from './MetricsVisual';
+import { ExportMenu } from '../ExportMenu';
 import { DecisionImage } from './DecisionImage';
-
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
@@ -18,7 +19,6 @@ interface AnalysisResultProps {
   currentDecision?: any;
   dilemma?: string;
 }
-
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
   isUpdating,
@@ -28,11 +28,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   dilemma
 }) => {
   if (!result) return null;
-
   const topOption = result.breakdown.reduce((prev, current) => current.score > prev.score ? current : prev);
-
-  return (
-    <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
+  return <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
       {/* Header with actions and main image */}
       <Card>
         <CardHeader>
@@ -49,6 +46,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               </Badge>
             </div>
             <div className="flex gap-2 flex-wrap justify-end">
+              {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
               <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm" aria-label="Commencer une nouvelle analyse">
                 <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
                 <span className="hidden sm:inline">Nouvelle analyse</span>
@@ -60,30 +58,18 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         <CardContent>
           {/* Image principale de la recommandation avec taille réduite de 50% */}
           <div className="mb-4 flex justify-start">
-            <DecisionImage 
-              imageQuery={result.imageQuery} 
-              alt={`Illustration pour ${result.recommendation}`} 
-              size="large" 
-              className="max-w-xs" 
-              option={topOption.option} 
-              dilemma={dilemma} 
-              index={0} 
-            />
+            <DecisionImage imageQuery={result.imageQuery} alt={`Illustration pour ${result.recommendation}`} size="large" className="max-w-xs" option={topOption.option} dilemma={dilemma} index={0} />
           </div>
           
           {/* ... keep existing code (grid with pros/cons) */}
           <div className="grid grid-cols-2 gap-2">
             <div className="text-green-700 bg-green-50 p-2 rounded">
               <div className="font-medium mb-1 text-xs pb-0.5">Points forts ({topOption.pros.length})</div>
-              {topOption.pros.map((pro, i) => (
-                <div key={i} className="text-xs">• {pro}</div>
-              ))}
+              {topOption.pros.map((pro, i) => <div key={i} className="text-xs">• {pro}</div>)}
             </div>
             <div className="text-red-700 bg-red-50 p-2 rounded">
               <div className="font-medium mb-1 text-xs pb-0.5">Points faibles ({topOption.cons.length})</div>
-              {topOption.cons.map((con, i) => (
-                <div key={i} className="text-xs">• {con}</div>
-              ))}
+              {topOption.cons.map((con, i) => <div key={i} className="text-xs">• {con}</div>)}
             </div>
           </div>
         </CardContent>
@@ -118,8 +104,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default AnalysisResult;

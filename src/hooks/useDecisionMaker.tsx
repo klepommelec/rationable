@@ -1,4 +1,3 @@
-
 import { useDecisionHistory } from './useDecisionHistory';
 import { useDecisionState } from './useDecisionState';
 import { useDecisionProgress } from './useDecisionProgress';
@@ -98,15 +97,6 @@ export const useDecisionMaker = () => {
         currentDecisionId,
         handleGenerateOptions,
         setAnalysisStep
-    });
-
-    // Debug logs pour vérifier les valeurs du hook
-    const currentDecision = getCurrentDecision();
-    console.log('🔍 [DEBUG] useDecisionMaker values:', {
-        analysisStep,
-        currentDecisionId,
-        currentDecision: !!currentDecision,
-        historyLength: history.length
     });
 
     return {

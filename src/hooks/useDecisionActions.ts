@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { toast } from "sonner";
 import { IDecision, IResult, ICriterion } from '@/types/decision';
@@ -181,17 +180,8 @@ export const useDecisionActions = ({
     };
 
     const getCurrentDecision = () => {
-        if (!currentDecisionId) {
-            console.log('🔍 [DEBUG] getCurrentDecision: no currentDecisionId');
-            return null;
-        }
-        const decision = history.find(d => d.id === currentDecisionId) || null;
-        console.log('🔍 [DEBUG] getCurrentDecision:', {
-            currentDecisionId,
-            foundDecision: !!decision,
-            historyLength: history.length
-        });
-        return decision;
+        if (!currentDecisionId) return null;
+        return history.find(d => d.id === currentDecisionId) || null;
     };
 
     return {
