@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -139,7 +140,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                             {displayedTemplates.map(template => (
                                 <Button 
                                     key={template.name} 
@@ -195,3 +196,4 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
 };
 
 export default DilemmaSetup;
+
