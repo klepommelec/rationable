@@ -98,8 +98,8 @@ export const CategoryBadge: React.FC<{ categoryId: string }> = ({ categoryId }) 
   if (!category) return null;
   
   return (
-    <Badge variant="secondary" className="flex items-center gap-1">
-      <span className="text-xs">{category.name}</span>
+    <Badge variant="secondary" className="text-xs">
+      {category.name}
     </Badge>
   );
 };
