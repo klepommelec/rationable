@@ -78,7 +78,7 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
 
   if (history.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-center text-slate-500 pt-16">
+      <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground pt-16">
         <History className="h-16 w-16 mb-4" />
         <h3 className="text-lg font-semibold">Aucun historique</h3>
         <p className="text-sm">Vos décisions analysées apparaîtront ici.</p>
@@ -183,28 +183,28 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
             </div>
           ) : (
             filteredAndSortedHistory.map(decision => (
-              <div key={decision.id} className="p-3 rounded-lg bg-slate-800/50 border border-slate-700 space-y-2">
+              <div key={decision.id} className="p-3 rounded-lg bg-card border space-y-2">
                 <div className="flex justify-between items-start gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-lg">{decision.emoji}</span>
                       {decision.category && <CategoryBadge categoryId={decision.category} />}
                     </div>
-                    <p className="font-semibold text-slate-300 truncate">{decision.dilemma}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="font-semibold text-foreground truncate">{decision.dilemma}</p>
+                    <p className="text-xs text-muted-foreground">
                       {new Date(decision.timestamp).toLocaleString('fr-FR')}
                     </p>
-                    <p className="text-xs text-slate-400 mt-1 line-clamp-2">
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                       {decision.result.recommendation}
                     </p>
                   </div>
                   
                   <div className="flex gap-2 shrink-0">
-                    <Button variant="outline" size="sm" onClick={() => handleLoad(decision.id)} className="border-slate-600">
+                    <Button variant="outline" size="sm" onClick={() => handleLoad(decision.id)}>
                       <RotateCcw className="h-4 w-4 mr-2" />
                       Charger
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(decision.id)} className="text-slate-400 hover:text-red-500 hover:bg-red-900/20">
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(decision.id)} className="text-muted-foreground hover:text-destructive hover:bg-destructive/10">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
