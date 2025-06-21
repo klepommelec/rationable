@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { BrainCircuit, History } from 'lucide-react';
 import { ThemeToggle } from '../ThemeToggle';
 import { DecisionHistory } from '../DecisionHistory';
+import { AnimatedPlaceholder } from '../AnimatedPlaceholder';
 import MainActionButton from './MainActionButton';
 import { IDecision } from '@/types/decision';
 
@@ -53,6 +54,16 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     // Afficher seulement les 3 premiers modèles
     const displayedTemplates = templates.slice(0, 3);
 
+    // Placeholders animés pour le textarea
+    const placeholders = [
+        "Ex: Quel framework JS devrais-je apprendre en 2025 ?",
+        "Ex: Dois-je changer de carrière professionnelle ?",
+        "Ex: Quelle ville choisir pour mes études ?",
+        "Ex: Investir en bourse ou dans l'immobilier ?",
+        "Ex: Partir en voyage ou économiser de l'argent ?",
+        "Ex: Accepter cette offre d'emploi ou continuer à chercher ?"
+    ];
+
     return (
         <Card className="backdrop-blur-sm relative max-w-4xl mx-auto">
             <div className="absolute top-4 right-4 z-10">
@@ -82,15 +93,25 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     </label>
                     <Textarea
                         id="dilemma-input"
-                        placeholder="Ex: Quel framework JS devrais-je apprendre en 2025 ?"
+                        placeholder=""
                         value={dilemma}
                         onChange={(e) => setDilemma(e.target.value)}
-                        className="focus:ring-cyan-500 text-base md:text-sm min-h-[100px] resize-none"
+                        className="focus:ring-cyan-500 text-base md:text-sm min-h-[100px] resize-none relative"
                         disabled={isLoading || isUpdating || analysisStep === 'done'}
                         rows={3}
                         aria-describedby="dilemma-help"
                         aria-invalid={dilemma.trim() === '' ? 'true' : 'false'}
                     />
+                    {dilemma === '' && (
+                        <div className="absolute inset-0 pointer-events-none flex items-start pt-3 px-3">
+                            <span className="text-muted-foreground text-base md:text-sm">
+                                <AnimatedPlaceholder 
+                                    placeholders={placeholders}
+                                    interval={2500}
+                                />
+                            </span>
+                        </div>
+                    )}
                     <p id="dilemma-help" className="sr-only">
                         Décrivez le problème ou la décision que vous devez prendre
                     </p>
