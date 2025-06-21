@@ -1,26 +1,11 @@
 
 import React, { useState, useMemo } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, History, RotateCcw, Search, Filter, FileDown, Share2, Calendar } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { IDecision, DEFAULT_CATEGORIES } from '@/types/decision';
-import { CategoryBadge } from './CategorySelector';
-import { ExportMenu } from './ExportMenu';
+import { IDecision } from '@/types/decision';
+import { HistorySearchBar } from './history/HistorySearchBar';
+import { HistoryActions } from './history/HistoryActions';
+import { HistoryItem } from './history/HistoryItem';
+import { EmptyHistoryState } from './history/EmptyHistoryState';
 
 interface EnhancedDecisionHistoryProps {
   history: IDecision[];
@@ -77,101 +62,27 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
   };
 
   if (history.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground pt-16">
-        <History className="h-16 w-16 mb-4" />
-        <h3 className="text-lg font-semibold">Aucun historique</h3>
-        <p className="text-sm">Vos décisions analysées apparaîtront ici.</p>
-      </div>
-    );
+    return <EmptyHistoryState />;
   }
 
   return (
     <div className="flex flex-col h-full mt-4">
       {/* En-tête avec actions */}
       <div className="space-y-4 mb-4">
-        {/* Barre de recherche */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher dans l'historique..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+        <HistorySearchBar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          categoryCounts={categoryCounts}
+        />
 
-        {/* Filtres */}
-        <div className="flex gap-2 items-center">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Catégorie" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Toutes les catégories</SelectItem>
-              <SelectItem value="uncategorized">Non catégorisées ({categoryCounts.uncategorized || 0})</SelectItem>
-              {DEFAULT_CATEGORIES.map(category => (
-                <SelectItem key={category.id} value={category.id}>
-                  <div className="flex items-center gap-2">
-                    <span>{category.emoji}</span>
-                    <span>{category.name}</span>
-                    <span className="text-muted-foreground">({categoryCounts[category.id] || 0})</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={sortBy} onValueChange={(value: 'date' | 'category') => setSortBy(value)}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="date">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Par date
-                </div>
-              </SelectItem>
-              <SelectItem value="category">
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  Par catégorie
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <Separator />
-
-        {/* Actions globales */}
-        <div className="flex justify-between items-center">
-          <div className="flex gap-2">
-            <ExportMenu decisions={filteredAndSortedHistory} />
-          </div>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                <Trash2 className="h-4 w-4 mr-2" />
-                Tout effacer
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Cette action est irréversible et supprimera tout votre historique de décisions.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction onClick={onClear}>Confirmer</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+        <HistoryActions
+          filteredDecisions={filteredAndSortedHistory}
+          onClear={onClear}
+        />
       </div>
 
       {/* Liste des décisions */}
@@ -183,33 +94,12 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
             </div>
           ) : (
             filteredAndSortedHistory.map(decision => (
-              <div key={decision.id} className="p-3 rounded-lg bg-card border space-y-2">
-                <div className="flex justify-between items-start gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-lg">{decision.emoji}</span>
-                      {decision.category && <CategoryBadge categoryId={decision.category} />}
-                    </div>
-                    <p className="font-semibold text-foreground truncate">{decision.dilemma}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(decision.timestamp).toLocaleString('fr-FR')}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {decision.result.recommendation}
-                    </p>
-                  </div>
-                  
-                  <div className="flex gap-2 shrink-0">
-                    <Button variant="outline" size="sm" onClick={() => handleLoad(decision.id)}>
-                      <RotateCcw className="h-4 w-4 mr-2" />
-                      Charger
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(decision.id)} className="text-muted-foreground hover:text-destructive hover:bg-destructive/10">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              <HistoryItem
+                key={decision.id}
+                decision={decision}
+                onLoad={handleLoad}
+                onDelete={onDelete}
+              />
             ))
           )}
         </div>
