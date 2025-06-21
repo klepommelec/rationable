@@ -40,7 +40,9 @@ const DecisionMaker = () => {
     loadDecision,
     analysisStep,
     isLoading,
-    handleStartAnalysis
+    handleStartAnalysis,
+    progress,
+    progressMessage
   } = useDecisionMaker();
 
   const { history, addDecision, updateDecision, updateDecisionCategory, deleteDecision, clearHistory } = useDecisionHistory();
@@ -134,8 +136,6 @@ const DecisionMaker = () => {
           <DilemmaSetup
             dilemma={dilemma}
             setDilemma={setDilemma}
-            emoji={emoji}
-            setEmoji={setEmoji}
           />
 
           {dilemma.trim() && (
@@ -149,10 +149,11 @@ const DecisionMaker = () => {
           {canProceed && !hasOptions && !isGeneratingOptions && (
             <div className="flex justify-center">
               <MainActionButton
-                onClick={handleDilemmaSubmit}
-                disabled={!canProceed}
-                isLoading={false}
-                step="setup"
+                analysisStep={analysisStep}
+                handleStartAnalysis={handleDilemmaSubmit}
+                isMainButtonDisabled={!canProceed}
+                progress={progress}
+                progressMessage={progressMessage}
               />
             </div>
           )}
@@ -185,11 +186,11 @@ const DecisionMaker = () => {
                 </div>
                 <div className="flex justify-center mt-6">
                   <MainActionButton
-                    onClick={handleAnalysis}
-                    disabled={!canAnalyze}
-                    isLoading={isLoading}
-                    step="analysis"
                     analysisStep={analysisStep}
+                    handleStartAnalysis={handleAnalysis}
+                    isMainButtonDisabled={!canAnalyze}
+                    progress={progress}
+                    progressMessage={progressMessage}
                   />
                 </div>
               </CardContent>
@@ -282,9 +283,9 @@ const DecisionMaker = () => {
             <DialogTitle>Modifier les options</DialogTitle>
           </DialogHeader>
           <ManualOptionsGenerator
-            currentOptions={options}
-            onOptionsChange={setOptions}
-            onClose={() => setShowManualOptions(false)}
+            onGenerateOptions={handleDilemmaSubmit}
+            isLoading={isGeneratingOptions}
+            hasChanges={false}
           />
         </DialogContent>
       </Dialog>
