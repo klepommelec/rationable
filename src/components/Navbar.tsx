@@ -18,7 +18,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentDecision }) => {
           className="flex items-center gap-2 mr-auto hover:underline transition-all duration-200"
         >
           <BrainCircuit className="h-6 w-6" />
-          <span className="font-bold text-lg">Decision Helper</span>
+          <span className="font-bold text-lg">Rationable</span>
         </Link>
         
         <div className="flex items-center gap-2">
