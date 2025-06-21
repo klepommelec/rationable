@@ -2,13 +2,14 @@
 import { toast } from "sonner";
 import { ICriterion, IResult, IDecision } from '@/types/decision';
 import { generateCriteriaOnly, generateOptions } from '@/services/decisionService';
+import { AnalysisStep } from './useDecisionState';
 
 interface UseDecisionAPIProps {
     dilemma: string;
     criteria: ICriterion[];
     setResult: (result: IResult | null) => void;
     setLastApiResponse: (response: any) => void;
-    setAnalysisStep: (step: 'idle' | 'criteria-loaded' | 'loading-options' | 'done') => void;
+    setAnalysisStep: (step: AnalysisStep) => void;
     setCriteria: (criteria: ICriterion[]) => void;
     setEmoji: (emoji: string) => void;
     setSelectedCategory: (category: string | undefined) => void;

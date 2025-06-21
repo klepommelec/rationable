@@ -1,7 +1,8 @@
 
 import { useEffect } from 'react';
 import { toast } from "sonner";
-import { IDecision, IResult } from '@/types/decision';
+import { IDecision, IResult, ICriterion } from '@/types/decision';
+import { AnalysisStep } from './useDecisionState';
 
 const templates = [
   {
@@ -55,14 +56,14 @@ const templates = [
 ];
 
 interface UseDecisionActionsProps {
-    criteria: any[];
-    analysisStep: string;
-    initialCriteriaRef: React.MutableRefObject<any[]>;
+    criteria: ICriterion[];
+    analysisStep: AnalysisStep;
+    initialCriteriaRef: React.MutableRefObject<ICriterion[]>;
     setHasChanges: (hasChanges: boolean) => void;
     setDilemma: (dilemma: string) => void;
     resetState: () => void;
     setEmoji: (emoji: string) => void;
-    setCriteria: (criteria: any[]) => void;
+    setCriteria: (criteria: ICriterion[]) => void;
     setResult: (result: IResult | null) => void;
     setCurrentDecisionId: (id: string | null) => void;
     setSelectedCategory: (category: string | undefined) => void;

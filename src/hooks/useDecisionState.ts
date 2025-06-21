@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react';
 import { ICriterion, IResult } from '@/types/decision';
 
-type AnalysisStep = 'idle' | 'criteria-loaded' | 'loading-options' | 'done';
+export type AnalysisStep = 'idle' | 'criteria-loaded' | 'loading-options' | 'done';
 
 export const useDecisionState = () => {
     const [dilemma, setDilemma] = useState('');
