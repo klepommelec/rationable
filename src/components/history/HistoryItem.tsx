@@ -16,6 +16,16 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
   onLoad,
   onDelete
 }) => {
+  const handleLoad = () => {
+    console.log('Loading decision:', decision.id);
+    onLoad(decision.id);
+  };
+
+  const handleDelete = () => {
+    console.log('Deleting decision:', decision.id);
+    onDelete(decision.id);
+  };
+
   return (
     <div className="p-3 rounded-lg bg-card border space-y-2">
       <div className="flex justify-between items-start gap-2">
@@ -38,11 +48,11 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
         </div>
         
         <div className="flex gap-2 shrink-0">
-          <Button variant="outline" size="sm" onClick={() => onLoad(decision.id)}>
+          <Button variant="outline" size="sm" onClick={handleLoad}>
             <RotateCcw className="h-4 w-4 mr-2" />
             Charger
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => onDelete(decision.id)} className="text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+          <Button variant="ghost" size="icon" onClick={handleDelete} className="text-muted-foreground hover:text-destructive hover:bg-destructive/10">
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>

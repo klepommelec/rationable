@@ -119,7 +119,7 @@ export const useDecisionMaker = () => {
         lastApiResponse,
         selectedCategory,
         handleCategoryChange,
-        handleUpdateCategory: updateDecisionCategory,
+        handleUpdateCategory: handleUpdateCategory,
         handleStartAnalysis,
         handleManualUpdate,
         applyTemplate,
