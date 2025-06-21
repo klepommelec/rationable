@@ -1,14 +1,15 @@
 
-import { Users, LogOut, User } from 'lucide-react';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { Users, LogOut, User, Lightbulb, LightbulbOff, Monitor } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ShareButton from './ShareButton';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from 'next-themes';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
@@ -18,6 +19,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ currentDecision }) => {
   const { user, profile, signOut } = useAuth();
+  const { setTheme, theme } = useTheme();
 
   const handleSignOut = async () => {
     await signOut();
@@ -52,6 +54,19 @@ const Navbar: React.FC<NavbarProps> = ({ currentDecision }) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setTheme("light")}>
+                    <Lightbulb className="h-4 w-4 mr-2" />
+                    Thème clair
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("dark")}>
+                    <LightbulbOff className="h-4 w-4 mr-2" />
+                    Thème sombre
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("system")}>
+                    <Monitor className="h-4 w-4 mr-2" />
+                    Système
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Se déconnecter
@@ -66,8 +81,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentDecision }) => {
               </Button>
             </Link>
           )}
-          
-          <ThemeToggle />
         </div>
       </div>
     </header>
