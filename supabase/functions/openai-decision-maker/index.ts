@@ -14,7 +14,7 @@ serve(async (req) => {
 
   try {
     console.log('🚀 Edge Function called');
-    const { prompt, model = 'gpt-4o-mini' } = await req.json()
+    const { prompt } = await req.json()
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
 
     if (!prompt) {
@@ -33,7 +33,7 @@ serve(async (req) => {
       })
     }
 
-    console.log(`📡 Calling OpenAI API with model: ${model}...`);
+    console.log('📡 Calling OpenAI API...');
     const startTime = Date.now();
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -43,7 +43,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: model,
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: 'You are a world-class decision making assistant. Your responses must be in French and in a valid JSON object format.' },
           { role: 'user', content: prompt }
@@ -54,21 +54,20 @@ serve(async (req) => {
     });
 
     const duration = Date.now() - startTime;
-    console.log(`⏱️ OpenAI API call with ${model} took ${duration}ms`);
+    console.log(`⏱️ OpenAI API call took ${duration}ms`);
 
     if (!response.ok) {
         const errorData = await response.json();
         console.error("❌ OpenAI API Error:", {
           status: response.status,
           statusText: response.statusText,
-          error: errorData,
-          model: model
+          error: errorData
         });
-        throw new Error(`Erreur de l'API OpenAI (${model}): ${errorData.error?.message || response.statusText}`);
+        throw new Error(`Erreur de l'API OpenAI: ${errorData.error?.message || response.statusText}`);
     }
 
     const text = await response.text();
-    console.log(`📄 Raw OpenAI response length: ${text.length} (model: ${model})`);
+    console.log('📄 Raw OpenAI response length:', text.length);
     
     let data;
     try {
@@ -84,7 +83,7 @@ serve(async (req) => {
     }
 
     const content = data.choices[0].message.content;
-    console.log(`📋 Content length: ${content?.length || 0} (model: ${model})`);
+    console.log('📋 Content length:', content?.length || 0);
     
     if (!content) {
       console.error("❌ Empty content from OpenAI");
@@ -94,18 +93,17 @@ serve(async (req) => {
     let jsonContent;
     try {
       jsonContent = JSON.parse(content);
-      console.log(`✅ Successfully parsed content JSON from ${model}`);
+      console.log('✅ Successfully parsed content JSON');
     } catch (contentParseError) {
       console.error("❌ Failed to parse JSON from API response content:", {
         error: contentParseError,
-        contentPreview: content.substring(0, 200),
-        model: model
+        contentPreview: content.substring(0, 200)
       });
       throw new Error("La réponse de l'API n'était pas un JSON valide.");
     }
 
     // Log successful response structure (without sensitive data)
-    console.log(`📊 Response structure from ${model}:`, {
+    console.log('📊 Response structure:', {
       hasEmoji: !!jsonContent.emoji,
       hasCriteria: Array.isArray(jsonContent.criteria),
       criteriaCount: jsonContent.criteria?.length || 0,

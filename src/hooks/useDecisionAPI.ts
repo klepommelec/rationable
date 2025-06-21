@@ -1,7 +1,7 @@
 
 import { toast } from "sonner";
 import { ICriterion, IResult, IDecision } from '@/types/decision';
-import { generateCompleteAnalysis, generateOptionsOnly } from '@/services/decisionService';
+import { generateCriteriaOnly, generateOptions } from '@/services/decisionService';
 import { AnalysisStep } from './useDecisionState';
 
 interface UseDecisionAPIProps {
@@ -81,11 +81,10 @@ export const useDecisionAPI = ({
         }
 
         try {
-          console.log("📡 [DEBUG] Calling generateOptionsOnly API...");
+          console.log("📡 [DEBUG] Calling generateOptions API...");
           const startTime = Date.now();
           
-          // Pass retry count to service for model selection
-          const apiResult = await generateOptionsOnly(dilemma, currentCriteria, retryCount);
+          const apiResult = await generateOptions(dilemma, currentCriteria);
           
           const endTime = Date.now();
           console.log("✅ [DEBUG] API call successful", {
@@ -124,7 +123,7 @@ export const useDecisionAPI = ({
           toast.success(isRetry ? "Options générées avec succès !" : "Analyse mise à jour !");
           
         } catch (error) {
-          console.error("❌ [DEBUG] Error in generateOptionsOnly:", {
+          console.error("❌ [DEBUG] Error in generateOptions:", {
             error: error instanceof Error ? error.message : 'Unknown error',
             stack: error instanceof Error ? error.stack : undefined,
             retryCount,
@@ -133,12 +132,7 @@ export const useDecisionAPI = ({
           
           const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
           
-          // Check if it's a rate limit error - don't retry
-          if (errorMessage.includes('Limite d\'appels API')) {
-            toast.error(errorMessage);
-            setAnalysisStep('criteria-loaded');
-            resetRetry();
-          } else if (retryCount < 2) {
+          if (retryCount < 2) {
             console.log(`🔄 [DEBUG] Will retry in 1.5s (attempt ${retryCount + 1}/3)`);
             toast.error(`${errorMessage} - Nouvelle tentative...`);
             setTimeout(() => handleGenerateOptions(true), 1500);
@@ -155,8 +149,8 @@ export const useDecisionAPI = ({
     };
 
     const handleStartAnalysis = async () => {
-        console.log("🚀 [DEBUG] Starting complete analysis", { dilemma: dilemma.substring(0, 50) + "..." });
-        setProgressMessage("Analyse complète en cours...");
+        console.log("🚀 [DEBUG] Starting full analysis", { dilemma: dilemma.substring(0, 50) + "..." });
+        setProgressMessage("Génération des critères...");
         setResult(null);
         setCriteria([]);
         setEmoji('🤔');
@@ -164,21 +158,16 @@ export const useDecisionAPI = ({
         setHasChanges(false);
         resetRetry();
         setLastApiResponse(null);
-        setAnalysisStep('loading-options');
 
         try {
-          console.log("📡 [DEBUG] Calling generateCompleteAnalysis API...");
-          const startTime = Date.now();
-          
-          const response = await generateCompleteAnalysis(dilemma);
-          
-          const endTime = Date.now();
-          console.log("✅ [DEBUG] Complete analysis generated:", {
-            duration: `${endTime - startTime}ms`,
+          // Phase 1: Générer les critères et obtenir la catégorie suggérée
+          console.log("📡 [DEBUG] Phase 1: Generating criteria and category");
+          const response = await generateCriteriaOnly(dilemma);
+          console.log("✅ [DEBUG] Criteria and category generated:", {
             emoji: response.emoji,
             criteriaCount: response.criteria?.length || 0,
-            suggestedCategory: response.suggestedCategory,
-            hasResult: !!response.result
+            criteria: response.criteria,
+            suggestedCategory: response.suggestedCategory
           });
           
           const newCriteria = response.criteria.map((name: string) => ({
@@ -189,33 +178,52 @@ export const useDecisionAPI = ({
           setCriteria(newCriteria);
           setEmoji(response.emoji || '🤔');
           setSelectedCategory(response.suggestedCategory);
-          setLastApiResponse(response.result);
-          setResult(response.result);
+          setAnalysisStep('criteria-loaded');
           
-          // Définir les critères de référence
-          initialCriteriaRef.current = newCriteria;
-          
-          const newDecision: IDecision = {
-            id: crypto.randomUUID(),
-            timestamp: Date.now(),
-            dilemma,
-            emoji: response.emoji || '🤔',
-            criteria: newCriteria,
-            result: response.result,
-            category: response.suggestedCategory
-          };
-          addDecision(newDecision);
-          setCurrentDecisionId(newDecision.id);
-          
-          setAnalysisStep('done');
-          toast.success("Analyse complète générée !");
+          // Phase 2: Générer automatiquement les options
+          setTimeout(async () => {
+            console.log("📡 [DEBUG] Phase 2: Auto-generating options");
+            setAnalysisStep('loading-options');
+            setProgressMessage("Génération des options...");
+            
+            try {
+              const optionsResult = await generateOptions(dilemma, newCriteria);
+              console.log("✅ [DEBUG] Auto-options generated successfully");
+              setLastApiResponse(optionsResult);
+              setResult(optionsResult);
+              
+              // Définir les critères de référence
+              initialCriteriaRef.current = newCriteria;
+              
+              const newDecision: IDecision = {
+                id: crypto.randomUUID(),
+                timestamp: Date.now(),
+                dilemma,
+                emoji: response.emoji || '🤔',
+                criteria: newCriteria,
+                result: optionsResult,
+                category: response.suggestedCategory
+              };
+              addDecision(newDecision);
+              setCurrentDecisionId(newDecision.id);
+              
+              setAnalysisStep('done');
+              toast.success("Analyse complète générée !");
+            } catch (error) {
+              console.error("❌ [DEBUG] Error in auto-options generation:", error);
+              const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
+              toast.error(`Erreur lors de la génération automatique : ${errorMessage}`);
+              setAnalysisStep('criteria-loaded');
+            } finally {
+              setProgressMessage('');
+            }
+          }, 800);
           
         } catch (error) {
-          console.error("❌ [DEBUG] Error in complete analysis:", error);
+          console.error("❌ [DEBUG] Error in analysis start:", error);
           const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
           toast.error(`Erreur lors de l'analyse : ${errorMessage}`);
           setAnalysisStep('idle');
-        } finally {
           setProgressMessage('');
         }
     };
