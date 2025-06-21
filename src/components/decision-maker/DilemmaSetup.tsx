@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { BrainCircuit, BookCopy, History } from 'lucide-react';
+import { BrainCircuit, History } from 'lucide-react';
 import { ThemeToggle } from '../ThemeToggle';
 import { DecisionHistory } from '../DecisionHistory';
 import MainActionButton from './MainActionButton';
@@ -147,7 +147,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 className="text-xs sm:text-sm justify-start h-auto py-3 px-3 whitespace-normal text-left"
                                 aria-label={`Utiliser le modèle: ${template.name}`}
                             >
-                                <BookCopy className="h-4 w-4 mr-2 flex-shrink-0" aria-hidden="true" />
                                 <span className="truncate">{template.name}</span>
                             </Button>
                         ))}
