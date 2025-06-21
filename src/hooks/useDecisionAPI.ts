@@ -132,7 +132,12 @@ export const useDecisionAPI = ({
           
           const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
           
-          if (retryCount < 2) {
+          // Check if it's a rate limit error - don't retry
+          if (errorMessage.includes('Limite d\'appels API')) {
+            toast.error(errorMessage);
+            setAnalysisStep('criteria-loaded');
+            resetRetry();
+          } else if (retryCount < 2) {
             console.log(`🔄 [DEBUG] Will retry in 1.5s (attempt ${retryCount + 1}/3)`);
             toast.error(`${errorMessage} - Nouvelle tentative...`);
             setTimeout(() => handleGenerateOptions(true), 1500);
