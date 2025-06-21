@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SharedDecision from "./pages/SharedDecision";
-import CommunityTemplates from "./pages/CommunityTemplates";
 import { ThemeProvider } from "./components/theme-provider";
 import Layout from "./components/Layout";
 
@@ -23,7 +22,6 @@ const App = () => (
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
-              <Route path="/templates" element={<CommunityTemplates />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             </Route>
             <Route path="/shared/:publicId" element={<SharedDecision />} />
