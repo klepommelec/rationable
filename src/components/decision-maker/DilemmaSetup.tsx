@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -64,6 +63,12 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
         "Ex: Partir en voyage ou économiser de l'argent ?",
         "Ex: Accepter cette offre d'emploi ou continuer à chercher ?"
     ];
+
+    const handleTemplateClick = (template: { name: string; dilemma: string; }) => {
+        console.log('Template clicked:', template);
+        setDilemma(template.dilemma);
+        applyTemplate(template);
+    };
 
     return (
         <Card className="backdrop-blur-sm relative max-w-4xl mx-auto">
@@ -166,7 +171,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 key={template.name} 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => applyTemplate(template)} 
+                                onClick={() => handleTemplateClick(template)} 
                                 disabled={isLoading || isUpdating || analysisStep !== 'idle'}
                                 className="text-xs sm:text-sm justify-start h-auto py-3 px-3 whitespace-normal text-left"
                                 aria-label={`Utiliser le modèle: ${template.name}`}
