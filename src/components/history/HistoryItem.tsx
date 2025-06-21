@@ -22,9 +22,13 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-lg">{decision.emoji}</span>
-            {decision.category && <CategoryBadge categoryId={decision.category} />}
+            <p className="font-semibold text-foreground truncate flex-1">{decision.dilemma}</p>
           </div>
-          <p className="font-semibold text-foreground truncate">{decision.dilemma}</p>
+          {decision.category && (
+            <div className="mb-1">
+              <CategoryBadge categoryId={decision.category} />
+            </div>
+          )}
           <p className="text-xs text-muted-foreground">
             {new Date(decision.timestamp).toLocaleString('fr-FR')}
           </p>

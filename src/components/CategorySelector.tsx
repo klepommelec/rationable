@@ -99,7 +99,6 @@ export const CategoryBadge: React.FC<{ categoryId: string }> = ({ categoryId }) 
   
   return (
     <Badge variant="secondary" className="flex items-center gap-1">
-      <span>{category.emoji}</span>
       <span className="text-xs">{category.name}</span>
     </Badge>
   );
