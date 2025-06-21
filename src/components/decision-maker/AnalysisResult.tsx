@@ -62,11 +62,11 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div className="text-green-700 bg-green-50 p-2 rounded">
               <div className="font-medium mb-1 text-xs pb-0.5">Points forts ({topOption.pros.length})</div>
-              {topOption.pros.map((pro, i) => <div key={i} className="text-xs text-black ">• {pro}</div>)}
+              {topOption.pros.map((pro, i) => <div key={i} className="text-xs text-black py-px">• {pro}</div>)}
             </div>
             <div className="text-red-700 bg-red-50 p-2 rounded">
               <div className="font-medium mb-1 text-xs pb-0.5">Points faibles ({topOption.cons.length})</div>
-              {topOption.cons.map((con, i) => <div key={i} className="text-xs text-black ">• {con}</div>)}
+              {topOption.cons.map((con, i) => <div key={i} className="text-xs text-black py-px">• {con}</div>)}
             </div>
           </div>
         </CardContent>
