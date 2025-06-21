@@ -5,45 +5,45 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { History, Users } from 'lucide-react';
-import { DilemmaSetup } from './decision-maker/DilemmaSetup';
+import DilemmaSetup from './decision-maker/DilemmaSetup';
 import { CriteriaManager } from './CriteriaManager';
-import { MainActionButton } from './decision-maker/MainActionButton';
-import { AnalysisResult } from './decision-maker/AnalysisResult';
+import MainActionButton from './decision-maker/MainActionButton';
+import AnalysisResult from './decision-maker/AnalysisResult';
 import { DecisionHistory } from './DecisionHistory';
 import CommunityTemplatesTab from './CommunityTemplatesTab';
 import { ExportMenu } from './ExportMenu';
-import { ShareAsTemplateDialog } from './ShareAsTemplateDialog';
+import ShareAsTemplateDialog from './ShareAsTemplateDialog';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
 import { useDecisionHistory } from '@/hooks/useDecisionHistory';
 import { useDecisionAPI } from '@/hooks/useDecisionAPI';
 import { generateOptions } from '@/services/decisionService';
-import { ManualOptionsGenerator } from './ManualOptionsGenerator';
+import ManualOptionsGenerator from './ManualOptionsGenerator';
 import { OptionsLoadingSkeleton } from './OptionsLoadingSkeleton';
-import { IDecision, ICriteria } from '@/types/decision';
+import { IDecision, ICriterion } from '@/types/decision';
 
 const DecisionMaker = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [showManualOptions, setShowManualOptions] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [options, setOptions] = useState<string[]>([]);
   
   const {
     dilemma,
     setDilemma,
     criteria,
     setCriteria,
-    options,
-    setOptions,
     result,
-    setResult,
     emoji,
     setEmoji,
     clearSession,
     getCurrentDecision,
-    loadDecision
+    loadDecision,
+    analysisStep,
+    isLoading,
+    handleStartAnalysis
   } = useDecisionMaker();
 
   const { history, addDecision, updateDecision, updateDecisionCategory, deleteDecision, clearHistory } = useDecisionHistory();
-  const { analyzeDecision, isLoading, analysisStep } = useDecisionAPI();
 
   const [isGeneratingOptions, setIsGeneratingOptions] = useState(false);
 
@@ -82,18 +82,10 @@ const DecisionMaker = () => {
 
   const handleAnalysis = async () => {
     if (!dilemma.trim() || criteria.length === 0 || options.length === 0) return;
-
-    try {
-      const result = await analyzeDecision(dilemma, criteria, options);
-      if (result) {
-        setResult(result);
-      }
-    } catch (error) {
-      console.error('Analysis failed:', error);
-    }
+    await handleStartAnalysis();
   };
 
-  const addCriterion = (newCriterion: ICriteria) => {
+  const addCriterion = (newCriterion: ICriterion) => {
     setCriteria([...criteria, newCriterion]);
   };
 
@@ -101,7 +93,7 @@ const DecisionMaker = () => {
     setCriteria(criteria.filter(c => c.id !== id));
   };
 
-  const updateCriterion = (id: string, updates: Partial<ICriteria>) => {
+  const updateCriterion = (id: string, updates: Partial<ICriterion>) => {
     setCriteria(criteria.map(c => c.id === id ? { ...c, ...updates } : c));
   };
 
@@ -110,7 +102,7 @@ const DecisionMaker = () => {
     const decision = history.find(d => d.id === decisionId);
     if (decision) {
       console.log('DecisionMaker - Loading decision:', decision);
-      loadDecision(decision);
+      loadDecision(decisionId);
       setShowHistory(false);
     } else {
       console.error('DecisionMaker - Decision not found:', decisionId);
@@ -149,9 +141,8 @@ const DecisionMaker = () => {
           {dilemma.trim() && (
             <CriteriaManager
               criteria={criteria}
-              onAdd={addCriterion}
-              onDelete={deleteCriterion}
-              onUpdate={updateCriterion}
+              setCriteria={setCriteria}
+              isInteractionDisabled={isLoading}
             />
           )}
 
