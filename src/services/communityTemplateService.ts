@@ -106,7 +106,11 @@ export const getCommunityTemplates = async (filters?: {
     throw new Error(`Erreur lors de la récupération : ${error.message}`);
   }
 
-  return data as CommunityTemplate[];
+  // Cast the data with proper type conversion
+  return (data || []).map(item => ({
+    ...item,
+    decision_data: item.decision_data as IDecision
+  })) as CommunityTemplate[];
 };
 
 export const getTemplateByPublicId = async (publicId: string): Promise<CommunityTemplate | null> => {
@@ -121,7 +125,13 @@ export const getTemplateByPublicId = async (publicId: string): Promise<Community
     throw new Error(`Erreur lors de la récupération : ${error.message}`);
   }
 
-  return data as CommunityTemplate | null;
+  if (!data) return null;
+
+  // Cast the data with proper type conversion
+  return {
+    ...data,
+    decision_data: data.decision_data as IDecision
+  } as CommunityTemplate;
 };
 
 export const copyTemplate = async (templateId: string): Promise<void> => {

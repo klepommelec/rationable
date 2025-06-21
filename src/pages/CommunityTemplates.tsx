@@ -20,7 +20,7 @@ const CommunityTemplates = () => {
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'most_copied'>('newest');
   const [copying, setCopying] = useState<string | null>(null);
   
-  const { setDilemma, setCriteria, setEmoji, setSelectedCategory, clearSession } = useDecisionMaker();
+  const { setDilemma, setCriteria, setEmoji, clearSession } = useDecisionMaker();
   const navigate = useNavigate();
 
   const loadTemplates = async () => {
@@ -53,7 +53,6 @@ const CommunityTemplates = () => {
       setDilemma(template.decision_data.dilemma);
       setCriteria(template.decision_data.criteria);
       setEmoji(template.decision_data.emoji);
-      setSelectedCategory(template.decision_data.category);
       
       // Increment copy count
       await copyTemplate(template.id);
@@ -70,14 +69,6 @@ const CommunityTemplates = () => {
 
   const getCategoryInfo = (categoryId: string) => {
     return DEFAULT_CATEGORIES.find(cat => cat.id === categoryId) || { name: categoryId, emoji: '🤔' };
-  };
-
-  const getSortLabel = (sort: string) => {
-    switch (sort) {
-      case 'popular': return 'Plus populaires';
-      case 'most_copied': return 'Plus copiés';
-      case 'newest': default: return 'Plus récents';
-    }
   };
 
   return (
@@ -107,7 +98,7 @@ const CommunityTemplates = () => {
             <SelectValue placeholder="Toutes les catégories" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Toutes les catégories</SelectItem>
+            <SelectItem value="all">Toutes les catégories</SelectItem>
             {DEFAULT_CATEGORIES.map((category) => (
               <SelectItem key={category.id} value={category.id}>
                 {category.emoji} {category.name}
