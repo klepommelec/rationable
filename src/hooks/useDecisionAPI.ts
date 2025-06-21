@@ -84,7 +84,8 @@ export const useDecisionAPI = ({
           console.log("📡 [DEBUG] Calling generateOptionsOnly API...");
           const startTime = Date.now();
           
-          const apiResult = await generateOptionsOnly(dilemma, currentCriteria);
+          // Pass retry count to service for model selection
+          const apiResult = await generateOptionsOnly(dilemma, currentCriteria, retryCount);
           
           const endTime = Date.now();
           console.log("✅ [DEBUG] API call successful", {

@@ -1,9 +1,9 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export const callOpenAiApi = async (prompt: string) => {
+export const callOpenAiApi = async (prompt: string, model: string = 'gpt-4o-mini') => {
   const { data, error } = await supabase.functions.invoke('openai-decision-maker', {
-    body: { prompt },
+    body: { prompt, model },
   });
 
   if (error) {
