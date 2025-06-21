@@ -86,8 +86,8 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
       </div>
 
       {/* Liste des décisions */}
-      <ScrollArea className="flex-1 pr-4">
-        <div className="space-y-3">
+      <ScrollArea className="flex-1">
+        <div className="space-y-3 pr-1">
           {filteredAndSortedHistory.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <p>Aucune décision ne correspond à vos critères de recherche.</p>
