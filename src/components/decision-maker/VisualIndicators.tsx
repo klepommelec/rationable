@@ -102,7 +102,7 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="text-green-700 bg-green-50 p-2 rounded">
                       <div className="font-medium mb-1">Points forts ({item.pros.length})</div>
-                      {item.pros.slice(0, 2).map((pro, i) => <div key={i} className="text-xs text-black py-px">• {pro}</div>)}
+                      {item.pros.slice(0, 2).map((pro, i) => <div key={i} className="text-xs text-black py-[0.5px]">• {pro}</div>)}
                     </div>
                     <div className="text-red-700 bg-red-50 p-2 rounded">
                       <div className="font-medium mb-1">Points faibles ({item.cons.length})</div>
