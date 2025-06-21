@@ -106,10 +106,10 @@ export const getCommunityTemplates = async (filters?: {
     throw new Error(`Erreur lors de la récupération : ${error.message}`);
   }
 
-  // Cast the data with proper type conversion
+  // Cast the data with proper type conversion using unknown as intermediate
   return (data || []).map(item => ({
     ...item,
-    decision_data: item.decision_data as IDecision
+    decision_data: item.decision_data as unknown as IDecision
   })) as CommunityTemplate[];
 };
 
@@ -127,10 +127,10 @@ export const getTemplateByPublicId = async (publicId: string): Promise<Community
 
   if (!data) return null;
 
-  // Cast the data with proper type conversion
+  // Cast the data with proper type conversion using unknown as intermediate
   return {
     ...data,
-    decision_data: data.decision_data as IDecision
+    decision_data: data.decision_data as unknown as IDecision
   } as CommunityTemplate;
 };
 
