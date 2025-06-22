@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
 import { EmojiPicker } from './EmojiPicker';
@@ -41,6 +42,8 @@ const DecisionMaker = () => {
     handleCategoryChange,
     handleUpdateCategory,
     getCurrentDecision,
+    uploadedFiles,
+    setUploadedFiles
   } = useDecisionMaker();
 
   return (
@@ -103,6 +106,8 @@ const DecisionMaker = () => {
               selectedCategory={selectedCategory}
               onCategoryChange={handleCategoryChange}
               onUpdateCategory={handleUpdateCategory}
+              uploadedFiles={uploadedFiles}
+              setUploadedFiles={setUploadedFiles}
             />
           </React.Suspense>
         )}

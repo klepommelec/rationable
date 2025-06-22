@@ -1,10 +1,14 @@
+import { useState } from 'react';
 import { useDecisionHistory } from './useDecisionHistory';
 import { useDecisionState } from './useDecisionState';
 import { useDecisionProgress } from './useDecisionProgress';
 import { useDecisionAPI } from './useDecisionAPI';
 import { useDecisionActions } from './useDecisionActions';
+import { UploadedFile } from '@/components/FileUpload';
 
 export const useDecisionMaker = () => {
+    const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+    
     const { history, addDecision, updateDecision, updateDecisionCategory, deleteDecision, clearHistory } = useDecisionHistory();
     
     const {
@@ -64,7 +68,8 @@ export const useDecisionMaker = () => {
         setCurrentDecisionId,
         history,
         updateDecision,
-        addDecision
+        addDecision,
+        uploadedFiles
     });
 
     const {
@@ -128,6 +133,8 @@ export const useDecisionMaker = () => {
         deleteDecision: handleDeleteDecision,
         clearHistory: handleClearHistory,
         getCurrentDecision,
-        templates
+        templates,
+        uploadedFiles,
+        setUploadedFiles
     };
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,8 @@ interface DilemmaSetupProps {
     selectedCategory?: string;
     onCategoryChange: (categoryId: string | undefined) => void;
     onUpdateCategory: (decisionId: string, categoryId: string | undefined) => void;
+    uploadedFiles: UploadedFile[];
+    setUploadedFiles: (files: UploadedFile[]) => void;
 }
 
 const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
@@ -48,10 +50,10 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   templates,
   selectedCategory,
   onCategoryChange,
-  onUpdateCategory
+  onUpdateCategory,
+  uploadedFiles,
+  setUploadedFiles
 }) => {
-    const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
-    
     // Afficher seulement les 3 premiers modèles
     const displayedTemplates = templates.slice(0, 3);
 
@@ -69,12 +71,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
         console.log('Template clicked:', template);
         setDilemma(template.dilemma);
         applyTemplate(template);
-    };
-
-    const handleStartAnalysisWithFiles = () => {
-        console.log('Starting analysis with files:', uploadedFiles);
-        // TODO: Passer les fichiers à l'analyse
-        handleStartAnalysis();
     };
 
     return (
@@ -130,7 +126,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         </p>
                     </div>
 
-                    {/* Nouveau composant d'upload de fichiers */}
+                    {/* Composant d'upload de fichiers */}
                     <div className="space-y-2">
                         <label className="font-medium text-sm sm:text-base">
                             Documents joints (optionnel)
@@ -166,7 +162,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                 <CardFooter className="flex flex-col gap-4 px-4 sm:px-6">
                     <MainActionButton
                         analysisStep={analysisStep}
-                        handleStartAnalysis={handleStartAnalysisWithFiles}
+                        handleStartAnalysis={handleStartAnalysis}
                         isMainButtonDisabled={dilemma.trim() === '' || isLoading}
                         progress={progress}
                         progressMessage={progressMessage}
