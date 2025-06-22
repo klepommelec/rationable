@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Copy, Heart, Search, Filter, User, Briefcase, Eye } from "lucide-react";
 import { DEFAULT_CATEGORIES } from '@/types/decision';
 import { CommunityTemplate, getCommunityTemplates, copyTemplate } from '@/services/communityTemplateService';
+import { shareDecision } from '@/services/sharedDecisionService';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
 import { toast } from "sonner";
 import { useNavigate } from 'react-router-dom';
@@ -440,6 +441,56 @@ const CommunityTemplates = () => {
     }
   };
 
+  const handleOpenTemplate = async (template: any) => {
+    try {
+      // Create a mock analyzed decision with the template data
+      const mockDecision = {
+        ...template.decision_data,
+        result: {
+          recommendation: `Option recommandée pour: ${template.decision_data.dilemma}`,
+          description: `Analyse détaillée basée sur les critères: ${template.decision_data.criteria.map(c => c.name).join(', ')}`,
+          breakdown: [
+            {
+              option: "Option A: Choix recommandé",
+              score: 8.5,
+              pros: ["Excellent rapport qualité-prix", "Répond parfaitement aux besoins", "Facilité d'utilisation"],
+              cons: ["Quelques limitations mineures", "Courbe d'apprentissage"]
+            },
+            {
+              option: "Option B: Alternative intéressante", 
+              score: 7.2,
+              pros: ["Prix attractif", "Bonne qualité"],
+              cons: ["Fonctionnalités limitées", "Support perfectible"]
+            },
+            {
+              option: "Option C: Solution premium",
+              score: 6.8,
+              pros: ["Fonctionnalités avancées", "Excellent support"],
+              cons: ["Prix élevé", "Complexité"]
+            }
+          ],
+          infoLinks: [
+            { title: "Guide complet", url: `https://www.google.com/search?q=${encodeURIComponent(template.decision_data.dilemma + " guide")}` },
+            { title: "Comparatif détaillé", url: `https://www.google.com/search?q=${encodeURIComponent(template.decision_data.dilemma + " comparatif")}` }
+          ],
+          shoppingLinks: [
+            { title: "Meilleure offre", url: `https://www.google.com/search?q=${encodeURIComponent("acheter " + template.title)}` }
+          ]
+        }
+      };
+
+      // Share this mock decision to get a public link
+      const publicId = await shareDecision(mockDecision);
+      
+      // Open the shared decision in a new tab
+      window.open(`/shared/${publicId}`, '_blank');
+      
+    } catch (error) {
+      console.error('Error opening template:', error);
+      toast.error("Erreur lors de l'ouverture du template");
+    }
+  };
+
   const getCategoryInfo = (categoryId: string) => {
     return DEFAULT_CATEGORIES.find(cat => cat.id === categoryId) || { name: categoryId, emoji: '🤔' };
   };
@@ -615,15 +666,14 @@ const CommunityTemplates = () => {
                         </div>
                         
                         <div className="flex gap-2 justify-end">
-                          <TemplatePreviewDialog 
-                            template={template}
-                            trigger={
-                              <Button variant="outline" size="sm">
-                                <Eye className="h-4 w-4 mr-2" />
-                                Ouvrir
-                              </Button>
-                            }
-                          />
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleOpenTemplate(template)}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ouvrir
+                          </Button>
                           <Button
                             size="sm"
                             onClick={() => handleCopyPredefinedTemplate(template)}
@@ -685,15 +735,14 @@ const CommunityTemplates = () => {
                         </div>
                         
                         <div className="flex gap-2 justify-end">
-                          <TemplatePreviewDialog 
-                            template={template}
-                            trigger={
-                              <Button variant="outline" size="sm">
-                                <Eye className="h-4 w-4 mr-2" />
-                                Ouvrir
-                              </Button>
-                            }
-                          />
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleOpenTemplate(template)}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ouvrir
+                          </Button>
                           <Button
                             size="sm"
                             onClick={() => handleCopyPredefinedTemplate(template)}
@@ -799,15 +848,14 @@ const CommunityTemplates = () => {
                     </div>
                     
                     <div className="flex gap-2">
-                      <TemplatePreviewDialog 
-                        template={template}
-                        trigger={
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4 mr-2" />
-                            Ouvrir
-                          </Button>
-                        }
-                      />
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleOpenTemplate(template)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Ouvrir
+                      </Button>
                       <Button
                         size="sm"
                         onClick={() => handleCopyTemplate(template)}
