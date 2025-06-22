@@ -244,8 +244,8 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 Ou utilisez un modèle
                             </label>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                {displayedTemplates.map(template => <Button key={template.name} variant="outline" size="sm" onClick={() => handleTemplateClick(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="text-xs sm:text-sm justify-start h-auto py-3 px-3 whitespace-normal text-left" aria-label={`Utiliser le modèle: ${template.name}`}>
-                                        <span className="truncate">{template.name}</span>
+                                {displayedTemplates.map(template => <Button key={template.name} variant="outline" size="sm" onClick={() => handleTemplateClick(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} aria-label={`Utiliser le modèle: ${template.name}`} className="text-xs sm:text-sm justify-start h-auto py-3 px-3 whitespace-normal text-left rounded-full">
+                                        <span className="truncate text-sm px-[4px] gap-10 ">{template.name}</span>
                                     </Button>)}
                             </div>
                         </div>
