@@ -172,7 +172,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         </div>
                         <CardTitle className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-slate-400 lg:text-5xl">
                             <div>Vos décisions seront désormais</div>
-                            <div className="flex items-center justify-center gap-3 mt-2">
+                            <div className="flex items-center justify-center gap-3">
                                 <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12" />
                                 <span>Rationable</span>
                             </div>
