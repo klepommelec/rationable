@@ -1,9 +1,10 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { UploadedFileInfo } from './fileUploadService';
 
-export const callOpenAiApi = async (prompt: string) => {
+export const callOpenAiApi = async (prompt: string, files?: UploadedFileInfo[]) => {
   const { data, error } = await supabase.functions.invoke('openai-decision-maker', {
-    body: { prompt },
+    body: { prompt, files },
   });
 
   if (error) {
@@ -22,6 +23,6 @@ export const callOpenAiApi = async (prompt: string) => {
     return JSON.parse(correctedString);
   } catch (e) {
     console.error("Could not correct AI response encoding, returning as is.", e);
-    return data; // Fallback to original data if anything goes wrong.
+    return data;
   }
 };

@@ -1,7 +1,8 @@
-
 import { toast } from "sonner";
 import { ICriterion, IResult, IDecision } from '@/types/decision';
 import { generateCriteriaOnly, generateOptions } from '@/services/decisionService';
+import { uploadFilesToStorage, deleteFileFromStorage, UploadedFileInfo } from '@/services/fileUploadService';
+import { UploadedFile } from '@/components/FileUpload';
 import { AnalysisStep } from './useDecisionState';
 
 interface UseDecisionAPIProps {
@@ -25,6 +26,7 @@ interface UseDecisionAPIProps {
     history: IDecision[];
     updateDecision: (decision: IDecision) => void;
     addDecision: (decision: IDecision) => void;
+    uploadedFiles?: UploadedFile[];
 }
 
 export const useDecisionAPI = ({
@@ -47,7 +49,8 @@ export const useDecisionAPI = ({
     setCurrentDecisionId,
     history,
     updateDecision,
-    addDecision
+    addDecision,
+    uploadedFiles = []
 }: UseDecisionAPIProps) => {
 
     const handleGenerateOptions = async (isRetry = false) => {
@@ -57,6 +60,7 @@ export const useDecisionAPI = ({
             isRetry,
             retryCount,
             criteriaCount: currentCriteria.length,
+            filesCount: uploadedFiles.length,
             dilemma: dilemma.substring(0, 50) + "..."
         });
         
@@ -73,22 +77,33 @@ export const useDecisionAPI = ({
 
         setIsUpdating(true);
         setAnalysisStep('loading-options');
-        setProgressMessage("Analyse des options en cours...");
         
         if (isRetry) {
             incrementRetry();
             console.log(`🔄 [DEBUG] Retry attempt #${retryCount + 1}`);
         }
 
+        let uploadedFileInfos: UploadedFileInfo[] = [];
+
         try {
+          // Upload des fichiers si présents
+          if (uploadedFiles.length > 0) {
+            setProgressMessage("Upload des documents en cours...");
+            console.log("📤 [DEBUG] Uploading files to storage...");
+            uploadedFileInfos = await uploadFilesToStorage(uploadedFiles);
+            console.log("✅ [DEBUG] Files uploaded successfully");
+          }
+          
+          setProgressMessage("Analyse des options en cours...");
           console.log("📡 [DEBUG] Calling generateOptions API...");
           const startTime = Date.now();
           
-          const apiResult = await generateOptions(dilemma, currentCriteria);
+          const apiResult = await generateOptions(dilemma, currentCriteria, uploadedFileInfos);
           
           const endTime = Date.now();
           console.log("✅ [DEBUG] API call successful", {
             duration: `${endTime - startTime}ms`,
+            filesAnalyzed: uploadedFileInfos.length,
             resultStructure: {
               hasRecommendation: !!apiResult.recommendation,
               hasDescription: !!apiResult.description,
@@ -127,8 +142,20 @@ export const useDecisionAPI = ({
             error: error instanceof Error ? error.message : 'Unknown error',
             stack: error instanceof Error ? error.stack : undefined,
             retryCount,
-            currentCriteria: currentCriteria.map(c => c.name)
+            filesCount: uploadedFiles.length
           });
+          
+          // Nettoyer les fichiers uploadés en cas d'erreur
+          if (uploadedFileInfos.length > 0) {
+            console.log("🧹 [DEBUG] Cleaning up uploaded files due to error...");
+            for (const fileInfo of uploadedFileInfos) {
+              try {
+                await deleteFileFromStorage(fileInfo.filePath);
+              } catch (cleanupError) {
+                console.error("❌ [DEBUG] Error cleaning up file:", cleanupError);
+              }
+            }
+          }
           
           const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
           
@@ -149,7 +176,11 @@ export const useDecisionAPI = ({
     };
 
     const handleStartAnalysis = async () => {
-        console.log("🚀 [DEBUG] Starting full analysis", { dilemma: dilemma.substring(0, 50) + "..." });
+        console.log("🚀 [DEBUG] Starting full analysis", { 
+          dilemma: dilemma.substring(0, 50) + "...",
+          filesCount: uploadedFiles.length
+        });
+        
         setProgressMessage("Génération des critères...");
         setResult(null);
         setCriteria([]);
@@ -159,15 +190,28 @@ export const useDecisionAPI = ({
         resetRetry();
         setLastApiResponse(null);
 
+        let uploadedFileInfos: UploadedFileInfo[] = [];
+
         try {
+          // Upload des fichiers si présents
+          if (uploadedFiles.length > 0) {
+            setProgressMessage("Upload des documents en cours...");
+            console.log("📤 [DEBUG] Uploading files for analysis...");
+            uploadedFileInfos = await uploadFilesToStorage(uploadedFiles);
+            console.log("✅ [DEBUG] Files uploaded for analysis");
+          }
+          
           // Phase 1: Générer les critères et obtenir la catégorie suggérée
           console.log("📡 [DEBUG] Phase 1: Generating criteria and category");
-          const response = await generateCriteriaOnly(dilemma);
+          setProgressMessage("Analyse du contexte et génération des critères...");
+          
+          const response = await generateCriteriaOnly(dilemma, uploadedFileInfos);
           console.log("✅ [DEBUG] Criteria and category generated:", {
             emoji: response.emoji,
             criteriaCount: response.criteria?.length || 0,
             criteria: response.criteria,
-            suggestedCategory: response.suggestedCategory
+            suggestedCategory: response.suggestedCategory,
+            filesAnalyzed: uploadedFileInfos.length
           });
           
           const newCriteria = response.criteria.map((name: string) => ({
@@ -187,7 +231,7 @@ export const useDecisionAPI = ({
             setProgressMessage("Génération des options...");
             
             try {
-              const optionsResult = await generateOptions(dilemma, newCriteria);
+              const optionsResult = await generateOptions(dilemma, newCriteria, uploadedFileInfos);
               console.log("✅ [DEBUG] Auto-options generated successfully");
               setLastApiResponse(optionsResult);
               setResult(optionsResult);
@@ -214,6 +258,18 @@ export const useDecisionAPI = ({
               const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
               toast.error(`Erreur lors de la génération automatique : ${errorMessage}`);
               setAnalysisStep('criteria-loaded');
+              
+              // Nettoyer les fichiers en cas d'erreur
+              if (uploadedFileInfos.length > 0) {
+                console.log("🧹 [DEBUG] Cleaning up uploaded files due to error...");
+                for (const fileInfo of uploadedFileInfos) {
+                  try {
+                    await deleteFileFromStorage(fileInfo.filePath);
+                  } catch (cleanupError) {
+                    console.error("❌ [DEBUG] Error cleaning up file:", cleanupError);
+                  }
+                }
+              }
             } finally {
               setProgressMessage('');
             }
@@ -225,6 +281,18 @@ export const useDecisionAPI = ({
           toast.error(`Erreur lors de l'analyse : ${errorMessage}`);
           setAnalysisStep('idle');
           setProgressMessage('');
+          
+          // Nettoyer les fichiers en cas d'erreur
+          if (uploadedFileInfos.length > 0) {
+            console.log("🧹 [DEBUG] Cleaning up uploaded files due to error...");
+            for (const fileInfo of uploadedFileInfos) {
+              try {
+                await deleteFileFromStorage(fileInfo.filePath);
+              } catch (cleanupError) {
+                console.error("❌ [DEBUG] Error cleaning up file:", cleanupError);
+              }
+            }
+          }
         }
     };
 

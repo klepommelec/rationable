@@ -1,16 +1,28 @@
 
 import { ICriterion, IResult, DEFAULT_CATEGORIES } from '@/types/decision';
 import { callOpenAiApi } from './openai';
+import { UploadedFileInfo } from './fileUploadService';
 
-export const generateCriteriaOnly = async (dilemma: string) => {
-  const prompt = `
+export const generateCriteriaOnly = async (dilemma: string, files?: UploadedFileInfo[]) => {
+  let prompt = `
 Analysez ce dilemme et retournez une réponse JSON avec les éléments suivants :
 
 1. "emoji": Un emoji représentant le dilemme (ex: 💻, ✈️, 🏠, etc.)
 2. "criteria": Une liste de 3-6 critères importants pour évaluer les options de ce dilemme
 3. "suggestedCategory": L'ID de la catégorie la plus appropriée parmi : ${DEFAULT_CATEGORIES.map(c => `"${c.id}" (${c.name} ${c.emoji})`).join(', ')}
 
-Dilemme: "${dilemma}"
+Dilemme: "${dilemma}"`;
+
+  if (files && files.length > 0) {
+    prompt += `
+
+Documents joints à analyser (${files.length} fichier(s)) :
+${files.map(f => `- ${f.fileName} (${f.fileType})`).join('\n')}
+
+Analysez le contenu de ces documents pour mieux comprendre le contexte du dilemme et ajustez les critères en conséquence.`;
+  }
+
+  prompt += `
 
 Répondez UNIQUEMENT avec un objet JSON valide contenant "emoji", "criteria" et "suggestedCategory".
 
@@ -21,7 +33,7 @@ Exemple de format:
   "suggestedCategory": "tech"
 }`;
 
-  const response = await callOpenAiApi(prompt);
+  const response = await callOpenAiApi(prompt, files);
   
   return {
     emoji: response.emoji || '🤔',
@@ -30,14 +42,25 @@ Exemple de format:
   };
 };
 
-export const generateOptions = async (dilemma: string, criteria: ICriterion[]): Promise<IResult> => {
+export const generateOptions = async (dilemma: string, criteria: ICriterion[], files?: UploadedFileInfo[]): Promise<IResult> => {
   const criteriaList = criteria.map(c => c.name).join(', ');
   
-  const prompt = `
+  let prompt = `
 Analysez ce dilemme et générez des options avec évaluation détaillée.
 
 Dilemme: "${dilemma}"
-Critères d'évaluation: ${criteriaList}
+Critères d'évaluation: ${criteriaList}`;
+
+  if (files && files.length > 0) {
+    prompt += `
+
+Documents joints à analyser (${files.length} fichier(s)) :
+${files.map(f => `- ${f.fileName} (${f.fileType})`).join('\n')}
+
+Analysez le contenu de ces documents pour enrichir votre analyse et vos recommandations.`;
+  }
+
+  prompt += `
 
 Retournez un objet JSON avec:
 1. "recommendation": La meilleure option recommandée (texte court)
@@ -55,5 +78,5 @@ Générez 3-5 options différentes et pertinentes. Soyez concret et actionnable.
 
 Répondez UNIQUEMENT avec un objet JSON valide.`;
 
-  return await callOpenAiApi(prompt);
+  return await callOpenAiApi(prompt, files);
 };

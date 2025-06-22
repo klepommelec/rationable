@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { BrainCircuit } from 'lucide-react';
 import { DecisionHistory } from '../DecisionHistory';
 import { AnimatedPlaceholder } from '../AnimatedPlaceholder';
 import MainActionButton from './MainActionButton';
+import FileUpload, { UploadedFile } from '../FileUpload';
 import { IDecision } from '@/types/decision';
 
 interface DilemmaSetupProps {
@@ -50,6 +50,8 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   onCategoryChange,
   onUpdateCategory
 }) => {
+    const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+    
     // Afficher seulement les 3 premiers modèles
     const displayedTemplates = templates.slice(0, 3);
 
@@ -67,6 +69,12 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
         console.log('Template clicked:', template);
         setDilemma(template.dilemma);
         applyTemplate(template);
+    };
+
+    const handleStartAnalysisWithFiles = () => {
+        console.log('Starting analysis with files:', uploadedFiles);
+        // TODO: Passer les fichiers à l'analyse
+        handleStartAnalysis();
     };
 
     return (
@@ -122,6 +130,18 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         </p>
                     </div>
 
+                    {/* Nouveau composant d'upload de fichiers */}
+                    <div className="space-y-2">
+                        <label className="font-medium text-sm sm:text-base">
+                            Documents joints (optionnel)
+                        </label>
+                        <FileUpload
+                            files={uploadedFiles}
+                            onFilesChange={setUploadedFiles}
+                            disabled={isLoading || isUpdating || analysisStep === 'done'}
+                        />
+                    </div>
+
                     <div className="space-y-3">
                         <label className="font-medium text-sm sm:text-base">
                             Ou utilisez un modèle
@@ -146,7 +166,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                 <CardFooter className="flex flex-col gap-4 px-4 sm:px-6">
                     <MainActionButton
                         analysisStep={analysisStep}
-                        handleStartAnalysis={handleStartAnalysis}
+                        handleStartAnalysis={handleStartAnalysisWithFiles}
                         isMainButtonDisabled={dilemma.trim() === '' || isLoading}
                         progress={progress}
                         progressMessage={progressMessage}

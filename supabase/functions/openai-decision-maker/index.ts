@@ -1,10 +1,16 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+)
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -14,7 +20,7 @@ serve(async (req) => {
 
   try {
     console.log('🚀 Edge Function called');
-    const { prompt } = await req.json()
+    const { prompt, files } = await req.json()
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
 
     if (!prompt) {
@@ -34,7 +40,82 @@ serve(async (req) => {
     }
 
     console.log('📡 Calling OpenAI API...');
+    console.log('📁 Files to analyze:', files?.length || 0);
     const startTime = Date.now();
+
+    // Préparer les messages pour OpenAI
+    const messages = [
+      { role: 'system', content: 'You are a world-class decision making assistant. Your responses must be in French and in a valid JSON object format.' },
+      { role: 'user', content: prompt }
+    ];
+
+    // Si nous avons des fichiers, les traiter
+    if (files && files.length > 0) {
+      console.log('🔍 Processing uploaded files...');
+      
+      for (const fileInfo of files) {
+        try {
+          console.log(`📄 Processing file: ${fileInfo.fileName} (${fileInfo.fileType})`);
+          
+          // Télécharger le fichier depuis Supabase Storage
+          const { data: fileData, error: downloadError } = await supabase.storage
+            .from('decision-files')
+            .download(fileInfo.filePath);
+            
+          if (downloadError) {
+            console.error(`❌ Error downloading file ${fileInfo.fileName}:`, downloadError);
+            continue;
+          }
+          
+          // Traiter selon le type de fichier
+          if (fileInfo.fileType.startsWith('image/')) {
+            console.log(`🖼️ Processing image: ${fileInfo.fileName}`);
+            
+            // Convertir l'image en base64
+            const arrayBuffer = await fileData.arrayBuffer();
+            const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+            const dataUrl = `data:${fileInfo.fileType};base64,${base64}`;
+            
+            // Ajouter l'image au message pour GPT-4o vision
+            messages.push({
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: `Voici un document image joint (${fileInfo.fileName}). Analysez son contenu et intégrez les informations pertinentes dans votre analyse du dilemme :`
+                },
+                {
+                  type: 'image_url',
+                  image_url: { url: dataUrl }
+                }
+              ]
+            });
+          } else if (fileInfo.fileType === 'application/pdf') {
+            console.log(`📄 Processing PDF: ${fileInfo.fileName}`);
+            
+            // Pour les PDFs, on ajoutera l'extraction de texte plus tard
+            // Pour l'instant, on informe juste OpenAI qu'il y a un PDF
+            messages.push({
+              role: 'user',
+              content: `Un document PDF a été joint (${fileInfo.fileName}). Veuillez tenir compte de ce contexte dans votre analyse. Note: L'extraction automatique de texte PDF sera implémentée prochainement.`
+            });
+          } else {
+            console.log(`📎 Processing other file type: ${fileInfo.fileName}`);
+            messages.push({
+              role: 'user',
+              content: `Un document a été joint (${fileInfo.fileName}, type: ${fileInfo.fileType}). Veuillez tenir compte de ce contexte dans votre analyse.`
+            });
+          }
+          
+        } catch (fileError) {
+          console.error(`❌ Error processing file ${fileInfo.fileName}:`, fileError);
+        }
+      }
+    }
+
+    // Utiliser GPT-4o pour supporter l'analyse d'images
+    const model = files && files.some(f => f.fileType.startsWith('image/')) ? 'gpt-4o' : 'gpt-4o-mini';
+    console.log(`🤖 Using model: ${model}`);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -43,11 +124,8 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: 'You are a world-class decision making assistant. Your responses must be in French and in a valid JSON object format.' },
-          { role: 'user', content: prompt }
-        ],
+        model: model,
+        messages: messages,
         temperature: 0.5,
         response_format: { type: "json_object" },
       }),
@@ -110,7 +188,8 @@ serve(async (req) => {
       hasResult: !!jsonContent.result,
       hasRecommendation: !!jsonContent.result?.recommendation,
       hasBreakdown: Array.isArray(jsonContent.result?.breakdown),
-      breakdownCount: jsonContent.result?.breakdown?.length || 0
+      breakdownCount: jsonContent.result?.breakdown?.length || 0,
+      filesProcessed: files?.length || 0
     });
     
     return new Response(JSON.stringify(jsonContent), {
