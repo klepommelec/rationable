@@ -531,7 +531,7 @@ const CommunityTemplates = () => {
   const [copying, setCopying] = useState<string | null>(null);
   const [showPredefined, setShowPredefined] = useState(false);
   
-  const { setDilemma, setCriteria, setEmoji, clearSession } = useDecisionMaker();
+  const { setDilemma, setCriteria, setEmoji, clearSession, loadDecision } = useDecisionMaker();
   const { addDecision } = useDecisionHistory();
   const navigate = useNavigate();
 
@@ -583,6 +583,9 @@ const CommunityTemplates = () => {
           category: template.category
         };
         addDecision(newDecision);
+        
+        // Charger la décision dans l'interface
+        loadDecision(newDecision.id);
       }
       
       // Increment copy count only for real community templates
@@ -620,6 +623,9 @@ const CommunityTemplates = () => {
           category: template.category
         };
         addDecision(newDecision);
+        
+        // Charger la décision dans l'interface
+        loadDecision(newDecision.id);
       }
       
       toast.success(`Template "${template.title}" copié et analysé ! Vous pouvez maintenant le modifier.`);
