@@ -587,15 +587,22 @@ const CommunityTemplates = () => {
         console.log('💾 Adding decision to history:', newDecision.id);
         addDecision(newDecision);
         
-        // Naviguer vers la home page d'abord
+        // Naviguer vers la home page
         console.log('🏠 Navigating to home page');
         navigate('/');
         
-        // Utiliser un timeout pour s'assurer que la navigation est terminée
+        // Attendre que l'historique soit sauvegardé puis charger la décision
         setTimeout(() => {
           console.log('🔄 Loading decision after navigation:', newDecision.id);
-          loadDecision(newDecision.id);
-        }, 100);
+          // Vérifier que la décision existe dans l'historique avant de la charger
+          const decisionExists = history.find(d => d.id === newDecision.id);
+          if (decisionExists) {
+            loadDecision(newDecision.id);
+          } else {
+            console.log('⏳ Decision not yet in history, trying again...');
+            setTimeout(() => loadDecision(newDecision.id), 100);
+          }
+        }, 600); // Attendre plus longtemps que le debounce de 500ms
       } else {
         // Si pas de résultat, juste copier les données de base
         console.log('📝 Template has no analysis, copying basic data');
@@ -643,15 +650,22 @@ const CommunityTemplates = () => {
         console.log('💾 Adding predefined decision to history:', newDecision.id);
         addDecision(newDecision);
         
-        // Naviguer vers la home page d'abord
+        // Naviguer vers la home page
         console.log('🏠 Navigating to home page');
         navigate('/');
         
-        // Utiliser un timeout pour s'assurer que la navigation est terminée
+        // Attendre que l'historique soit sauvegardé puis charger la décision
         setTimeout(() => {
           console.log('🔄 Loading predefined decision after navigation:', newDecision.id);
-          loadDecision(newDecision.id);
-        }, 100);
+          // Vérifier que la décision existe dans l'historique avant de la charger
+          const decisionExists = history.find(d => d.id === newDecision.id);
+          if (decisionExists) {
+            loadDecision(newDecision.id);
+          } else {
+            console.log('⏳ Predefined decision not yet in history, trying again...');
+            setTimeout(() => loadDecision(newDecision.id), 100);
+          }
+        }, 600); // Attendre plus longtemps que le debounce de 500ms
       } else {
         // Si pas de résultat, juste copier les données de base
         console.log('📝 Predefined template has no analysis, copying basic data');
