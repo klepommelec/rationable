@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -532,7 +533,7 @@ const CommunityTemplates = () => {
   const [showPredefined, setShowPredefined] = useState(false);
   
   const { setDilemma, setCriteria, setEmoji, clearSession, loadDecision } = useDecisionMaker();
-  const { addDecision } = useDecisionHistory();
+  const { history, addDecision } = useDecisionHistory();
   const navigate = useNavigate();
 
   const loadTemplates = async () => {
