@@ -95,68 +95,62 @@
     background-color: #020617; /* slate-950 */
   }
 
-  /* Pulsing glow effect for textarea */
+  /* Pulsing glow effect for textarea - subtle gray tones */
   @keyframes pulsing-glow {
     0%, 100% {
       box-shadow: 
-        0 0 10px rgba(6, 182, 212, 0.4),
-        0 0 20px rgba(6, 182, 212, 0.2),
-        0 0 30px rgba(6, 182, 212, 0.1);
+        0 0 8px rgba(148, 163, 184, 0.2),
+        0 0 16px rgba(148, 163, 184, 0.1);
     }
     50% {
       box-shadow: 
-        0 0 15px rgba(6, 182, 212, 0.6),
-        0 0 30px rgba(6, 182, 212, 0.4),
-        0 0 45px rgba(6, 182, 212, 0.2);
+        0 0 12px rgba(148, 163, 184, 0.3),
+        0 0 24px rgba(148, 163, 184, 0.15);
     }
   }
 
   @keyframes pulsing-glow-dark {
     0%, 100% {
       box-shadow: 
-        0 0 10px rgba(59, 130, 246, 0.4),
-        0 0 20px rgba(59, 130, 246, 0.2),
-        0 0 30px rgba(59, 130, 246, 0.1);
+        0 0 8px rgba(71, 85, 105, 0.3),
+        0 0 16px rgba(71, 85, 105, 0.15);
     }
     50% {
       box-shadow: 
-        0 0 15px rgba(59, 130, 246, 0.6),
-        0 0 30px rgba(59, 130, 246, 0.4),
-        0 0 45px rgba(59, 130, 246, 0.2);
+        0 0 12px rgba(71, 85, 105, 0.4),
+        0 0 24px rgba(71, 85, 105, 0.2);
     }
   }
 
   @keyframes pulsing-glow-drag {
     0%, 100% {
       box-shadow: 
-        0 0 15px rgba(34, 197, 94, 0.5),
-        0 0 30px rgba(34, 197, 94, 0.3),
-        0 0 45px rgba(34, 197, 94, 0.2);
+        0 0 10px rgba(34, 197, 94, 0.4),
+        0 0 20px rgba(34, 197, 94, 0.2);
     }
     50% {
       box-shadow: 
-        0 0 25px rgba(34, 197, 94, 0.8),
-        0 0 50px rgba(34, 197, 94, 0.6),
-        0 0 75px rgba(34, 197, 94, 0.4);
+        0 0 16px rgba(34, 197, 94, 0.6),
+        0 0 32px rgba(34, 197, 94, 0.3);
     }
   }
 
   .pulsing-glow {
-    animation: pulsing-glow 2.5s ease-in-out infinite;
+    animation: pulsing-glow 3s ease-in-out infinite;
     will-change: box-shadow;
     transform: translateZ(0); /* GPU acceleration */
   }
 
   .dark .pulsing-glow {
-    animation: pulsing-glow-dark 2.5s ease-in-out infinite;
+    animation: pulsing-glow-dark 3s ease-in-out infinite;
   }
 
   .pulsing-glow:hover {
-    animation-duration: 2s;
+    animation-duration: 2.5s;
   }
 
   .pulsing-glow:focus {
-    animation-duration: 1.5s;
+    animation-duration: 2s;
   }
 
   .pulsing-glow.drag-over {
@@ -170,14 +164,14 @@
     .pulsing-glow.drag-over {
       animation: none;
       box-shadow: 
-        0 0 5px rgba(6, 182, 212, 0.3),
-        0 0 10px rgba(6, 182, 212, 0.2);
+        0 0 4px rgba(148, 163, 184, 0.2),
+        0 0 8px rgba(148, 163, 184, 0.1);
     }
     
     .dark .pulsing-glow {
       box-shadow: 
-        0 0 5px rgba(59, 130, 246, 0.3),
-        0 0 10px rgba(59, 130, 246, 0.2);
+        0 0 4px rgba(71, 85, 105, 0.3),
+        0 0 8px rgba(71, 85, 105, 0.15);
     }
   }
 
