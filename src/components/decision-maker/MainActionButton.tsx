@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { LoaderCircle, Sparkles } from 'lucide-react';
+import { LoaderCircle } from 'lucide-react';
 
 interface MainActionButtonProps {
     analysisStep: 'idle' | 'loading-criteria' | 'criteria-loaded' | 'loading-options' | 'done';
@@ -33,15 +33,9 @@ const MainActionButton: React.FC<MainActionButtonProps> = ({
             );
         case 'criteria-loaded':
         case 'done':
-            return null;
         case 'idle':
         default:
-            return (
-                <Button onClick={handleStartAnalysis} disabled={isMainButtonDisabled} className="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold text-lg py-6 transition-all duration-300 ease-in-out transform hover:scale-105">
-                    <Sparkles className="h-5 w-5 mr-2" />
-                    Lancer l'analyse
-                </Button>
-            );
+            return null;
     }
 };
 

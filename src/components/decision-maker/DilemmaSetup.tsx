@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { BrainCircuit, Paperclip, X, FileText, Image } from 'lucide-react';
+import { BrainCircuit, Paperclip, X, FileText, Image, ArrowRight } from 'lucide-react';
 import { DecisionHistory } from '../DecisionHistory';
 import { AnimatedPlaceholder } from '../AnimatedPlaceholder';
 import MainActionButton from './MainActionButton';
@@ -184,6 +184,8 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
+    const isMainButtonDisabled = dilemma.trim() === '' || isLoading;
+
     return (
         <div className="max-w-4xl mx-auto space-y-6">
             <Card className="backdrop-blur-sm relative">
@@ -218,7 +220,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
                                 onDrop={handleDrop}
-                                className={`focus:ring-cyan-500 text-base md:text-sm min-h-[100px] resize-none pr-12 transition-colors ${
+                                className={`focus:ring-cyan-500 text-base md:text-sm min-h-[100px] resize-none pr-20 transition-colors ${
                                     isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed' : ''
                                 }`}
                                 disabled={isLoading || isUpdating || analysisStep === 'done'}
@@ -243,17 +245,35 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                     </div>
                                 </div>
                             )}
-                            {/* Bouton d'attachement de fichier */}
-                            <button
-                                type="button"
-                                onClick={handleFileButtonClick}
-                                disabled={isLoading || isUpdating || analysisStep === 'done'}
-                                className="absolute bottom-3 right-3 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                aria-label="Joindre un fichier"
-                                title="Joindre un fichier"
-                            >
-                                <Paperclip className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                            </button>
+                            {/* Boutons d'action à droite */}
+                            <div className="absolute bottom-3 right-3 flex gap-1">
+                                {/* Bouton d'attachement de fichier */}
+                                <button
+                                    type="button"
+                                    onClick={handleFileButtonClick}
+                                    disabled={isLoading || isUpdating || analysisStep === 'done'}
+                                    className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    aria-label="Joindre un fichier"
+                                    title="Joindre un fichier"
+                                >
+                                    <Paperclip className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                </button>
+                                
+                                {/* Bouton d'analyse */}
+                                {analysisStep === 'idle' && (
+                                    <button
+                                        type="button"
+                                        onClick={handleStartAnalysis}
+                                        disabled={isMainButtonDisabled}
+                                        className="p-2 rounded-md bg-cyan-500 hover:bg-cyan-600 text-slate-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        aria-label="Lancer l'analyse"
+                                        title="Lancer l'analyse"
+                                    >
+                                        <ArrowRight className="h-4 w-4" />
+                                    </button>
+                                )}
+                            </div>
+                            
                             {/* Input file caché */}
                             <input
                                 ref={fileInputRef}
@@ -335,7 +355,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     <MainActionButton
                         analysisStep={analysisStep}
                         handleStartAnalysis={handleStartAnalysis}
-                        isMainButtonDisabled={dilemma.trim() === '' || isLoading}
+                        isMainButtonDisabled={isMainButtonDisabled}
                         progress={progress}
                         progressMessage={progressMessage}
                     />
