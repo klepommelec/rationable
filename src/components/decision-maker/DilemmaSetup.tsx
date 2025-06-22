@@ -9,7 +9,6 @@ import MainActionButton from './MainActionButton';
 import { UploadedFile } from '../FileUpload';
 import { IDecision } from '@/types/decision';
 import { toast } from "sonner";
-
 interface DilemmaSetupProps {
   dilemma: string;
   setDilemma: (dilemma: string) => void;
@@ -178,7 +177,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 <span>Rationable</span>
                             </div>
                         </CardTitle>
-                        <CardDescription className="text-muted-foreground text-sm sm:text-base">L'IA vous assistera dans chaque prise de décision pour vous</CardDescription>
+                        <CardDescription className="text-muted-foreground text-sm sm:text-base">De l'incertitude à la clarté : exploitez la puissance de l'IA</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6 px-4 sm:px-6">
                         <div className="space-y-2">
