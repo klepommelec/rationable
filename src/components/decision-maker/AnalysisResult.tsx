@@ -87,17 +87,17 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg text-gray-950 font-medium">Recommandation IA</h2>
+                <h2 className="text-lg text-gray-950 font-medium">Résultat de l'analyse IA</h2>
                 <Trophy className="h-5 w-5 text-yellow-600" />
               </div>
-              <p className="text-sm text-muted-foreground">Option optimale identifiée par l'analyse</p>
+              <p className="text-sm text-muted-foreground">Votre option rationnelle identifiée par l'analyse</p>
             </div>
           </div>
           
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg p-4 border border-blue-200/50 dark:border-blue-700/50">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex-1">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-xl sm:text-2xl text-gray-900 dark:text-white mb-2 font-bold">
                   {cleanOptionName}
                 </h3>
                 <div className="flex items-center gap-4 flex-wrap">
