@@ -170,9 +170,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         <div className="flex justify-center items-center mb-4">
                             <BrainCircuit className="h-10 w-10 sm:h-12 sm:w-12 text-cyan-400" aria-hidden="true" />
                         </div>
-                        <CardTitle className="text-2xl sm:text-3xl lg:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-slate-400">
-                            Assistant de Décision IA
-                        </CardTitle>
+                        <CardTitle className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-slate-400 lg:text-5xl">Transformez chaque décision en choix rationnel</CardTitle>
                         <CardDescription className="text-muted-foreground text-sm sm:text-base">
                             Posez votre dilemme, et laissez l'IA vous éclairer.
                         </CardDescription>
