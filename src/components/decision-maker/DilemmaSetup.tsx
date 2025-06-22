@@ -167,9 +167,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             <div className="h-[72vh] flex items-center justify-center">
                 <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none ">
                     <CardHeader className="text-center pt-12 px-4 sm:px-6">
-                        <div className="flex justify-center items-center mb-4">
-                            <BrainCircuit className="h-10 w-10 sm:h-12 sm:w-12 text-cyan-400" aria-hidden="true" />
-                        </div>
                         <CardTitle className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-slate-400 lg:text-5xl">
                             <div>Vos décisions seront désormais</div>
                             <div className="flex items-center justify-center gap-3">
@@ -177,7 +174,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 <span>Rationable</span>
                             </div>
                         </CardTitle>
-                        <CardDescription className="text-muted-foreground text-sm sm:text-base">De l'incertitude à la clarté : exploitez la puissance de l'IA</CardDescription>
+                        <CardDescription className="text-muted-foreground text-sm:text-base">De l'incertitude à la clarté : exploitez la puissance de l'IA</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6 px-4 sm:px-6">
                         <div className="space-y-2">
