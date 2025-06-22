@@ -2,10 +2,23 @@
 import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Calendar } from 'lucide-react';
+import { Search, Calendar, MoreHorizontal, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { DEFAULT_CATEGORIES } from '@/types/decision';
+import { IDecision } from '@/types/decision';
+import { ExportMenu } from '../ExportMenu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface HistorySearchBarProps {
   searchQuery: string;
@@ -15,6 +28,8 @@ interface HistorySearchBarProps {
   sortBy: 'date' | 'category';
   setSortBy: (sort: 'date' | 'category') => void;
   categoryCounts: Record<string, number>;
+  filteredDecisions: IDecision[];
+  onClear: () => void;
 }
 
 export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
@@ -24,7 +39,9 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
   setSelectedCategory,
   sortBy,
   setSortBy,
-  categoryCounts
+  categoryCounts,
+  filteredDecisions,
+  onClear
 }) => {
   return (
     <div className="flex gap-2 items-center">
@@ -94,6 +111,44 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
               </Select>
             </div>
           </div>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Bouton Plus d'options */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm">
+            <MoreHorizontal className="h-4 w-4 mr-2" />
+            Plus d'options
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem asChild>
+            <div className="w-full">
+              <ExportMenu decisions={filteredDecisions} />
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Tout effacer
+              </DropdownMenuItem>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Cette action est irréversible et supprimera tout votre historique de décisions.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                <AlertDialogAction onClick={onClear}>Confirmer</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

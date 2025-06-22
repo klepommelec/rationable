@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { IDecision } from '@/types/decision';
@@ -77,13 +78,12 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
           setSelectedCategory={setSelectedCategory} 
           sortBy={sortBy} 
           setSortBy={setSortBy} 
-          categoryCounts={categoryCounts} 
+          categoryCounts={categoryCounts}
+          filteredDecisions={filteredAndSortedHistory}
+          onClear={onClear}
         />
 
-        <HistoryActions 
-          filteredDecisions={filteredAndSortedHistory} 
-          onClear={onClear} 
-        />
+        <HistoryActions />
       </div>
 
       {/* Liste des décisions */}
