@@ -250,7 +250,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             </div>
 
             {/* Historique intégré directement dans la page */}
-            <Card className="backdrop-blur-sm">
+            <Card className="backdrop-blur-2xl ">
                 <CardHeader className="pb-4">
                     <CardTitle className="text-xl font-semibold">Historique des décisions</CardTitle>
                     <CardDescription className="text-muted-foreground">
