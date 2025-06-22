@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -188,8 +189,8 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     return (
         <div className="max-w-4xl mx-auto space-y-6">
             {/* Header principal occupant 72% de la hauteur de l'écran */}
-            <div className="h-[72vh] flex flex-col">
-                <Card className="backdrop-blur-sm relative flex-1 flex flex-col">
+            <div className="h-[72vh] flex items-center justify-center">
+                <Card className="backdrop-blur-sm relative w-full max-w-3xl">
                     <CardHeader className="text-center pt-12 px-4 sm:px-6">
                         <div className="flex justify-center items-center mb-4">
                             <BrainCircuit 
@@ -204,15 +205,15 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                             Posez votre dilemme, et laissez l'IA vous éclairer.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6 px-4 sm:px-6 flex-1 flex flex-col">
-                        <div className="space-y-2 flex-1">
+                    <CardContent className="space-y-6 px-4 sm:px-6">
+                        <div className="space-y-2">
                             <label 
                                 htmlFor="dilemma-input"
                                 className="font-medium text-sm sm:text-base"
                             >
                                 Votre dilemme
                             </label>
-                            <div className="relative flex-1">
+                            <div className="relative">
                                 <Textarea
                                     id="dilemma-input"
                                     placeholder=""
@@ -221,7 +222,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                     onDragOver={handleDragOver}
                                     onDragLeave={handleDragLeave}
                                     onDrop={handleDrop}
-                                    className={`focus:ring-cyan-500 text-base md:text-sm min-h-[200px] resize-none pr-20 transition-colors h-full ${
+                                    className={`focus:ring-cyan-500 text-base md:text-sm max-h-[150px] resize-none pr-20 transition-colors ${
                                         isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed' : ''
                                     }`}
                                     disabled={isLoading || isUpdating || analysisStep === 'done'}
