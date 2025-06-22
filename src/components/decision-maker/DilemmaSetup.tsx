@@ -197,12 +197,12 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 {/* Boutons d'action à droite */}
                                 <div className="absolute bottom-3 right-3 flex gap-1">
                                     {/* Bouton d'attachement de fichier */}
-                                    <button type="button" onClick={handleFileButtonClick} disabled={isLoading || isUpdating || analysisStep === 'done'} className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Joindre un fichier" title="Joindre un fichier">
+                                    <button type="button" onClick={handleFileButtonClick} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-label="Joindre un fichier" title="Joindre un fichier" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-full">
                                         <Paperclip className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                                     </button>
                                     
                                     {/* Bouton d'analyse */}
-                                    {analysisStep === 'idle' && <button type="button" onClick={handleStartAnalysis} disabled={isMainButtonDisabled} className="p-2 rounded-md bg-cyan-500 hover:bg-cyan-600 text-slate-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Lancer l'analyse" title="Lancer l'analyse">
+                                    {analysisStep === 'idle' && <button type="button" onClick={handleStartAnalysis} disabled={isMainButtonDisabled} aria-label="Lancer l'analyse" title="Lancer l'analyse" className="p-2 bg-cyan-500 hover:bg-cyan-600 text-slate-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-full">
                                             <ArrowRight className="h-4 w-4" />
                                         </button>}
                                 </div>
@@ -245,7 +245,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                             </label>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                 {displayedTemplates.map(template => <Button key={template.name} variant="outline" size="sm" onClick={() => handleTemplateClick(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} aria-label={`Utiliser le modèle: ${template.name}`} className="text-xs sm:text-sm justify-start h-auto py-3 px-3 whitespace-normal text-left rounded-full">
-                                        <span className="truncate text-sm px-[4px] gap-10 ">{template.name}</span>
+                                        <span className="truncate text-sm px-[4px] font-normal">{template.name}</span>
                                     </Button>)}
                             </div>
                         </div>
