@@ -35,6 +35,7 @@ interface DilemmaSetupProps {
   uploadedFiles: UploadedFile[];
   setUploadedFiles: (files: UploadedFile[]) => void;
 }
+
 const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   dilemma,
   setDilemma,
@@ -65,6 +66,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
 
   // Placeholders animés pour le textarea
   const placeholders = ["Ex: Quel framework JS devrais-je apprendre en 2025 ?", "Ex: Dois-je changer de carrière professionnelle ?", "Ex: Quelle ville choisir pour mes études ?", "Ex: Investir en bourse ou dans l'immobilier ?", "Ex: Partir en voyage ou économiser de l'argent ?", "Ex: Accepter cette offre d'emploi ou continuer à chercher ?"];
+
   const handleTemplateClick = (template: {
     name: string;
     dilemma: string;
@@ -162,11 +164,13 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
+
   const isMainButtonDisabled = dilemma.trim() === '' || isLoading;
+
   return <div className="max-w-4xl mx-auto space-y-6">
             {/* Header principal occupant 72% de la hauteur de l'écran */}
             <div className="h-[72vh] flex items-center justify-center">
-                <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none ">
+                <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none shadow-none">
                     <CardHeader className="text-center pt-12 px-4 sm:px-6">
                         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-slate-400">
                             <div>Vos décisions seront </div>
@@ -276,4 +280,5 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             </Card>
         </div>;
 };
+
 export default DilemmaSetup;
