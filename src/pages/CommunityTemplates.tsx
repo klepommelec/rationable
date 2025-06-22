@@ -223,7 +223,39 @@ const PERSONAL_TEMPLATES = [
         { id: '2', name: 'Niveau de risque' },
         { id: '3', name: 'Liquidité' },
         { id: '4', name: 'Horizon d\'investissement' }
-      ]
+      ],
+      result: {
+        recommendation: 'ETF World diversifié + Épargne sécurisée',
+        description: 'Une approche équilibrée combinant 70% d\'ETF world pour la croissance long terme et 30% d\'épargne sécurisée pour la stabilité et les opportunités.',
+        breakdown: [
+          {
+            option: 'ETF World diversifié + Épargne',
+            score: 8.9,
+            pros: ['Diversification maximale', 'Frais très faibles', 'Liquidité élevée', 'Croissance long terme'],
+            cons: ['Volatilité court terme', 'Pas de capital garanti']
+          },
+          {
+            option: 'Immobilier locatif',
+            score: 8.1,
+            pros: ['Revenus réguliers', 'Effet de levier', 'Tangible', 'Avantages fiscaux'],
+            cons: ['Illiquide', 'Gestion contraignante', 'Risques locataires']
+          },
+          {
+            option: 'Livret A + Assurance vie fonds euros',
+            score: 6.8,
+            pros: ['Capital garanti', 'Disponibilité immédiate', 'Sécurité maximale', 'Avantages fiscaux AV'],
+            cons: ['Rendement très faible', 'Inflation non couverte', 'Opportunité manquée']
+          }
+        ],
+        infoLinks: [
+          { title: 'Guide investissement débutant', url: 'https://www.google.com/search?q=guide+investissement+débutant+ETF' },
+          { title: 'Comparatif brokers ETF', url: 'https://www.google.com/search?q=meilleur+courtier+ETF+France' }
+        ],
+        shoppingLinks: [
+          { title: 'Boursorama - ETF World', url: 'https://www.google.com/search?q=Boursorama+ETF+World+MSCI' },
+          { title: 'Fortuneo - PEA', url: 'https://www.google.com/search?q=Fortuneo+PEA+frais' }
+        ]
+      }
     }
   },
   {
@@ -240,7 +272,39 @@ const PERSONAL_TEMPLATES = [
         { id: '2', name: 'Équipements' },
         { id: '3', name: 'Proximité' },
         { id: '4', name: 'Horaires d\'ouverture' }
-      ]
+      ],
+      result: {
+        recommendation: 'Basic-Fit',
+        description: 'Basic-Fit offre le meilleur rapport qualité-prix avec des équipements modernes, une accessibilité 24h/7j et de nombreuses salles en réseau.',
+        breakdown: [
+          {
+            option: 'Basic-Fit',
+            score: 8.7,
+            pros: ['Prix très attractif', 'Réseau étendu', 'Ouvert 24h/7j', 'Équipements récents'],
+            cons: ['Affluence aux heures de pointe', 'Pas de cours collectifs premium']
+          },
+          {
+            option: 'L\'Orange Bleue',
+            score: 8.3,
+            pros: ['Cours collectifs variés', 'Coaching personnalisé', 'Ambiance conviviale', 'Piscine dans certaines salles'],
+            cons: ['Prix plus élevé', 'Horaires limités le weekend']
+          },
+          {
+            option: 'Salle municipale',
+            score: 7.2,
+            pros: ['Tarif très bas', 'Proximité quartier', 'Ambiance familiale', 'Créneaux réservés seniors'],
+            cons: ['Équipements vieillissants', 'Horaires restreints', 'Peu d\'innovations']
+          }
+        ],
+        infoLinks: [
+          { title: 'Comparatif salles de sport', url: 'https://www.google.com/search?q=comparatif+salles+sport+France+2024' },
+          { title: 'Programme musculation débutant', url: 'https://www.google.com/search?q=programme+musculation+débutant' }
+        ],
+        shoppingLinks: [
+          { title: 'Basic-Fit - Abonnement', url: 'https://www.google.com/search?q=Basic+Fit+abonnement+tarif' },
+          { title: 'L\'Orange Bleue - Tarifs', url: 'https://www.google.com/search?q=Orange+Bleue+prix+abonnement' }
+        ]
+      }
     }
   },
   {
@@ -257,7 +321,39 @@ const PERSONAL_TEMPLATES = [
         { id: '2', name: 'Prix' },
         { id: '3', name: 'Performance' },
         { id: '4', name: 'Exclusivités' }
-      ]
+      ],
+      result: {
+        recommendation: 'PlayStation 5',
+        description: 'La PS5 offre l\'expérience gaming la plus complète avec ses exclusivités remarquables, ses performances exceptionnelles et son catalogue riche.',
+        breakdown: [
+          {
+            option: 'PlayStation 5',
+            score: 9.1,
+            pros: ['Exclusivités exceptionnelles', 'SSD ultra-rapide', 'Manette DualSense innovante', 'Rétrocompatibilité PS4'],
+            cons: ['Prix élevé', 'Taille imposante', 'Stock encore limité']
+          },
+          {
+            option: 'Xbox Series X',
+            score: 8.6,
+            pros: ['Game Pass excellent', 'Puissance brute supérieure', 'Rétrocompatibilité étendue', 'Quick Resume'],
+            cons: ['Moins d\'exclusivités', 'Design imposant']
+          },
+          {
+            option: 'Nintendo Switch OLED',
+            score: 8.3,
+            pros: ['Polyvalence portable/TV', 'Exclusivités Nintendo', 'Écran OLED magnifique', 'Gaming familial'],
+            cons: ['Performances limitées', 'Stockage insuffisant', 'Prix des jeux élevé']
+          }
+        ],
+        infoLinks: [
+          { title: 'Comparatif consoles 2024', url: 'https://www.google.com/search?q=comparatif+consoles+2024+PS5+Xbox+Switch' },
+          { title: 'Meilleurs jeux PS5', url: 'https://www.google.com/search?q=meilleurs+jeux+PS5+exclusivités' }
+        ],
+        shoppingLinks: [
+          { title: 'PS5 - Stock disponible', url: 'https://www.google.com/search?q=PS5+stock+achat+prix' },
+          { title: 'Xbox Series X - Prix', url: 'https://www.google.com/search?q=Xbox+Series+X+prix+disponibilité' }
+        ]
+      }
     }
   },
   {
@@ -274,7 +370,39 @@ const PERSONAL_TEMPLATES = [
         { id: '2', name: 'Prix' },
         { id: '3', name: 'Ambiance' },
         { id: '4', name: 'Localisation' }
-      ]
+      ],
+      result: {
+        recommendation: 'Restaurant italien traditionnel',
+        description: 'Un restaurant italien offre l\'équilibre parfait entre qualité culinaire, ambiance chaleureuse et rapport qualité-prix pour une soirée réussie.',
+        breakdown: [
+          {
+            option: 'Restaurant italien traditionnel',
+            score: 8.8,
+            pros: ['Cuisine familiale authentique', 'Ambiance conviviale', 'Prix raisonnables', 'Plats généreux'],
+            cons: ['Peut être bruyant', 'Réservation nécessaire']
+          },
+          {
+            option: 'Bistrot français gastronomique',
+            score: 8.5,
+            pros: ['Cuisine raffinée', 'Service impeccable', 'Cadre élégant', 'Vins exceptionnels'],
+            cons: ['Prix élevé', 'Portions parfois petites', 'Ambiance formelle']
+          },
+          {
+            option: 'Restaurant asiatique fusion',
+            score: 7.9,
+            pros: ['Cuisine originale', 'Présentation soignée', 'Options végétariennes', 'Service rapide'],
+            cons: ['Saveurs parfois déroutantes', 'Ambiance moderne froide']
+          }
+        ],
+        infoLinks: [
+          { title: 'Meilleurs restaurants italiens Paris', url: 'https://www.google.com/search?q=meilleurs+restaurants+italiens+Paris' },
+          { title: 'Réservation restaurant', url: 'https://www.google.com/search?q=réserver+restaurant+en+ligne' }
+        ],
+        shoppingLinks: [
+          { title: 'LaFourchette - Réservation', url: 'https://www.google.com/search?q=LaFourchette+restaurant+italien' },
+          { title: 'OpenTable - Paris', url: 'https://www.google.com/search?q=OpenTable+restaurant+Paris' }
+        ]
+      }
     }
   },
   {
@@ -291,7 +419,39 @@ const PERSONAL_TEMPLATES = [
         { id: '2', name: 'Prix mensuel' },
         { id: '3', name: 'Qualité vidéo' },
         { id: '4', name: 'Interface' }
-      ]
+      ],
+      result: {
+        recommendation: 'Netflix Standard',
+        description: 'Netflix reste la référence avec le catalogue le plus riche, des productions originales de qualité et une interface intuitive pour tous les profils.',
+        breakdown: [
+          {
+            option: 'Netflix Standard',
+            score: 8.9,
+            pros: ['Catalogue très vaste', 'Productions originales excellentes', 'Interface parfaite', 'Disponible partout'],
+            cons: ['Prix en hausse', 'Contenu qui disparaît', 'Moins de films récents']
+          },
+          {
+            option: 'Amazon Prime Video',
+            score: 8.1,
+            pros: ['Inclus avec Prime', 'Films récents disponibles', 'Séries originales réussies', 'Livraison gratuite bonus'],
+            cons: ['Interface confuse', 'Contenu payant en plus', 'Catalogue français limité']
+          },
+          {
+            option: 'Disney+',
+            score: 7.6,
+            pros: ['Contenu familial exceptionnel', 'Marvel, Star Wars inclus', 'Qualité 4K standard', 'Prix attractif'],
+            cons: ['Catalogue adulte limité', 'Peu de nouveautés mensuelles', 'Contenu répétitif']
+          }
+        ],
+        infoLinks: [
+          { title: 'Comparatif plateformes streaming', url: 'https://www.google.com/search?q=comparatif+Netflix+Prime+Disney+2024' },
+          { title: 'Nouveautés streaming ce mois', url: 'https://www.google.com/search?q=nouveautés+streaming+ce+mois' }
+        ],
+        shoppingLinks: [
+          { title: 'Netflix - Abonnement', url: 'https://www.google.com/search?q=Netflix+abonnement+prix+France' },
+          { title: 'Amazon Prime - Essai', url: 'https://www.google.com/search?q=Amazon+Prime+Video+essai+gratuit' }
+        ]
+      }
     }
   },
   {
@@ -308,7 +468,39 @@ const PERSONAL_TEMPLATES = [
         { id: '2', name: 'Espace logement' },
         { id: '3', name: 'Coût d\'entretien' },
         { id: '4', name: 'Affinités' }
-      ]
+      ],
+      result: {
+        recommendation: 'Chat d\'appartement',
+        description: 'Un chat offre la compagnie idéale avec une autonomie adaptée à la vie moderne, des coûts maîtrisés et une grande affection sans contraintes majeures.',
+        breakdown: [
+          {
+            option: 'Chat d\'appartement',
+            score: 8.7,
+            pros: ['Très autonome', 'Affectueux sans être envahissant', 'Coûts raisonnables', 'Adapté petit espace'],
+            cons: ['Allergie possible', 'Litière à nettoyer', 'Griffures mobilier']
+          },
+          {
+            option: 'Chien de petite taille',
+            score: 7.8,
+            pros: ['Compagnon très fidèle', 'Encourage les sorties', 'Sécurité du foyer', 'Interactions sociales'],
+            cons: ['Sorties obligatoires 3x/jour', 'Coûts vétérinaires élevés', 'Contraintes vacances']
+          },
+          {
+            option: 'Poissons tropicaux',
+            score: 7.1,
+            pros: ['Très peu contraignant', 'Apaisant à observer', 'Coût très faible', 'Pas d\'allergies'],
+            cons: ['Interaction limitée', 'Aquarium à entretenir', 'Fragilité des poissons']
+          }
+        ],
+        infoLinks: [
+          { title: 'Guide adoption chat', url: 'https://www.google.com/search?q=guide+adoption+chat+appartement' },
+          { title: 'Refuges animaux près de chez vous', url: 'https://www.google.com/search?q=refuge+animaux+adoption+chat' }
+        ],
+        shoppingLinks: [
+          { title: 'Accessoires chat - Zooplus', url: 'https://www.google.com/search?q=accessoires+chat+Zooplus' },
+          { title: 'Assurance animaux', url: 'https://www.google.com/search?q=assurance+santé+chat+prix' }
+        ]
+      }
     }
   }
 ];
@@ -378,7 +570,39 @@ const PROFESSIONAL_TEMPLATES = [
         { id: '2', name: 'Courbe d\'apprentissage' },
         { id: '3', name: 'Performance' },
         { id: '4', name: 'Écosystème' }
-      ]
+      ],
+      result: {
+        recommendation: 'React avec Next.js',
+        description: 'React reste le framework le plus demandé en 2025, avec Next.js qui apporte les fonctionnalités modernes nécessaires (SSR, optimisations, etc.).',
+        breakdown: [
+          {
+            option: 'React + Next.js',
+            score: 9.2,
+            pros: ['Demande marché très forte', 'Écosystème mature', 'Meta-framework complet', 'Communauté énorme'],
+            cons: ['Évolution rapide', 'Complexité croissante']
+          },
+          {
+            option: 'Vue.js + Nuxt',
+            score: 8.4,
+            pros: ['Apprentissage plus facile', 'Documentation excellente', 'Performance native', 'Approche progressive'],
+            cons: ['Marché plus restreint', 'Écosystème plus petit']
+          },
+          {
+            option: 'Svelte + SvelteKit',
+            score: 7.9,
+            pros: ['Performance exceptionnelle', 'Syntaxe intuitive', 'Bundle size minimal', 'Développement rapide'],
+            cons: ['Écosystème naissant', 'Adoption limitée en entreprise']
+          }
+        ],
+        infoLinks: [
+          { title: 'State of JS 2024', url: 'https://www.google.com/search?q=State+of+JS+2024+frameworks' },
+          { title: 'Guide React débutant', url: 'https://www.google.com/search?q=apprendre+React+guide+débutant' }
+        ],
+        shoppingLinks: [
+          { title: 'Formation React - Udemy', url: 'https://www.google.com/search?q=formation+React+Udemy' },
+          { title: 'Bootcamp développement web', url: 'https://www.google.com/search?q=bootcamp+développement+web+React' }
+        ]
+      }
     }
   },
   {
@@ -395,7 +619,39 @@ const PROFESSIONAL_TEMPLATES = [
         { id: '2', name: 'Reconnaissance' },
         { id: '3', name: 'Durée' },
         { id: '4', name: 'Coût' }
-      ]
+      ],
+      result: {
+        recommendation: 'Certification Cloud AWS',
+        description: 'La certification AWS Solutions Architect offre une reconnaissance immédiate sur le marché avec des compétences très demandées et un excellent ROI.',
+        breakdown: [
+          {
+            option: 'Certification Cloud AWS',
+            score: 9.0,
+            pros: ['Très demandé sur le marché', 'Augmentation salariale immédiate', 'Reconnaissance mondiale', 'Compétences transversales'],
+            cons: ['Examen technique exigeant', 'Coût de certification élevé']
+          },
+          {
+            option: 'MBA Executive',
+            score: 8.2,
+            pros: ['Prestige reconnu', 'Réseau professionnel', 'Vision stratégique', 'Évolution management'],
+            cons: ['Coût très élevé', 'Durée longue (2 ans)', 'ROI à long terme']
+          },
+          {
+            option: 'Formation Data Science',
+            score: 7.6,
+            pros: ['Secteur en croissance', 'Salaires attractifs', 'Compétences recherchées', 'Applications variées'],
+            cons: ['Prérequis mathématiques', 'Marché saturé junior', 'Évolution technologique rapide']
+          }
+        ],
+        infoLinks: [
+          { title: 'Guide certification AWS', url: 'https://www.google.com/search?q=certification+AWS+Solutions+Architect+guide' },
+          { title: 'Salaires cloud computing', url: 'https://www.google.com/search?q=salaire+architecte+cloud+AWS+France' }
+        ],
+        shoppingLinks: [
+          { title: 'Formation AWS - A Cloud Guru', url: 'https://www.google.com/search?q=formation+AWS+A+Cloud+Guru' },
+          { title: 'CPF formations éligibles', url: 'https://www.google.com/search?q=formation+AWS+CPF+éligible' }
+        ]
+      }
     }
   },
   {
@@ -412,7 +668,39 @@ const PROFESSIONAL_TEMPLATES = [
         { id: '2', name: 'Fonctionnalités' },
         { id: '3', name: 'Intégrations' },
         { id: '4', name: 'Prix' }
-      ]
+      ],
+      result: {
+        recommendation: 'Notion',
+        description: 'Notion offre la flexibilité ultime pour créer un workspace personnalisé qui s\'adapte parfaitement aux besoins spécifiques de votre équipe.',
+        breakdown: [
+          {
+            option: 'Notion',
+            score: 8.8,
+            pros: ['Très flexible et personnalisable', 'Tout-en-un (wiki, tâches, docs)', 'Interface moderne', 'Plan gratuit généreux'],
+            cons: ['Courbe d\'apprentissage', 'Performance parfois lente']
+          },
+          {
+            option: 'Monday.com',
+            score: 8.3,
+            pros: ['Interface très intuitive', 'Automatisations puissantes', 'Vues multiples', 'Support client excellent'],
+            cons: ['Prix élevé', 'Complexité pour projets simples']
+          },
+          {
+            option: 'Trello',
+            score: 7.4,
+            pros: ['Simplicité maximale', 'Prise en main immédiate', 'Prix abordable', 'Power-ups utiles'],
+            cons: ['Fonctionnalités limitées', 'Pas adapté projets complexes']
+          }
+        ],
+        infoLinks: [
+          { title: 'Comparatif outils gestion projet', url: 'https://www.google.com/search?q=comparatif+outils+gestion+projet+2024' },
+          { title: 'Guide Notion pour équipes', url: 'https://www.google.com/search?q=Notion+guide+gestion+équipe' }
+        ],
+        shoppingLinks: [
+          { title: 'Notion - Plans tarifs', url: 'https://www.google.com/search?q=Notion+tarifs+équipe+entreprise' },
+          { title: 'Monday.com - Essai gratuit', url: 'https://www.google.com/search?q=Monday.com+essai+gratuit' }
+        ]
+      }
     }
   },
   {
@@ -429,7 +717,39 @@ const PROFESSIONAL_TEMPLATES = [
         { id: '2', name: 'Audience cible' },
         { id: '3', name: 'Canaux efficaces' },
         { id: '4', name: 'Mesurabilité' }
-      ]
+      ],
+      result: {
+        recommendation: 'Marketing digital ciblé + Content marketing',
+        description: 'Une approche combinant publicités digitales ciblées et création de contenu de valeur offre le meilleur ROI pour un lancement produit moderne.',
+        breakdown: [
+          {
+            option: 'Marketing digital + Content',
+            score: 9.1,
+            pros: ['Ciblage précis', 'Mesurable en temps réel', 'Coût maîtrisé', 'Scalable rapidement'],
+            cons: ['Concurrence forte', 'Expertise technique requise']
+          },
+          {
+            option: 'Influenceurs + Relations presse',
+            score: 8.0,
+            pros: ['Crédibilité élevée', 'Reach important', 'Engagement authentique', 'Buzz potentiel'],
+            cons: ['Coût imprévisible', 'Contrôle limité du message']
+          },
+          {
+            option: 'Événements + Networking',
+            score: 7.2,
+            pros: ['Contact direct prospects', 'Démonstration produit', 'Feedback immédiat', 'Relations durables'],
+            cons: ['Reach limité', 'Organisation complexe', 'ROI difficile à mesurer']
+          }
+        ],
+        infoLinks: [
+          { title: 'Guide marketing digital startup', url: 'https://www.google.com/search?q=guide+marketing+digital+startup+lancement' },
+          { title: 'Stratégies content marketing', url: 'https://www.google.com/search?q=stratégie+content+marketing+efficace' }
+        ],
+        shoppingLinks: [
+          { title: 'Google Ads - Démarrer', url: 'https://www.google.com/search?q=Google+Ads+créer+campagne' },
+          { title: 'Facebook Business - Publicités', url: 'https://www.google.com/search?q=Facebook+Ads+Manager+création' }
+        ]
+      }
     }
   },
   {
@@ -446,7 +766,39 @@ const PROFESSIONAL_TEMPLATES = [
         { id: '2', name: 'Prix' },
         { id: '3', name: 'Fiabilité' },
         { id: '4', name: 'Support client' }
-      ]
+      ],
+      result: {
+        recommendation: 'Fournisseur établi avec historique prouvé',
+        description: 'Privilégier un fournisseur avec un track record solide et un support réactif, même si légèrement plus cher, garantit la continuité d\'activité.',
+        breakdown: [
+          {
+            option: 'Fournisseur établi premium',
+            score: 8.6,
+            pros: ['Fiabilité éprouvée', 'Support 24/7', 'SLA garantis', 'Références solides'],
+            cons: ['Prix plus élevé', 'Moins de flexibilité']
+          },
+          {
+            option: 'Startup innovante',
+            score: 7.8,
+            pros: ['Prix compétitifs', 'Innovation rapide', 'Flexibilité maximale', 'Attention personnalisée'],
+            cons: ['Risque de discontinuité', 'Support limité', 'Processus instables']
+          },
+          {
+            option: 'Solution low-cost',
+            score: 6.4,
+            pros: ['Prix très attractif', 'Économies importantes', 'Simplicité', 'Pas d\'engagement long'],
+            cons: ['Qualité variable', 'Support minimal', 'Risques cachés']
+          }
+        ],
+        infoLinks: [
+          { title: 'Évaluer un fournisseur B2B', url: 'https://www.google.com/search?q=évaluer+fournisseur+entreprise+critères' },
+          { title: 'Due diligence fournisseurs', url: 'https://www.google.com/search?q=due+diligence+sélection+fournisseur' }
+        ],
+        shoppingLinks: [
+          { title: 'Annuaire fournisseurs B2B', url: 'https://www.google.com/search?q=annuaire+fournisseurs+professionnels' },
+          { title: 'Comparateur solutions B2B', url: 'https://www.google.com/search?q=comparateur+solutions+entreprise' }
+        ]
+      }
     }
   },
   {
@@ -463,7 +815,39 @@ const PROFESSIONAL_TEMPLATES = [
         { id: '2', name: 'Coût' },
         { id: '3', name: 'Collaboration' },
         { id: '4', name: 'Équilibre vie privée' }
-      ]
+      ],
+      result: {
+        recommendation: 'Hybride : Télétravail + Coworking',
+        description: 'Un modèle hybride combinant télétravail 3 jours et coworking 2 jours offre flexibilité, économies et opportunités de networking.',
+        breakdown: [
+          {
+            option: 'Hybride télétravail + coworking',
+            score: 9.0,
+            pros: ['Flexibilité maximale', 'Coûts optimisés', 'Networking opportunités', 'Équilibre parfait'],
+            cons: ['Organisation requise', 'Double équipement']
+          },
+          {
+            option: 'Télétravail 100%',
+            score: 8.1,
+            pros: ['Économies maximales', 'Pas de transport', 'Environnement personnalisé', 'Horaires flexibles'],
+            cons: ['Isolement social', 'Distractions domestiques', 'Séparation vie pro/perso']
+          },
+          {
+            option: 'Bureau traditionnel',
+            score: 7.3,
+            pros: ['Collaboration naturelle', 'Séparation claire', 'Équipement fourni', 'Cadre professionnel'],
+            cons: ['Coût élevé', 'Transport quotidien', 'Rigidité horaires']
+          }
+        ],
+        infoLinks: [
+          { title: 'Guide télétravail efficace', url: 'https://www.google.com/search?q=guide+télétravail+productivité+organisation' },
+          { title: 'Espaces coworking près de chez vous', url: 'https://www.google.com/search?q=espaces+coworking+Paris+tarifs' }
+        ],
+        shoppingLinks: [
+          { title: 'WeWork - Espaces flex', url: 'https://www.google.com/search?q=WeWork+abonnement+coworking' },
+          { title: 'Équipement bureau maison', url: 'https://www.google.com/search?q=équipement+bureau+télétravail' }
+        ]
+      }
     }
   },
   {
@@ -480,7 +864,39 @@ const PROFESSIONAL_TEMPLATES = [
         { id: '2', name: 'Impact sur la croissance' },
         { id: '3', name: 'Risque' },
         { id: '4', name: 'Urgence' }
-      ]
+      ],
+      result: {
+        recommendation: 'Acquisition clients + Automatisation',
+        description: 'Investir simultanément dans l\'acquisition de nouveaux clients et l\'automatisation des processus génère une croissance durable et efficace.',
+        breakdown: [
+          {
+            option: 'Acquisition clients + Automatisation',
+            score: 9.2,
+            pros: ['ROI mesurable rapidement', 'Croissance scalable', 'Efficacité opérationnelle', 'Avantage concurrentiel'],
+            cons: ['Investissement initial important', 'Courbe d\'apprentissage']
+          },
+          {
+            option: 'Recrutement équipe senior',
+            score: 8.4,
+            pros: ['Expertise immédiate', 'Accélération développement', 'Amélioration qualité', 'Leadership renforcé'],
+            cons: ['Coût récurrent élevé', 'Risque de départ', 'Intégration complexe']
+          },
+          {
+            option: 'R&D nouveaux produits',
+            score: 7.6,
+            pros: ['Innovation competitive', 'Nouveaux marchés', 'Valeur ajoutée', 'Différenciation'],
+            cons: ['ROI incertain', 'Délais longs', 'Risque d\'échec élevé']
+          }
+        ],
+        infoLinks: [
+          { title: 'Stratégies acquisition clients', url: 'https://www.google.com/search?q=stratégie+acquisition+clients+startup' },
+          { title: 'ROI automatisation entreprise', url: 'https://www.google.com/search?q=ROI+automatisation+processus+entreprise' }
+        ],
+        shoppingLinks: [
+          { title: 'Outils marketing automation', url: 'https://www.google.com/search?q=outils+marketing+automation+HubSpot' },
+          { title: 'Consultant stratégie croissance', url: 'https://www.google.com/search?q=consultant+stratégie+croissance+entreprise' }
+        ]
+      }
     }
   },
   {
@@ -497,7 +913,39 @@ const PROFESSIONAL_TEMPLATES = [
         { id: '2', name: 'Fit culturel' },
         { id: '3', name: 'Expérience' },
         { id: '4', name: 'Potentiel d\'évolution' }
-      ]
+      ],
+      result: {
+        recommendation: 'Candidat junior avec fort potentiel',
+        description: 'Le candidat junior montre une excellente adaptation culturelle et un potentiel d\'évolution exceptionnel, compensant son manque d\'expérience.',
+        breakdown: [
+          {
+            option: 'Candidat junior fort potentiel',
+            score: 8.7,
+            pros: ['Excellent fit culturel', 'Motivation exceptionnelle', 'Capacité d\'apprentissage', 'Coût modéré'],
+            cons: ['Besoin de formation', 'Montée en compétence progressive']
+          },
+          {
+            option: 'Expert technique senior',
+            score: 8.1,
+            pros: ['Compétences immédiatement opérationnelles', 'Mentoring équipe', 'Résolution problèmes complexes', 'Crédibilité externe'],
+            cons: ['Coût élevé', 'Risque de sur-qualification', 'Adaptation culturelle incertaine']
+          },
+          {
+            option: 'Profil expérimenté équilibré',
+            score: 7.5,
+            pros: ['Bon équilibre compétences/coût', 'Expérience variée', 'Autonomie rapidement', 'Références solides'],
+            cons: ['Moins de potentiel disruptif', 'Motivation standard']
+          }
+        ],
+        infoLinks: [
+          { title: 'Guide entretien recrutement', url: 'https://www.google.com/search?q=guide+entretien+recrutement+questions' },
+          { title: 'Évaluation soft skills', url: 'https://www.google.com/search?q=évaluer+soft+skills+candidat' }
+        ],
+        shoppingLinks: [
+          { title: 'Tests techniques recrutement', url: 'https://www.google.com/search?q=tests+techniques+développeur+recrutement' },
+          { title: 'Background check candidats', url: 'https://www.google.com/search?q=vérification+références+candidat' }
+        ]
+      }
     }
   },
   {
@@ -514,7 +962,39 @@ const PROFESSIONAL_TEMPLATES = [
         { id: '2', name: 'Prix concurrence' },
         { id: '3', name: 'Valeur perçue' },
         { id: '4', name: 'Volume de ventes' }
-      ]
+      ],
+      result: {
+        recommendation: 'Pricing par valeur avec freemium',
+        description: 'Une stratégie basée sur la valeur perçue avec une offre freemium permet de maximiser l\'adoption tout en capturant la valeur des clients premium.',
+        breakdown: [
+          {
+            option: 'Pricing par valeur + freemium',
+            score: 9.0,
+            pros: ['Maximise la valeur capturée', 'Adoption large avec freemium', 'Différenciation possible', 'Revenue scalable'],
+            cons: ['Complexité de mise en œuvre', 'Éducation marché nécessaire']
+          },
+          {
+            option: 'Prix concurrentiel agressif',
+            score: 7.8,
+            pros: ['Pénétration marché rapide', 'Volume élevé', 'Barrière à l\'entrée', 'Simplicité'],
+            cons: ['Marges réduites', 'Guerre des prix', 'Positionnement low-cost']
+          },
+          {
+            option: 'Premium positioning',
+            score: 7.2,
+            pros: ['Marges élevées', 'Image de qualité', 'Clients moins sensibles prix', 'Exclusivité'],
+            cons: ['Volume limité', 'Concurrence intense', 'Justification valeur difficile']
+          }
+        ],
+        infoLinks: [
+          { title: 'Stratégies pricing SaaS', url: 'https://www.google.com/search?q=stratégie+pricing+SaaS+freemium' },
+          { title: 'Psychological pricing techniques', url: 'https://www.google.com/search?q=psychological+pricing+techniques+efficaces' }
+        ],
+        shoppingLinks: [
+          { title: 'Outils analyse pricing', url: 'https://www.google.com/search?q=outils+analyse+pricing+produit' },
+          { title: 'A/B testing prix', url: 'https://www.google.com/search?q=A/B+testing+stratégie+prix' }
+        ]
+      }
     }
   }
 ];
