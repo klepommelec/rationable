@@ -88,7 +88,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg text-gray-950 font-medium">Résultat de l'analyse IA</h2>
-                <Trophy className="h-5 w-5 text-yellow-600" />
+                
               </div>
               <p className="text-sm text-muted-foreground">Votre option rationnelle identifiée par l'analyse</p>
             </div>
