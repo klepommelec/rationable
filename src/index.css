@@ -95,17 +95,19 @@
     background-color: #020617; /* slate-950 */
   }
 
-  /* Pulsing glow effect for textarea - subtle gray tones */
+  /* Pulsing glow effect for textarea - subtle gray tones with border color animation */
   @keyframes pulsing-glow {
     0%, 100% {
       box-shadow: 
         0 0 12px rgba(148, 163, 184, 0.15),
         0 0 24px rgba(148, 163, 184, 0.08);
+      border-color: hsl(214.3 31.8% 91.4%);
     }
     50% {
       box-shadow: 
         0 0 16px rgba(148, 163, 184, 0.2),
         0 0 32px rgba(148, 163, 184, 0.1);
+      border-color: hsl(214.3 31.8% 87%);
     }
   }
 
@@ -114,11 +116,13 @@
       box-shadow: 
         0 0 12px rgba(71, 85, 105, 0.2),
         0 0 24px rgba(71, 85, 105, 0.1);
+      border-color: hsl(217.2 32.6% 17.5%);
     }
     50% {
       box-shadow: 
         0 0 16px rgba(71, 85, 105, 0.3),
         0 0 32px rgba(71, 85, 105, 0.15);
+      border-color: hsl(217.2 32.6% 22%);
     }
   }
 
@@ -127,17 +131,19 @@
       box-shadow: 
         0 0 14px rgba(34, 197, 94, 0.3),
         0 0 28px rgba(34, 197, 94, 0.15);
+      border-color: hsl(142 69% 58%);
     }
     50% {
       box-shadow: 
         0 0 20px rgba(34, 197, 94, 0.5),
         0 0 40px rgba(34, 197, 94, 0.25);
+      border-color: hsl(142 69% 65%);
     }
   }
 
   .pulsing-glow {
     animation: pulsing-glow 3s ease-in-out infinite;
-    will-change: box-shadow;
+    will-change: box-shadow, border-color;
     transform: translateZ(0); /* GPU acceleration */
   }
 
@@ -166,12 +172,14 @@
       box-shadow: 
         0 0 6px rgba(148, 163, 184, 0.1),
         0 0 12px rgba(148, 163, 184, 0.05);
+      border-color: hsl(var(--border));
     }
     
     .dark .pulsing-glow {
       box-shadow: 
         0 0 6px rgba(71, 85, 105, 0.2),
         0 0 12px rgba(71, 85, 105, 0.1);
+      border-color: hsl(var(--border));
     }
   }
 
