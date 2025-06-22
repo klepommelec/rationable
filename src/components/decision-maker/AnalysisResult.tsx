@@ -10,6 +10,7 @@ import { EnhancedRadarChart } from './EnhancedRadarChart';
 import { MetricsVisual } from './MetricsVisual';
 import { ExportMenu } from '../ExportMenu';
 import { DecisionImage } from './DecisionImage';
+import ValidatedLink from '../ValidatedLink';
 
 interface AnalysisResultProps {
   result: IResult | null;
@@ -164,6 +165,53 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </div>
         </CardContent>
       </Card>
+
+      {/* Liens utiles */}
+      {((result.infoLinks && result.infoLinks.length > 0) || 
+        (result.shoppingLinks && result.shoppingLinks.length > 0)) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              📚 Liens utiles
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-6">
+              {result.infoLinks && result.infoLinks.length > 0 && (
+                <div>
+                  <h4 className="font-medium mb-3">📚 Ressources d'information</h4>
+                  <div className="space-y-2">
+                    {result.infoLinks.map((link, index) => (
+                      <ValidatedLink
+                        key={index}
+                        link={link}
+                        fallbackSearchQuery={dilemma}
+                        className="block p-2 rounded border hover:bg-muted text-sm"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {result.shoppingLinks && result.shoppingLinks.length > 0 && (
+                <div>
+                  <h4 className="font-medium mb-3">🛒 Liens d'achat</h4>
+                  <div className="space-y-2">
+                    {result.shoppingLinks.map((link, index) => (
+                      <ValidatedLink
+                        key={index}
+                        link={link}
+                        fallbackSearchQuery={`acheter ${result.recommendation}`}
+                        className="block p-2 rounded border hover:bg-muted text-sm"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

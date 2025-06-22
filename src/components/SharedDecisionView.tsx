@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -123,7 +122,7 @@ const SharedDecisionView: React.FC = () => {
       {/* Recommendation */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-xl text-green-600">✅ Recommandation</CardTitle>
+          <CardTitle className="text-xl text-green-600 dark:text-green-400">✅ Recommandation</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-lg font-semibold mb-2">{decision.result.recommendation}</p>
@@ -168,7 +167,7 @@ const SharedDecisionView: React.FC = () => {
                   
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <h5 className="text-sm font-medium text-green-600 mb-2">✅ Avantages</h5>
+                      <h5 className="text-sm font-medium text-green-600 dark:text-green-400 mb-2">✅ Avantages</h5>
                       <ul className="text-sm space-y-1">
                         {item.pros.map((pro, idx) => (
                           <li key={idx} className="text-muted-foreground">• {pro}</li>
@@ -177,7 +176,7 @@ const SharedDecisionView: React.FC = () => {
                     </div>
                     
                     <div>
-                      <h5 className="text-sm font-medium text-red-600 mb-2">❌ Inconvénients</h5>
+                      <h5 className="text-sm font-medium text-red-600 dark:text-red-400 mb-2">❌ Inconvénients</h5>
                       <ul className="text-sm space-y-1">
                         {item.cons.map((con, idx) => (
                           <li key={idx} className="text-muted-foreground">• {con}</li>
