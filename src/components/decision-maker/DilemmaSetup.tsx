@@ -9,30 +9,31 @@ import MainActionButton from './MainActionButton';
 import { UploadedFile } from '../FileUpload';
 import { IDecision } from '@/types/decision';
 import { toast } from "sonner";
-
 interface DilemmaSetupProps {
+  dilemma: string;
+  setDilemma: (dilemma: string) => void;
+  analysisStep: 'idle' | 'loading-criteria' | 'criteria-loaded' | 'loading-options' | 'done';
+  isLoading: boolean;
+  isUpdating: boolean;
+  applyTemplate: (template: any) => void;
+  clearSession: () => void;
+  history: IDecision[];
+  loadDecision: (id: string) => void;
+  deleteDecision: (id: string) => void;
+  clearHistory: () => void;
+  handleStartAnalysis: () => void;
+  progress: number;
+  progressMessage: string;
+  templates: {
+    name: string;
     dilemma: string;
-    setDilemma: (dilemma: string) => void;
-    analysisStep: 'idle' | 'loading-criteria' | 'criteria-loaded' | 'loading-options' | 'done';
-    isLoading: boolean;
-    isUpdating: boolean;
-    applyTemplate: (template: any) => void;
-    clearSession: () => void;
-    history: IDecision[];
-    loadDecision: (id: string) => void;
-    deleteDecision: (id: string) => void;
-    clearHistory: () => void;
-    handleStartAnalysis: () => void;
-    progress: number;
-    progressMessage: string;
-    templates: { name: string; dilemma: string; }[];
-    selectedCategory?: string;
-    onCategoryChange: (categoryId: string | undefined) => void;
-    onUpdateCategory: (decisionId: string, categoryId: string | undefined) => void;
-    uploadedFiles: UploadedFile[];
-    setUploadedFiles: (files: UploadedFile[]) => void;
+  }[];
+  selectedCategory?: string;
+  onCategoryChange: (categoryId: string | undefined) => void;
+  onUpdateCategory: (decisionId: string, categoryId: string | undefined) => void;
+  uploadedFiles: UploadedFile[];
+  setUploadedFiles: (files: UploadedFile[]) => void;
 }
-
 const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   dilemma,
   setDilemma,
@@ -55,147 +56,119 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   uploadedFiles,
   setUploadedFiles
 }) => {
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [isDragOver, setIsDragOver] = useState(false);
-    
-    // Afficher seulement les 3 premiers modèles
-    const displayedTemplates = templates.slice(0, 3);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
-    // Placeholders animés pour le textarea
-    const placeholders = [
-        "Ex: Quel framework JS devrais-je apprendre en 2025 ?",
-        "Ex: Dois-je changer de carrière professionnelle ?",
-        "Ex: Quelle ville choisir pour mes études ?",
-        "Ex: Investir en bourse ou dans l'immobilier ?",
-        "Ex: Partir en voyage ou économiser de l'argent ?",
-        "Ex: Accepter cette offre d'emploi ou continuer à chercher ?"
-    ];
+  // Afficher seulement les 3 premiers modèles
+  const displayedTemplates = templates.slice(0, 3);
 
-    const handleTemplateClick = (template: { name: string; dilemma: string; }) => {
-        console.log('Template clicked:', template);
-        setDilemma(template.dilemma);
-        applyTemplate(template);
-    };
+  // Placeholders animés pour le textarea
+  const placeholders = ["Ex: Quel framework JS devrais-je apprendre en 2025 ?", "Ex: Dois-je changer de carrière professionnelle ?", "Ex: Quelle ville choisir pour mes études ?", "Ex: Investir en bourse ou dans l'immobilier ?", "Ex: Partir en voyage ou économiser de l'argent ?", "Ex: Accepter cette offre d'emploi ou continuer à chercher ?"];
+  const handleTemplateClick = (template: {
+    name: string;
+    dilemma: string;
+  }) => {
+    console.log('Template clicked:', template);
+    setDilemma(template.dilemma);
+    applyTemplate(template);
+  };
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+  const processFiles = (files: FileList) => {
+    const newFiles: UploadedFile[] = Array.from(files).map(file => {
+      // Validation de la taille (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`Le fichier ${file.name} est trop volumineux (max 10MB)`);
+        return null;
+      }
+      let fileType: 'pdf' | 'image' | 'other' = 'other';
+      let preview: string | undefined;
+      if (file.type.startsWith('image/')) {
+        fileType = 'image';
+        preview = URL.createObjectURL(file);
+      } else if (file.type === 'application/pdf') {
+        fileType = 'pdf';
+      }
+      return {
+        id: crypto.randomUUID(),
+        file,
+        preview,
+        type: fileType
+      };
+    }).filter(Boolean) as UploadedFile[];
+    setUploadedFiles([...uploadedFiles, ...newFiles]);
+    if (newFiles.length > 0) {
+      toast.success(`${newFiles.length} fichier(s) ajouté(s)`);
+    }
+  };
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+    processFiles(files);
 
-    const handleFileButtonClick = () => {
-        fileInputRef.current?.click();
-    };
+    // Reset l'input pour permettre de sélectionner le même fichier à nouveau
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isLoading && !isUpdating && analysisStep !== 'done') {
+      setIsDragOver(true);
+    }
+  };
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    if (isLoading || isUpdating || analysisStep === 'done') return;
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      processFiles(files);
+    }
+  };
+  const removeFile = (fileId: string) => {
+    const updatedFiles = uploadedFiles.filter(f => f.id !== fileId);
+    setUploadedFiles(updatedFiles);
 
-    const processFiles = (files: FileList) => {
-        const newFiles: UploadedFile[] = Array.from(files).map(file => {
-            // Validation de la taille (10MB max)
-            if (file.size > 10 * 1024 * 1024) {
-                toast.error(`Le fichier ${file.name} est trop volumineux (max 10MB)`);
-                return null;
-            }
-
-            let fileType: 'pdf' | 'image' | 'other' = 'other';
-            let preview: string | undefined;
-            
-            if (file.type.startsWith('image/')) {
-                fileType = 'image';
-                preview = URL.createObjectURL(file);
-            } else if (file.type === 'application/pdf') {
-                fileType = 'pdf';
-            }
-
-            return {
-                id: crypto.randomUUID(),
-                file,
-                preview,
-                type: fileType
-            };
-        }).filter(Boolean) as UploadedFile[];
-
-        setUploadedFiles([...uploadedFiles, ...newFiles]);
-        
-        if (newFiles.length > 0) {
-            toast.success(`${newFiles.length} fichier(s) ajouté(s)`);
-        }
-    };
-
-    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
-        if (!files) return;
-
-        processFiles(files);
-        
-        // Reset l'input pour permettre de sélectionner le même fichier à nouveau
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
-    };
-
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!isLoading && !isUpdating && analysisStep !== 'done') {
-            setIsDragOver(true);
-        }
-    };
-
-    const handleDragLeave = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragOver(false);
-    };
-
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragOver(false);
-
-        if (isLoading || isUpdating || analysisStep === 'done') return;
-
-        const files = e.dataTransfer.files;
-        if (files && files.length > 0) {
-            processFiles(files);
-        }
-    };
-
-    const removeFile = (fileId: string) => {
-        const updatedFiles = uploadedFiles.filter(f => f.id !== fileId);
-        setUploadedFiles(updatedFiles);
-        
-        // Nettoyer les URLs de preview
-        const fileToRemove = uploadedFiles.find(f => f.id === fileId);
-        if (fileToRemove?.preview) {
-            URL.revokeObjectURL(fileToRemove.preview);
-        }
-    };
-
-    const getFileIcon = (type: string) => {
-        switch (type) {
-            case 'pdf':
-                return <FileText className="h-4 w-4 text-red-500" />;
-            case 'image':
-                return <Image className="h-4 w-4 text-blue-500" />;
-            default:
-                return <FileText className="h-4 w-4 text-gray-500" />;
-        }
-    };
-
-    const formatFileSize = (bytes: number) => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    };
-
-    const isMainButtonDisabled = dilemma.trim() === '' || isLoading;
-
-    return (
-        <div className="max-w-4xl mx-auto space-y-6">
+    // Nettoyer les URLs de preview
+    const fileToRemove = uploadedFiles.find(f => f.id === fileId);
+    if (fileToRemove?.preview) {
+      URL.revokeObjectURL(fileToRemove.preview);
+    }
+  };
+  const getFileIcon = (type: string) => {
+    switch (type) {
+      case 'pdf':
+        return <FileText className="h-4 w-4 text-red-500" />;
+      case 'image':
+        return <Image className="h-4 w-4 text-blue-500" />;
+      default:
+        return <FileText className="h-4 w-4 text-gray-500" />;
+    }
+  };
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+  const isMainButtonDisabled = dilemma.trim() === '' || isLoading;
+  return <div className="max-w-4xl mx-auto space-y-6">
             {/* Header principal occupant 72% de la hauteur de l'écran */}
             <div className="h-[72vh] flex items-center justify-center">
-                <Card className="backdrop-blur-sm relative w-full max-w-3xl">
+                <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none ">
                     <CardHeader className="text-center pt-12 px-4 sm:px-6">
                         <div className="flex justify-center items-center mb-4">
-                            <BrainCircuit 
-                                className="h-10 w-10 sm:h-12 sm:w-12 text-cyan-400" 
-                                aria-hidden="true"
-                            />
+                            <BrainCircuit className="h-10 w-10 sm:h-12 sm:w-12 text-cyan-400" aria-hidden="true" />
                         </div>
                         <CardTitle className="text-2xl sm:text-3xl lg:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-slate-400">
                             Assistant de Décision IA
@@ -206,84 +179,36 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     </CardHeader>
                     <CardContent className="space-y-6 px-4 sm:px-6">
                         <div className="space-y-2">
-                            <label 
-                                htmlFor="dilemma-input"
-                                className="font-medium text-sm sm:text-base"
-                            >
+                            <label htmlFor="dilemma-input" className="font-medium text-sm sm:text-base">
                                 Votre dilemme
                             </label>
                             <div className="relative">
-                                <Textarea
-                                    id="dilemma-input"
-                                    placeholder=""
-                                    value={dilemma}
-                                    onChange={(e) => setDilemma(e.target.value)}
-                                    onDragOver={handleDragOver}
-                                    onDragLeave={handleDragLeave}
-                                    onDrop={handleDrop}
-                                    className={`focus:ring-cyan-500 text-base md:text-sm h-[160px] resize-none pr-20 transition-colors ${
-                                        isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed' : ''
-                                    }`}
-                                    disabled={isLoading || isUpdating || analysisStep === 'done'}
-                                    aria-describedby="dilemma-help"
-                                    aria-invalid={dilemma.trim() === '' ? 'true' : 'false'}
-                                />
-                                {dilemma === '' && !isDragOver && (
-                                    <div className="absolute top-3 left-3 pointer-events-none">
+                                <Textarea id="dilemma-input" placeholder="" value={dilemma} onChange={e => setDilemma(e.target.value)} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`focus:ring-cyan-500 text-base md:text-sm h-[160px] resize-none pr-20 transition-colors ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
+                                {dilemma === '' && !isDragOver && <div className="absolute top-3 left-3 pointer-events-none">
                                         <span className="text-muted-foreground text-base md:text-sm">
-                                            <AnimatedPlaceholder 
-                                                placeholders={placeholders}
-                                                interval={2500}
-                                            />
+                                            <AnimatedPlaceholder placeholders={placeholders} interval={2500} />
                                         </span>
-                                    </div>
-                                )}
-                                {isDragOver && (
-                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    </div>}
+                                {isDragOver && <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                         <div className="text-primary font-medium">
                                             Déposez vos fichiers ici
                                         </div>
-                                    </div>
-                                )}
+                                    </div>}
                                 {/* Boutons d'action à droite */}
                                 <div className="absolute bottom-3 right-3 flex gap-1">
                                     {/* Bouton d'attachement de fichier */}
-                                    <button
-                                        type="button"
-                                        onClick={handleFileButtonClick}
-                                        disabled={isLoading || isUpdating || analysisStep === 'done'}
-                                        className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        aria-label="Joindre un fichier"
-                                        title="Joindre un fichier"
-                                    >
+                                    <button type="button" onClick={handleFileButtonClick} disabled={isLoading || isUpdating || analysisStep === 'done'} className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Joindre un fichier" title="Joindre un fichier">
                                         <Paperclip className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                                     </button>
                                     
                                     {/* Bouton d'analyse */}
-                                    {analysisStep === 'idle' && (
-                                        <button
-                                            type="button"
-                                            onClick={handleStartAnalysis}
-                                            disabled={isMainButtonDisabled}
-                                            className="p-2 rounded-md bg-cyan-500 hover:bg-cyan-600 text-slate-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                            aria-label="Lancer l'analyse"
-                                            title="Lancer l'analyse"
-                                        >
+                                    {analysisStep === 'idle' && <button type="button" onClick={handleStartAnalysis} disabled={isMainButtonDisabled} className="p-2 rounded-md bg-cyan-500 hover:bg-cyan-600 text-slate-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Lancer l'analyse" title="Lancer l'analyse">
                                             <ArrowRight className="h-4 w-4" />
-                                        </button>
-                                    )}
+                                        </button>}
                                 </div>
                                 
                                 {/* Input file caché */}
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    multiple
-                                    accept="image/*,.pdf,.doc,.docx,.txt"
-                                    onChange={handleFileSelect}
-                                    className="hidden"
-                                    aria-hidden="true"
-                                />
+                                <input ref={fileInputRef} type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt" onChange={handleFileSelect} className="hidden" aria-hidden="true" />
                             </div>
                             <p id="dilemma-help" className="sr-only">
                                 Décrivez le problème ou la décision que vous devez prendre. Vous pouvez aussi glisser-déposer des documents directement dans cette zone.
@@ -291,14 +216,12 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         </div>
 
                         {/* Liste des fichiers uploadés */}
-                        {uploadedFiles.length > 0 && (
-                            <div className="space-y-2">
+                        {uploadedFiles.length > 0 && <div className="space-y-2">
                                 <label className="font-medium text-sm sm:text-base">
                                     Documents joints ({uploadedFiles.length})
                                 </label>
                                 <div className="space-y-2 max-h-32 overflow-y-auto">
-                                    {uploadedFiles.map((uploadedFile) => (
-                                        <Card key={uploadedFile.id} className="p-3">
+                                    {uploadedFiles.map(uploadedFile => <Card key={uploadedFile.id} className="p-3">
                                             <div className="flex items-center gap-3">
                                                 {getFileIcon(uploadedFile.type)}
                                                 <div className="flex-1 min-w-0">
@@ -307,58 +230,28 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                                         {formatFileSize(uploadedFile.file.size)}
                                                     </p>
                                                 </div>
-                                                {uploadedFile.preview && (
-                                                    <img 
-                                                        src={uploadedFile.preview} 
-                                                        alt="Preview" 
-                                                        className="h-10 w-10 object-cover rounded"
-                                                    />
-                                                )}
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => removeFile(uploadedFile.id)}
-                                                    disabled={isLoading || isUpdating || analysisStep === 'done'}
-                                                    className="text-muted-foreground hover:text-destructive"
-                                                >
+                                                {uploadedFile.preview && <img src={uploadedFile.preview} alt="Preview" className="h-10 w-10 object-cover rounded" />}
+                                                <Button variant="ghost" size="sm" onClick={() => removeFile(uploadedFile.id)} disabled={isLoading || isUpdating || analysisStep === 'done'} className="text-muted-foreground hover:text-destructive">
                                                     <X className="h-4 w-4" />
                                                 </Button>
                                             </div>
-                                        </Card>
-                                    ))}
+                                        </Card>)}
                                 </div>
-                            </div>
-                        )}
+                            </div>}
 
                         <div className="space-y-3">
                             <label className="font-medium text-sm sm:text-base">
                                 Ou utilisez un modèle
                             </label>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                {displayedTemplates.map(template => (
-                                    <Button 
-                                        key={template.name} 
-                                        variant="outline" 
-                                        size="sm" 
-                                        onClick={() => handleTemplateClick(template)} 
-                                        disabled={isLoading || isUpdating || analysisStep !== 'idle'}
-                                        className="text-xs sm:text-sm justify-start h-auto py-3 px-3 whitespace-normal text-left"
-                                        aria-label={`Utiliser le modèle: ${template.name}`}
-                                    >
+                                {displayedTemplates.map(template => <Button key={template.name} variant="outline" size="sm" onClick={() => handleTemplateClick(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="text-xs sm:text-sm justify-start h-auto py-3 px-3 whitespace-normal text-left" aria-label={`Utiliser le modèle: ${template.name}`}>
                                         <span className="truncate">{template.name}</span>
-                                    </Button>
-                                ))}
+                                    </Button>)}
                             </div>
                         </div>
                     </CardContent>
                     <CardFooter className="flex flex-col gap-4 px-4 sm:px-6">
-                        <MainActionButton
-                            analysisStep={analysisStep}
-                            handleStartAnalysis={handleStartAnalysis}
-                            isMainButtonDisabled={isMainButtonDisabled}
-                            progress={progress}
-                            progressMessage={progressMessage}
-                        />
+                        <MainActionButton analysisStep={analysisStep} handleStartAnalysis={handleStartAnalysis} isMainButtonDisabled={isMainButtonDisabled} progress={progress} progressMessage={progressMessage} />
                     </CardFooter>
                 </Card>
             </div>
@@ -372,18 +265,9 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
-                    <DecisionHistory 
-                        history={history}
-                        onLoad={loadDecision}
-                        onDelete={deleteDecision}
-                        onClear={clearHistory}
-                        onClose={() => {}}
-                        onUpdateCategory={onUpdateCategory}
-                    />
+                    <DecisionHistory history={history} onLoad={loadDecision} onDelete={deleteDecision} onClear={clearHistory} onClose={() => {}} onUpdateCategory={onUpdateCategory} />
                 </CardContent>
             </Card>
-        </div>
-    );
+        </div>;
 };
-
 export default DilemmaSetup;
