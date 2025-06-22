@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -83,11 +84,24 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
         const files = event.target.files;
         if (!files) return;
 
-        const newFiles: UploadedFile[] = Array.from(files).map(file => ({
-            id: crypto.randomUUID(),
-            file,
-            preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined
-        }));
+        const newFiles: UploadedFile[] = Array.from(files).map(file => {
+            let fileType: 'pdf' | 'image' | 'other' = 'other';
+            let preview: string | undefined;
+            
+            if (file.type.startsWith('image/')) {
+                fileType = 'image';
+                preview = URL.createObjectURL(file);
+            } else if (file.type === 'application/pdf') {
+                fileType = 'pdf';
+            }
+
+            return {
+                id: crypto.randomUUID(),
+                file,
+                preview,
+                type: fileType
+            };
+        });
 
         setUploadedFiles([...uploadedFiles, ...newFiles]);
         
