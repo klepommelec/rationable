@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -71,9 +72,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     return (
         <div className="max-w-4xl mx-auto space-y-6">
             <Card className="backdrop-blur-sm relative">
-                <div className="absolute top-4 right-4 z-10">
-                    <ThemeToggle />
-                </div>
                 <CardHeader className="text-center pt-12 px-4 sm:px-6">
                     <div className="flex justify-center items-center mb-4">
                         <BrainCircuit 
