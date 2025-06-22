@@ -564,14 +564,15 @@ const CommunityTemplates = () => {
   const handleCopyTemplate = async (template: CommunityTemplate) => {
     setCopying(template.id);
     try {
+      console.log('🔄 Copying community template:', template.title);
+      
       // Copy the template data to the decision maker with full analysis
       clearSession();
-      setDilemma(template.decision_data.dilemma);
-      setCriteria(template.decision_data.criteria);
-      setEmoji(template.decision_data.emoji);
       
       // Si le template a déjà un résultat d'analyse, l'utiliser
       if (template.decision_data.result) {
+        console.log('📋 Template has analysis, creating decision in history');
+        
         // Créer une nouvelle décision dans l'historique
         const newDecision = {
           id: crypto.randomUUID(),
@@ -582,10 +583,26 @@ const CommunityTemplates = () => {
           result: template.decision_data.result,
           category: template.category
         };
+        
+        console.log('💾 Adding decision to history:', newDecision.id);
         addDecision(newDecision);
         
-        // Charger la décision dans l'interface
-        loadDecision(newDecision.id);
+        // Naviguer vers la home page d'abord
+        console.log('🏠 Navigating to home page');
+        navigate('/');
+        
+        // Utiliser un timeout pour s'assurer que la navigation est terminée
+        setTimeout(() => {
+          console.log('🔄 Loading decision after navigation:', newDecision.id);
+          loadDecision(newDecision.id);
+        }, 100);
+      } else {
+        // Si pas de résultat, juste copier les données de base
+        console.log('📝 Template has no analysis, copying basic data');
+        setDilemma(template.decision_data.dilemma);
+        setCriteria(template.decision_data.criteria);
+        setEmoji(template.decision_data.emoji);
+        navigate('/');
       }
       
       // Increment copy count only for real community templates
@@ -593,10 +610,9 @@ const CommunityTemplates = () => {
         await copyTemplate(template.id);
       }
       
-      toast.success(`Template "${template.title}" copié et analysé ! Vous pouvez maintenant le modifier.`);
-      navigate('/');
+      toast.success(`Template "${template.title}" copié avec succès !`);
     } catch (error) {
-      console.error('Error copying template:', error);
+      console.error('❌ Error copying template:', error);
       toast.error("Erreur lors de la copie du template");
     } finally {
       setCopying(null);
@@ -606,12 +622,13 @@ const CommunityTemplates = () => {
   const handleCopyPredefinedTemplate = (template: any) => {
     setCopying(template.id);
     try {
+      console.log('🔄 Copying predefined template:', template.title);
+      
       clearSession();
-      setDilemma(template.decision_data.dilemma);
-      setCriteria(template.decision_data.criteria);
-      setEmoji(template.decision_data.emoji);
       
       if (template.decision_data.result) {
+        console.log('📋 Predefined template has analysis, creating decision in history');
+        
         // Créer une nouvelle décision dans l'historique
         const newDecision = {
           id: crypto.randomUUID(),
@@ -622,16 +639,31 @@ const CommunityTemplates = () => {
           result: template.decision_data.result,
           category: template.category
         };
+        
+        console.log('💾 Adding predefined decision to history:', newDecision.id);
         addDecision(newDecision);
         
-        // Charger la décision dans l'interface
-        loadDecision(newDecision.id);
+        // Naviguer vers la home page d'abord
+        console.log('🏠 Navigating to home page');
+        navigate('/');
+        
+        // Utiliser un timeout pour s'assurer que la navigation est terminée
+        setTimeout(() => {
+          console.log('🔄 Loading predefined decision after navigation:', newDecision.id);
+          loadDecision(newDecision.id);
+        }, 100);
+      } else {
+        // Si pas de résultat, juste copier les données de base
+        console.log('📝 Predefined template has no analysis, copying basic data');
+        setDilemma(template.decision_data.dilemma);
+        setCriteria(template.decision_data.criteria);
+        setEmoji(template.decision_data.emoji);
+        navigate('/');
       }
       
-      toast.success(`Template "${template.title}" copié et analysé ! Vous pouvez maintenant le modifier.`);
-      navigate('/');
+      toast.success(`Template "${template.title}" copié avec succès !`);
     } catch (error) {
-      console.error('Error copying template:', error);
+      console.error('❌ Error copying predefined template:', error);
       toast.error("Erreur lors de la copie du template");
     } finally {
       setCopying(null);
