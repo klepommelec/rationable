@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RotateCcw, BarChart3, Lightbulb, Target, AlertTriangle, TrendingUp } from 'lucide-react';
+import { RotateCcw, BarChart3, Lightbulb, Target, AlertTriangle, TrendingUp, Trophy, Sparkles } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { VisualIndicators } from './VisualIndicators';
 import { EnhancedRadarChart } from './EnhancedRadarChart';
@@ -76,33 +76,85 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
     return insights;
   };
 
+  const cleanOptionName = topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim();
+
   return (
     <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
-      {/* Header with actions and main image */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-            <div className="flex-1 min-w-0">
-              <CardTitle className="text-xl sm:text-2xl mb-2 break-words">
-                Résultat de l'analyse
-              </CardTitle>
-              <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs sm:text-sm inline-flex items-center gap-1 max-w-full">
-                <span className="flex-shrink-0" aria-hidden="true">✅</span>
-                <span className="truncate">
-                  Recommandation: {topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
-                </span>
-              </Badge>
+      {/* Section Recommandation IA améliorée */}
+      <Card className="relative overflow-hidden border-2 border-gradient-to-r from-blue-200 to-purple-200 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950 dark:border-blue-500/30">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-yellow-300/20 to-transparent rounded-bl-full"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-300/20 to-transparent rounded-tr-full"></div>
+        
+        <CardHeader className="relative">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white animate-pulse">
+              <Sparkles className="h-6 w-6" />
             </div>
-            <div className="flex gap-2 flex-wrap justify-end">
-              {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
-              <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm" aria-label="Commencer une nouvelle analyse">
-                <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
-                <span className="hidden sm:inline">Nouvelle analyse</span>
-                <span className="sm:hidden">Nouveau</span>
-              </Button>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-blue-800 dark:text-blue-200">Recommandation IA</h2>
+                <Trophy className="h-5 w-5 text-yellow-600" />
+              </div>
+              <p className="text-sm text-muted-foreground">Option optimale identifiée par l'analyse</p>
             </div>
           </div>
+          
+          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg p-4 border border-blue-200/50 dark:border-blue-700/50">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex-1">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  {cleanOptionName}
+                </h3>
+                <div className="flex items-center gap-4 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Score :</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-1000 ease-out"
+                          style={{ width: `${topOption.score}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-lg font-bold text-green-600 dark:text-green-400">
+                        {topOption.score}/100
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <Badge className={`${confidence.color} border-0`}>
+                    <ConfidenceIcon className="h-3 w-3 mr-1" />
+                    Confiance: {confidence.level}
+                  </Badge>
+                </div>
+              </div>
+              
+              <div className="flex gap-2 flex-wrap justify-end">
+                {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
+                <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm" aria-label="Commencer une nouvelle analyse">
+                  <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
+                  <span className="hidden sm:inline">Nouvelle analyse</span>
+                  <span className="sm:hidden">Nouveau</span>
+                </Button>
+              </div>
+            </div>
+            
+            {result.breakdown.length >= 2 && (() => {
+              const secondBest = result.breakdown
+                .filter(item => item.option !== topOption.option)
+                .reduce((prev, current) => prev.score > current.score ? prev : current);
+              const scoreDifference = topOption.score - secondBest.score;
+              
+              return scoreDifference > 5 && (
+                <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-950/50 rounded-md border border-blue-200 dark:border-blue-800">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    <strong>+{scoreDifference} points</strong> d'avantage sur la deuxième meilleure option
+                  </p>
+                </div>
+              );
+            })()}
+          </div>
         </CardHeader>
+        
         <CardContent>
           <div className="mb-4 flex justify-start">
             <DecisionImage imageQuery={result.imageQuery} alt={`Illustration pour ${result.recommendation}`} size="large" className="max-w-xs" option={topOption.option} dilemma={dilemma} index={0} />
@@ -127,14 +179,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </div>
             
             <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Niveau de confiance :</span>
-                <Badge className={confidence.color}>
-                  <ConfidenceIcon className="h-3 w-3 mr-1" />
-                  {confidence.level}
-                </Badge>
-              </div>
-              
               {result.description && (
                 <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
                   <p className="text-sm text-blue-900">{result.description}</p>
@@ -156,7 +200,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               {topOption && (
                 <div className="p-3 bg-green-50 rounded-lg">
                   <p className="text-sm text-green-900">
-                    <strong>{topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim()}</strong> obtient 
+                    <strong>{cleanOptionName}</strong> obtient 
                     le score le plus élevé ({topOption.score}/100) grâce à ses avantages clés : {topOption.pros.slice(0, 2).join(', ')}.
                   </p>
                 </div>
