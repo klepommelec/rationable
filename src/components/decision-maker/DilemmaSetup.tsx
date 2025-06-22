@@ -9,7 +9,6 @@ import MainActionButton from './MainActionButton';
 import { UploadedFile } from '../FileUpload';
 import { IDecision } from '@/types/decision';
 import { toast } from "sonner";
-
 interface DilemmaSetupProps {
   dilemma: string;
   setDilemma: (dilemma: string) => void;
@@ -65,7 +64,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
 
   // Placeholders animés pour le textarea
   const placeholders = ["Ex: Quel framework JS devrais-je apprendre en 2025 ?", "Ex: Dois-je changer de carrière professionnelle ?", "Ex: Quelle ville choisir pour mes études ?", "Ex: Investir en bourse ou dans l'immobilier ?", "Ex: Partir en voyage ou économiser de l'argent ?", "Ex: Accepter cette offre d'emploi ou continuer à chercher ?"];
-  
   const handleTemplateClick = (template: {
     name: string;
     dilemma: string;
@@ -74,11 +72,9 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     setDilemma(template.dilemma);
     applyTemplate(template);
   };
-  
   const handleFileButtonClick = () => {
     fileInputRef.current?.click();
   };
-  
   const processFiles = (files: FileList) => {
     const newFiles: UploadedFile[] = Array.from(files).map(file => {
       // Validation de la taille (10MB max)
@@ -106,7 +102,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
       toast.success(`${newFiles.length} fichier(s) ajouté(s)`);
     }
   };
-  
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
@@ -117,7 +112,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
       fileInputRef.current.value = '';
     }
   };
-  
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -125,13 +119,11 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
       setIsDragOver(true);
     }
   };
-  
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
   };
-  
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -142,7 +134,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
       processFiles(files);
     }
   };
-  
   const removeFile = (fileId: string) => {
     const updatedFiles = uploadedFiles.filter(f => f.id !== fileId);
     setUploadedFiles(updatedFiles);
@@ -153,7 +144,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
       URL.revokeObjectURL(fileToRemove.preview);
     }
   };
-  
   const getFileIcon = (type: string) => {
     switch (type) {
       case 'pdf':
@@ -164,7 +154,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
         return <FileText className="h-4 w-4 text-gray-500" />;
     }
   };
-  
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -172,13 +161,11 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
-  
   const isMainButtonDisabled = dilemma.trim() === '' || isLoading;
-  
   return <div className="max-w-4xl mx-auto space-y-6">
             {/* Header principal occupant 72% de la hauteur de l'écran */}
             <div className="h-[72vh] flex items-center justify-center">
-                <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none ">
+                <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none shadow-none ">
                     <CardHeader className="text-center pt-12 px-4 sm:px-6">
                         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-slate-400">
                             <div>Vos décisions seront </div>
@@ -192,19 +179,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     <CardContent className="space-y-6 px-4 sm:px-6">
                         <div className="space-y-2">
                             <div className="relative">
-                                <Textarea 
-                                  id="dilemma-input" 
-                                  placeholder="" 
-                                  value={dilemma} 
-                                  onChange={e => setDilemma(e.target.value)} 
-                                  onDragOver={handleDragOver} 
-                                  onDragLeave={handleDragLeave} 
-                                  onDrop={handleDrop} 
-                                  className={`floating-particles focus:ring-cyan-500 text-base md:text-sm h-[160px] resize-none pr-20 transition-colors ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-active' : ''}`} 
-                                  disabled={isLoading || isUpdating || analysisStep === 'done'} 
-                                  aria-describedby="dilemma-help" 
-                                  aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} 
-                                />
+                                <Textarea id="dilemma-input" placeholder="" value={dilemma} onChange={e => setDilemma(e.target.value)} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`floating-particles focus:ring-cyan-500 text-base md:text-sm h-[160px] resize-none pr-20 transition-colors ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-active' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
                                 {dilemma === '' && !isDragOver && <div className="absolute top-3 left-3 pointer-events-none">
                                         <span className="text-muted-foreground text-base md:text-sm">
                                             <AnimatedPlaceholder placeholders={placeholders} interval={2500} />
