@@ -1,14 +1,15 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { BrainCircuit, Paperclip } from 'lucide-react';
+import { BrainCircuit, Paperclip, X, FileText, Image } from 'lucide-react';
 import { DecisionHistory } from '../DecisionHistory';
 import { AnimatedPlaceholder } from '../AnimatedPlaceholder';
 import MainActionButton from './MainActionButton';
-import FileUpload, { UploadedFile } from '../FileUpload';
+import { UploadedFile } from '../FileUpload';
 import { IDecision } from '@/types/decision';
+import { toast } from "sonner";
 
 interface DilemmaSetupProps {
     dilemma: string;
@@ -56,6 +57,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   setUploadedFiles
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isDragOver, setIsDragOver] = useState(false);
     
     // Afficher seulement les 3 premiers modèles
     const displayedTemplates = templates.slice(0, 3);
@@ -80,11 +82,14 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
         fileInputRef.current?.click();
     };
 
-    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
-        if (!files) return;
-
+    const processFiles = (files: FileList) => {
         const newFiles: UploadedFile[] = Array.from(files).map(file => {
+            // Validation de la taille (10MB max)
+            if (file.size > 10 * 1024 * 1024) {
+                toast.error(`Le fichier ${file.name} est trop volumineux (max 10MB)`);
+                return null;
+            }
+
             let fileType: 'pdf' | 'image' | 'other' = 'other';
             let preview: string | undefined;
             
@@ -101,14 +106,82 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                 preview,
                 type: fileType
             };
-        });
+        }).filter(Boolean) as UploadedFile[];
 
         setUploadedFiles([...uploadedFiles, ...newFiles]);
+        
+        if (newFiles.length > 0) {
+            toast.success(`${newFiles.length} fichier(s) ajouté(s)`);
+        }
+    };
+
+    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (!files) return;
+
+        processFiles(files);
         
         // Reset l'input pour permettre de sélectionner le même fichier à nouveau
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!isLoading && !isUpdating && analysisStep !== 'done') {
+            setIsDragOver(true);
+        }
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOver(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOver(false);
+
+        if (isLoading || isUpdating || analysisStep === 'done') return;
+
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+            processFiles(files);
+        }
+    };
+
+    const removeFile = (fileId: string) => {
+        const updatedFiles = uploadedFiles.filter(f => f.id !== fileId);
+        setUploadedFiles(updatedFiles);
+        
+        // Nettoyer les URLs de preview
+        const fileToRemove = uploadedFiles.find(f => f.id === fileId);
+        if (fileToRemove?.preview) {
+            URL.revokeObjectURL(fileToRemove.preview);
+        }
+    };
+
+    const getFileIcon = (type: string) => {
+        switch (type) {
+            case 'pdf':
+                return <FileText className="h-4 w-4 text-red-500" />;
+            case 'image':
+                return <Image className="h-4 w-4 text-blue-500" />;
+            default:
+                return <FileText className="h-4 w-4 text-gray-500" />;
+        }
+    };
+
+    const formatFileSize = (bytes: number) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
     return (
@@ -142,13 +215,18 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 placeholder=""
                                 value={dilemma}
                                 onChange={(e) => setDilemma(e.target.value)}
-                                className="focus:ring-cyan-500 text-base md:text-sm min-h-[100px] resize-none pr-12"
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleDrop}
+                                className={`focus:ring-cyan-500 text-base md:text-sm min-h-[100px] resize-none pr-12 transition-colors ${
+                                    isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed' : ''
+                                }`}
                                 disabled={isLoading || isUpdating || analysisStep === 'done'}
                                 rows={3}
                                 aria-describedby="dilemma-help"
                                 aria-invalid={dilemma.trim() === '' ? 'true' : 'false'}
                             />
-                            {dilemma === '' && (
+                            {dilemma === '' && !isDragOver && (
                                 <div className="absolute top-3 left-3 pointer-events-none">
                                     <span className="text-muted-foreground text-base md:text-sm">
                                         <AnimatedPlaceholder 
@@ -156,6 +234,13 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                             interval={2500}
                                         />
                                     </span>
+                                </div>
+                            )}
+                            {isDragOver && (
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <div className="text-primary font-medium">
+                                        Déposez vos fichiers ici
+                                    </div>
                                 </div>
                             )}
                             {/* Bouton d'attachement de fichier */}
@@ -181,21 +266,49 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                             />
                         </div>
                         <p id="dilemma-help" className="sr-only">
-                            Décrivez le problème ou la décision que vous devez prendre
+                            Décrivez le problème ou la décision que vous devez prendre. Vous pouvez aussi glisser-déposer des documents directement dans cette zone.
                         </p>
                     </div>
 
-                    {/* Composant d'upload de fichiers */}
-                    <div className="space-y-2">
-                        <label className="font-medium text-sm sm:text-base">
-                            Documents joints (optionnel)
-                        </label>
-                        <FileUpload
-                            files={uploadedFiles}
-                            onFilesChange={setUploadedFiles}
-                            disabled={isLoading || isUpdating || analysisStep === 'done'}
-                        />
-                    </div>
+                    {/* Liste des fichiers uploadés */}
+                    {uploadedFiles.length > 0 && (
+                        <div className="space-y-2">
+                            <label className="font-medium text-sm sm:text-base">
+                                Documents joints ({uploadedFiles.length})
+                            </label>
+                            <div className="space-y-2">
+                                {uploadedFiles.map((uploadedFile) => (
+                                    <Card key={uploadedFile.id} className="p-3">
+                                        <div className="flex items-center gap-3">
+                                            {getFileIcon(uploadedFile.type)}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium truncate">{uploadedFile.file.name}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {formatFileSize(uploadedFile.file.size)}
+                                                </p>
+                                            </div>
+                                            {uploadedFile.preview && (
+                                                <img 
+                                                    src={uploadedFile.preview} 
+                                                    alt="Preview" 
+                                                    className="h-10 w-10 object-cover rounded"
+                                                />
+                                            )}
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => removeFile(uploadedFile.id)}
+                                                disabled={isLoading || isUpdating || analysisStep === 'done'}
+                                                className="text-muted-foreground hover:text-destructive"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="space-y-3">
                         <label className="font-medium text-sm sm:text-base">
