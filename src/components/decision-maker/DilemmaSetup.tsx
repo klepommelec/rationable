@@ -178,9 +178,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     </CardHeader>
                     <CardContent className="space-y-6 px-4 sm:px-6">
                         <div className="space-y-2">
-                            <label htmlFor="dilemma-input" className="font-medium text-sm sm:text-base">
-                                Votre dilemme
-                            </label>
                             <div className="relative">
                                 <Textarea id="dilemma-input" placeholder="" value={dilemma} onChange={e => setDilemma(e.target.value)} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`focus:ring-cyan-500 text-base md:text-sm h-[160px] resize-none pr-20 transition-colors ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
                                 {dilemma === '' && !isDragOver && <div className="absolute top-3 left-3 pointer-events-none">
@@ -239,9 +236,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                             </div>}
 
                         <div className="space-y-3">
-                            <label className="font-medium text-sm sm:text-base">
-                                Ou utilisez un modèle
-                            </label>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                 {displayedTemplates.map(template => <Button key={template.name} variant="outline" size="sm" onClick={() => handleTemplateClick(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} aria-label={`Utiliser le modèle: ${template.name}`} className="text-xs sm:text-sm justify-start h-auto py-3 px-3 whitespace-normal text-left rounded-full">
                                         <span className="truncate text-sm px-[4px] font-normal">{template.name}</span>
