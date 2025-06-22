@@ -1,15 +1,14 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { searchGoogleImages, getEconomicalImage, detectImageCategory } from './googleImageService';
 
-// Cache persistant pour éviter les régénérations (coût zéro)
+// Cache pour éviter de régénérer les mêmes images
 const imageCache = new Map<string, string>();
 
-// File d'attente simplifiée et plus économique
-class EconomicalRequestQueue {
+// File d'attente pour limiter les requêtes simultanées
+class RequestQueue {
   private queue: (() => Promise<any>)[] = [];
   private running = 0;
-  private maxConcurrent = 1; // Réduit à 1 pour économiser
+  private maxConcurrent = 2; // Limite le nombre de requêtes simultanées
 
   async add<T>(fn: () => Promise<T>): Promise<T> {
     return new Promise((resolve, reject) => {
@@ -39,73 +38,62 @@ class EconomicalRequestQueue {
   }
 }
 
-const requestQueue = new EconomicalRequestQueue();
+const requestQueue = new RequestQueue();
 
-// Prompt simplifié et plus court pour économiser (réduction de 60% vs ancien)
+// Fonction pour générer un prompt contextuel optimisé et plus court
 export const generateContextualPrompt = (option: string, dilemma?: string): string => {
+  // Nettoyer l'option des préfixes comme "Option 1:", etc.
   const cleanOption = option.replace(/^Option\s+\d+:\s*/i, '').trim();
-  const category = detectImageCategory(dilemma || option);
   
-  // Prompt ultra-court pour économiser les tokens
-  return `${cleanOption.substring(0, 40)}, ${category}`;
+  // Détecter le type de décision pour adapter le style (version simplifiée)
+  const dilemmaLower = dilemma?.toLowerCase() || '';
+  let style = 'high quality';
+  
+  if (dilemmaLower.includes('voyage') || dilemmaLower.includes('destination')) {
+    style = 'travel destination';
+  } else if (dilemmaLower.includes('restaurant') || dilemmaLower.includes('manger')) {
+    style = 'food photography';
+  } else if (dilemmaLower.includes('voiture') || dilemmaLower.includes('acheter')) {
+    style = 'product photo';
+  } else if (dilemmaLower.includes('emploi') || dilemmaLower.includes('travail')) {
+    style = 'professional workplace';
+  } else if (dilemmaLower.includes('maison') || dilemmaLower.includes('appartement')) {
+    style = 'modern interior';
+  }
+  
+  // Prompt plus court et optimisé pour la vitesse
+  return `${cleanOption}, ${style}`;
 };
 
-// Nouvelle stratégie économique : Google > Défaut > IA (en dernier recours seulement)
+// Fonction pour générer une image via l'edge function (optimisée pour la vitesse)
 export const generateContextualImage = async (option: string, dilemma?: string): Promise<string | null> => {
   const cacheKey = `${option}-${dilemma}`;
   
-  // Vérifier le cache d'abord (gratuit)
+  // Vérifier le cache d'abord
   if (imageCache.has(cacheKey)) {
-    console.log('💰 Image trouvée en cache (gratuit):', option);
     return imageCache.get(cacheKey)!;
   }
   
   try {
-    // Stratégie économique prioritaire
-    const economicalImage = await getEconomicalImage(option, dilemma);
-    
-    // Mettre en cache pour éviter les futurs coûts
-    imageCache.set(cacheKey, economicalImage);
-    return economicalImage;
-    
-  } catch (error) {
-    console.error('Error in economical image generation:', error);
-    
-    // Fallback sur image par défaut (gratuit)
-    const defaultImage = getVariedPlaceholder(option, 0);
-    imageCache.set(cacheKey, defaultImage);
-    return defaultImage;
-  }
-};
-
-// IA uniquement pour les cas critiques (fonction séparée, coûteuse)
-export const generateAIImageIfCritical = async (option: string, dilemma?: string, forceAI: boolean = false): Promise<string | null> => {
-  if (!forceAI) {
-    console.log('⚠️ IA non utilisée pour économiser les coûts:', option);
-    return null;
-  }
-  
-  console.log('💸 Génération IA coûteuse demandée pour:', option);
-  
-  try {
     const prompt = generateContextualPrompt(option, dilemma);
+    console.log('Generating image with optimized prompt:', prompt);
     
-    // Utiliser la file d'attente pour les requêtes IA coûteuses
+    // Utiliser la file d'attente pour éviter de surcharger les APIs
     const result = await requestQueue.add(async () => {
-      // Essayer FLUX d'abord (moins cher que DALL-E)
+      // Essayer FLUX.1-schnell d'abord (plus rapide)
       const { data, error } = await supabase.functions.invoke('generate-image-hf', {
         body: { prompt }
       });
       
       if (error || !data?.success) {
-        // Fallback DALL-E uniquement si vraiment nécessaire
-        console.log('FLUX failed, trying DALL-E (plus cher)...');
+        // Fallback rapide vers DALL-E 2 si FLUX échoue
+        console.log('FLUX failed, trying DALL-E 2...');
         const fallbackData = await supabase.functions.invoke('generate-image', {
-          body: { prompt: prompt.substring(0, 400) }
+          body: { prompt: prompt.substring(0, 800) } // Limiter la taille pour DALL-E
         });
         
         if (fallbackData.error || !fallbackData.data?.success) {
-          throw new Error('Both AI image generation methods failed');
+          throw new Error('Both image generation methods failed');
         }
         
         return fallbackData.data.imageUrl;
@@ -114,20 +102,26 @@ export const generateAIImageIfCritical = async (option: string, dilemma?: string
       return data.imageUrl;
     });
     
-    return result;
+    if (result) {
+      // Mettre en cache l'image générée
+      imageCache.set(cacheKey, result);
+      return result;
+    }
+    
+    return null;
   } catch (error) {
-    console.error('Error in AI image generation:', error);
+    console.error('Error generating contextual image:', error);
     return null;
   }
 };
 
-// Placeholders variés mais optimisés
+// Fonction pour créer des placeholders variés et contextuels (optimisée)
 export const getVariedPlaceholder = (option: string, index: number = 0): string => {
   const cleanOption = option.replace(/^Option\s+\d+:\s*/i, '').trim();
-  const colors = ['4F46E5', '7C3AED', 'DC2626', '059669', 'D97706'];
+  const colors = ['4F46E5', '7C3AED', 'DC2626', '059669', 'D97706', '0891B2'];
   const color = colors[index % colors.length];
-  const text = encodeURIComponent(cleanOption.slice(0, 10));
+  const text = encodeURIComponent(cleanOption.slice(0, 12));
   
-  // URL plus simple pour de meilleures performances
-  return `https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=300&h=200&fit=crop&auto=format&overlay-text=${text}&overlay-color=${color}`;
+  // Utiliser une URL plus simple et rapide
+  return `https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=300&fit=crop&auto=format&overlay-text=${text}&overlay-color=${color}`;
 };

@@ -53,7 +53,7 @@ export const useDecisionAPI = ({
     const handleGenerateOptions = async (isRetry = false) => {
         const currentCriteria = criteria;
         
-        console.log("🔄 [ÉCONOMIQUE] Starting optimized options generation", {
+        console.log("🔄 [DEBUG] Starting options generation", {
             isRetry,
             retryCount,
             criteriaCount: currentCriteria.length,
@@ -73,21 +73,21 @@ export const useDecisionAPI = ({
 
         setIsUpdating(true);
         setAnalysisStep('loading-options');
-        setProgressMessage("Optimisation en cours (mode économique)...");
+        setProgressMessage("Analyse des options en cours...");
         
         if (isRetry) {
             incrementRetry();
-            console.log(`🔄 [ÉCONOMIQUE] Retry attempt #${retryCount + 1}`);
+            console.log(`🔄 [DEBUG] Retry attempt #${retryCount + 1}`);
         }
 
         try {
-          console.log("📡 [ÉCONOMIQUE] Calling optimized generateOptions API...");
+          console.log("📡 [DEBUG] Calling generateOptions API...");
           const startTime = Date.now();
           
           const apiResult = await generateOptions(dilemma, currentCriteria);
           
           const endTime = Date.now();
-          console.log("✅ [ÉCONOMIQUE] API call successful", {
+          console.log("✅ [DEBUG] API call successful", {
             duration: `${endTime - startTime}ms`,
             resultStructure: {
               hasRecommendation: !!apiResult.recommendation,
@@ -108,7 +108,7 @@ export const useDecisionAPI = ({
           setHasChanges(false);
           
           if (currentDecisionId) {
-            console.log("💾 [ÉCONOMIQUE] Updating existing decision", { decisionId: currentDecisionId });
+            console.log("💾 [DEBUG] Updating existing decision", { decisionId: currentDecisionId });
             const decisionToUpdate = history.find(d => d.id === currentDecisionId);
             if (decisionToUpdate) {
                 const updated: IDecision = {
@@ -120,10 +120,10 @@ export const useDecisionAPI = ({
             }
           }
           
-          toast.success(isRetry ? "Options générées avec succès (mode économique) !" : "Analyse mise à jour (optimisée) !");
+          toast.success(isRetry ? "Options générées avec succès !" : "Analyse mise à jour !");
           
         } catch (error) {
-          console.error("❌ [ÉCONOMIQUE] Error in generateOptions:", {
+          console.error("❌ [DEBUG] Error in generateOptions:", {
             error: error instanceof Error ? error.message : 'Unknown error',
             stack: error instanceof Error ? error.stack : undefined,
             retryCount,
@@ -133,11 +133,11 @@ export const useDecisionAPI = ({
           const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
           
           if (retryCount < 2) {
-            console.log(`🔄 [ÉCONOMIQUE] Will retry in 1.5s (attempt ${retryCount + 1}/3)`);
+            console.log(`🔄 [DEBUG] Will retry in 1.5s (attempt ${retryCount + 1}/3)`);
             toast.error(`${errorMessage} - Nouvelle tentative...`);
             setTimeout(() => handleGenerateOptions(true), 1500);
           } else {
-            console.log("💀 [ÉCONOMIQUE] Max retries reached, giving up");
+            console.log("💀 [DEBUG] Max retries reached, giving up");
             toast.error(`Impossible de générer les options après ${retryCount + 1} tentatives. ${errorMessage}`);
             setAnalysisStep('criteria-loaded');
             resetRetry();
@@ -149,8 +149,8 @@ export const useDecisionAPI = ({
     };
 
     const handleStartAnalysis = async () => {
-        console.log("🚀 [ÉCONOMIQUE] Starting optimized full analysis", { dilemma: dilemma.substring(0, 50) + "..." });
-        setProgressMessage("Génération optimisée des critères...");
+        console.log("🚀 [DEBUG] Starting full analysis", { dilemma: dilemma.substring(0, 50) + "..." });
+        setProgressMessage("Génération des critères...");
         setResult(null);
         setCriteria([]);
         setEmoji('🤔');
@@ -160,10 +160,10 @@ export const useDecisionAPI = ({
         setLastApiResponse(null);
 
         try {
-          // Phase 1: Générer les critères avec cache intelligent
-          console.log("📡 [ÉCONOMIQUE] Phase 1: Generating criteria with cache");
+          // Phase 1: Générer les critères et obtenir la catégorie suggérée
+          console.log("📡 [DEBUG] Phase 1: Generating criteria and category");
           const response = await generateCriteriaOnly(dilemma);
-          console.log("✅ [ÉCONOMIQUE] Optimized criteria generated:", {
+          console.log("✅ [DEBUG] Criteria and category generated:", {
             emoji: response.emoji,
             criteriaCount: response.criteria?.length || 0,
             criteria: response.criteria,
@@ -180,15 +180,15 @@ export const useDecisionAPI = ({
           setSelectedCategory(response.suggestedCategory);
           setAnalysisStep('criteria-loaded');
           
-          // Phase 2: Générer automatiquement les options avec optimisations
+          // Phase 2: Générer automatiquement les options
           setTimeout(async () => {
-            console.log("📡 [ÉCONOMIQUE] Phase 2: Auto-generating optimized options");
+            console.log("📡 [DEBUG] Phase 2: Auto-generating options");
             setAnalysisStep('loading-options');
-            setProgressMessage("Génération optimisée des options...");
+            setProgressMessage("Génération des options...");
             
             try {
               const optionsResult = await generateOptions(dilemma, newCriteria);
-              console.log("✅ [ÉCONOMIQUE] Auto-options generated successfully");
+              console.log("✅ [DEBUG] Auto-options generated successfully");
               setLastApiResponse(optionsResult);
               setResult(optionsResult);
               
@@ -208,19 +208,19 @@ export const useDecisionAPI = ({
               setCurrentDecisionId(newDecision.id);
               
               setAnalysisStep('done');
-              toast.success("Analyse complète générée (mode économique) !");
+              toast.success("Analyse complète générée !");
             } catch (error) {
-              console.error("❌ [ÉCONOMIQUE] Error in auto-options generation:", error);
+              console.error("❌ [DEBUG] Error in auto-options generation:", error);
               const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
               toast.error(`Erreur lors de la génération automatique : ${errorMessage}`);
               setAnalysisStep('criteria-loaded');
             } finally {
               setProgressMessage('');
             }
-          }, 600); // Réduit à 600ms pour une UX plus rapide
+          }, 800);
           
         } catch (error) {
-          console.error("❌ [ÉCONOMIQUE] Error in analysis start:", error);
+          console.error("❌ [DEBUG] Error in analysis start:", error);
           const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
           toast.error(`Erreur lors de l'analyse : ${errorMessage}`);
           setAnalysisStep('idle');
