@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -222,7 +221,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                     onDragOver={handleDragOver}
                                     onDragLeave={handleDragLeave}
                                     onDrop={handleDrop}
-                                    className={`focus:ring-cyan-500 text-base md:text-sm max-h-[150px] resize-none pr-20 transition-colors ${
+                                    className={`focus:ring-cyan-500 text-base md:text-sm max-h-[180px] resize-none pr-20 transition-colors ${
                                         isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed' : ''
                                     }`}
                                     disabled={isLoading || isUpdating || analysisStep === 'done'}
