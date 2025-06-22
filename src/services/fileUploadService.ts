@@ -11,6 +11,29 @@ export interface UploadedFileInfo {
   extractedText?: string;
 }
 
+// Fonction pour nettoyer et sanitiser les noms de fichiers
+const sanitizeFileName = (fileName: string): string => {
+  // Séparer le nom et l'extension
+  const lastDotIndex = fileName.lastIndexOf('.');
+  const name = lastDotIndex > 0 ? fileName.substring(0, lastDotIndex) : fileName;
+  const extension = lastDotIndex > 0 ? fileName.substring(lastDotIndex) : '';
+  
+  // Normaliser les caractères Unicode pour gérer les accents
+  const normalizedName = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  
+  // Remplacer les espaces par des underscores et supprimer les caractères spéciaux
+  const cleanName = normalizedName
+    .replace(/\s+/g, '_') // Remplacer les espaces par des underscores
+    .replace(/[^a-zA-Z0-9_-]/g, '') // Garder seulement alphanumériques, underscores et tirets
+    .replace(/_+/g, '_') // Éviter les underscores multiples
+    .replace(/^_|_$/g, ''); // Supprimer les underscores en début/fin
+  
+  // S'assurer qu'on a un nom valide
+  const finalName = cleanName || 'file';
+  
+  return finalName + extension;
+};
+
 export const uploadFilesToStorage = async (files: UploadedFile[]): Promise<UploadedFileInfo[]> => {
   console.log('📤 Uploading files to Supabase Storage...', files.length);
   
@@ -18,12 +41,15 @@ export const uploadFilesToStorage = async (files: UploadedFile[]): Promise<Uploa
   
   for (const file of files) {
     try {
+      // Nettoyer le nom de fichier
+      const sanitizedFileName = sanitizeFileName(file.file.name);
+      
       // Créer un nom de fichier unique avec timestamp
       const timestamp = Date.now();
-      const fileName = `${timestamp}_${file.file.name}`;
+      const fileName = `${timestamp}_${sanitizedFileName}`;
       const filePath = `decision-documents/${fileName}`;
       
-      console.log(`📤 Uploading file: ${fileName}`);
+      console.log(`📤 Uploading file: ${file.file.name} -> ${fileName}`);
       
       // Upload vers Supabase Storage
       const { data, error } = await supabase.storage
@@ -35,14 +61,14 @@ export const uploadFilesToStorage = async (files: UploadedFile[]): Promise<Uploa
       
       if (error) {
         console.error(`❌ Error uploading ${fileName}:`, error);
-        throw error;
+        throw new Error(`Erreur lors de l'upload de ${file.file.name}: ${error.message}`);
       }
       
       console.log(`✅ File uploaded successfully: ${fileName}`);
       
       uploadedFiles.push({
         id: file.id,
-        fileName: file.file.name,
+        fileName: file.file.name, // Garder le nom original pour l'affichage
         filePath: data.path,
         fileType: file.file.type,
         fileSize: file.file.size
