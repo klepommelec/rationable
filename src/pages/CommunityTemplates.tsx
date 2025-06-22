@@ -13,7 +13,7 @@ import { useDecisionMaker } from '@/hooks/useDecisionMaker';
 import { toast } from "sonner";
 import { useNavigate } from 'react-router-dom';
 
-// Templates prédéfinis pour usage personnel
+// Templates prédéfinis pour usage personnel avec analyses réelles
 const PERSONAL_TEMPLATES = [
   {
     id: 'personal-1',
@@ -29,7 +29,39 @@ const PERSONAL_TEMPLATES = [
         { id: '2', name: 'Qualité photo' },
         { id: '3', name: 'Autonomie' },
         { id: '4', name: 'Performance' }
-      ]
+      ],
+      result: {
+        recommendation: 'iPhone 15 Pro',
+        description: 'Après analyse comparative, l\'iPhone 15 Pro offre le meilleur équilibre entre performance, qualité photo et écosystème intégré pour un usage polyvalent.',
+        breakdown: [
+          {
+            option: 'iPhone 15 Pro',
+            score: 9.2,
+            pros: ['Excellent appareil photo', 'Performance exceptionnelle', 'Écosystème intégré', 'Finition premium'],
+            cons: ['Prix élevé', 'Écosystème fermé']
+          },
+          {
+            option: 'Samsung Galaxy S24 Ultra',
+            score: 8.8,
+            pros: ['S Pen inclus', 'Écran superbe', 'Autonomie solide', 'Zoom exceptionnel'],
+            cons: ['Interface parfois complexe', 'Prix premium']
+          },
+          {
+            option: 'Google Pixel 8 Pro',
+            score: 8.5,
+            pros: ['IA photographique avancée', 'Android pur', 'Mises à jour garanties', 'Prix plus accessible'],
+            cons: ['Disponibilité limitée', 'Autonomie moyenne']
+          }
+        ],
+        infoLinks: [
+          { title: 'Comparatif smartphones 2024', url: 'https://www.google.com/search?q=comparatif+smartphones+2024' },
+          { title: 'Guide achat smartphone', url: 'https://www.google.com/search?q=guide+achat+smartphone' }
+        ],
+        shoppingLinks: [
+          { title: 'iPhone 15 Pro - Apple Store', url: 'https://www.google.com/search?q=iPhone+15+Pro+prix' },
+          { title: 'Galaxy S24 Ultra - Samsung', url: 'https://www.google.com/search?q=Galaxy+S24+Ultra+prix' }
+        ]
+      }
     }
   },
   {
@@ -46,7 +78,39 @@ const PERSONAL_TEMPLATES = [
         { id: '2', name: 'Activités disponibles' },
         { id: '3', name: 'Climat' },
         { id: '4', name: 'Culture locale' }
-      ]
+      ],
+      result: {
+        recommendation: 'Portugal (Lisbonne & Porto)',
+        description: 'Le Portugal offre un excellent rapport qualité-prix avec une richesse culturelle, un climat agréable et une gastronomie exceptionnelle, parfait pour des vacances d\'été variées.',
+        breakdown: [
+          {
+            option: 'Portugal (Lisbonne & Porto)',
+            score: 9.1,
+            pros: ['Excellent rapport qualité-prix', 'Culture riche', 'Gastronomie exceptionnelle', 'Climat parfait'],
+            cons: ['Affluence touristique', 'Chaleur en août']
+          },
+          {
+            option: 'Grèce (Îles Cyclades)',
+            score: 8.7,
+            pros: ['Paysages magnifiques', 'Histoire fascinante', 'Plages paradisiaques', 'Cuisine méditerranéenne'],
+            cons: ['Prix élevés en été', 'Très touristique']
+          },
+          {
+            option: 'Croatie (Côte Dalmate)',
+            score: 8.4,
+            pros: ['Eau cristalline', 'Patrimoine préservé', 'Nature exceptionnelle', 'Moins cher que l\'Italie'],
+            cons: ['Foules en été', 'Locations limitées']
+          }
+        ],
+        infoLinks: [
+          { title: 'Guide voyage Portugal', url: 'https://www.google.com/search?q=guide+voyage+Portugal+été' },
+          { title: 'Destinations Europe été', url: 'https://www.google.com/search?q=meilleures+destinations+Europe+été' }
+        ],
+        shoppingLinks: [
+          { title: 'Vols vers Lisbonne', url: 'https://www.google.com/search?q=vol+Paris+Lisbonne' },
+          { title: 'Hôtels Porto', url: 'https://www.google.com/search?q=hôtel+Porto+réservation' }
+        ]
+      }
     }
   },
   {
@@ -63,7 +127,39 @@ const PERSONAL_TEMPLATES = [
         { id: '2', name: 'Consommation' },
         { id: '3', name: 'Fiabilité' },
         { id: '4', name: 'Espace' }
-      ]
+      ],
+      result: {
+        recommendation: 'Toyota Corolla Hybrid',
+        description: 'La Toyota Corolla Hybrid combine parfaitement fiabilité légendaire, consommation réduite et coût de possession optimal pour un usage quotidien.',
+        breakdown: [
+          {
+            option: 'Toyota Corolla Hybrid',
+            score: 9.0,
+            pros: ['Fiabilité exceptionnelle', 'Consommation très faible', 'Coût d\'entretien réduit', 'Bonne revente'],
+            cons: ['Design conservateur', 'Performances modestes']
+          },
+          {
+            option: 'Volkswagen Golf',
+            score: 8.3,
+            pros: ['Qualité de finition', 'Conduite agréable', 'Technologie embarquée', 'Polyvalence'],
+            cons: ['Prix d\'achat élevé', 'Entretien coûteux']
+          },
+          {
+            option: 'Peugeot 308',
+            score: 7.8,
+            pros: ['Confort excellent', 'Design moderne', 'Prix attractif', 'Garantie étendue'],
+            cons: ['Fiabilité perfectible', 'Revente difficile']
+          }
+        ],
+        infoLinks: [
+          { title: 'Comparatif voitures compactes', url: 'https://www.google.com/search?q=comparatif+voitures+compactes+2024' },
+          { title: 'Guide achat voiture hybride', url: 'https://www.google.com/search?q=guide+achat+voiture+hybride' }
+        ],
+        shoppingLinks: [
+          { title: 'Toyota Corolla - Configurateur', url: 'https://www.google.com/search?q=Toyota+Corolla+Hybrid+prix+neuf' },
+          { title: 'Occasions certifiées', url: 'https://www.google.com/search?q=voiture+occasion+certifiée' }
+        ]
+      }
     }
   },
   {
@@ -80,7 +176,39 @@ const PERSONAL_TEMPLATES = [
         { id: '2', name: 'Proximité transports' },
         { id: '3', name: 'Sécurité' },
         { id: '4', name: 'Commerces' }
-      ]
+      ],
+      result: {
+        recommendation: 'Quartier Montparnasse (Paris 14e)',
+        description: 'Montparnasse offre un excellent équilibre entre accessibilité, services et qualité de vie, avec des loyers plus abordables que le centre de Paris.',
+        breakdown: [
+          {
+            option: 'Montparnasse (14e)',
+            score: 8.6,
+            pros: ['Hub transport majeur', 'Nombreux commerces', 'Quartier vivant', 'Prix raisonnables'],
+            cons: ['Affluence gare', 'Travaux fréquents']
+          },
+          {
+            option: 'Belleville (20e)',
+            score: 8.2,
+            pros: ['Ambiance authentique', 'Prix attractifs', 'Diversité culturelle', 'Vie nocturne'],
+            cons: ['Gentrification rapide', 'Nuisances sonores']
+          },
+          {
+            option: 'Neuilly-sur-Seine',
+            score: 7.4,
+            pros: ['Quartier sécurisé', 'Écoles réputées', 'Espaces verts', 'Prestige'],
+            cons: ['Loyers très élevés', 'Manque d\'animation']
+          }
+        ],
+        infoLinks: [
+          { title: 'Guide quartiers Paris', url: 'https://www.google.com/search?q=meilleurs+quartiers+Paris+vivre' },
+          { title: 'Prix immobilier Paris', url: 'https://www.google.com/search?q=prix+immobilier+Paris+arrondissement' }
+        ],
+        shoppingLinks: [
+          { title: 'Recherche appartement Paris 14', url: 'https://www.google.com/search?q=appartement+location+Paris+14' },
+          { title: 'Estimation loyer', url: 'https://www.google.com/search?q=estimation+loyer+Paris' }
+        ]
+      }
     }
   },
   {
@@ -187,7 +315,7 @@ const PERSONAL_TEMPLATES = [
   }
 ];
 
-// Templates prédéfinis pour usage professionnel
+// Templates prédéfinis pour usage professionnel avec analyses réelles
 const PROFESSIONAL_TEMPLATES = [
   {
     id: 'pro-1',
@@ -203,7 +331,39 @@ const PROFESSIONAL_TEMPLATES = [
         { id: '2', name: 'Évolution possible' },
         { id: '3', name: 'Équilibre vie pro/perso' },
         { id: '4', name: 'Culture d\'entreprise' }
-      ]
+      ],
+      result: {
+        recommendation: 'Accepter l\'offre avec négociation',
+        description: 'L\'offre présente un potentiel d\'évolution intéressant et une culture d\'entreprise alignée avec vos valeurs. Une négociation salariale permettrait d\'optimiser le package.',
+        breakdown: [
+          {
+            option: 'Accepter l\'offre actuelle',
+            score: 7.8,
+            pros: ['Évolution claire', 'Bonne culture d\'entreprise', 'Projets stimulants', 'Équipe qualifiée'],
+            cons: ['Salaire en dessous du marché', 'Peu de télétravail']
+          },
+          {
+            option: 'Négocier puis accepter',
+            score: 9.1,
+            pros: ['Meilleur package total', 'Flexibilité horaires', 'Formation incluse', 'Évolution rapide'],
+            cons: ['Négociation délicate', 'Attentes élevées']
+          },
+          {
+            option: 'Refuser et continuer recherche',
+            score: 6.2,
+            pros: ['Autres opportunités', 'Pas de précipitation', 'Meilleur choix possible'],
+            cons: ['Incertitude marché', 'Opportunité manquée', 'Recherche prolongée']
+          }
+        ],
+        infoLinks: [
+          { title: 'Guide négociation salariale', url: 'https://www.google.com/search?q=guide+négociation+salaire+emploi' },
+          { title: 'Évaluer une offre d\'emploi', url: 'https://www.google.com/search?q=comment+évaluer+offre+emploi' }
+        ],
+        shoppingLinks: [
+          { title: 'Salaires par poste', url: 'https://www.google.com/search?q=grille+salaire+développeur+France' },
+          { title: 'Avis entreprises', url: 'https://www.google.com/search?q=avis+salariés+entreprise' }
+        ]
+      }
     }
   },
   {
@@ -402,18 +562,38 @@ const CommunityTemplates = () => {
   const handleCopyTemplate = async (template: CommunityTemplate) => {
     setCopying(template.id);
     try {
-      // Copy the template data to the decision maker
+      // Copy the template data to the decision maker with full analysis
       clearSession();
       setDilemma(template.decision_data.dilemma);
       setCriteria(template.decision_data.criteria);
       setEmoji(template.decision_data.emoji);
+      
+      // Si le template a déjà un résultat d'analyse, l'utiliser
+      if (template.decision_data.result) {
+        const { setResult, setAnalysisStep, setCurrentDecisionId, addDecision } = useDecisionMaker();
+        setResult(template.decision_data.result);
+        setAnalysisStep('done');
+        
+        // Créer une nouvelle décision dans l'historique
+        const newDecision = {
+          id: crypto.randomUUID(),
+          timestamp: Date.now(),
+          dilemma: template.decision_data.dilemma,
+          emoji: template.decision_data.emoji,
+          criteria: template.decision_data.criteria,
+          result: template.decision_data.result,
+          category: template.category
+        };
+        addDecision(newDecision);
+        setCurrentDecisionId(newDecision.id);
+      }
       
       // Increment copy count only for real community templates
       if (!template.id.startsWith('personal-') && !template.id.startsWith('pro-')) {
         await copyTemplate(template.id);
       }
       
-      toast.success(`Template "${template.title}" copié ! Vous pouvez maintenant le personnaliser.`);
+      toast.success(`Template "${template.title}" copié et analysé ! Vous pouvez maintenant le modifier.`);
       navigate('/');
     } catch (error) {
       console.error('Error copying template:', error);
@@ -431,7 +611,28 @@ const CommunityTemplates = () => {
       setCriteria(template.decision_data.criteria);
       setEmoji(template.decision_data.emoji);
       
-      toast.success(`Template "${template.title}" copié ! Vous pouvez maintenant le personnaliser.`);
+      // Utiliser les hooks depuis useDecisionMaker pour set le résultat et l'état
+      const { setResult, setAnalysisStep, setCurrentDecisionId, addDecision } = useDecisionMaker();
+      
+      if (template.decision_data.result) {
+        setResult(template.decision_data.result);
+        setAnalysisStep('done');
+        
+        // Créer une nouvelle décision dans l'historique
+        const newDecision = {
+          id: crypto.randomUUID(),
+          timestamp: Date.now(),
+          dilemma: template.decision_data.dilemma,
+          emoji: template.decision_data.emoji,
+          criteria: template.decision_data.criteria,
+          result: template.decision_data.result,
+          category: template.category
+        };
+        addDecision(newDecision);
+        setCurrentDecisionId(newDecision.id);
+      }
+      
+      toast.success(`Template "${template.title}" copié et analysé ! Vous pouvez maintenant le modifier.`);
       navigate('/');
     } catch (error) {
       console.error('Error copying template:', error);
@@ -443,44 +644,8 @@ const CommunityTemplates = () => {
 
   const handleOpenTemplate = async (template: any) => {
     try {
-      // Create a mock analyzed decision with the template data
-      const mockDecision = {
-        ...template.decision_data,
-        result: {
-          recommendation: `Option recommandée pour: ${template.decision_data.dilemma}`,
-          description: `Analyse détaillée basée sur les critères: ${template.decision_data.criteria.map(c => c.name).join(', ')}`,
-          breakdown: [
-            {
-              option: "Option A: Choix recommandé",
-              score: 8.5,
-              pros: ["Excellent rapport qualité-prix", "Répond parfaitement aux besoins", "Facilité d'utilisation"],
-              cons: ["Quelques limitations mineures", "Courbe d'apprentissage"]
-            },
-            {
-              option: "Option B: Alternative intéressante", 
-              score: 7.2,
-              pros: ["Prix attractif", "Bonne qualité"],
-              cons: ["Fonctionnalités limitées", "Support perfectible"]
-            },
-            {
-              option: "Option C: Solution premium",
-              score: 6.8,
-              pros: ["Fonctionnalités avancées", "Excellent support"],
-              cons: ["Prix élevé", "Complexité"]
-            }
-          ],
-          infoLinks: [
-            { title: "Guide complet", url: `https://www.google.com/search?q=${encodeURIComponent(template.decision_data.dilemma + " guide")}` },
-            { title: "Comparatif détaillé", url: `https://www.google.com/search?q=${encodeURIComponent(template.decision_data.dilemma + " comparatif")}` }
-          ],
-          shoppingLinks: [
-            { title: "Meilleure offre", url: `https://www.google.com/search?q=${encodeURIComponent("acheter " + template.title)}` }
-          ]
-        }
-      };
-
-      // Share this mock decision to get a public link
-      const publicId = await shareDecision(mockDecision);
+      // Utiliser directement les données du template avec l'analyse réelle
+      const publicId = await shareDecision(template.decision_data);
       
       // Open the shared decision in a new tab
       window.open(`/shared/${publicId}`, '_blank');
