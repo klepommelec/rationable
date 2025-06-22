@@ -162,7 +162,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
   const isMainButtonDisabled = dilemma.trim() === '' || isLoading;
-  return <div className="max-w-4xl mx-auto space-y-6">
+  return <div className="mx-auto space-y-6">
             {/* Header principal occupant 72% de la hauteur de l'écran */}
             <div className="h-[72vh] flex items-center justify-center">
                 <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none shadow-none">
@@ -250,7 +250,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             </div>
 
             {/* Historique intégré directement dans la page */}
-            <Card className="backdrop-blur-2xl ">
+            <Card className="backdrop-blur-sm">
                 <CardHeader className="pb-4">
                     <CardTitle className="text-xl font-semibold">Historique des décisions</CardTitle>
                     <CardDescription className="text-muted-foreground">
