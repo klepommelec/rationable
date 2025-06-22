@@ -2,12 +2,20 @@
 import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Calendar, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Search, Calendar, MoreHorizontal, Trash2, FileDown, FileText, Download } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger, 
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger
+} from "@/components/ui/dropdown-menu";
 import { DEFAULT_CATEGORIES } from '@/types/decision';
 import { IDecision } from '@/types/decision';
-import { ExportMenu } from '../ExportMenu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 interface HistorySearchBarProps {
   searchQuery: string;
@@ -43,6 +52,57 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
   filteredDecisions,
   onClear
 }) => {
+  const exportToPDF = async () => {
+    try {
+      const dataStr = JSON.stringify(filteredDecisions, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `decisions-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast.success("Export réussi ! (format JSON pour le moment)");
+    } catch (error) {
+      toast.error("Erreur lors de l'export");
+    }
+  };
+
+  const exportToJSON = () => {
+    try {
+      const dataStr = JSON.stringify(filteredDecisions, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `decisions-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast.success("Export JSON réussi !");
+    } catch (error) {
+      toast.error("Erreur lors de l'export JSON");
+    }
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      const textData = filteredDecisions.map(decision => 
+        `🤔 ${decision.dilemma}\n✅ ${decision.result.recommendation}\n📅 ${new Date(decision.timestamp).toLocaleString('fr-FR')}\n`
+      ).join('\n---\n\n');
+      
+      await navigator.clipboard.writeText(textData);
+      toast.success("Données copiées dans le presse-papiers !");
+    } catch (error) {
+      toast.error("Erreur lors de la copie");
+    }
+  };
+
   return (
     <div className="flex gap-2 items-center">
       {/* Barre de recherche avec largeur fixe */}
@@ -123,11 +183,27 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem asChild>
-            <div className="w-full">
-              <ExportMenu decisions={filteredDecisions} />
-            </div>
-          </DropdownMenuItem>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <FileDown className="mr-2 h-4 w-4" />
+              <span>Exporter</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              <DropdownMenuItem onClick={exportToPDF}>
+                <FileText className="mr-2 h-4 w-4" />
+                <span>Exporter en PDF</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportToJSON}>
+                <Download className="mr-2 h-4 w-4" />
+                <span>Exporter en JSON</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={copyToClipboard}>
+                <FileText className="mr-2 h-4 w-4" />
+                <span>Copier le texte</span>
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
           <DropdownMenuSeparator />
           <AlertDialog>
             <AlertDialogTrigger asChild>
