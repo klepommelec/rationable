@@ -168,7 +168,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                 <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none ">
                     <CardHeader className="text-center pt-12 px-4 sm:px-6">
                         <CardTitle className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-slate-400 lg:text-5xl">
-                            <div>Vos décisions seront désormais</div>
+                            <div>Vos décisions seront </div>
                             <div className="flex items-center justify-center gap-3">
                                 <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12" />
                                 <span>Rationable</span>
@@ -176,7 +176,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         </CardTitle>
                         <CardDescription className="text-muted-foreground text-sm:text-base">De l'incertitude à la clarté : exploitez la puissance de l'IA</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6 px-4 sm:px-6 pt-4">
+                    <CardContent className="space-y-6 px-4 sm:px-6">
                         <div className="space-y-2">
                             <div className="relative">
                                 <Textarea id="dilemma-input" placeholder="" value={dilemma} onChange={e => setDilemma(e.target.value)} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`focus:ring-cyan-500 text-base md:text-sm h-[160px] resize-none pr-20 transition-colors ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
