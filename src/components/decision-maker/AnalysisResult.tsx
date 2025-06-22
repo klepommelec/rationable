@@ -97,7 +97,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg p-4 border border-blue-200/50 dark:border-blue-700/50">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex-1">
-                <h3 className="text-xl sm:text-2xl text-gray-900 dark:text-white mb-2 font-bold">
+                <h3 className="text-xl text-gray-900 dark:text-white mb-2 font-bold sm:text-3xl">
                   {cleanOptionName}
                 </h3>
                 <div className="flex items-center gap-4 flex-wrap">
@@ -109,7 +109,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                         width: `${topOption.score}%`
                       }}></div>
                       </div>
-                      <span className="text-lg font-mono text-gray-500">
+                      <span className="font-mono text-gray-500 text-sm">
                         {topOption.score}/100
                       </span>
                     </div>
