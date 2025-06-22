@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Heart, Search, Filter, User, Briefcase } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Copy, Heart, Search, Filter, User, Briefcase, Eye } from "lucide-react";
 import { DEFAULT_CATEGORIES } from '@/types/decision';
 import { CommunityTemplate, getCommunityTemplates, copyTemplate } from '@/services/communityTemplateService';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
@@ -460,6 +460,55 @@ const CommunityTemplates = () => {
     return matchesSearch && matchesCategory;
   });
 
+  const TemplatePreviewDialog = ({ template, trigger }: { template: any, trigger: React.ReactNode }) => {
+    return (
+      <Dialog>
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {template.decision_data.emoji} {template.title}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-semibold mb-2">Dilemme</h4>
+              <p className="text-muted-foreground">{template.decision_data.dilemma}</p>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-2">Critères d'évaluation</h4>
+              <div className="grid grid-cols-1 gap-2">
+                {template.decision_data.criteria.map((criterion: any, index: number) => (
+                  <div key={criterion.id || index} className="flex items-center justify-between p-2 bg-muted rounded">
+                    <span>{criterion.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {template.description && (
+              <div>
+                <h4 className="font-semibold mb-2">Description</h4>
+                <p className="text-muted-foreground">{template.description}</p>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-1">
+              {template.tags.map((tag: string) => (
+                <Badge key={tag} variant="outline" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-8">
@@ -565,7 +614,16 @@ const CommunityTemplates = () => {
                           ))}
                         </div>
                         
-                        <div className="flex justify-end">
+                        <div className="flex gap-2 justify-end">
+                          <TemplatePreviewDialog 
+                            template={template}
+                            trigger={
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-4 w-4 mr-2" />
+                                Ouvrir
+                              </Button>
+                            }
+                          />
                           <Button
                             size="sm"
                             onClick={() => handleCopyPredefinedTemplate(template)}
@@ -576,7 +634,7 @@ const CommunityTemplates = () => {
                             ) : (
                               <>
                                 <Copy className="h-4 w-4 mr-2" />
-                                Utiliser
+                                Copier
                               </>
                             )}
                           </Button>
@@ -626,7 +684,16 @@ const CommunityTemplates = () => {
                           ))}
                         </div>
                         
-                        <div className="flex justify-end">
+                        <div className="flex gap-2 justify-end">
+                          <TemplatePreviewDialog 
+                            template={template}
+                            trigger={
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-4 w-4 mr-2" />
+                                Ouvrir
+                              </Button>
+                            }
+                          />
                           <Button
                             size="sm"
                             onClick={() => handleCopyPredefinedTemplate(template)}
@@ -637,7 +704,7 @@ const CommunityTemplates = () => {
                             ) : (
                               <>
                                 <Copy className="h-4 w-4 mr-2" />
-                                Utiliser
+                                Copier
                               </>
                             )}
                           </Button>
@@ -731,20 +798,31 @@ const CommunityTemplates = () => {
                       </span>
                     </div>
                     
-                    <Button
-                      size="sm"
-                      onClick={() => handleCopyTemplate(template)}
-                      disabled={copying === template.id}
-                    >
-                      {copying === template.id ? (
-                        <>Copie...</>
-                      ) : (
-                        <>
-                          <Copy className="h-4 w-4 mr-2" />
-                          Copier
-                        </>
-                      )}
-                    </Button>
+                    <div className="flex gap-2">
+                      <TemplatePreviewDialog 
+                        template={template}
+                        trigger={
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ouvrir
+                          </Button>
+                        }
+                      />
+                      <Button
+                        size="sm"
+                        onClick={() => handleCopyTemplate(template)}
+                        disabled={copying === template.id}
+                      >
+                        {copying === template.id ? (
+                          <>Copie...</>
+                        ) : (
+                          <>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Copier
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
