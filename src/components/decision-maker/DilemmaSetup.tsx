@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { BrainCircuit } from 'lucide-react';
-import { ThemeToggle } from '../ThemeToggle';
 import { DecisionHistory } from '../DecisionHistory';
 import { AnimatedPlaceholder } from '../AnimatedPlaceholder';
 import MainActionButton from './MainActionButton';
