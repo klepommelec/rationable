@@ -180,7 +180,19 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     <CardContent className="space-y-6 px-4 sm:px-6">
                         <div className="space-y-2">
                             <div className="relative">
-                                <Textarea id="dilemma-input" placeholder="" value={dilemma} onChange={e => setDilemma(e.target.value)} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`focus:ring-cyan-500 text-base md:text-sm h-[160px] resize-none pr-20 transition-colors ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
+                                <Textarea 
+                                  id="dilemma-input" 
+                                  placeholder="" 
+                                  value={dilemma} 
+                                  onChange={e => setDilemma(e.target.value)} 
+                                  onDragOver={handleDragOver} 
+                                  onDragLeave={handleDragLeave} 
+                                  onDrop={handleDrop} 
+                                  className={`pulsing-glow focus:ring-cyan-500 text-base md:text-sm h-[160px] resize-none pr-20 transition-colors ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-over' : ''}`} 
+                                  disabled={isLoading || isUpdating || analysisStep === 'done'} 
+                                  aria-describedby="dilemma-help" 
+                                  aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} 
+                                />
                                 {dilemma === '' && !isDragOver && <div className="absolute top-3 left-3 pointer-events-none">
                                         <span className="text-muted-foreground text-base md:text-sm">
                                             <AnimatedPlaceholder placeholders={placeholders} interval={2500} />
