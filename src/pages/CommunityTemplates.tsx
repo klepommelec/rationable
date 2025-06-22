@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -532,7 +531,7 @@ const CommunityTemplates = () => {
   const [copying, setCopying] = useState<string | null>(null);
   const [showPredefined, setShowPredefined] = useState(false);
   
-  const { setDilemma, setCriteria, setEmoji, clearSession, loadDecision } = useDecisionMaker();
+  const { setDilemma, setCriteria, setEmoji, setResult, clearSession, loadDecision, setAnalysisStep, setCurrentDecisionId, setSelectedCategory } = useDecisionMaker();
   const { history, addDecision } = useDecisionHistory();
   const navigate = useNavigate();
 
@@ -572,44 +571,29 @@ const CommunityTemplates = () => {
       
       // Si le template a déjà un résultat d'analyse, l'utiliser
       if (template.decision_data.result) {
-        console.log('📋 Template has analysis, creating decision in history');
+        console.log('📋 Template has analysis, loading directly into workspace');
         
-        // Créer une nouvelle décision dans l'historique
-        const newDecision = {
-          id: crypto.randomUUID(),
-          timestamp: Date.now(),
-          dilemma: template.decision_data.dilemma,
-          emoji: template.decision_data.emoji,
-          criteria: template.decision_data.criteria,
-          result: template.decision_data.result,
-          category: template.category
-        };
+        // Charger directement dans le workspace au lieu de créer dans l'historique
+        setDilemma(template.decision_data.dilemma);
+        setCriteria(template.decision_data.criteria);
+        setEmoji(template.decision_data.emoji);
+        setResult(template.decision_data.result);
+        setAnalysisStep('done');
+        setSelectedCategory(template.category);
         
-        console.log('💾 Adding decision to history:', newDecision.id);
-        addDecision(newDecision);
+        // Créer un nouvel ID pour cette session
+        const newDecisionId = crypto.randomUUID();
+        setCurrentDecisionId(newDecisionId);
         
         // Naviguer vers la home page
-        console.log('🏠 Navigating to home page');
         navigate('/');
-        
-        // Attendre que l'historique soit sauvegardé puis charger la décision
-        setTimeout(() => {
-          console.log('🔄 Loading decision after navigation:', newDecision.id);
-          // Vérifier que la décision existe dans l'historique avant de la charger
-          const decisionExists = history.find(d => d.id === newDecision.id);
-          if (decisionExists) {
-            loadDecision(newDecision.id);
-          } else {
-            console.log('⏳ Decision not yet in history, trying again...');
-            setTimeout(() => loadDecision(newDecision.id), 100);
-          }
-        }, 600); // Attendre plus longtemps que le debounce de 500ms
       } else {
         // Si pas de résultat, juste copier les données de base
         console.log('📝 Template has no analysis, copying basic data');
         setDilemma(template.decision_data.dilemma);
         setCriteria(template.decision_data.criteria);
         setEmoji(template.decision_data.emoji);
+        setSelectedCategory(template.category);
         navigate('/');
       }
       
@@ -635,44 +619,29 @@ const CommunityTemplates = () => {
       clearSession();
       
       if (template.decision_data.result) {
-        console.log('📋 Predefined template has analysis, creating decision in history');
+        console.log('📋 Predefined template has analysis, loading directly into workspace');
         
-        // Créer une nouvelle décision dans l'historique
-        const newDecision = {
-          id: crypto.randomUUID(),
-          timestamp: Date.now(),
-          dilemma: template.decision_data.dilemma,
-          emoji: template.decision_data.emoji,
-          criteria: template.decision_data.criteria,
-          result: template.decision_data.result,
-          category: template.category
-        };
+        // Charger directement dans le workspace au lieu de créer dans l'historique
+        setDilemma(template.decision_data.dilemma);
+        setCriteria(template.decision_data.criteria);
+        setEmoji(template.decision_data.emoji);
+        setResult(template.decision_data.result);
+        setAnalysisStep('done');
+        setSelectedCategory(template.category);
         
-        console.log('💾 Adding predefined decision to history:', newDecision.id);
-        addDecision(newDecision);
+        // Créer un nouvel ID pour cette session
+        const newDecisionId = crypto.randomUUID();
+        setCurrentDecisionId(newDecisionId);
         
         // Naviguer vers la home page
-        console.log('🏠 Navigating to home page');
         navigate('/');
-        
-        // Attendre que l'historique soit sauvegardé puis charger la décision
-        setTimeout(() => {
-          console.log('🔄 Loading predefined decision after navigation:', newDecision.id);
-          // Vérifier que la décision existe dans l'historique avant de la charger
-          const decisionExists = history.find(d => d.id === newDecision.id);
-          if (decisionExists) {
-            loadDecision(newDecision.id);
-          } else {
-            console.log('⏳ Predefined decision not yet in history, trying again...');
-            setTimeout(() => loadDecision(newDecision.id), 100);
-          }
-        }, 600); // Attendre plus longtemps que le debounce de 500ms
       } else {
         // Si pas de résultat, juste copier les données de base
         console.log('📝 Predefined template has no analysis, copying basic data');
         setDilemma(template.decision_data.dilemma);
         setCriteria(template.decision_data.criteria);
         setEmoji(template.decision_data.emoji);
+        setSelectedCategory(template.category);
         navigate('/');
       }
       
@@ -687,14 +656,24 @@ const CommunityTemplates = () => {
 
   const handleOpenTemplate = async (template: any) => {
     try {
+      console.log('🔄 Opening template:', template.title);
+      
+      // Vérifier que le template a bien des données de résultat
+      if (!template.decision_data.result) {
+        toast.error("Ce template n'a pas encore d'analyse complète");
+        return;
+      }
+      
       // Utiliser directement les données du template avec l'analyse réelle
       const publicId = await shareDecision(template.decision_data);
       
       // Open the shared decision in a new tab
-      window.open(`/shared/${publicId}`, '_blank');
+      const sharedUrl = `/shared/${publicId}`;
+      console.log('🌐 Opening shared URL:', sharedUrl);
+      window.open(sharedUrl, '_blank');
       
     } catch (error) {
-      console.error('Error opening template:', error);
+      console.error('❌ Error opening template:', error);
       toast.error("Erreur lors de l'ouverture du template");
     }
   };
@@ -874,14 +853,16 @@ const CommunityTemplates = () => {
                         </div>
                         
                         <div className="flex gap-2 justify-end">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleOpenTemplate(template)}
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            Ouvrir
-                          </Button>
+                          {template.decision_data.result && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleOpenTemplate(template)}
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              Ouvrir
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             onClick={() => handleCopyPredefinedTemplate(template)}
@@ -943,14 +924,16 @@ const CommunityTemplates = () => {
                         </div>
                         
                         <div className="flex gap-2 justify-end">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleOpenTemplate(template)}
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            Ouvrir
-                          </Button>
+                          {template.decision_data.result && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleOpenTemplate(template)}
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              Ouvrir
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             onClick={() => handleCopyPredefinedTemplate(template)}
