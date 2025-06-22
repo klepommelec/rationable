@@ -249,6 +249,220 @@
   .dark .dropdown-menu {
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
   }
+
+  /* Effet de particules flottantes pour le textarea */
+  .floating-particles {
+    position: relative;
+    overflow: visible;
+  }
+
+  .floating-particles::before,
+  .floating-particles::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    z-index: -1;
+    will-change: transform, opacity;
+  }
+
+  /* Particule 1 */
+  .floating-particles::before {
+    top: -10px;
+    left: -10px;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.8) 0%, rgba(6, 182, 212, 0.2) 70%, transparent 100%);
+    animation: float-particle-1 8s ease-in-out infinite;
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+  }
+
+  /* Particule 2 */
+  .floating-particles::after {
+    bottom: -10px;
+    right: -10px;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.8) 0%, rgba(168, 85, 247, 0.2) 70%, transparent 100%);
+    animation: float-particle-2 6s ease-in-out infinite reverse;
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.3);
+  }
+
+  /* Particules supplémentaires au focus */
+  .floating-particles:focus-within::before {
+    animation: float-particle-focus-1 4s ease-in-out infinite;
+    width: 6px;
+    height: 6px;
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
+  }
+
+  .floating-particles:focus-within::after {
+    animation: float-particle-focus-2 3s ease-in-out infinite;
+    width: 8px;
+    height: 8px;
+    box-shadow: 0 0 18px rgba(168, 85, 247, 0.5);
+  }
+
+  /* Animation des particules au hover */
+  .floating-particles:hover::before {
+    animation: float-particle-hover-1 2s ease-in-out infinite;
+  }
+
+  .floating-particles:hover::after {
+    animation: float-particle-hover-2 2.5s ease-in-out infinite;
+  }
+
+  /* Keyframes pour l'animation des particules */
+  @keyframes float-particle-1 {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0deg);
+      opacity: 0.6;
+    }
+    25% {
+      transform: translate(20px, -15px) rotate(90deg);
+      opacity: 1;
+    }
+    50% {
+      transform: translate(40px, 10px) rotate(180deg);
+      opacity: 0.8;
+    }
+    75% {
+      transform: translate(15px, 25px) rotate(270deg);
+      opacity: 1;
+    }
+  }
+
+  @keyframes float-particle-2 {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0deg);
+      opacity: 0.7;
+    }
+    33% {
+      transform: translate(-25px, -20px) rotate(120deg);
+      opacity: 1;
+    }
+    66% {
+      transform: translate(-10px, 15px) rotate(240deg);
+      opacity: 0.9;
+    }
+  }
+
+  @keyframes float-particle-focus-1 {
+    0%, 100% {
+      transform: translate(0, 0) scale(1) rotate(0deg);
+      opacity: 0.8;
+    }
+    50% {
+      transform: translate(30px, -25px) scale(1.5) rotate(180deg);
+      opacity: 1;
+    }
+  }
+
+  @keyframes float-particle-focus-2 {
+    0%, 100% {
+      transform: translate(0, 0) scale(1) rotate(0deg);
+      opacity: 0.9;
+    }
+    50% {
+      transform: translate(-35px, 20px) scale(1.8) rotate(-180deg);
+      opacity: 1;
+    }
+  }
+
+  @keyframes float-particle-hover-1 {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.6;
+    }
+    50% {
+      transform: translate(15px, -10px) scale(1.2);
+      opacity: 1;
+    }
+  }
+
+  @keyframes float-particle-hover-2 {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.7;
+    }
+    50% {
+      transform: translate(-18px, 12px) scale(1.3);
+      opacity: 1;
+    }
+  }
+
+  /* Effet spécial pour le drag & drop */
+  .floating-particles.drag-active::before,
+  .floating-particles.drag-active::after {
+    animation-duration: 1s;
+    animation-timing-function: ease-out;
+  }
+
+  .floating-particles.drag-active::before {
+    background: radial-gradient(circle, rgba(34, 197, 94, 0.9) 0%, rgba(34, 197, 94, 0.3) 70%, transparent 100%);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.6);
+    animation: float-particle-drag 1s ease-out infinite;
+  }
+
+  .floating-particles.drag-active::after {
+    background: radial-gradient(circle, rgba(34, 197, 94, 0.9) 0%, rgba(34, 197, 94, 0.3) 70%, transparent 100%);
+    box-shadow: 0 0 25px rgba(34, 197, 94, 0.6);
+    animation: float-particle-drag-2 1.2s ease-out infinite;
+  }
+
+  @keyframes float-particle-drag {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: translate(25px, -20px) scale(2);
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes float-particle-drag-2 {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: translate(-30px, 25px) scale(2.2);
+      opacity: 0.8;
+    }
+  }
+
+  /* Adaptation pour le thème sombre */
+  .dark .floating-particles::before {
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.9) 0%, rgba(56, 189, 248, 0.3) 70%, transparent 100%);
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+  }
+
+  .dark .floating-particles::after {
+    background: radial-gradient(circle, rgba(196, 181, 253, 0.9) 0%, rgba(196, 181, 253, 0.3) 70%, transparent 100%);
+    box-shadow: 0 0 15px rgba(196, 181, 253, 0.4);
+  }
+
+  .dark .floating-particles:focus-within::before {
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.6);
+  }
+
+  .dark .floating-particles:focus-within::after {
+    box-shadow: 0 0 22px rgba(196, 181, 253, 0.6);
+  }
+
+  .dark .floating-particles.drag-active::before,
+  .dark .floating-particles.drag-active::after {
+    background: radial-gradient(circle, rgba(74, 222, 128, 0.9) 0%, rgba(74, 222, 128, 0.3) 70%, transparent 100%);
+  }
+
+  .dark .floating-particles.drag-active::before {
+    box-shadow: 0 0 25px rgba(74, 222, 128, 0.7);
+  }
+
+  .dark .floating-particles.drag-active::after {
+    box-shadow: 0 0 30px rgba(74, 222, 128, 0.7);
+  }
 }
 
 /* Performance optimizations */
