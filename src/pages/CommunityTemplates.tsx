@@ -10,6 +10,7 @@ import { DEFAULT_CATEGORIES } from '@/types/decision';
 import { CommunityTemplate, getCommunityTemplates, copyTemplate } from '@/services/communityTemplateService';
 import { shareDecision } from '@/services/sharedDecisionService';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
+import { useDecisionHistory } from '@/hooks/useDecisionHistory';
 import { toast } from "sonner";
 import { useNavigate } from 'react-router-dom';
 
@@ -531,6 +532,7 @@ const CommunityTemplates = () => {
   const [showPredefined, setShowPredefined] = useState(false);
   
   const { setDilemma, setCriteria, setEmoji, clearSession } = useDecisionMaker();
+  const { addDecision } = useDecisionHistory();
   const navigate = useNavigate();
 
   const loadTemplates = async () => {
@@ -570,10 +572,6 @@ const CommunityTemplates = () => {
       
       // Si le template a déjà un résultat d'analyse, l'utiliser
       if (template.decision_data.result) {
-        const { setResult, setAnalysisStep, setCurrentDecisionId, addDecision } = useDecisionMaker();
-        setResult(template.decision_data.result);
-        setAnalysisStep('done');
-        
         // Créer une nouvelle décision dans l'historique
         const newDecision = {
           id: crypto.randomUUID(),
@@ -585,7 +583,6 @@ const CommunityTemplates = () => {
           category: template.category
         };
         addDecision(newDecision);
-        setCurrentDecisionId(newDecision.id);
       }
       
       // Increment copy count only for real community templates
@@ -611,13 +608,7 @@ const CommunityTemplates = () => {
       setCriteria(template.decision_data.criteria);
       setEmoji(template.decision_data.emoji);
       
-      // Utiliser les hooks depuis useDecisionMaker pour set le résultat et l'état
-      const { setResult, setAnalysisStep, setCurrentDecisionId, addDecision } = useDecisionMaker();
-      
       if (template.decision_data.result) {
-        setResult(template.decision_data.result);
-        setAnalysisStep('done');
-        
         // Créer une nouvelle décision dans l'historique
         const newDecision = {
           id: crypto.randomUUID(),
@@ -629,7 +620,6 @@ const CommunityTemplates = () => {
           category: template.category
         };
         addDecision(newDecision);
-        setCurrentDecisionId(newDecision.id);
       }
       
       toast.success(`Template "${template.title}" copié et analysé ! Vous pouvez maintenant le modifier.`);
