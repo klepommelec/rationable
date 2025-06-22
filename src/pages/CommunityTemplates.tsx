@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { CommunityTemplate, getCommunityTemplates, copyTemplate } from '@/servic
 import { shareDecision } from '@/services/sharedDecisionService';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
 import { useDecisionHistory } from '@/hooks/useDecisionHistory';
+import { useDecisionState } from '@/hooks/useDecisionState';
 import { toast } from "sonner";
 import { useNavigate } from 'react-router-dom';
 
@@ -531,7 +533,8 @@ const CommunityTemplates = () => {
   const [copying, setCopying] = useState<string | null>(null);
   const [showPredefined, setShowPredefined] = useState(false);
   
-  const { setDilemma, setCriteria, setEmoji, setResult, clearSession, loadDecision, setAnalysisStep, setCurrentDecisionId, setSelectedCategory } = useDecisionMaker();
+  const { setDilemma, setCriteria, setEmoji, clearSession } = useDecisionMaker();
+  const { setResult, setAnalysisStep, setCurrentDecisionId, setSelectedCategory } = useDecisionState();
   const { history, addDecision } = useDecisionHistory();
   const navigate = useNavigate();
 
@@ -573,7 +576,7 @@ const CommunityTemplates = () => {
       if (template.decision_data.result) {
         console.log('📋 Template has analysis, loading directly into workspace');
         
-        // Charger directement dans le workspace au lieu de créer dans l'historique
+        // Charger directement dans le workspace
         setDilemma(template.decision_data.dilemma);
         setCriteria(template.decision_data.criteria);
         setEmoji(template.decision_data.emoji);
@@ -621,7 +624,7 @@ const CommunityTemplates = () => {
       if (template.decision_data.result) {
         console.log('📋 Predefined template has analysis, loading directly into workspace');
         
-        // Charger directement dans le workspace au lieu de créer dans l'historique
+        // Charger directement dans le workspace
         setDilemma(template.decision_data.dilemma);
         setCriteria(template.decision_data.criteria);
         setEmoji(template.decision_data.emoji);
