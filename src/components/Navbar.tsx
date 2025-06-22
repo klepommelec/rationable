@@ -27,7 +27,7 @@ const Navbar: React.FC<NavbarProps> = ({
       <div className="container flex h-16 items-center">
         <Link to="/" className="flex items-center gap-2 mr-auto hover:underline transition-all duration-200">
           <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-9 w-9 " />
-          <span className="font-medium text-xl">Rationable</span>
+          <span className="text-xl font-semibold">Rationable</span>
         </Link>
         
         <div className="flex items-center gap-2">
