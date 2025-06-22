@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,15 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Copy, Heart, Search, Filter, User, Briefcase, Eye } from "lucide-react";
+import { Heart, Search, Filter, User, Briefcase, Eye } from "lucide-react";
 import { DEFAULT_CATEGORIES } from '@/types/decision';
-import { CommunityTemplate, getCommunityTemplates, copyTemplate } from '@/services/communityTemplateService';
+import { CommunityTemplate, getCommunityTemplates } from '@/services/communityTemplateService';
 import { shareDecision } from '@/services/sharedDecisionService';
-import { useDecisionMaker } from '@/hooks/useDecisionMaker';
-import { useDecisionHistory } from '@/hooks/useDecisionHistory';
-import { useDecisionState } from '@/hooks/useDecisionState';
 import { toast } from "sonner";
-import { useNavigate } from 'react-router-dom';
 
 // Templates prédéfinis pour usage personnel avec analyses réelles
 const PERSONAL_TEMPLATES = [
@@ -530,13 +525,7 @@ const CommunityTemplates = () => {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'most_copied'>('newest');
-  const [copying, setCopying] = useState<string | null>(null);
   const [showPredefined, setShowPredefined] = useState(false);
-  
-  const { setDilemma, setCriteria, setEmoji, clearSession } = useDecisionMaker();
-  const { setResult, setAnalysisStep, setCurrentDecisionId, setSelectedCategory } = useDecisionState();
-  const { history, addDecision } = useDecisionHistory();
-  const navigate = useNavigate();
 
   const loadTemplates = async () => {
     try {
@@ -564,108 +553,9 @@ const CommunityTemplates = () => {
     loadTemplates();
   }, [search, categoryFilter, sortBy]);
 
-  const handleCopyTemplate = async (template: CommunityTemplate) => {
-    setCopying(template.id);
-    try {
-      console.log('🔄 Copying community template:', template.title);
-      
-      // Copy the template data to the decision maker with full analysis
-      clearSession();
-      
-      // Si le template a déjà un résultat d'analyse, l'utiliser
-      if (template.decision_data.result) {
-        console.log('📋 Template has analysis, loading directly into workspace');
-        
-        // Charger directement dans le workspace
-        setDilemma(template.decision_data.dilemma);
-        setCriteria(template.decision_data.criteria);
-        setEmoji(template.decision_data.emoji);
-        setResult(template.decision_data.result);
-        setAnalysisStep('done');
-        setSelectedCategory(template.category);
-        
-        // Créer un nouvel ID pour cette session
-        const newDecisionId = crypto.randomUUID();
-        setCurrentDecisionId(newDecisionId);
-        
-        // Naviguer vers la home page
-        navigate('/');
-      } else {
-        // Si pas de résultat, juste copier les données de base
-        console.log('📝 Template has no analysis, copying basic data');
-        setDilemma(template.decision_data.dilemma);
-        setCriteria(template.decision_data.criteria);
-        setEmoji(template.decision_data.emoji);
-        setSelectedCategory(template.category);
-        navigate('/');
-      }
-      
-      // Increment copy count only for real community templates
-      if (!template.id.startsWith('personal-') && !template.id.startsWith('pro-')) {
-        await copyTemplate(template.id);
-      }
-      
-      toast.success(`Template "${template.title}" copié avec succès !`);
-    } catch (error) {
-      console.error('❌ Error copying template:', error);
-      toast.error("Erreur lors de la copie du template");
-    } finally {
-      setCopying(null);
-    }
-  };
-
-  const handleCopyPredefinedTemplate = (template: any) => {
-    setCopying(template.id);
-    try {
-      console.log('🔄 Copying predefined template:', template.title);
-      
-      clearSession();
-      
-      if (template.decision_data.result) {
-        console.log('📋 Predefined template has analysis, loading directly into workspace');
-        
-        // Charger directement dans le workspace
-        setDilemma(template.decision_data.dilemma);
-        setCriteria(template.decision_data.criteria);
-        setEmoji(template.decision_data.emoji);
-        setResult(template.decision_data.result);
-        setAnalysisStep('done');
-        setSelectedCategory(template.category);
-        
-        // Créer un nouvel ID pour cette session
-        const newDecisionId = crypto.randomUUID();
-        setCurrentDecisionId(newDecisionId);
-        
-        // Naviguer vers la home page
-        navigate('/');
-      } else {
-        // Si pas de résultat, juste copier les données de base
-        console.log('📝 Predefined template has no analysis, copying basic data');
-        setDilemma(template.decision_data.dilemma);
-        setCriteria(template.decision_data.criteria);
-        setEmoji(template.decision_data.emoji);
-        setSelectedCategory(template.category);
-        navigate('/');
-      }
-      
-      toast.success(`Template "${template.title}" copié avec succès !`);
-    } catch (error) {
-      console.error('❌ Error copying predefined template:', error);
-      toast.error("Erreur lors de la copie du template");
-    } finally {
-      setCopying(null);
-    }
-  };
-
   const handleOpenTemplate = async (template: any) => {
     try {
       console.log('🔄 Opening template:', template.title);
-      
-      // Vérifier que le template a bien des données de résultat
-      if (!template.decision_data.result) {
-        toast.error("Ce template n'a pas encore d'analyse complète");
-        return;
-      }
       
       // Utiliser directement les données du template avec l'analyse réelle
       const publicId = await shareDecision(template.decision_data);
@@ -700,55 +590,6 @@ const CommunityTemplates = () => {
     const matchesCategory = !categoryFilter || categoryFilter === 'all' || template.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
-
-  const TemplatePreviewDialog = ({ template, trigger }: { template: any, trigger: React.ReactNode }) => {
-    return (
-      <Dialog>
-        <DialogTrigger asChild>
-          {trigger}
-        </DialogTrigger>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {template.decision_data.emoji} {template.title}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-semibold mb-2">Dilemme</h4>
-              <p className="text-muted-foreground">{template.decision_data.dilemma}</p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-2">Critères d'évaluation</h4>
-              <div className="grid grid-cols-1 gap-2">
-                {template.decision_data.criteria.map((criterion: any, index: number) => (
-                  <div key={criterion.id || index} className="flex items-center justify-between p-2 bg-muted rounded">
-                    <span>{criterion.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {template.description && (
-              <div>
-                <h4 className="font-semibold mb-2">Description</h4>
-                <p className="text-muted-foreground">{template.description}</p>
-              </div>
-            )}
-
-            <div className="flex flex-wrap gap-1">
-              {template.tags.map((tag: string) => (
-                <Badge key={tag} variant="outline" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -856,29 +697,13 @@ const CommunityTemplates = () => {
                         </div>
                         
                         <div className="flex gap-2 justify-end">
-                          {template.decision_data.result && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleOpenTemplate(template)}
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              Ouvrir
-                            </Button>
-                          )}
-                          <Button
+                          <Button 
+                            variant="outline" 
                             size="sm"
-                            onClick={() => handleCopyPredefinedTemplate(template)}
-                            disabled={copying === template.id}
+                            onClick={() => handleOpenTemplate(template)}
                           >
-                            {copying === template.id ? (
-                              <>Copie...</>
-                            ) : (
-                              <>
-                                <Copy className="h-4 w-4 mr-2" />
-                                Copier
-                              </>
-                            )}
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ouvrir
                           </Button>
                         </div>
                       </CardContent>
@@ -927,29 +752,13 @@ const CommunityTemplates = () => {
                         </div>
                         
                         <div className="flex gap-2 justify-end">
-                          {template.decision_data.result && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleOpenTemplate(template)}
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              Ouvrir
-                            </Button>
-                          )}
-                          <Button
+                          <Button 
+                            variant="outline" 
                             size="sm"
-                            onClick={() => handleCopyPredefinedTemplate(template)}
-                            disabled={copying === template.id}
+                            onClick={() => handleOpenTemplate(template)}
                           >
-                            {copying === template.id ? (
-                              <>Copie...</>
-                            ) : (
-                              <>
-                                <Copy className="h-4 w-4 mr-2" />
-                                Copier
-                              </>
-                            )}
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ouvrir
                           </Button>
                         </div>
                       </CardContent>
@@ -1032,10 +841,6 @@ const CommunityTemplates = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <Copy className="h-3 w-3" />
-                        {template.copy_count}
-                      </span>
-                      <span className="flex items-center gap-1">
                         <Heart className="h-3 w-3" />
                         {template.like_count}
                       </span>
@@ -1049,20 +854,6 @@ const CommunityTemplates = () => {
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         Ouvrir
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => handleCopyTemplate(template)}
-                        disabled={copying === template.id}
-                      >
-                        {copying === template.id ? (
-                          <>Copie...</>
-                        ) : (
-                          <>
-                            <Copy className="h-4 w-4 mr-2" />
-                            Copier
-                          </>
-                        )}
                       </Button>
                     </div>
                   </div>
