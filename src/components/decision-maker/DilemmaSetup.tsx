@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { BrainCircuit } from 'lucide-react';
+import { BrainCircuit, Paperclip } from 'lucide-react';
 import { DecisionHistory } from '../DecisionHistory';
 import { AnimatedPlaceholder } from '../AnimatedPlaceholder';
 import MainActionButton from './MainActionButton';
@@ -54,6 +54,8 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   uploadedFiles,
   setUploadedFiles
 }) => {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    
     // Afficher seulement les 3 premiers modèles
     const displayedTemplates = templates.slice(0, 3);
 
@@ -71,6 +73,28 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
         console.log('Template clicked:', template);
         setDilemma(template.dilemma);
         applyTemplate(template);
+    };
+
+    const handleFileButtonClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (!files) return;
+
+        const newFiles: UploadedFile[] = Array.from(files).map(file => ({
+            id: crypto.randomUUID(),
+            file,
+            preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined
+        }));
+
+        setUploadedFiles([...uploadedFiles, ...newFiles]);
+        
+        // Reset l'input pour permettre de sélectionner le même fichier à nouveau
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
     };
 
     return (
@@ -104,7 +128,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 placeholder=""
                                 value={dilemma}
                                 onChange={(e) => setDilemma(e.target.value)}
-                                className="focus:ring-cyan-500 text-base md:text-sm min-h-[100px] resize-none"
+                                className="focus:ring-cyan-500 text-base md:text-sm min-h-[100px] resize-none pr-12"
                                 disabled={isLoading || isUpdating || analysisStep === 'done'}
                                 rows={3}
                                 aria-describedby="dilemma-help"
@@ -120,6 +144,27 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                     </span>
                                 </div>
                             )}
+                            {/* Bouton d'attachement de fichier */}
+                            <button
+                                type="button"
+                                onClick={handleFileButtonClick}
+                                disabled={isLoading || isUpdating || analysisStep === 'done'}
+                                className="absolute bottom-3 right-3 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                aria-label="Joindre un fichier"
+                                title="Joindre un fichier"
+                            >
+                                <Paperclip className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                            </button>
+                            {/* Input file caché */}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                multiple
+                                accept="image/*,.pdf,.doc,.docx,.txt"
+                                onChange={handleFileSelect}
+                                className="hidden"
+                                aria-hidden="true"
+                            />
                         </div>
                         <p id="dilemma-help" className="sr-only">
                             Décrivez le problème ou la décision que vous devez prendre
