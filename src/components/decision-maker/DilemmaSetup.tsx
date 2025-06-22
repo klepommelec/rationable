@@ -9,7 +9,6 @@ import MainActionButton from './MainActionButton';
 import { UploadedFile } from '../FileUpload';
 import { IDecision } from '@/types/decision';
 import { toast } from "sonner";
-
 interface DilemmaSetupProps {
   dilemma: string;
   setDilemma: (dilemma: string) => void;
@@ -169,10 +168,10 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                 <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none shadow-none">
                     <CardHeader className="text-center pt-12 px-4 sm:px-6">
                         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-black dark:text-white">
-                            <div>Vos décisions seront </div>
+                            <div className="font-medium ">Vos décisions seront </div>
                             <div className="flex items-center justify-center gap-3">
                                 <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 xl:h-12 xl:w-12" />
-                                <span>Rationable</span>
+                                <span className="font-medium ">Rationable</span>
                             </div>
                         </h2>
                         <CardDescription className="text-muted-foreground text-sm:text-base">De l'incertitude à la clarté : exploitez la puissance de l'IA</CardDescription>
