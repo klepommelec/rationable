@@ -10,7 +10,6 @@ import { MetricsVisual } from './MetricsVisual';
 import { ExportMenu } from '../ExportMenu';
 import ShareButton from '../ShareButton';
 import ValidatedLink from '../ValidatedLink';
-
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
@@ -94,7 +93,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </div>
           </div>
           
-          <div className="relative p-[1px] rounded-lg bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-gradient-x">
+          <div className="relative p-[1px] rounded-lg bg-gradient-to-r from-blue-100 via-purple-50 to-pink-100 animate-gradient-x">
             <div className="relative bg-gradient-to-br from-purple-50 via-blue-50 to-blue-100 dark:from-blue-950 dark:to-slate-800 rounded-lg p-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex-1">
