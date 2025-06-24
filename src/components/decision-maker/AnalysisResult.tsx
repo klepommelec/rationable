@@ -163,7 +163,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
 
           {/* "Pourquoi cette recommandation ?" section - collapsible and properly contained */}
           <Collapsible defaultOpen={false}>
-            <CollapsibleTrigger className="flex items-center justify-between w-full group px-3 py-3 rounded-lg border bg-gray-50 hover:bg-gray-100 transition-colors data-[state=open]:rounded-b-none">
+            <CollapsibleTrigger className="flex items-center justify-between w-full group px-3 py-3 rounded-lg border bg-white hover:bg-gray-100 transition-colors data-[state=open]:rounded-b-none">
               <div className="flex items-center gap-2">
                 <Lightbulb className="h-5 w-5" />
                 <h3 className="text-lg font-semibold">Pourquoi cette recommandation ?</h3>
