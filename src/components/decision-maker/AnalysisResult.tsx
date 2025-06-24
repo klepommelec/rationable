@@ -94,7 +94,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </div>
           
           <div className="relative p-[1px] rounded-lg bg-gradient-to-r from-blue-200 via-purple-100 to-pink-200 animate-gradient-x">
-            <div className="relative bg-gradient-to-br from-purple-50 via-blue-50 to-blue-100 dark:from-blue-950 dark:to-slate-800 rounded-lg p-4">
+            <div className="relative bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-blue-950 dark:to-slate-800 rounded-lg p-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex-1">
                   <h3 className="text-xl text-gray-900 dark:text-white mb-2 font-bold sm:text-3xl">
