@@ -1,3 +1,4 @@
+
 import { toast } from "sonner";
 import { ICriterion, IResult, IDecision } from '@/types/decision';
 import { generateCriteriaOnly, generateOptions } from '@/services/decisionService';
@@ -9,7 +10,6 @@ interface UseDecisionAPIProps {
     dilemma: string;
     criteria: ICriterion[];
     setResult: (result: IResult | null) => void;
-    setLastApiResponse: (response: any) => void;
     setAnalysisStep: (step: AnalysisStep) => void;
     setCriteria: (criteria: ICriterion[]) => void;
     setEmoji: (emoji: string) => void;
@@ -33,7 +33,6 @@ export const useDecisionAPI = ({
     dilemma,
     criteria,
     setResult,
-    setLastApiResponse,
     setAnalysisStep,
     setCriteria,
     setEmoji,
@@ -113,7 +112,6 @@ export const useDecisionAPI = ({
             }
           });
           
-          setLastApiResponse(apiResult);
           setResult(apiResult);
           setAnalysisStep('done');
           resetRetry();
@@ -188,7 +186,6 @@ export const useDecisionAPI = ({
         setCurrentDecisionId(null);
         setHasChanges(false);
         resetRetry();
-        setLastApiResponse(null);
 
         let uploadedFileInfos: UploadedFileInfo[] = [];
 
@@ -233,7 +230,6 @@ export const useDecisionAPI = ({
             try {
               const optionsResult = await generateOptions(dilemma, newCriteria, uploadedFileInfos);
               console.log("✅ [DEBUG] Auto-options generated successfully");
-              setLastApiResponse(optionsResult);
               setResult(optionsResult);
               
               // Définir les critères de référence
