@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -145,8 +146,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         </CardHeader>
         
         <CardContent>
-          {/* Image désactivée pour économiser les crédits */}
-          
           <div className="grid grid-cols-2 gap-2 mb-6">
             <div className="text-green-700 bg-green-50 p-2 rounded">
               <div className="font-medium mb-1 text-xs pb-0.5">Points forts ({topOption.pros.length})</div>
@@ -158,7 +157,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </div>
           </div>
 
-          {/* Integrated DecisionExplanation content */}
+          {/* Moved "Pourquoi cette recommandation ?" section to the bottom */}
           <div className="border-t pt-4">
             <div className="flex items-center gap-2 mb-4">
               <Lightbulb className="h-5 w-5" />
