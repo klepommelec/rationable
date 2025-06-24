@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -98,8 +97,6 @@
     background-color: #020617; /* slate-950 */
   }
 
-  /* ... keep existing code (pulsing glow animations and other styles) */
-
   /* Pulsing glow effect for textarea - subtle gray tones with border color animation */
   @keyframes pulsing-glow {
     0%, 100% {
@@ -186,6 +183,21 @@
         0 0 12px rgba(71, 85, 105, 0.1);
       border-color: hsl(var(--border));
     }
+  }
+
+  /* Gradient border animation */
+  @keyframes gradient-x {
+    0%, 100% {
+      transform: translateX(0%);
+    }
+    50% {
+      transform: translateX(100%);
+    }
+  }
+
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradient-x 6s ease infinite;
   }
 
   /* Amélioration des transitions pour tous les éléments interactifs */

@@ -10,6 +10,7 @@ import { MetricsVisual } from './MetricsVisual';
 import { ExportMenu } from '../ExportMenu';
 import ShareButton from '../ShareButton';
 import ValidatedLink from '../ValidatedLink';
+
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
@@ -93,54 +94,56 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </div>
           </div>
           
-          <div className="backdrop-blur-sm rounded-lg p-4 border dark:from-blue-950 bg-gradient-to-br from-purple-50 via-blue-50 to-blue-100 dark:from-blue-950">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex-1">
-                <h3 className="text-xl text-gray-900 dark:text-white mb-2 font-bold sm:text-3xl">
-                  {cleanOptionName}
-                </h3>
-                <div className="flex items-center gap-4 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-500">Score :</span>
+          <div className="relative backdrop-blur-sm rounded-lg p-4 bg-gradient-to-br from-purple-50 via-blue-50 to-blue-100 dark:from-blue-950 before:absolute before:inset-0 before:rounded-lg before:p-[1px] before:bg-gradient-to-r before:from-blue-400 before:via-purple-500 before:to-pink-500 before:animate-gradient-x before:-z-10">
+            <div className="relative bg-gradient-to-br from-purple-50 via-blue-50 to-blue-100 dark:from-blue-950 dark:to-slate-800 rounded-lg -m-[1px] p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex-1">
+                  <h3 className="text-xl text-gray-900 dark:text-white mb-2 font-bold sm:text-3xl">
+                    {cleanOptionName}
+                  </h3>
+                  <div className="flex items-center gap-4 flex-wrap">
                     <div className="flex items-center gap-2">
-                      <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-1000 ease-out" style={{
-                        width: `${topOption.score}%`
-                      }}></div>
+                      <span className="text-sm font-medium text-gray-500">Score :</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-1000 ease-out" style={{
+                          width: `${topOption.score}%`
+                        }}></div>
+                        </div>
+                        <span className="font-mono text-gray-500 text-sm">
+                          {topOption.score}/100
+                        </span>
                       </div>
-                      <span className="font-mono text-gray-500 text-sm">
-                        {topOption.score}/100
-                      </span>
                     </div>
+                    
+                    <Badge className={`${confidence.color} border-0`}>
+                      <ConfidenceIcon className="h-3 w-3 mr-1" />
+                      Confiance: {confidence.level}
+                    </Badge>
                   </div>
-                  
-                  <Badge className={`${confidence.color} border-0`}>
-                    <ConfidenceIcon className="h-3 w-3 mr-1" />
-                    Confiance: {confidence.level}
-                  </Badge>
+                </div>
+                
+                <div className="flex gap-2 flex-wrap justify-end">
+                  {currentDecision && <ShareButton decision={currentDecision} />}
+                  {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
+                  <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm" aria-label="Commencer une nouvelle analyse">
+                    <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
+                    <span className="hidden sm:inline">Nouvelle analyse</span>
+                    <span className="sm:hidden">Nouveau</span>
+                  </Button>
                 </div>
               </div>
               
-              <div className="flex gap-2 flex-wrap justify-end">
-                {currentDecision && <ShareButton decision={currentDecision} />}
-                {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
-                <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm" aria-label="Commencer une nouvelle analyse">
-                  <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
-                  <span className="hidden sm:inline">Nouvelle analyse</span>
-                  <span className="sm:hidden">Nouveau</span>
-                </Button>
-              </div>
+              {result.breakdown.length >= 2 && (() => {
+              const secondBest = result.breakdown.filter(item => item.option !== topOption.option).reduce((prev, current) => prev.score > current.score ? prev : current);
+              const scoreDifference = topOption.score - secondBest.score;
+              return scoreDifference > 5 && <div className="mt-3 p-2 bg-gray-100 rounded-md border border-gray-200">
+                    <p className="text-sm text-gray-950 font-normal">
+                      <strong className="font-mono">+{scoreDifference} points</strong> d'avantage sur la deuxième meilleure option
+                    </p>
+                  </div>;
+            })()}
             </div>
-            
-            {result.breakdown.length >= 2 && (() => {
-            const secondBest = result.breakdown.filter(item => item.option !== topOption.option).reduce((prev, current) => prev.score > current.score ? prev : current);
-            const scoreDifference = topOption.score - secondBest.score;
-            return scoreDifference > 5 && <div className="mt-3 p-2 bg-gray-100 rounded-md border border-gray-200">
-                  <p className="text-sm text-gray-950 font-normal">
-                    <strong className="font-mono">+{scoreDifference} points</strong> d'avantage sur la deuxième meilleure option
-                  </p>
-                </div>;
-          })()}
           </div>
         </CardHeader>
         
