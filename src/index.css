@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -85,15 +86,19 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
     transition: background-color 0.3s ease, color 0.3s ease;
+    /* Garder le body blanc en thème clair, sombre en thème sombre */
+    background-color: white;
   }
 
   .dark body {
     background: radial-gradient(ellipse 80% 50% at 50% -20%,rgba(120,119,198,0.3),hsla(0,0%,100%,0));
     background-color: #020617; /* slate-950 */
   }
+
+  /* ... keep existing code (pulsing glow animations and other styles) */
 
   /* Pulsing glow effect for textarea - subtle gray tones with border color animation */
   @keyframes pulsing-glow {
