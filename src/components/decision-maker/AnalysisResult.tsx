@@ -135,7 +135,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             const scoreDifference = topOption.score - secondBest.score;
             return scoreDifference > 5 && <div className="mt-3">
                 <Collapsible defaultOpen={false}>
-                  <CollapsibleTrigger className="flex items-center justify-between w-full group px-3 py-3 rounded-lg border bg-white hover:bg-gray-100 transition-colors data-[state=open]:rounded-b-none">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full group px-3 rounded-lg border bg-white hover:bg-gray-100 transition-colors data-[state=open]:rounded-b-none py-[8px]">
                     <div className="flex items-center gap-2">
                       
                       <span className="text-sm text-gray-950 font-normal">
