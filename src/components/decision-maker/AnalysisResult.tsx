@@ -10,6 +10,7 @@ import { EnhancedRadarChart } from './EnhancedRadarChart';
 import { MetricsVisual } from './MetricsVisual';
 import { ExportMenu } from '../ExportMenu';
 import ValidatedLink from '../ValidatedLink';
+
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
@@ -18,6 +19,7 @@ interface AnalysisResultProps {
   currentDecision?: any;
   dilemma?: string;
 }
+
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
   isUpdating,
@@ -27,6 +29,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   dilemma
 }) => {
   if (!result) return null;
+
   const topOption = result.breakdown.reduce((prev, current) => current.score > prev.score ? current : prev);
 
   // Logic from DecisionExplanation
@@ -57,6 +60,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   };
   const confidence = getConfidenceLevel();
   const ConfidenceIcon = confidence.icon;
+  
   const getKeyInsights = () => {
     const insights = [];
     if (scoreRange < 15) {
@@ -73,8 +77,11 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
     }
     return insights;
   };
+
   const cleanOptionName = topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim();
-  return <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
+
+  return (
+    <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
       {/* Section Recommandation IA améliorée */}
       <Card className="relative overflow-hidden border bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950 rounded-xl">
         <CardHeader className="relative">
@@ -156,7 +163,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
 
           {/* "Pourquoi cette recommandation ?" section - collapsible and properly contained */}
           <Collapsible defaultOpen={false}>
-            <CollapsibleTrigger className="flex items-center justify-between w-full group px-3 py-3 rounded-lg border transition-colors data-[state=open]:rounded-b-none bg-white">
+            <CollapsibleTrigger className="flex items-center justify-between w-full group px-3 py-3 rounded-lg border bg-gray-50 hover:bg-gray-100 transition-colors data-[state=open]:rounded-b-none">
               <div className="flex items-center gap-2">
                 <Lightbulb className="h-5 w-5" />
                 <h3 className="text-lg font-semibold">Pourquoi cette recommandation ?</h3>
@@ -165,51 +172,77 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </CollapsibleTrigger>
             
             <CollapsibleContent className="border border-t-0 border-gray-200 rounded-b-lg bg-white p-4 space-y-4">
-              {result.description && <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+              {result.description && (
+                <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
                   <p className="text-sm text-blue-900">{result.description}</p>
-                </div>}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <h4 className="font-medium text-sm">Points clés de l'analyse :</h4>
                 <ul className="space-y-1">
-                  {getKeyInsights().map((insight, index) => <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                  {getKeyInsights().map((insight, index) => (
+                    <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
                       <span className="text-blue-500 mt-1">•</span>
                       {insight}
-                    </li>)}
+                    </li>
+                  ))}
                 </ul>
               </div>
 
-              {topOption && <div className="p-3 bg-green-50 rounded-lg">
+              {topOption && (
+                <div className="p-3 bg-green-50 rounded-lg">
                   <p className="text-sm text-green-900">
                     <strong>{cleanOptionName}</strong> obtient 
                     le score le plus élevé ({topOption.score}/100) grâce à ses avantages clés : {topOption.pros.slice(0, 2).join(', ')}.
                   </p>
-                </div>}
+                </div>
+              )}
             </CollapsibleContent>
           </Collapsible>
 
           {/* Liens utiles - no separator, directly integrated */}
-          {(result.infoLinks && result.infoLinks.length > 0 || result.shoppingLinks && result.shoppingLinks.length > 0) && <div className="mt-6">
+          {(result.infoLinks && result.infoLinks.length > 0 || result.shoppingLinks && result.shoppingLinks.length > 0) && (
+            <div className="mt-6">
               <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
                 <Link className="h-5 w-5" />
                 Liens utiles
               </h3>
               <div className="grid md:grid-cols-2 gap-6">
-                {result.infoLinks && result.infoLinks.length > 0 && <div>
+                {result.infoLinks && result.infoLinks.length > 0 && (
+                  <div>
                     <h4 className="font-medium mb-3">📚 Ressources d'information</h4>
                     <div className="space-y-2">
-                      {result.infoLinks.map((link, index) => <ValidatedLink key={index} link={link} fallbackSearchQuery={dilemma} className="block p-2 rounded border hover:bg-muted text-sm" />)}
+                      {result.infoLinks.map((link, index) => (
+                        <ValidatedLink 
+                          key={index} 
+                          link={link} 
+                          fallbackSearchQuery={dilemma} 
+                          className="block p-2 rounded border hover:bg-muted text-sm" 
+                        />
+                      ))}
                     </div>
-                  </div>}
+                  </div>
+                )}
                 
-                {result.shoppingLinks && result.shoppingLinks.length > 0 && <div>
+                {result.shoppingLinks && result.shoppingLinks.length > 0 && (
+                  <div>
                     <h4 className="font-medium mb-3">🛒 Liens d'achat</h4>
                     <div className="space-y-2">
-                      {result.shoppingLinks.map((link, index) => <ValidatedLink key={index} link={link} fallbackSearchQuery={`acheter ${result.recommendation}`} className="block p-2 rounded border hover:bg-muted text-sm" />)}
+                      {result.shoppingLinks.map((link, index) => (
+                        <ValidatedLink 
+                          key={index} 
+                          link={link} 
+                          fallbackSearchQuery={`acheter ${result.recommendation}`} 
+                          className="block p-2 rounded border hover:bg-muted text-sm" 
+                        />
+                      ))}
                     </div>
-                  </div>}
+                  </div>
+                )}
               </div>
-            </div>}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -237,6 +270,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </div>
         </CardContent>
       </Card>
-    </div>;
+    </div>
+  );
 };
+
 export default AnalysisResult;
