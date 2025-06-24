@@ -16,9 +16,10 @@ import ShareAsTemplateDialog from './ShareAsTemplateDialog';
 
 interface ShareButtonProps {
   decision: IDecision;
+  className?: string;
 }
 
-const ShareButton: React.FC<ShareButtonProps> = ({ decision }) => {
+const ShareButton: React.FC<ShareButtonProps> = ({ decision, className }) => {
   const [isSharing, setIsSharing] = useState(false);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
 
@@ -46,7 +47,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ decision }) => {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" disabled={isSharing}>
+          <Button variant="outline" size="sm" disabled={isSharing} className={className}>
             {isSharing ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : (

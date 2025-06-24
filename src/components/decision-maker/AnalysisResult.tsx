@@ -8,7 +8,7 @@ import { ExternalLink, CheckCircle, XCircle, RotateCcw, Share2 } from 'lucide-re
 import { IResult, IDecision } from '@/types/decision';
 import { DecisionExplanation } from './DecisionExplanation';
 import { ComparisonTable } from './ComparisonTable';
-import { ShareButton } from '../ShareButton';
+import ShareButton from '../ShareButton';
 
 interface AnalysisResultProps {
   result: IResult | null;
@@ -106,9 +106,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
 
       {/* Decision Explanation */}
       <DecisionExplanation 
-        result={result} 
-        currentDecision={currentDecision} 
-        dilemma={dilemma}
+        result={result}
       />
 
       {/* Options Breakdown */}
@@ -122,7 +120,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
       )}
 
       {/* Comparison Table */}
-      <ComparisonTable result={result} />
+      <ComparisonTable breakdown={result.breakdown} dilemma={dilemma} />
 
       {/* Links Section */}
       {((result.infoLinks && result.infoLinks.length > 0) || 
@@ -184,10 +182,12 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           Nouvelle analyse
         </Button>
         
-        <ShareButton 
-          decision={currentDecision} 
-          className="flex-1"
-        />
+        {currentDecision && (
+          <ShareButton 
+            decision={currentDecision} 
+            className="flex-1"
+          />
+        )}
       </div>
     </div>
   );
