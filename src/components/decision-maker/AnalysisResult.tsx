@@ -93,7 +93,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </div>
           </div>
           
-          <div className="backdrop-blur-sm rounded-lg p-4 border bg-gradient-to-br from-blue-50 via-white to-blue-100 dark:from-blue-950">
+          <div className="backdrop-blur-sm rounded-lg p-4 border bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-950">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex-1">
                 <h3 className="text-xl text-gray-900 dark:text-white mb-2 font-bold sm:text-3xl">
