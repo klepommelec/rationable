@@ -6,11 +6,9 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from 'next-themes';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-
 interface NavbarProps {
   currentDecision?: any;
 }
-
 const Navbar: React.FC<NavbarProps> = ({
   currentDecision
 }) => {
@@ -24,25 +22,21 @@ const Navbar: React.FC<NavbarProps> = ({
     setTheme,
     theme
   } = useTheme();
-
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
       setIsScrolled(scrollPosition > 0);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
   const handleSignOut = async () => {
     await signOut();
   };
-
   return <header className={`sticky top-0 z-50 w-full transition-all duration-150 ${isScrolled ? 'bg-white/95 backdrop-blur border-b supports-[backdrop-filter]:bg-white/90' : 'bg-transparent'}`}>
       <div className="container flex h-16 items-center">
         <Link to="/" className="flex items-center gap-2 mr-auto hover:underline transition-all duration-200">
-          <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-9 w-9 " />
+          <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-9 w-9 rounded-full " />
           <span className="text-xl font-medium">Rationable</span>
         </Link>
         
@@ -94,5 +88,4 @@ const Navbar: React.FC<NavbarProps> = ({
       </div>
     </header>;
 };
-
 export default Navbar;

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -83,7 +82,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         
         <CardHeader className="relative">
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white animate-pulse">
+            <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white animate-pulse rounded-full">
               <img src="/lovable-uploads/b5fcad52-5808-4dc8-b6ff-0cd99578dade.png" alt="Rationable" className="h-6 w-6" />
             </div>
             <div>
