@@ -13,8 +13,6 @@ export const useDecisionState = () => {
     const [isUpdating, setIsUpdating] = useState(false);
     const [currentDecisionId, setCurrentDecisionId] = useState<string | null>(null);
     const [hasChanges, setHasChanges] = useState(false);
-    const [debugMode, setDebugMode] = useState(false);
-    const [lastApiResponse, setLastApiResponse] = useState<any>(null);
     const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
     
     const initialCriteriaRef = useRef<ICriterion[]>([]);
@@ -35,7 +33,6 @@ export const useDecisionState = () => {
         setCurrentDecisionId(null);
         setHasChanges(false);
         setSelectedCategory(undefined);
-        setLastApiResponse(null);
     };
 
     return {
@@ -56,10 +53,6 @@ export const useDecisionState = () => {
         setCurrentDecisionId,
         hasChanges,
         setHasChanges,
-        debugMode,
-        setDebugMode,
-        lastApiResponse,
-        setLastApiResponse,
         selectedCategory,
         setSelectedCategory,
         initialCriteriaRef,

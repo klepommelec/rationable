@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useDecisionHistory } from './useDecisionHistory';
 import { useDecisionState } from './useDecisionState';
@@ -28,10 +29,6 @@ export const useDecisionMaker = () => {
         setCurrentDecisionId,
         hasChanges,
         setHasChanges,
-        debugMode,
-        setDebugMode,
-        lastApiResponse,
-        setLastApiResponse,
         selectedCategory,
         setSelectedCategory,
         initialCriteriaRef,
@@ -52,7 +49,6 @@ export const useDecisionMaker = () => {
         dilemma,
         criteria,
         setResult,
-        setLastApiResponse,
         setAnalysisStep,
         setCriteria,
         setEmoji,
@@ -119,12 +115,9 @@ export const useDecisionMaker = () => {
         isUpdating,
         isLoading,
         hasChanges,
-        debugMode,
-        setDebugMode,
-        lastApiResponse,
         selectedCategory,
         handleCategoryChange,
-        handleUpdateCategory: handleUpdateCategory,
+        handleUpdateCategory,
         handleStartAnalysis,
         handleManualUpdate,
         applyTemplate,
