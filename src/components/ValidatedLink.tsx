@@ -49,7 +49,7 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
       href={finalUrl} 
       target="_blank" 
       rel="noopener noreferrer" 
-      className={className}
+      className={`${className} bg-white`}
       title={isSearchUrl ? `Rechercher: ${link.title}` : link.title}
     >
       {link.title}
