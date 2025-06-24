@@ -1,15 +1,14 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { RotateCcw, BarChart3, Lightbulb, Target, AlertTriangle, TrendingUp } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { VisualIndicators } from './VisualIndicators';
 import { EnhancedRadarChart } from './EnhancedRadarChart';
 import { MetricsVisual } from './MetricsVisual';
 import { ExportMenu } from '../ExportMenu';
-import ShareButton from '../ShareButton';
 import ValidatedLink from '../ValidatedLink';
 
 interface AnalysisResultProps {
@@ -94,7 +93,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </div>
           </div>
           
-          <div className="relative border border-gray-200 dark:border-gray-700 rounded-lg bg-gradient-to-br from-purple-50 via-blue-50 to-blue-100 dark:from-blue-950 dark:to-slate-800 p-4 animate-border-gradient">
+          <div className="relative border border-gray-200 dark:border-gray-700 rounded-lg bg-gradient-to-br from-purple-50 via-blue-50 to-blue-100 dark:from-blue-950 dark:to-slate-800 p-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex-1">
                 <h3 className="text-xl text-gray-900 dark:text-white mb-2 font-bold sm:text-3xl">
@@ -123,9 +122,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               </div>
               
               <div className="flex gap-2 flex-wrap justify-end">
-                {currentDecision && <ShareButton decision={currentDecision} />}
                 {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
-                <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm" aria-label="Commencer une nouvelle analyse">
+                <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm h-9" aria-label="Commencer une nouvelle analyse">
                   <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
                   <span className="hidden sm:inline">Nouvelle analyse</span>
                   <span className="sm:hidden">Nouveau</span>
@@ -187,34 +185,35 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 </div>}
             </div>
           </div>
+
+          {/* Liens utiles moved to bottom with separator */}
+          {(result.infoLinks && result.infoLinks.length > 0 || result.shoppingLinks && result.shoppingLinks.length > 0) && (
+            <>
+              <Separator className="my-6" />
+              <div>
+                <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
+                  📚 Liens utiles
+                </h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {result.infoLinks && result.infoLinks.length > 0 && <div>
+                      <h4 className="font-medium mb-3">📚 Ressources d'information</h4>
+                      <div className="space-y-2">
+                        {result.infoLinks.map((link, index) => <ValidatedLink key={index} link={link} fallbackSearchQuery={dilemma} className="block p-2 rounded border hover:bg-muted text-sm" />)}
+                      </div>
+                    </div>}
+                  
+                  {result.shoppingLinks && result.shoppingLinks.length > 0 && <div>
+                      <h4 className="font-medium mb-3">🛒 Liens d'achat</h4>
+                      <div className="space-y-2">
+                        {result.shoppingLinks.map((link, index) => <ValidatedLink key={index} link={link} fallbackSearchQuery={`acheter ${result.recommendation}`} className="block p-2 rounded border hover:bg-muted text-sm" />)}
+                      </div>
+                    </div>}
+                </div>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
-
-      {/* Liens utiles */}
-      {(result.infoLinks && result.infoLinks.length > 0 || result.shoppingLinks && result.shoppingLinks.length > 0) && <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-              📚 Liens utiles
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 gap-6">
-              {result.infoLinks && result.infoLinks.length > 0 && <div>
-                  <h4 className="font-medium mb-3">📚 Ressources d'information</h4>
-                  <div className="space-y-2">
-                    {result.infoLinks.map((link, index) => <ValidatedLink key={index} link={link} fallbackSearchQuery={dilemma} className="block p-2 rounded border hover:bg-muted text-sm" />)}
-                  </div>
-                </div>}
-              
-              {result.shoppingLinks && result.shoppingLinks.length > 0 && <div>
-                  <h4 className="font-medium mb-3">🛒 Liens d'achat</h4>
-                  <div className="space-y-2">
-                    {result.shoppingLinks.map((link, index) => <ValidatedLink key={index} link={link} fallbackSearchQuery={`acheter ${result.recommendation}`} className="block p-2 rounded border hover:bg-muted text-sm" />)}
-                  </div>
-                </div>}
-            </div>
-          </CardContent>
-        </Card>}
 
       <Card>
         <CardHeader>
