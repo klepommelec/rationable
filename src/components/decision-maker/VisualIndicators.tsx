@@ -38,9 +38,9 @@ export const VisualIndicators: React.FC<VisualIndicatorsProps> = ({
     return 'bg-red-500';
   };
   const getScoreIcon = (score: number, index: number) => {
-    if (index === 0) return <Award className="h-4 w-4 text-yellow-600" />;
-    if (index === 1) return <Medal className="h-4 w-4 text-gray-500" />;
-    if (index === 2) return <Star className="h-4 w-4 text-amber-600" />;
+    if (index === 0) return;
+    if (index === 1) return;
+    if (index === 2) return;
     return null;
   };
   const getTrendIcon = (score: number) => {
