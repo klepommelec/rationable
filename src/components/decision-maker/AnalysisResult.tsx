@@ -140,11 +140,50 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             {result.breakdown.length >= 2 && (() => {
             const secondBest = result.breakdown.filter(item => item.option !== topOption.option).reduce((prev, current) => prev.score > current.score ? prev : current);
             const scoreDifference = topOption.score - secondBest.score;
-            return scoreDifference > 5 && <div className="mt-3 p-2 bg-white rounded-md border border-gray-200">
-                  <p className="text-sm text-gray-950 font-normal">
-                    <strong className="font-mono">+{scoreDifference} points</strong> d'avantage sur la deuxième meilleure option
-                  </p>
-                </div>;
+            return scoreDifference > 5 && (
+              <div className="mt-3">
+                <Collapsible defaultOpen={false}>
+                  <CollapsibleTrigger className="flex items-center justify-between w-full group p-2 bg-white rounded-md border border-gray-200 hover:bg-gray-50 transition-colors">
+                    <p className="text-sm text-gray-950 font-normal">
+                      <strong className="font-mono">+{scoreDifference} points</strong> d'avantage sur la deuxième meilleure option
+                    </p>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent className="mt-2 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                    <p className="text-sm text-blue-900 mb-4">
+                      Les vacances à vélo en Bretagne sont recommandées car elles offrent une empreinte carbone extrêmement faible grâce à 
+                      l'utilisation d'un mode de transport non polluant. De plus, la région est accessible en train depuis de nombreuses villes 
+                      françaises, ce qui réduit encore l'empreinte carbone. Les paysages côtiers, les pistes cyclables et la richesse culturelle de 
+                      la Bretagne offrent une multitude d'activités, et le coût peut être maîtrisé en choisissant des hébergements chez l'habitant 
+                      ou en camping.
+                    </p>
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Points clés de l'analyse :</h4>
+                      <ul className="space-y-1">
+                        <li className="text-sm text-muted-foreground flex items-start gap-2">
+                          <span className="text-blue-500 mt-1">•</span>
+                          L'option recommandée se démarque clairement avec un score excellent.
+                        </li>
+                        <li className="text-sm text-muted-foreground flex items-start gap-2">
+                          <span className="text-blue-500 mt-1">•</span>
+                          Il y a une nette différence entre les meilleures et moins bonnes options.
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                      <p className="text-sm text-green-900">
+                        <strong>{cleanOptionName}</strong> obtient 
+                        le score le plus élevé ({topOption.score}/100) grâce à ses avantages clés : Empreinte carbone très 
+                        faible, Accès facile en train.
+                      </p>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
+            );
           })()}
           </div>
         </CardHeader>
