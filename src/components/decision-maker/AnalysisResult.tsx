@@ -98,9 +98,9 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               </div>
             </div>
             
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap items-center">
               {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
-              <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm h-10" aria-label="Commencer une nouvelle analyse">
+              <Button variant="outline" onClick={clearSession} size="sm" className="text-xs sm:text-sm" aria-label="Commencer une nouvelle analyse">
                 <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
                 <span className="hidden sm:inline">Nouvelle analyse</span>
                 <span className="sm:hidden">Nouveau</span>
