@@ -3,13 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { RotateCcw, BarChart3, Lightbulb, Target, AlertTriangle, TrendingUp } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { RotateCcw, BarChart3, Lightbulb, Target, AlertTriangle, TrendingUp, Link, ChevronDown } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { VisualIndicators } from './VisualIndicators';
 import { EnhancedRadarChart } from './EnhancedRadarChart';
 import { MetricsVisual } from './MetricsVisual';
 import { ExportMenu } from '../ExportMenu';
 import ValidatedLink from '../ValidatedLink';
+
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
@@ -18,6 +20,7 @@ interface AnalysisResultProps {
   currentDecision?: any;
   dilemma?: string;
 }
+
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
   isUpdating,
@@ -27,6 +30,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   dilemma
 }) => {
   if (!result) return null;
+
   const topOption = result.breakdown.reduce((prev, current) => current.score > prev.score ? current : prev);
 
   // Logic from DecisionExplanation
@@ -74,19 +78,31 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
     return insights;
   };
   const cleanOptionName = topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim();
+
   return <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
       {/* Section Recommandation IA améliorée */}
       <Card className="relative overflow-hidden border bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950 rounded-xl">
         <CardHeader className="relative">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white animate-pulse rounded-full">
-              <img src="/lovable-uploads/b5fcad52-5808-4dc8-b6ff-0cd99578dade.png" alt="Rationable" className="h-6 w-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg text-gray-950 font-medium">Résultat de l'analyse IA</h2>
+          <div className="flex items-start justify-between gap-4 mb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white animate-pulse rounded-full">
+                <img src="/lovable-uploads/b5fcad52-5808-4dc8-b6ff-0cd99578dade.png" alt="Rationable" className="h-6 w-6" />
               </div>
-              <p className="text-sm text-muted-foreground">Votre option rationnelle identifiée par l'analyse</p>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg text-gray-950 font-medium">Résultat de l'analyse IA</h2>
+                </div>
+                <p className="text-sm text-muted-foreground">Votre option rationnelle identifiée par l'analyse</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 flex-wrap">
+              {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
+              <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm h-10" aria-label="Commencer une nouvelle analyse">
+                <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
+                <span className="hidden sm:inline">Nouvelle analyse</span>
+                <span className="sm:hidden">Nouveau</span>
+              </Button>
             </div>
           </div>
           
@@ -117,15 +133,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                   </Badge>
                 </div>
               </div>
-              
-              <div className="flex gap-2 flex-wrap justify-end">
-                {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
-                <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm h-9" aria-label="Commencer une nouvelle analyse">
-                  <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
-                  <span className="hidden sm:inline">Nouvelle analyse</span>
-                  <span className="sm:hidden">Nouveau</span>
-                </Button>
-              </div>
             </div>
             
             {result.breakdown.length >= 2 && (() => {
@@ -152,43 +159,52 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </div>
           </div>
 
-          {/* Moved "Pourquoi cette recommandation ?" section to the bottom */}
+          {/* "Pourquoi cette recommandation ?" section - now collapsible */}
           <div className="border-t pt-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Lightbulb className="h-5 w-5" />
-              <h3 className="text-lg font-semibold">Pourquoi cette recommandation ?</h3>
-            </div>
-            
-            <div className="space-y-4 py-[12px] border rounded-xl px-[12px] shadow-neutral-200 bg-gray-100">
-              {result.description && <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-                  <p className="text-sm text-blue-900">{result.description}</p>
-                </div>}
+            <Collapsible defaultOpen={false}>
+              <CollapsibleTrigger className="flex items-center justify-between w-full group">
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5" />
+                  <h3 className="text-lg font-semibold">Pourquoi cette recommandation ?</h3>
+                </div>
+                <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              </CollapsibleTrigger>
+              
+              <CollapsibleContent className="mt-4">
+                <div className="space-y-4">
+                  {result.description && <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                      <p className="text-sm text-blue-900">{result.description}</p>
+                    </div>}
 
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm">Points clés de l'analyse :</h4>
-                <ul className="space-y-1">
-                  {getKeyInsights().map((insight, index) => <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="text-blue-500 mt-1">•</span>
-                      {insight}
-                    </li>)}
-                </ul>
-              </div>
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm">Points clés de l'analyse :</h4>
+                    <ul className="space-y-1">
+                      {getKeyInsights().map((insight, index) => <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                          <span className="text-blue-500 mt-1">•</span>
+                          {insight}
+                        </li>)}
+                    </ul>
+                  </div>
 
-              {topOption && <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-sm text-green-900">
-                    <strong>{cleanOptionName}</strong> obtient 
-                    le score le plus élevé ({topOption.score}/100) grâce à ses avantages clés : {topOption.pros.slice(0, 2).join(', ')}.
-                  </p>
-                </div>}
-            </div>
+                  {topOption && <div className="p-3 bg-green-50 rounded-lg">
+                      <p className="text-sm text-green-900">
+                        <strong>{cleanOptionName}</strong> obtient 
+                        le score le plus élevé ({topOption.score}/100) grâce à ses avantages clés : {topOption.pros.slice(0, 2).join(', ')}.
+                      </p>
+                    </div>}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
 
           {/* Liens utiles moved to bottom with separator */}
-          {(result.infoLinks && result.infoLinks.length > 0 || result.shoppingLinks && result.shoppingLinks.length > 0) && <>
+          {(result.infoLinks && result.infoLinks.length > 0 || result.shoppingLinks && result.shoppingLinks.length > 0) && (
+            <>
               <Separator className="my-6" />
               <div>
                 <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
-                  📚 Liens utiles
+                  <Link className="h-5 w-5" />
+                  Liens utiles
                 </h3>
                 <div className="grid md:grid-cols-2 gap-6">
                   {result.infoLinks && result.infoLinks.length > 0 && <div>
@@ -198,7 +214,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                       </div>
                     </div>}
                   
-                  {result.shoppingLinks && result.shoppingLinks.length > 0 && <div className="pt-8 ">
+                  {result.shoppingLinks && result.shoppingLinks.length > 0 && <div>
                       <h4 className="font-medium mb-3">🛒 Liens d'achat</h4>
                       <div className="space-y-2">
                         {result.shoppingLinks.map((link, index) => <ValidatedLink key={index} link={link} fallbackSearchQuery={`acheter ${result.recommendation}`} className="block p-2 rounded border hover:bg-muted text-sm" />)}
@@ -206,7 +222,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     </div>}
                 </div>
               </div>
-            </>}
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -236,4 +253,5 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
       </Card>
     </div>;
 };
+
 export default AnalysisResult;
