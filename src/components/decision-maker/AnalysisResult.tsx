@@ -134,7 +134,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             {result.breakdown.length >= 2 && (() => {
             const secondBest = result.breakdown.filter(item => item.option !== topOption.option).reduce((prev, current) => prev.score > current.score ? prev : current);
             const scoreDifference = topOption.score - secondBest.score;
-            return scoreDifference > 5 && <div className="mt-3 p-2 bg-gray-100 rounded-md border border-gray-200">
+            return scoreDifference > 5 && <div className="mt-3 p-2 bg-white rounded-md border border-gray-200">
                   <p className="text-sm text-gray-950 font-normal">
                     <strong className="font-mono">+{scoreDifference} points</strong> d'avantage sur la deuxième meilleure option
                   </p>
