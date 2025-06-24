@@ -4,11 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 // Cache pour éviter de régénérer les mêmes images
 const imageCache = new Map<string, string>();
 
+// GÉNÉRATION D'IMAGES DÉSACTIVÉE - Mode économie
+const IMAGE_GENERATION_ENABLED = false;
+
 // File d'attente pour limiter les requêtes simultanées
 class RequestQueue {
   private queue: (() => Promise<any>)[] = [];
   private running = 0;
-  private maxConcurrent = 2; // Limite le nombre de requêtes simultanées
+  private maxConcurrent = 2;
 
   async add<T>(fn: () => Promise<T>): Promise<T> {
     return new Promise((resolve, reject) => {
@@ -65,8 +68,14 @@ export const generateContextualPrompt = (option: string, dilemma?: string): stri
   return `${cleanOption}, ${style}`;
 };
 
-// Fonction pour générer une image via l'edge function (optimisée pour la vitesse)
+// Fonction pour générer une image via l'edge function (DÉSACTIVÉE)
 export const generateContextualImage = async (option: string, dilemma?: string): Promise<string | null> => {
+  // GÉNÉRATION DÉSACTIVÉE - Retourner null immédiatement
+  if (!IMAGE_GENERATION_ENABLED) {
+    console.log('Image generation is disabled to save credits');
+    return null;
+  }
+
   const cacheKey = `${option}-${dilemma}`;
   
   // Vérifier le cache d'abord
@@ -78,50 +87,17 @@ export const generateContextualImage = async (option: string, dilemma?: string):
     const prompt = generateContextualPrompt(option, dilemma);
     console.log('Generating image with optimized prompt:', prompt);
     
-    // Utiliser la file d'attente pour éviter de surcharger les APIs
-    const result = await requestQueue.add(async () => {
-      // Essayer FLUX.1-schnell d'abord (plus rapide)
-      const { data, error } = await supabase.functions.invoke('generate-image-hf', {
-        body: { prompt }
-      });
-      
-      if (error || !data?.success) {
-        // Fallback rapide vers DALL-E 2 si FLUX échoue
-        console.log('FLUX failed, trying DALL-E 2...');
-        const fallbackData = await supabase.functions.invoke('generate-image', {
-          body: { prompt: prompt.substring(0, 800) } // Limiter la taille pour DALL-E
-        });
-        
-        if (fallbackData.error || !fallbackData.data?.success) {
-          throw new Error('Both image generation methods failed');
-        }
-        
-        return fallbackData.data.imageUrl;
-      }
-      
-      return data.imageUrl;
-    });
-    
-    if (result) {
-      // Mettre en cache l'image générée
-      imageCache.set(cacheKey, result);
-      return result;
-    }
-    
+    // Code de génération désactivé
     return null;
+    
   } catch (error) {
     console.error('Error generating contextual image:', error);
     return null;
   }
 };
 
-// Fonction pour créer des placeholders variés et contextuels (optimisée)
+// Fonction pour créer des placeholders variés et contextuels (DÉSACTIVÉE)
 export const getVariedPlaceholder = (option: string, index: number = 0): string => {
-  const cleanOption = option.replace(/^Option\s+\d+:\s*/i, '').trim();
-  const colors = ['4F46E5', '7C3AED', 'DC2626', '059669', 'D97706', '0891B2'];
-  const color = colors[index % colors.length];
-  const text = encodeURIComponent(cleanOption.slice(0, 12));
-  
-  // Utiliser une URL plus simple et rapide
-  return `https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=300&fit=crop&auto=format&overlay-text=${text}&overlay-color=${color}`;
+  // PLACEHOLDERS DÉSACTIVÉS - Retourner une chaîne vide
+  return '';
 };
