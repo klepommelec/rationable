@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RotateCcw, BarChart3, Lightbulb, Target, AlertTriangle, TrendingUp, Sparkles } from 'lucide-react';
+import { RotateCcw, BarChart3, Lightbulb, Target, AlertTriangle, TrendingUp } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { VisualIndicators } from './VisualIndicators';
 import { EnhancedRadarChart } from './EnhancedRadarChart';
@@ -83,7 +84,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         <CardHeader className="relative">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white animate-pulse">
-              <Sparkles className="h-6 w-6" />
+              <img src="/lovable-uploads/b5fcad52-5808-4dc8-b6ff-0cd99578dade.png" alt="Rationable" className="h-6 w-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
