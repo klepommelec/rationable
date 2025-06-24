@@ -3,7 +3,9 @@ import DecisionMaker from "@/components/DecisionMaker";
 
 const Index = () => {
   return (
-    <DecisionMaker />
+    <div className="max-w-6xl mx-auto">
+      <DecisionMaker />
+    </div>
   );
 };
 
