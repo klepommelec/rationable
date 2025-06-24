@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -77,19 +78,31 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
     return insights;
   };
   const cleanOptionName = topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim();
+
   return <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
       {/* Section Recommandation IA améliorée */}
       <Card className="relative overflow-hidden border bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950 rounded-xl">
         <CardHeader className="relative">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white animate-pulse rounded-full">
-              <img src="/lovable-uploads/b5fcad52-5808-4dc8-b6ff-0cd99578dade.png" alt="Rationable" className="h-6 w-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg text-gray-950 font-medium">Résultat de l'analyse IA</h2>
+          <div className="flex items-start justify-between gap-4 mb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white animate-pulse rounded-full">
+                <img src="/lovable-uploads/b5fcad52-5808-4dc8-b6ff-0cd99578dade.png" alt="Rationable" className="h-6 w-6" />
               </div>
-              <p className="text-sm text-muted-foreground">Votre option rationnelle identifiée par l'analyse</p>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg text-gray-950 font-medium">Résultat de l'analyse IA</h2>
+                </div>
+                <p className="text-sm text-muted-foreground">Votre option rationnelle identifiée par l'analyse</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 flex-wrap">
+              {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
+              <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm h-10" aria-label="Commencer une nouvelle analyse">
+                <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
+                <span className="hidden sm:inline">Nouvelle analyse</span>
+                <span className="sm:hidden">Nouveau</span>
+              </Button>
             </div>
           </div>
           
@@ -120,15 +133,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                   </Badge>
                 </div>
               </div>
-              
-              <div className="flex gap-2 flex-wrap justify-end">
-                {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
-                <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm h-9" aria-label="Commencer une nouvelle analyse">
-                  <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
-                  <span className="hidden sm:inline">Nouvelle analyse</span>
-                  <span className="sm:hidden">Nouveau</span>
-                </Button>
-              </div>
             </div>
             
             {result.breakdown.length >= 2 && (() => {
@@ -155,7 +159,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </div>
           </div>
 
-          {/* Moved "Pourquoi cette recommandation ?" section to the bottom */}
+          {/* "Pourquoi cette recommandation ?" section */}
           <div className="border-t pt-4">
             <div className="flex items-center gap-2 mb-4">
               <Lightbulb className="h-5 w-5" />
