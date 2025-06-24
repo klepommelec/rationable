@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,6 @@ import { MetricsVisual } from './MetricsVisual';
 import { ExportMenu } from '../ExportMenu';
 import ShareButton from '../ShareButton';
 import ValidatedLink from '../ValidatedLink';
-
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
@@ -20,7 +18,6 @@ interface AnalysisResultProps {
   currentDecision?: any;
   dilemma?: string;
 }
-
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
   isUpdating,
@@ -30,29 +27,18 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   dilemma
 }) => {
   if (!result) return null;
-
-  const topOption = result.breakdown.reduce((prev, current) => 
-    current.score > prev.score ? current : prev
-  );
+  const topOption = result.breakdown.reduce((prev, current) => current.score > prev.score ? current : prev);
 
   // Logic from DecisionExplanation
-  const scoreRange = result.breakdown.length > 0 ? 
-    Math.max(...result.breakdown.map(item => item.score)) - 
-    Math.min(...result.breakdown.map(item => item.score)) : 0;
-
+  const scoreRange = result.breakdown.length > 0 ? Math.max(...result.breakdown.map(item => item.score)) - Math.min(...result.breakdown.map(item => item.score)) : 0;
   const getConfidenceLevel = () => {
     if (!topOption || result.breakdown.length < 2) return {
       level: "Moyenne",
       color: "bg-yellow-100 text-yellow-800",
       icon: AlertTriangle
     };
-
-    const secondBest = result.breakdown
-      .filter(item => item.option !== topOption.option)
-      .reduce((prev, current) => prev.score > current.score ? prev : current);
-    
+    const secondBest = result.breakdown.filter(item => item.option !== topOption.option).reduce((prev, current) => prev.score > current.score ? prev : current);
     const scoreDifference = topOption.score - secondBest.score;
-    
     if (scoreDifference >= 20) return {
       level: "Très Élevée",
       color: "bg-green-100 text-green-800",
@@ -69,40 +55,28 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
       icon: AlertTriangle
     };
   };
-
   const confidence = getConfidenceLevel();
   const ConfidenceIcon = confidence.icon;
-
   const getKeyInsights = () => {
     const insights = [];
-    
     if (scoreRange < 15) {
       insights.push("Les options sont très proches en termes de qualité - votre choix dépendra surtout de vos préférences personnelles.");
     }
-    
     if (topOption && topOption.score >= 85) {
       insights.push("L'option recommandée se démarque clairement avec un score excellent.");
     }
-    
     if (result.breakdown.length >= 3) {
-      const medianScore = result.breakdown
-        .map(item => item.score)
-        .sort((a, b) => a - b)[Math.floor(result.breakdown.length / 2)];
-      
+      const medianScore = result.breakdown.map(item => item.score).sort((a, b) => a - b)[Math.floor(result.breakdown.length / 2)];
       if (topOption && topOption.score - medianScore >= 15) {
         insights.push("Il y a une nette différence entre les meilleures et moins bonnes options.");
       }
     }
-    
     return insights;
   };
-
   const cleanOptionName = topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim();
-
-  return (
-    <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
+  return <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
       {/* Section Recommandation IA améliorée */}
-      <Card className="relative overflow-hidden border-2 border-gradient-to-r from-blue-200 to-purple-200 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950 dark:border-blue-500/30">
+      <Card className="relative overflow-hidden border-gradient-to-r from-blue-200 to-purple-200 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950 dark:border-blue-500/30">
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-yellow-300/20 to-transparent rounded-bl-full"></div>
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-300/20 to-transparent rounded-tr-full"></div>
         
@@ -130,10 +104,9 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     <span className="text-sm font-medium text-gray-500">Score :</span>
                     <div className="flex items-center gap-2">
                       <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-1000 ease-out" 
-                          style={{ width: `${topOption.score}%` }}
-                        ></div>
+                        <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-1000 ease-out" style={{
+                        width: `${topOption.score}%`
+                      }}></div>
                       </div>
                       <span className="font-mono text-gray-500 text-sm">
                         {topOption.score}/100
@@ -151,12 +124,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               <div className="flex gap-2 flex-wrap justify-end">
                 {currentDecision && <ShareButton decision={currentDecision} />}
                 {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
-                <Button 
-                  variant="outline" 
-                  onClick={clearSession} 
-                  className="text-xs sm:text-sm" 
-                  aria-label="Commencer une nouvelle analyse"
-                >
+                <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm" aria-label="Commencer une nouvelle analyse">
                   <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
                   <span className="hidden sm:inline">Nouvelle analyse</span>
                   <span className="sm:hidden">Nouveau</span>
@@ -165,19 +133,14 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </div>
             
             {result.breakdown.length >= 2 && (() => {
-              const secondBest = result.breakdown
-                .filter(item => item.option !== topOption.option)
-                .reduce((prev, current) => prev.score > current.score ? prev : current);
-              const scoreDifference = topOption.score - secondBest.score;
-              
-              return scoreDifference > 5 && (
-                <div className="mt-3 p-2 bg-gray-100 rounded-md border border-gray-200">
+            const secondBest = result.breakdown.filter(item => item.option !== topOption.option).reduce((prev, current) => prev.score > current.score ? prev : current);
+            const scoreDifference = topOption.score - secondBest.score;
+            return scoreDifference > 5 && <div className="mt-3 p-2 bg-gray-100 rounded-md border border-gray-200">
                   <p className="text-sm text-gray-950 font-normal">
                     <strong className="font-mono">+{scoreDifference} points</strong> d'avantage sur la deuxième meilleure option
                   </p>
-                </div>
-              );
-            })()}
+                </div>;
+          })()}
           </div>
         </CardHeader>
         
@@ -187,15 +150,11 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           <div className="grid grid-cols-2 gap-2 mb-6">
             <div className="text-green-700 bg-green-50 p-2 rounded">
               <div className="font-medium mb-1 text-xs pb-0.5">Points forts ({topOption.pros.length})</div>
-              {topOption.pros.map((pro, i) => (
-                <div key={i} className="text-xs text-black py-[0.5px]">• {pro}</div>
-              ))}
+              {topOption.pros.map((pro, i) => <div key={i} className="text-xs text-black py-[0.5px]">• {pro}</div>)}
             </div>
             <div className="text-red-700 bg-red-50 p-2 rounded">
               <div className="font-medium mb-1 text-xs pb-0.5">Points faibles ({topOption.cons.length})</div>
-              {topOption.cons.map((con, i) => (
-                <div key={i} className="text-xs text-black py-px">• {con}</div>
-              ))}
+              {topOption.cons.map((con, i) => <div key={i} className="text-xs text-black py-px">• {con}</div>)}
             </div>
           </div>
 
@@ -207,40 +166,33 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </div>
             
             <div className="space-y-4">
-              {result.description && (
-                <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+              {result.description && <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
                   <p className="text-sm text-blue-900">{result.description}</p>
-                </div>
-              )}
+                </div>}
 
               <div className="space-y-2">
                 <h4 className="font-medium text-sm">Points clés de l'analyse :</h4>
                 <ul className="space-y-1">
-                  {getKeyInsights().map((insight, index) => (
-                    <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                  {getKeyInsights().map((insight, index) => <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
                       <span className="text-blue-500 mt-1">•</span>
                       {insight}
-                    </li>
-                  ))}
+                    </li>)}
                 </ul>
               </div>
 
-              {topOption && (
-                <div className="p-3 bg-green-50 rounded-lg">
+              {topOption && <div className="p-3 bg-green-50 rounded-lg">
                   <p className="text-sm text-green-900">
                     <strong>{cleanOptionName}</strong> obtient 
                     le score le plus élevé ({topOption.score}/100) grâce à ses avantages clés : {topOption.pros.slice(0, 2).join(', ')}.
                   </p>
-                </div>
-              )}
+                </div>}
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Liens utiles */}
-      {(result.infoLinks && result.infoLinks.length > 0 || result.shoppingLinks && result.shoppingLinks.length > 0) && (
-        <Card>
+      {(result.infoLinks && result.infoLinks.length > 0 || result.shoppingLinks && result.shoppingLinks.length > 0) && <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               📚 Liens utiles
@@ -248,41 +200,22 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-6">
-              {result.infoLinks && result.infoLinks.length > 0 && (
-                <div>
+              {result.infoLinks && result.infoLinks.length > 0 && <div>
                   <h4 className="font-medium mb-3">📚 Ressources d'information</h4>
                   <div className="space-y-2">
-                    {result.infoLinks.map((link, index) => (
-                      <ValidatedLink 
-                        key={index} 
-                        link={link} 
-                        fallbackSearchQuery={dilemma} 
-                        className="block p-2 rounded border hover:bg-muted text-sm" 
-                      />
-                    ))}
+                    {result.infoLinks.map((link, index) => <ValidatedLink key={index} link={link} fallbackSearchQuery={dilemma} className="block p-2 rounded border hover:bg-muted text-sm" />)}
                   </div>
-                </div>
-              )}
+                </div>}
               
-              {result.shoppingLinks && result.shoppingLinks.length > 0 && (
-                <div>
+              {result.shoppingLinks && result.shoppingLinks.length > 0 && <div>
                   <h4 className="font-medium mb-3">🛒 Liens d'achat</h4>
                   <div className="space-y-2">
-                    {result.shoppingLinks.map((link, index) => (
-                      <ValidatedLink 
-                        key={index} 
-                        link={link} 
-                        fallbackSearchQuery={`acheter ${result.recommendation}`} 
-                        className="block p-2 rounded border hover:bg-muted text-sm" 
-                      />
-                    ))}
+                    {result.shoppingLinks.map((link, index) => <ValidatedLink key={index} link={link} fallbackSearchQuery={`acheter ${result.recommendation}`} className="block p-2 rounded border hover:bg-muted text-sm" />)}
                   </div>
-                </div>
-              )}
+                </div>}
             </div>
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
       <Card>
         <CardHeader>
@@ -308,8 +241,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default AnalysisResult;
