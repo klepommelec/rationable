@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -140,11 +141,45 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             {result.breakdown.length >= 2 && (() => {
             const secondBest = result.breakdown.filter(item => item.option !== topOption.option).reduce((prev, current) => prev.score > current.score ? prev : current);
             const scoreDifference = topOption.score - secondBest.score;
-            return scoreDifference > 5 && <div className="mt-3 p-2 bg-white rounded-md border border-gray-200">
+            return scoreDifference > 5 && (
+              <Collapsible defaultOpen={false} className="mt-3">
+                <CollapsibleTrigger className="flex items-center justify-between w-full group p-2 bg-white rounded-md border border-gray-200 hover:bg-gray-100 transition-colors data-[state=open]:rounded-b-none">
                   <p className="text-sm text-gray-950 font-normal">
                     <strong className="font-mono">+{scoreDifference} points</strong> d'avantage sur la deuxième meilleure option
                   </p>
-                </div>;
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                
+                <CollapsibleContent className="border border-t-0 border-gray-200 rounded-b-md bg-white p-4 space-y-4">
+                  {result.description && (
+                    <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                      <p className="text-sm text-blue-900">{result.description}</p>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm">Points clés de l'analyse :</h4>
+                    <ul className="space-y-1">
+                      {getKeyInsights().map((insight, index) => (
+                        <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                          <span className="text-blue-500 mt-1">•</span>
+                          {insight}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {topOption && (
+                    <div className="p-3 bg-green-50 rounded-lg">
+                      <p className="text-sm text-green-900">
+                        <strong>{cleanOptionName}</strong> obtient 
+                        le score le plus élevé ({topOption.score}/100) grâce à ses avantages clés : {topOption.pros.slice(0, 2).join(', ')}.
+                      </p>
+                    </div>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
+            );
           })()}
           </div>
         </CardHeader>
@@ -160,46 +195,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               {topOption.cons.map((con, i) => <div key={i} className="text-xs text-black py-px">• {con}</div>)}
             </div>
           </div>
-
-          {/* "Pourquoi cette recommandation ?" section - collapsible and properly contained */}
-          <Collapsible defaultOpen={false}>
-            <CollapsibleTrigger className="flex items-center justify-between w-full group px-3 py-3 rounded-lg border bg-white hover:bg-gray-100 transition-colors data-[state=open]:rounded-b-none">
-              <div className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5" />
-                <h3 className="text-lg font-semibold">Pourquoi cette recommandation ?</h3>
-              </div>
-              <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
-            </CollapsibleTrigger>
-            
-            <CollapsibleContent className="border border-t-0 border-gray-200 rounded-b-lg bg-white p-4 space-y-4">
-              {result.description && (
-                <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-                  <p className="text-sm text-blue-900">{result.description}</p>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm">Points clés de l'analyse :</h4>
-                <ul className="space-y-1">
-                  {getKeyInsights().map((insight, index) => (
-                    <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="text-blue-500 mt-1">•</span>
-                      {insight}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {topOption && (
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-sm text-green-900">
-                    <strong>{cleanOptionName}</strong> obtient 
-                    le score le plus élevé ({topOption.score}/100) grâce à ses avantages clés : {topOption.pros.slice(0, 2).join(', ')}.
-                  </p>
-                </div>
-              )}
-            </CollapsibleContent>
-          </Collapsible>
 
           {/* Liens utiles - no separator, directly integrated */}
           {(result.infoLinks && result.infoLinks.length > 0 || result.shoppingLinks && result.shoppingLinks.length > 0) && (
