@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { RotateCcw, BarChart3, Lightbulb, Target, AlertTriangle, TrendingUp } from 'lucide-react';
+import { RotateCcw, BarChart3, Lightbulb, Target, AlertTriangle, TrendingUp, Link } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { VisualIndicators } from './VisualIndicators';
 import { EnhancedRadarChart } from './EnhancedRadarChart';
@@ -196,7 +195,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               <Separator className="my-6" />
               <div>
                 <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
-                  📚 Liens utiles
+                  <Link className="h-5 w-5" />
+                  Liens utiles
                 </h3>
                 <div className="grid md:grid-cols-2 gap-6">
                   {result.infoLinks && result.infoLinks.length > 0 && <div>
