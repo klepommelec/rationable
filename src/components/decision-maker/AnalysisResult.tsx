@@ -76,7 +76,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   const cleanOptionName = topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim();
   return <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
       {/* Section Recommandation IA améliorée */}
-      <Card className="relative overflow-hidden border-gradient-to-br from-gray-100-to-blue-100 bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950">
+      <Card className="relative overflow-hidden border-gradient-to-br from-gray-100-to-red-100 bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950">
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-yellow-300/20 to-transparent rounded-bl-full"></div>
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-300/20 to-transparent rounded-tr-full"></div>
         
