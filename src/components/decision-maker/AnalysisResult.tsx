@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { RotateCcw, BarChart3, Lightbulb, Target, AlertTriangle, TrendingUp, Link } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { RotateCcw, BarChart3, Lightbulb, Target, AlertTriangle, TrendingUp, Link, ChevronDown } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { VisualIndicators } from './VisualIndicators';
 import { EnhancedRadarChart } from './EnhancedRadarChart';
@@ -158,35 +159,42 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </div>
           </div>
 
-          {/* "Pourquoi cette recommandation ?" section */}
+          {/* "Pourquoi cette recommandation ?" section - now collapsible */}
           <div className="border-t pt-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Lightbulb className="h-5 w-5" />
-              <h3 className="text-lg font-semibold">Pourquoi cette recommandation ?</h3>
-            </div>
-            
-            <div className="space-y-4">
-              {result.description && <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-                  <p className="text-sm text-blue-900">{result.description}</p>
-                </div>}
+            <Collapsible defaultOpen={false}>
+              <CollapsibleTrigger className="flex items-center justify-between w-full group">
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5" />
+                  <h3 className="text-lg font-semibold">Pourquoi cette recommandation ?</h3>
+                </div>
+                <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              </CollapsibleTrigger>
+              
+              <CollapsibleContent className="mt-4">
+                <div className="space-y-4">
+                  {result.description && <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                      <p className="text-sm text-blue-900">{result.description}</p>
+                    </div>}
 
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm">Points clés de l'analyse :</h4>
-                <ul className="space-y-1">
-                  {getKeyInsights().map((insight, index) => <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="text-blue-500 mt-1">•</span>
-                      {insight}
-                    </li>)}
-                </ul>
-              </div>
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm">Points clés de l'analyse :</h4>
+                    <ul className="space-y-1">
+                      {getKeyInsights().map((insight, index) => <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                          <span className="text-blue-500 mt-1">•</span>
+                          {insight}
+                        </li>)}
+                    </ul>
+                  </div>
 
-              {topOption && <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-sm text-green-900">
-                    <strong>{cleanOptionName}</strong> obtient 
-                    le score le plus élevé ({topOption.score}/100) grâce à ses avantages clés : {topOption.pros.slice(0, 2).join(', ')}.
-                  </p>
-                </div>}
-            </div>
+                  {topOption && <div className="p-3 bg-green-50 rounded-lg">
+                      <p className="text-sm text-green-900">
+                        <strong>{cleanOptionName}</strong> obtient 
+                        le score le plus élevé ({topOption.score}/100) grâce à ses avantages clés : {topOption.pros.slice(0, 2).join(', ')}.
+                      </p>
+                    </div>}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
 
           {/* Liens utiles moved to bottom with separator */}
