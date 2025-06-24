@@ -10,6 +10,7 @@ import { MetricsVisual } from './MetricsVisual';
 import { ExportMenu } from '../ExportMenu';
 import ShareButton from '../ShareButton';
 import ValidatedLink from '../ValidatedLink';
+
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
@@ -18,6 +19,7 @@ interface AnalysisResultProps {
   currentDecision?: any;
   dilemma?: string;
 }
+
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
   isUpdating,
@@ -27,6 +29,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   dilemma
 }) => {
   if (!result) return null;
+
   const topOption = result.breakdown.reduce((prev, current) => current.score > prev.score ? current : prev);
 
   // Logic from DecisionExplanation
@@ -77,9 +80,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   return <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
       {/* Section Recommandation IA améliorée */}
       <Card className="relative overflow-hidden border bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950 rounded-xl">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-yellow-300/20 to-transparent rounded-bl-full"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-300/20 to-transparent rounded-tr-full"></div>
-        
         <CardHeader className="relative">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white animate-pulse rounded-full">
@@ -93,56 +93,54 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </div>
           </div>
           
-          <div className="relative p-[1px] rounded-lg bg-gradient-to-r from-blue-200 via-purple-100 to-pink-200 animate-gradient-x">
-            <div className="relative bg-gradient-to-br from-purple-50 via-blue-50 to-blue-100 dark:from-blue-950 dark:to-slate-800 rounded-lg p-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex-1">
-                  <h3 className="text-xl text-gray-900 dark:text-white mb-2 font-bold sm:text-3xl">
-                    {cleanOptionName}
-                  </h3>
-                  <div className="flex items-center gap-4 flex-wrap">
+          <div className="relative border border-gray-200 dark:border-gray-700 rounded-lg bg-gradient-to-br from-purple-50 via-blue-50 to-blue-100 dark:from-blue-950 dark:to-slate-800 p-4 animate-border-gradient">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex-1">
+                <h3 className="text-xl text-gray-900 dark:text-white mb-2 font-bold sm:text-3xl">
+                  {cleanOptionName}
+                </h3>
+                <div className="flex items-center gap-4 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-500">Score :</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-500">Score :</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-1000 ease-out" style={{
-                          width: `${topOption.score}%`
-                        }}></div>
-                        </div>
-                        <span className="font-mono text-gray-500 text-sm">
-                          {topOption.score}/100
-                        </span>
+                      <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-1000 ease-out" style={{
+                        width: `${topOption.score}%`
+                      }}></div>
                       </div>
+                      <span className="font-mono text-gray-500 text-sm">
+                        {topOption.score}/100
+                      </span>
                     </div>
-                    
-                    <Badge className={`${confidence.color} border-0`}>
-                      <ConfidenceIcon className="h-3 w-3 mr-1" />
-                      Confiance: {confidence.level}
-                    </Badge>
                   </div>
-                </div>
-                
-                <div className="flex gap-2 flex-wrap justify-end">
-                  {currentDecision && <ShareButton decision={currentDecision} />}
-                  {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
-                  <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm" aria-label="Commencer une nouvelle analyse">
-                    <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
-                    <span className="hidden sm:inline">Nouvelle analyse</span>
-                    <span className="sm:hidden">Nouveau</span>
-                  </Button>
+                  
+                  <Badge className={`${confidence.color} border-0`}>
+                    <ConfidenceIcon className="h-3 w-3 mr-1" />
+                    Confiance: {confidence.level}
+                  </Badge>
                 </div>
               </div>
               
-              {result.breakdown.length >= 2 && (() => {
-              const secondBest = result.breakdown.filter(item => item.option !== topOption.option).reduce((prev, current) => prev.score > current.score ? prev : current);
-              const scoreDifference = topOption.score - secondBest.score;
-              return scoreDifference > 5 && <div className="mt-3 p-2 bg-gray-100 rounded-md border border-gray-200">
-                    <p className="text-sm text-gray-950 font-normal">
-                      <strong className="font-mono">+{scoreDifference} points</strong> d'avantage sur la deuxième meilleure option
-                    </p>
-                  </div>;
-            })()}
+              <div className="flex gap-2 flex-wrap justify-end">
+                {currentDecision && <ShareButton decision={currentDecision} />}
+                {currentDecision && <ExportMenu decisions={[]} singleDecision={currentDecision} />}
+                <Button variant="outline" onClick={clearSession} className="text-xs sm:text-sm" aria-label="Commencer une nouvelle analyse">
+                  <RotateCcw className="h-4 w-4 mr-2" aria-hidden="true" />
+                  <span className="hidden sm:inline">Nouvelle analyse</span>
+                  <span className="sm:hidden">Nouveau</span>
+                </Button>
+              </div>
             </div>
+            
+            {result.breakdown.length >= 2 && (() => {
+            const secondBest = result.breakdown.filter(item => item.option !== topOption.option).reduce((prev, current) => prev.score > current.score ? prev : current);
+            const scoreDifference = topOption.score - secondBest.score;
+            return scoreDifference > 5 && <div className="mt-3 p-2 bg-gray-100 rounded-md border border-gray-200">
+                  <p className="text-sm text-gray-950 font-normal">
+                    <strong className="font-mono">+{scoreDifference} points</strong> d'avantage sur la deuxième meilleure option
+                  </p>
+                </div>;
+          })()}
           </div>
         </CardHeader>
         
@@ -245,4 +243,5 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
       </Card>
     </div>;
 };
+
 export default AnalysisResult;
