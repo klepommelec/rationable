@@ -13,18 +13,23 @@ const Layout = () => {
   // Only show share button on the main decision maker page when there's a completed decision
   const currentDecision = location.pathname === '/' && user ? getCurrentDecision() : null;
 
+  // Check if we're on the home page
+  const isHomePage = location.pathname === '/';
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground relative">
-      {/* Dégradé uniquement en thème clair */}
-      <div 
-        className="absolute top-0 left-0 w-full h-full pointer-events-none dark:hidden"
-        style={{
-          backgroundImage: 'url(/lovable-uploads/eec8c18b-38ad-4629-9c00-5c9e97467f34.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center top',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
+      {/* Dégradé uniquement sur la home page et en thème clair */}
+      {isHomePage && (
+        <div 
+          className="absolute top-0 left-0 w-full h-full pointer-events-none dark:hidden"
+          style={{
+            backgroundImage: 'url(/lovable-uploads/eec8c18b-38ad-4629-9c00-5c9e97467f34.png)',
+            backgroundSize: 'contain',
+            backgroundPosition: 'center top',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
+      )}
       
       <div className="relative z-10">
         <Navbar currentDecision={currentDecision} />
