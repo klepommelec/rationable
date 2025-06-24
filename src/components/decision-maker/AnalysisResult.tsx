@@ -11,7 +11,6 @@ import { EnhancedRadarChart } from './EnhancedRadarChart';
 import { MetricsVisual } from './MetricsVisual';
 import { ExportMenu } from '../ExportMenu';
 import ValidatedLink from '../ValidatedLink';
-
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
@@ -20,7 +19,6 @@ interface AnalysisResultProps {
   currentDecision?: any;
   dilemma?: string;
 }
-
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
   isUpdating,
@@ -30,7 +28,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   dilemma
 }) => {
   if (!result) return null;
-
   const topOption = result.breakdown.reduce((prev, current) => current.score > prev.score ? current : prev);
 
   // Logic from DecisionExplanation
@@ -78,7 +75,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
     return insights;
   };
   const cleanOptionName = topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim();
-
   return <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
       {/* Section Recommandation IA améliorée */}
       <Card className="relative overflow-hidden border bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950 rounded-xl">
@@ -162,7 +158,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           {/* "Pourquoi cette recommandation ?" section - now collapsible */}
           <div className="border-t pt-4">
             <Collapsible defaultOpen={false}>
-              <CollapsibleTrigger className="flex items-center justify-between w-full group">
+              <CollapsibleTrigger className="flex items-center justify-between w-full group px-[12px] py-[12px] rounded-xl border bg-gray-100 ">
                 <div className="flex items-center gap-2">
                   <Lightbulb className="h-5 w-5" />
                   <h3 className="text-lg font-semibold">Pourquoi cette recommandation ?</h3>
@@ -198,8 +194,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </div>
 
           {/* Liens utiles moved to bottom with separator */}
-          {(result.infoLinks && result.infoLinks.length > 0 || result.shoppingLinks && result.shoppingLinks.length > 0) && (
-            <>
+          {(result.infoLinks && result.infoLinks.length > 0 || result.shoppingLinks && result.shoppingLinks.length > 0) && <>
               <Separator className="my-6" />
               <div>
                 <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
@@ -222,8 +217,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     </div>}
                 </div>
               </div>
-            </>
-          )}
+            </>}
         </CardContent>
       </Card>
 
@@ -253,5 +247,4 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
       </Card>
     </div>;
 };
-
 export default AnalysisResult;
