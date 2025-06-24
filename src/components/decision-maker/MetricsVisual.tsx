@@ -4,12 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { TrendingUp, Target, BarChart3, Award, AlertTriangle, CheckCircle, XCircle, Zap } from 'lucide-react';
 import { IBreakdownItem } from '@/types/decision';
 import { ComparisonTable } from './ComparisonTable';
-
 interface MetricsVisualProps {
   data: IBreakdownItem[];
   dilemma?: string;
 }
-
 export const MetricsVisual: React.FC<MetricsVisualProps> = ({
   data,
   dilemma
@@ -75,9 +73,9 @@ export const MetricsVisual: React.FC<MetricsVisualProps> = ({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {metrics.map((metric, index) => <div key={metric.title} className="p-4 rounded-lg border-2 bg-gray-50 border-gray-200 animate-fade-in transition-all hover:scale-105" style={{
+            {metrics.map((metric, index) => <div key={metric.title} style={{
             animationDelay: `${index * 100}ms`
-          }}>
+          }} className="p-4 rounded-lg border bg-gray-50 border-gray-200 animate-fade-in transition-all hover:scale-105">
                 <div className="flex items-center justify-between mb-2">
                   {metric.icon}
                   <span className="text-2xl font-bold text-gray-900">
