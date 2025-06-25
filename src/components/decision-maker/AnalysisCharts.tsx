@@ -1,6 +1,7 @@
 
 import React, { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { BarChart3 } from 'lucide-react';
 import { IBreakdownItem } from '@/types/decision';
 import { VisualIndicators } from './VisualIndicators';
@@ -28,6 +29,8 @@ export const AnalysisCharts: React.FC<AnalysisChartsProps> = memo(({
           <div className="w-full">
             <MetricsVisual data={breakdown} dilemma={dilemma} />
           </div>
+          
+          <Separator className="my-6" />
           
           <div className="w-full">
             <VisualIndicators data={breakdown} />
