@@ -179,13 +179,19 @@ export const useDecisionAPI = ({
           filesCount: uploadedFiles.length
         });
         
-        setProgressMessage("Génération des critères...");
+        if (!dilemma.trim()) {
+          toast.error("Veuillez décrire votre dilemme avant de lancer l'analyse.");
+          return;
+        }
+        
+        setProgressMessage("Vérification de la connexion...");
         setResult(null);
         setCriteria([]);
         setEmoji('🤔');
         setCurrentDecisionId(null);
         setHasChanges(false);
         resetRetry();
+        setAnalysisStep('loading-criteria');
 
         let uploadedFileInfos: UploadedFileInfo[] = [];
 
@@ -274,7 +280,22 @@ export const useDecisionAPI = ({
         } catch (error) {
           console.error("❌ [DEBUG] Error in analysis start:", error);
           const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
-          toast.error(`Erreur lors de l'analyse : ${errorMessage}`);
+          
+          // Messages d'erreur plus informatifs selon le type d'erreur
+          if (errorMessage.includes('Failed to fetch') || errorMessage.includes('Failed to send a request to the Edge Function')) {
+            toast.error("Problème de connexion. Vérifiez votre connexion internet et réessayez.", {
+              duration: 5000,
+            });
+          } else if (errorMessage.includes('API')) {
+            toast.error("Erreur de l'API d'intelligence artificielle. Réessayez dans quelques instants.", {
+              duration: 5000,
+            });
+          } else {
+            toast.error(`Erreur lors de l'analyse : ${errorMessage}`, {
+              duration: 5000,
+            });
+          }
+          
           setAnalysisStep('idle');
           setProgressMessage('');
           
