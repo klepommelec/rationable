@@ -6,6 +6,7 @@ import { ChevronDown } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { ConfidenceIndicator } from './ConfidenceIndicator';
 import { AnalysisInsights } from './AnalysisInsights';
+import { UsefulLinks } from './UsefulLinks';
 import { ExportMenu } from '../ExportMenu';
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from 'lucide-react';
@@ -112,6 +113,14 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = memo(({
             {topOption.cons.map((con, i) => <div key={i} className="text-xs text-black py-px">• {con}</div>)}
           </div>
         </div>
+
+        {/* Liens utiles intégrés en bas de la carte */}
+        <UsefulLinks 
+          infoLinks={result.infoLinks}
+          shoppingLinks={result.shoppingLinks}
+          dilemma={dilemma}
+          recommendation={result.recommendation}
+        />
       </CardContent>
     </Card>
   );
