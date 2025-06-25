@@ -13,7 +13,8 @@ export interface IBreakdownItem {
 
 export interface ILink {
   title: string;
-  url:string;
+  url: string;
+  description?: string;
 }
 
 export interface IResult {

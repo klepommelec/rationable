@@ -47,8 +47,8 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
             className="flex-1 h-2 sm:h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden transition-all duration-300"
             role="progressbar"
             aria-valuenow={topOption?.score || 0}
-            aria-valuemin="0"
-            aria-valuemax="100"
+            aria-valuemin={0}
+            aria-valuemax={100}
             aria-label={`Score de confiance: ${topOption?.score || 0} sur 100`}
           >
             <div 

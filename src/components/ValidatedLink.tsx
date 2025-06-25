@@ -49,11 +49,13 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
       href={finalUrl} 
       target="_blank" 
       rel="noopener noreferrer" 
-      className={`${className} bg-white`}
+      className={className}
       title={isSearchUrl ? `Rechercher: ${link.title}` : link.title}
     >
-      {link.title}
-      {isSearchUrl ? <Search className="h-3 w-3" /> : <ExternalLink className="h-3 w-3" />}
+      <span className="flex items-center gap-2 truncate flex-1 text-gray-700 dark:text-gray-300">
+        {isSearchUrl ? <Search className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-blue-500 dark:text-blue-400" aria-hidden="true" /> : <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-blue-500 dark:text-blue-400" aria-hidden="true" />}
+        {link.description || link.title}
+      </span>
     </a>
   );
 };

@@ -60,15 +60,7 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
                     link={link} 
                     fallbackSearchQuery={dilemma} 
                     className="flex items-center gap-2 p-2 sm:p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-muted hover:border-gray-300 dark:hover:border-gray-600 text-xs sm:text-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md group-focus-within:ring-2 group-focus-within:ring-blue-500 group-focus-within:ring-offset-2" 
-                  >
-                    <ExternalLink 
-                      className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-blue-500 dark:text-blue-400" 
-                      aria-hidden="true"
-                    />
-                    <span className="truncate flex-1 text-gray-700 dark:text-gray-300">
-                      {link.description}
-                    </span>
-                  </ValidatedLink>
+                  />
                 </div>
               ))}
             </div>
@@ -99,15 +91,7 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
                     link={link} 
                     fallbackSearchQuery={`acheter ${recommendation}`} 
                     className="flex items-center gap-2 p-2 sm:p-3 rounded-lg border border-green-200 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-300 dark:hover:border-green-600 text-xs sm:text-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md group-focus-within:ring-2 group-focus-within:ring-green-500 group-focus-within:ring-offset-2" 
-                  >
-                    <ExternalLink 
-                      className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-green-500 dark:text-green-400" 
-                      aria-hidden="true"
-                    />
-                    <span className="truncate flex-1 text-gray-700 dark:text-gray-300">
-                      {link.description}
-                    </span>
-                  </ValidatedLink>
+                  />
                 </div>
               ))}
             </div>
