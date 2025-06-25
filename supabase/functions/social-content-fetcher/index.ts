@@ -28,7 +28,8 @@ serve(async (req) => {
     if (!youtubeApiKey) {
       console.error('❌ Missing YOUTUBE_API_KEY secret');
       return new Response(JSON.stringify({ 
-        youtubeVideos: [] 
+        youtubeVideos: [],
+        error: 'YOUTUBE_API_KEY manquant dans les secrets Supabase'
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
@@ -36,6 +37,8 @@ serve(async (req) => {
     }
 
     console.log('📺 Fetching YouTube videos for query:', query);
+    console.log('🔑 API Key present:', youtubeApiKey ? 'Yes' : 'No');
+    console.log('🔑 API Key length:', youtubeApiKey ? youtubeApiKey.length : 0);
     
     // Recherche de vidéos YouTube populaires
     const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
@@ -48,20 +51,32 @@ serve(async (req) => {
     searchUrl.searchParams.set('maxResults', '3');
     searchUrl.searchParams.set('key', youtubeApiKey);
 
+    console.log('🌐 YouTube API URL:', searchUrl.toString().replace(youtubeApiKey, '[HIDDEN]'));
+
     const searchResponse = await fetch(searchUrl.toString());
     
+    console.log('📡 YouTube API Response Status:', searchResponse.status);
+    console.log('📡 YouTube API Response Headers:', Object.fromEntries(searchResponse.headers.entries()));
+    
     if (!searchResponse.ok) {
-      console.error('❌ YouTube Search API Error:', searchResponse.status);
-      return new Response(JSON.stringify({ youtubeVideos: [] }), {
+      const errorText = await searchResponse.text();
+      console.error('❌ YouTube Search API Error:', searchResponse.status, errorText);
+      
+      // Retourner un tableau vide plutôt qu'une erreur pour ne pas casser l'interface
+      return new Response(JSON.stringify({ 
+        youtubeVideos: [],
+        error: `YouTube API Error ${searchResponse.status}: ${errorText}`
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       })
     }
 
     const searchData = await searchResponse.json();
+    console.log('📊 YouTube Search Response:', JSON.stringify(searchData, null, 2));
     
     if (!searchData.items || searchData.items.length === 0) {
-      console.log('📺 No YouTube videos found');
+      console.log('📺 No YouTube videos found for query:', query);
       return new Response(JSON.stringify({ youtubeVideos: [] }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
@@ -75,8 +90,16 @@ serve(async (req) => {
     statsUrl.searchParams.set('id', videoIds);
     statsUrl.searchParams.set('key', youtubeApiKey);
 
+    console.log('📊 Fetching video statistics for IDs:', videoIds);
+
     const statsResponse = await fetch(statsUrl.toString());
-    const statsData = await statsResponse.json();
+    
+    if (!statsResponse.ok) {
+      console.error('❌ YouTube Stats API Error:', statsResponse.status);
+      // Continuer sans les statistiques
+    }
+
+    const statsData = statsResponse.ok ? await statsResponse.json() : { items: [] };
 
     // Combiner les données
     const youtubeVideos = searchData.items.map((item, index) => {
@@ -94,6 +117,7 @@ serve(async (req) => {
     });
 
     console.log(`✅ Found ${youtubeVideos.length} YouTube videos`);
+    console.log('📝 Video titles:', youtubeVideos.map(v => v.title));
 
     return new Response(JSON.stringify({ youtubeVideos }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
