@@ -115,6 +115,9 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 <h3 className="text-xl text-gray-900 dark:text-white mb-2 font-bold sm:text-3xl">
                   {cleanOptionName}
                 </h3>
+                {result.description && (
+                  <p className="text-muted-foreground mb-4">{result.description}</p>
+                )}
                 <div className="flex items-center gap-4 flex-wrap">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-500">Score :</span>
@@ -151,12 +154,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 </CollapsibleTrigger>
                 
                 <CollapsibleContent className="border border-t-0 border-gray-200 rounded-b-md bg-white p-4 space-y-4">
-                  {result.description && (
-                    <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-                      <p className="text-sm text-blue-900">{result.description}</p>
-                    </div>
-                  )}
-
                   <div className="space-y-2">
                     <h4 className="font-medium text-sm">Points clés de l'analyse :</h4>
                     <ul className="space-y-1">
