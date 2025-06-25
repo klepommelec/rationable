@@ -115,10 +115,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 <h3 className="text-xl text-gray-900 dark:text-white mb-2 font-bold sm:text-3xl">
                   {cleanOptionName}
                 </h3>
-                {result.description && (
-                  <p className="text-muted-foreground mb-4">{result.description}</p>
-                )}
-                <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-4 flex-wrap mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-500">Score :</span>
                     <div className="flex items-center gap-2">
@@ -138,6 +135,9 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                     Confiance: {confidence.level}
                   </Badge>
                 </div>
+                {result.description && (
+                  <p className="text-muted-foreground">{result.description}</p>
+                )}
               </div>
             </div>
             
