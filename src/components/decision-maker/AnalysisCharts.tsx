@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3 } from 'lucide-react';
 import { IBreakdownItem } from '@/types/decision';
@@ -12,7 +12,7 @@ interface AnalysisChartsProps {
   dilemma?: string;
 }
 
-export const AnalysisCharts: React.FC<AnalysisChartsProps> = ({
+export const AnalysisCharts: React.FC<AnalysisChartsProps> = memo(({
   breakdown,
   dilemma
 }) => {
@@ -42,4 +42,6 @@ export const AnalysisCharts: React.FC<AnalysisChartsProps> = ({
       </CardContent>
     </Card>
   );
-};
+});
+
+AnalysisCharts.displayName = 'AnalysisCharts';

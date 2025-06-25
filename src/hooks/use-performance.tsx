@@ -86,3 +86,57 @@ export function useMemoizedComputation<T>(
 ): T {
   return useMemo(computation, dependencies);
 }
+
+// Nouveau hook pour optimiser les calculs complexes
+export function useDeepMemo<T>(
+  factory: () => T,
+  deps: React.DependencyList
+): T {
+  const ref = useRef<{ deps: React.DependencyList; value: T }>();
+  
+  if (!ref.current || !areEqual(ref.current.deps, deps)) {
+    ref.current = { deps, value: factory() };
+  }
+  
+  return ref.current.value;
+}
+
+// Helper pour comparaison profonde
+function areEqual(a: React.DependencyList, b: React.DependencyList): boolean {
+  if (a.length !== b.length) return false;
+  
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  
+  return true;
+}
+
+// Hook pour les calculs coûteux avec cache
+export function useExpensiveCalculation<T, Args extends any[]>(
+  calculation: (...args: Args) => T,
+  dependencies: React.DependencyList
+) {
+  const cacheRef = useRef<Map<string, T>>(new Map());
+  
+  return useCallback((...args: Args): T => {
+    const key = JSON.stringify(args);
+    
+    if (cacheRef.current.has(key)) {
+      return cacheRef.current.get(key)!;
+    }
+    
+    const result = calculation(...args);
+    cacheRef.current.set(key, result);
+    
+    // Nettoyer le cache si il devient trop gros
+    if (cacheRef.current.size > 100) {
+      const entries = Array.from(cacheRef.current.entries());
+      cacheRef.current.clear();
+      // Garder les 50 derniers
+      entries.slice(-50).forEach(([k, v]) => cacheRef.current.set(k, v));
+    }
+    
+    return result;
+  }, dependencies);
+}
