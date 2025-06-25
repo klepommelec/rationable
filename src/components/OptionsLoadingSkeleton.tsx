@@ -1,11 +1,8 @@
-
 import React from 'react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoaderCircle } from 'lucide-react';
-
 export const OptionsLoadingSkeleton = () => {
-  return (
-    <div className="space-y-6 animate-fade-in">
+  return <div className="space-y-6 animate-fade-in px-[32px]">
       <div className="text-center space-y-2">
         <div className="flex items-center justify-center gap-2">
           <LoaderCircle className="h-5 w-5 animate-spin text-cyan-500" />
@@ -19,8 +16,7 @@ export const OptionsLoadingSkeleton = () => {
       </div>
 
       <div className="grid gap-4">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="p-4 rounded-lg border bg-card animate-pulse">
+        {[...Array(3)].map((_, i) => <div key={i} className="p-4 rounded-lg border bg-card animate-pulse">
             <div className="flex items-center justify-between mb-3">
               <Skeleton className="h-6 w-32" />
               <Skeleton className="h-8 w-16 rounded-full" />
@@ -44,13 +40,11 @@ export const OptionsLoadingSkeleton = () => {
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          </div>)}
       </div>
 
       <div className="text-center">
         <Skeleton className="h-12 w-48 mx-auto" />
       </div>
-    </div>
-  );
+    </div>;
 };
