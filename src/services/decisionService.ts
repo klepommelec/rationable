@@ -1,4 +1,3 @@
-
 import { ICriterion, IResult, DEFAULT_CATEGORIES } from '@/types/decision';
 import { callOpenAiApi } from './openai';
 import { UploadedFileInfo } from './fileUploadService';
@@ -75,11 +74,19 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[], f
   let prompt = `
 Analysez ce dilemme et générez des options avec évaluation détaillée.
 
-CONTRAINTES IMPORTANTES:
-- Votre réponse doit être appropriée pour tous les publics
-- Évitez tout contenu politique, violent, discriminatoire ou inapproprié
-- Privilégiez des recommandations constructives et positives
-- Pour les liens, utilisez UNIQUEMENT des sites web reconnus et fiables
+CONTRAINTES ULTRA-STRICTES DE SÉCURITÉ:
+- Votre réponse doit être appropriée pour tous les publics (famille, enfants)
+- INTERDICTION ABSOLUE: politique, violence, discrimination, contenu adulte
+- Pour les liens, utilisez EXCLUSIVEMENT ces domaines autorisés:
+  * Institutions: gov.fr, gouv.fr, europa.eu, who.int, unesco.org
+  * Références: wikipedia.org, britannica.com, larousse.fr
+  * E-commerce: amazon.fr, fnac.com, darty.com, boulanger.com, leclerc.com, carrefour.fr
+  * Voyage/Restaurant: tripadvisor.fr, booking.com, michelin.com, lafourchette.com
+  * Médias: lemonde.fr, figaro.fr, bbc.com, reuters.com
+  * Tech: apple.com, microsoft.com, google.com, adobe.com
+  * Recettes: marmiton.org, 750g.com, cuisineaz.com
+- AUCUN autre domaine n'est autorisé
+- Privilégiez des recommandations constructives et éducatives
 
 Dilemme: "${dilemma}"
 Critères d'évaluation: ${criteriaList}`;
@@ -96,30 +103,21 @@ Analysez le contenu de ces documents pour enrichir votre analyse et vos recomman
   prompt += `
 
 Retournez un objet JSON avec:
-1. "recommendation": La meilleure option recommandée (texte court et approprié)
-2. "description": Explication détaillée et positive de pourquoi cette option est recommandée
-3. "imageQuery": Description pour générer une image (en anglais, très descriptive, appropriée)
-4. "infoLinks": Tableau de liens utiles avec "title" et "url" - UTILISEZ UNIQUEMENT des sites reconnus et fiables
-5. "shoppingLinks": Tableau de liens d'achat avec "title" et "url" - UTILISEZ UNIQUEMENT des sites de confiance
-6. "breakdown": Tableau d'objets avec:
-   - "option": Nom de l'option (approprié)
-   - "pros": Tableau des avantages (positifs)
-   - "cons": Tableau des inconvénients (constructifs)
-   - "score": Note sur 100
+1. "recommendation": La meilleure option recommandée (texte approprié et constructif)
+2. "description": Explication détaillée et positive (évitez tout contenu négatif)
+3. "imageQuery": Description pour image (en anglais, familial et positif)
+4. "infoLinks": Liens informatifs avec "title" et "url" - UNIQUEMENT domaines autorisés
+5. "shoppingLinks": Liens d'achat avec "title" et "url" - UNIQUEMENT sites autorisés
+6. "breakdown": Options avec "option", "pros", "cons" (constructifs), "score"
 
-SITES AUTORISÉS pour les liens:
-- Wikipedia, sites gouvernementaux officiels
-- Amazon.fr, Fnac.com, Darty.com, Boulanger.com (pour l'achat)
-- TripAdvisor, Booking.com, LaFourchette (pour voyage/restaurant)
-- Sites officiels des marques/entreprises
-
-Générez 3-5 options différentes et pertinentes. Soyez concret, positif et approprié.
+ATTENTION: Tout lien vers un domaine non autorisé sera automatiquement bloqué.
+Générez 3-5 options pertinentes. Restez positif, constructif et familial.
 
 Répondez UNIQUEMENT avec un objet JSON valide.`;
 
   const result = await callOpenAiApi(prompt, files);
   
-  // Modération ultra-stricte du contenu généré
+  // PHASE 2: Modération ultra-stricte du contenu généré
   const moderationChecks = [
     { content: result.recommendation, name: 'recommendation' },
     { content: result.description, name: 'description' },
@@ -130,13 +128,13 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
     if (check.content) {
       const moderation = ContentModerationService.moderateText(check.content);
       if (!moderation.isAppropriate) {
-        console.error(`Contenu ${check.name} modéré:`, check.content);
+        console.error(`🚫 Contenu ${check.name} modéré:`, check.content);
         throw new Error(`Contenu inapproprié généré par l'IA dans ${check.name}: ${moderation.reason}`);
       }
     }
   }
 
-  // Modération des options du breakdown
+  // PHASE 2: Modération renforcée des options du breakdown
   if (result.breakdown && Array.isArray(result.breakdown)) {
     for (const option of result.breakdown) {
       const optionModeration = ContentModerationService.moderateText(option.option);
@@ -144,8 +142,8 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
         throw new Error(`Option inappropriée: ${optionModeration.reason}`);
       }
       
-      // Vérifier les pros et cons
-      if (option.pros) {
+      // Vérifier les pros et cons avec un seuil de tolérance zéro
+      if (option.pros && Array.isArray(option.pros)) {
         for (const pro of option.pros) {
           const proModeration = ContentModerationService.moderateText(pro);
           if (!proModeration.isAppropriate) {
@@ -154,7 +152,7 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
         }
       }
       
-      if (option.cons) {
+      if (option.cons && Array.isArray(option.cons)) {
         for (const con of option.cons) {
           const conModeration = ContentModerationService.moderateText(con);
           if (!conModeration.isAppropriate) {
@@ -165,33 +163,51 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
     }
   }
 
-  // Validation et nettoyage des liens
+  // PHASE 2: Validation stricte des liens avec rapport détaillé
   if (result.infoLinks && Array.isArray(result.infoLinks)) {
-    result.infoLinks = result.infoLinks
-      .map(link => ({
-        ...link,
-        url: ContentModerationService.validateUrl(link.url).isValid 
-          ? link.url 
-          : ContentModerationService.generateSafeSearchUrl(link.title || dilemma)
+    const linkValidation = ContentModerationService.validateLinksStrict(
+      result.infoLinks,
+      dilemma
+    );
+    
+    // Remplacer les liens bloqués par des recherches sécurisées
+    result.infoLinks = linkValidation.validLinks.concat(
+      linkValidation.blockedLinks.map(blocked => ({
+        title: blocked.title,
+        url: ContentModerationService.generateSafeSearchUrl(blocked.title)
       }))
-      .filter(link => {
-        const titleModeration = ContentModerationService.moderateText(link.title);
-        return titleModeration.isAppropriate;
+    );
+
+    // Log des liens bloqués pour monitoring
+    if (linkValidation.totalBlocked > 0) {
+      console.warn(`⚠️ ${linkValidation.totalBlocked} liens d'information bloqués et remplacés par des recherches sécurisées`);
+      linkValidation.blockedLinks.forEach(blocked => {
+        console.warn(`🚫 Lien bloqué: ${blocked.url} - ${blocked.reason}`);
       });
+    }
   }
 
   if (result.shoppingLinks && Array.isArray(result.shoppingLinks)) {
-    result.shoppingLinks = result.shoppingLinks
-      .map(link => ({
-        ...link,
-        url: ContentModerationService.validateUrl(link.url).isValid 
-          ? link.url 
-          : ContentModerationService.generateSafeSearchUrl(`acheter ${result.recommendation}`, true)
+    const shoppingValidation = ContentModerationService.validateLinksStrict(
+      result.shoppingLinks,
+      `acheter ${result.recommendation}`
+    );
+    
+    // Remplacer les liens d'achat bloqués par des recherches shopping sécurisées
+    result.shoppingLinks = shoppingValidation.validLinks.concat(
+      shoppingValidation.blockedLinks.map(blocked => ({
+        title: blocked.title,
+        url: ContentModerationService.generateSafeSearchUrl(`acheter ${blocked.title}`, true)
       }))
-      .filter(link => {
-        const titleModeration = ContentModerationService.moderateText(link.title);
-        return titleModeration.isAppropriate;
+    );
+
+    // Log des liens d'achat bloqués
+    if (shoppingValidation.totalBlocked > 0) {
+      console.warn(`⚠️ ${shoppingValidation.totalBlocked} liens d'achat bloqués et remplacés par des recherches shopping sécurisées`);
+      shoppingValidation.blockedLinks.forEach(blocked => {
+        console.warn(`🚫 Lien d'achat bloqué: ${blocked.url} - ${blocked.reason}`);
       });
+    }
   }
   
   // Fetch social content (vidéos YouTube filtrées) en parallèle
