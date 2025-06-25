@@ -1,10 +1,10 @@
+
 import { toast } from "sonner";
 import { ICriterion, IResult, IDecision } from '@/types/decision';
 import { generateCriteriaOnly, generateOptions } from '@/services/decisionService';
 import { uploadFilesToStorage, deleteFileFromStorage, UploadedFileInfo } from '@/services/fileUploadService';
 import { UploadedFile } from '@/components/FileUpload';
 import { AnalysisStep } from './useDecisionState';
-import { testEdgeFunctionConnectivity } from '@/services/openai';
 
 interface UseDecisionAPIProps {
     dilemma: string;
@@ -179,30 +179,13 @@ export const useDecisionAPI = ({
           filesCount: uploadedFiles.length
         });
         
-        if (!dilemma.trim()) {
-          toast.error("Veuillez décrire votre dilemme avant de lancer l'analyse.");
-          return;
-        }
-        
-        // Test de connectivité avant de commencer
-        setProgressMessage("Test de connectivité...");
-        const isConnected = await testEdgeFunctionConnectivity();
-        if (!isConnected) {
-          toast.error("Impossible de se connecter aux services d'IA. Vérifiez que les Edge Functions sont déployées et configurées.", {
-            duration: 10000,
-          });
-          setProgressMessage('');
-          return;
-        }
-        
-        setProgressMessage("Connexion établie - Démarrage de l'analyse...");
+        setProgressMessage("Génération des critères...");
         setResult(null);
         setCriteria([]);
         setEmoji('🤔');
         setCurrentDecisionId(null);
         setHasChanges(false);
         resetRetry();
-        setAnalysisStep('idle');
 
         let uploadedFileInfos: UploadedFileInfo[] = [];
 
@@ -269,9 +252,7 @@ export const useDecisionAPI = ({
             } catch (error) {
               console.error("❌ [DEBUG] Error in auto-options generation:", error);
               const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
-              toast.error(`Erreur lors de la génération automatique : ${errorMessage}`, {
-                duration: 8000,
-              });
+              toast.error(`Erreur lors de la génération automatique : ${errorMessage}`);
               setAnalysisStep('criteria-loaded');
               
               // Nettoyer les fichiers en cas d'erreur
@@ -293,26 +274,7 @@ export const useDecisionAPI = ({
         } catch (error) {
           console.error("❌ [DEBUG] Error in analysis start:", error);
           const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
-          
-          // Messages d'erreur plus informatifs selon le type d'erreur
-          if (errorMessage.includes('Failed to fetch') || errorMessage.includes('Failed to send a request to the Edge Function')) {
-            toast.error("Problème de connexion avec les services d'IA. Vérifiez votre connexion internet et que les Edge Functions sont correctement déployées.", {
-              duration: 10000,
-            });
-          } else if (errorMessage.includes('not found') || errorMessage.includes('404')) {
-            toast.error("Service d'IA non disponible. Les Edge Functions ne semblent pas être déployées.", {
-              duration: 10000,
-            });
-          } else if (errorMessage.includes('API')) {
-            toast.error("Erreur de l'API d'intelligence artificielle. Vérifiez la configuration des clés API.", {
-              duration: 8000,
-            });
-          } else {
-            toast.error(`Erreur lors de l'analyse : ${errorMessage}`, {
-              duration: 8000,
-            });
-          }
-          
+          toast.error(`Erreur lors de l'analyse : ${errorMessage}`);
           setAnalysisStep('idle');
           setProgressMessage('');
           

@@ -9,7 +9,6 @@ import MainActionButton from './MainActionButton';
 import { UploadedFile } from '../FileUpload';
 import { IDecision } from '@/types/decision';
 import { toast } from "sonner";
-
 interface DilemmaSetupProps {
   dilemma: string;
   setDilemma: (dilemma: string) => void;
@@ -65,7 +64,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
 
   // Placeholders animés pour le textarea
   const placeholders = ["Ex: Quel framework JS devrais-je apprendre en 2025 ?", "Ex: Dois-je changer de carrière professionnelle ?", "Ex: Quelle ville choisir pour mes études ?", "Ex: Investir en bourse ou dans l'immobilier ?", "Ex: Partir en voyage ou économiser de l'argent ?", "Ex: Accepter cette offre d'emploi ou continuer à chercher ?"];
-  
   const handleTemplateClick = (template: {
     name: string;
     dilemma: string;
@@ -74,20 +72,9 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     setDilemma(template.dilemma);
     applyTemplate(template);
   };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (!isLoading && !isUpdating && analysisStep !== 'done' && dilemma.trim() !== '') {
-        handleStartAnalysis();
-      }
-    }
-  };
-
   const handleFileButtonClick = () => {
     fileInputRef.current?.click();
   };
-
   const processFiles = (files: FileList) => {
     const newFiles: UploadedFile[] = Array.from(files).map(file => {
       // Validation de la taille (10MB max)
@@ -115,7 +102,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
       toast.success(`${newFiles.length} fichier(s) ajouté(s)`);
     }
   };
-
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
@@ -126,7 +112,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
       fileInputRef.current.value = '';
     }
   };
-
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -134,13 +119,11 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
       setIsDragOver(true);
     }
   };
-
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
   };
-
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -151,7 +134,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
       processFiles(files);
     }
   };
-
   const removeFile = (fileId: string) => {
     const updatedFiles = uploadedFiles.filter(f => f.id !== fileId);
     setUploadedFiles(updatedFiles);
@@ -162,7 +144,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
       URL.revokeObjectURL(fileToRemove.preview);
     }
   };
-
   const getFileIcon = (type: string) => {
     switch (type) {
       case 'pdf':
@@ -173,7 +154,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
         return <FileText className="h-4 w-4 text-gray-500" />;
     }
   };
-
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -181,9 +161,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
-
   const isMainButtonDisabled = dilemma.trim() === '' || isLoading;
-
   return <div className="mx-auto space-y-6">
             {/* Header principal occupant 72% de la hauteur de l'écran */}
             <div className="h-[72vh] flex items-center justify-center">
@@ -201,20 +179,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     <CardContent className="space-y-6 px-4 sm:px-6">
                         <div className="space-y-2">
                             <div className="relative">
-                                <Textarea 
-                                  id="dilemma-input" 
-                                  placeholder="" 
-                                  value={dilemma} 
-                                  onChange={e => setDilemma(e.target.value)} 
-                                  onKeyDown={handleKeyDown}
-                                  onDragOver={handleDragOver} 
-                                  onDragLeave={handleDragLeave} 
-                                  onDrop={handleDrop} 
-                                  className={`pulsing-glow focus:ring-cyan-500 text-base md:text-sm h-[160px] resize-none pr-20 transition-colors ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-over' : ''}`} 
-                                  disabled={isLoading || isUpdating || analysisStep === 'done'} 
-                                  aria-describedby="dilemma-help" 
-                                  aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} 
-                                />
+                                <Textarea id="dilemma-input" placeholder="" value={dilemma} onChange={e => setDilemma(e.target.value)} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`pulsing-glow focus:ring-cyan-500 text-base md:text-sm h-[160px] resize-none pr-20 transition-colors ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-over' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
                                 {dilemma === '' && !isDragOver && <div className="absolute top-2 left-3 pointer-events-none">
                                         <span className="text-muted-foreground text-base md:text-sm">
                                             <AnimatedPlaceholder placeholders={placeholders} interval={2500} />
@@ -242,7 +207,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 <input ref={fileInputRef} type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt" onChange={handleFileSelect} className="hidden" aria-hidden="true" />
                             </div>
                             <p id="dilemma-help" className="sr-only">
-                                Décrivez le problème ou la décision que vous devez prendre. Vous pouvez aussi glisser-déposer des documents directement dans cette zone. Appuyez sur Entrée pour lancer l'analyse ou Shift+Entrée pour créer une nouvelle ligne.
+                                Décrivez le problème ou la décision que vous devez prendre. Vous pouvez aussi glisser-déposer des documents directement dans cette zone.
                             </p>
                         </div>
 
