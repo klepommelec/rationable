@@ -55,7 +55,7 @@ const DecisionMaker = () => {
                 </h1>
               </div>
             </div>
-            <div className="w-full mb-6">
+            <div className="w-full mb-6 px-[16px]">
               <CriteriaManager criteria={criteria} setCriteria={setCriteria} isInteractionDisabled={analysisStep === 'loading-options' || isLoading || isUpdating} onUpdateAnalysis={handleManualUpdate} hasChanges={hasChanges} />
             </div>
           </>}
