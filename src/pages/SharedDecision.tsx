@@ -6,7 +6,7 @@ import SharedDecisionView from '@/components/SharedDecisionView';
 
 const SharedDecision: React.FC = () => {
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <div className="min-h-screen bg-background text-foreground">
         {/* Header avec toggle de thème */}
         <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">

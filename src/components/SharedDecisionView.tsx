@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -125,7 +126,7 @@ const SharedDecisionView: React.FC = () => {
           <CardTitle className="text-xl text-green-600 dark:text-green-400">✅ Recommandation</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-lg font-semibold mb-2">{decision.result.recommendation}</p>
+          <h3 className="text-lg font-semibold mb-2">{decision.result.recommendation}</h3>
           {decision.result.description && (
             <p className="text-muted-foreground">{decision.result.description}</p>
           )}
