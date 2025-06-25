@@ -198,6 +198,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = memo(({
           <UsefulLinks 
             infoLinks={result.infoLinks}
             shoppingLinks={result.shoppingLinks}
+            socialContent={result.socialContent}
             dilemma={dilemma}
             recommendation={result.recommendation}
           />

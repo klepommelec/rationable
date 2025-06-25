@@ -17,6 +17,19 @@ export interface ILink {
   description?: string;
 }
 
+export interface IYouTubeVideo {
+  id: string;
+  title: string;
+  channelTitle: string;
+  thumbnail: string;
+  viewCount: string;
+  url: string;
+}
+
+export interface ISocialContent {
+  youtubeVideos: IYouTubeVideo[];
+}
+
 export interface IResult {
   recommendation: string;
   description: string;
@@ -25,6 +38,7 @@ export interface IResult {
   infoLinks: ILink[];
   shoppingLinks: ILink[];
   breakdown: IBreakdownItem[];
+  socialContent?: ISocialContent;
 }
 
 export interface IDecision {

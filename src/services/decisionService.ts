@@ -2,6 +2,7 @@
 import { ICriterion, IResult, DEFAULT_CATEGORIES } from '@/types/decision';
 import { callOpenAiApi } from './openai';
 import { UploadedFileInfo } from './fileUploadService';
+import { supabase } from '@/integrations/supabase/client';
 
 export const generateCriteriaOnly = async (dilemma: string, files?: UploadedFileInfo[]) => {
   let prompt = `
@@ -78,5 +79,27 @@ Générez 3-5 options différentes et pertinentes. Soyez concret et actionnable.
 
 Répondez UNIQUEMENT avec un objet JSON valide.`;
 
-  return await callOpenAiApi(prompt, files);
+  const result = await callOpenAiApi(prompt, files);
+  
+  // Fetch social content (YouTube videos) en parallèle
+  try {
+    console.log('🔍 Fetching social content for:', result.recommendation);
+    const { data: socialData, error } = await supabase.functions.invoke('social-content-fetcher', {
+      body: { query: result.recommendation }
+    });
+    
+    if (error) {
+      console.error('❌ Error fetching social content:', error);
+    } else if (socialData?.youtubeVideos && socialData.youtubeVideos.length > 0) {
+      console.log(`✅ Found ${socialData.youtubeVideos.length} YouTube videos`);
+      result.socialContent = {
+        youtubeVideos: socialData.youtubeVideos
+      };
+    }
+  } catch (socialError) {
+    console.error('❌ Social content fetch failed:', socialError);
+    // Continue without social content
+  }
+  
+  return result;
 };
