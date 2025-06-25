@@ -191,7 +191,7 @@ export const useDecisionAPI = ({
         setCurrentDecisionId(null);
         setHasChanges(false);
         resetRetry();
-        setAnalysisStep('loading-criteria');
+        setAnalysisStep('idle'); // Use valid AnalysisStep value
 
         let uploadedFileInfos: UploadedFileInfo[] = [];
 
