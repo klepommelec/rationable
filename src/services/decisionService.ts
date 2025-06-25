@@ -67,13 +67,21 @@ Retournez un objet JSON avec:
 1. "recommendation": La meilleure option recommandée (texte court)
 2. "description": Explication détaillée de pourquoi cette option est recommandée
 3. "imageQuery": Description pour générer une image (en anglais, très descriptive)
-4. "infoLinks": Tableau de liens utiles avec "title" et "url"
-5. "shoppingLinks": Tableau de liens d'achat avec "title" et "url"  
+4. "infoLinks": Tableau de liens utiles avec "title" et "url" - FOURNIR DES LIENS RÉELS ET FONCTIONNELS ou des descriptions de recherche précises
+5. "shoppingLinks": Tableau de liens d'achat avec "title" et "url" - FOURNIR DES LIENS RÉELS vers des sites fiables (Amazon, Fnac, etc.) ou des descriptions de recherche précises
 6. "breakdown": Tableau d'objets avec:
    - "option": Nom de l'option
    - "pros": Tableau des avantages
    - "cons": Tableau des inconvénients  
    - "score": Note sur 100
+
+IMPORTANT pour les liens:
+- Privilégiez les sites officiels, Wikipedia, sites gouvernementaux, grandes plateformes reconnues
+- Pour les liens d'achat: Amazon.fr, Fnac.com, Darty.com, Boulanger.com, etc.
+- Si vous n'êtes pas sûr d'un lien, utilisez une description claire pour une recherche Google
+- Évitez les liens vers des sites douteux ou temporaires
+- Pour les restaurants: sites officiels, TripAdvisor, LaFourchette
+- Pour les hôtels: Booking.com, Expedia.fr, sites officiels
 
 Générez 3-5 options différentes et pertinentes. Soyez concret et actionnable.
 
@@ -85,7 +93,11 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
   try {
     console.log('🔍 Fetching social content for:', result.recommendation);
     const { data: socialData, error } = await supabase.functions.invoke('social-content-fetcher', {
-      body: { query: result.recommendation }
+      body: { 
+        query: result.recommendation,
+        dilemma: dilemma,
+        recommendation: result.recommendation
+      }
     });
     
     if (error) {
