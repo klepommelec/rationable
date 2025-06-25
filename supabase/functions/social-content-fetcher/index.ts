@@ -36,19 +36,19 @@ serve(async (req) => {
       })
     }
 
-    // Construire une requête contextuelle plus pertinente
+    // Construire une requête contextuelle beaucoup plus pertinente
     const contextualQuery = buildContextualQuery(query, dilemma, recommendation);
     console.log('📺 Fetching YouTube videos for contextual query:', contextualQuery);
     
-    // Recherche de vidéos YouTube populaires
+    // Recherche de vidéos YouTube pertinentes
     const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
     searchUrl.searchParams.set('part', 'snippet');
     searchUrl.searchParams.set('q', contextualQuery);
     searchUrl.searchParams.set('type', 'video');
-    searchUrl.searchParams.set('order', 'relevance'); // Changé de viewCount à relevance pour plus de pertinence
-    searchUrl.searchParams.set('publishedAfter', '2023-01-01T00:00:00Z'); // Élargi la période
+    searchUrl.searchParams.set('order', 'relevance');
+    searchUrl.searchParams.set('publishedAfter', '2022-01-01T00:00:00Z');
     searchUrl.searchParams.set('relevanceLanguage', 'fr');
-    searchUrl.searchParams.set('maxResults', '6'); // Augmenté pour avoir plus de choix avant filtrage
+    searchUrl.searchParams.set('maxResults', '8');
     searchUrl.searchParams.set('key', youtubeApiKey);
 
     console.log('🌐 YouTube API URL:', searchUrl.toString().replace(youtubeApiKey, '[HIDDEN]'));
@@ -81,7 +81,7 @@ serve(async (req) => {
       })
     }
 
-    // Filtrer les vidéos non pertinentes
+    // Filtrer rigoureusement les vidéos pertinentes
     const filteredItems = filterRelevantVideos(searchData.items, dilemma, recommendation);
     console.log('🔍 Filtered videos count:', filteredItems.length);
 
@@ -144,21 +144,88 @@ serve(async (req) => {
 })
 
 function buildContextualQuery(query: string, dilemma?: string, recommendation?: string): string {
-  // Nettoyer et extraire les mots-clés pertinents
-  const cleanQuery = query.trim();
+  console.log('🔍 Building contextual query with:', { query, dilemma, recommendation });
   
-  // Si on a le dilemme et la recommandation, construire une requête plus contextuelle
-  if (dilemma && recommendation) {
-    // Extraire les mots-clés du dilemme (restaurants, hôtels, etc.)
-    const dilemmaKeywords = extractKeywords(dilemma);
-    const recKeywords = extractKeywords(recommendation);
+  // Analyser le dilemme pour extraire le contexte principal
+  if (dilemma) {
+    const dilemmaContext = extractMainContext(dilemma);
+    console.log('📋 Extracted context:', dilemmaContext);
     
-    // Combiner intelligemment
-    const keywords = [...new Set([...dilemmaKeywords, ...recKeywords])].slice(0, 4);
-    return keywords.join(' ') + ` ${cleanQuery}`;
+    if (dilemmaContext.isRestaurant) {
+      const cityKeywords = extractCityFromText(dilemma);
+      const cuisineKeywords = extractCuisineFromText(dilemma);
+      
+      // Construire une requête spécialisée pour les restaurants
+      let restaurantQuery = `meilleurs restaurants ${cityKeywords}`;
+      if (cuisineKeywords) {
+        restaurantQuery += ` ${cuisineKeywords}`;
+      }
+      if (recommendation && recommendation.length > 3) {
+        restaurantQuery += ` ${recommendation.replace(/^(Le |La |Les |L')/i, '')}`;
+      }
+      restaurantQuery += ' avis test gastronomie';
+      
+      console.log('🍽️ Restaurant query built:', restaurantQuery);
+      return restaurantQuery;
+    }
+    
+    if (dilemmaContext.isTravel) {
+      const destination = extractDestinationFromText(dilemma);
+      let travelQuery = `voyage ${destination} guide`;
+      if (recommendation) {
+        travelQuery += ` ${recommendation}`;
+      }
+      travelQuery += ' visite tourisme';
+      return travelQuery;
+    }
+    
+    if (dilemmaContext.isTech) {
+      let techQuery = recommendation || query;
+      techQuery += ' test review comparaison tech';
+      return techQuery;
+    }
   }
   
-  return cleanQuery;
+  // Fallback: utiliser la recommandation avec le contexte du dilemme
+  const cleanQuery = query.trim();
+  if (recommendation && dilemma) {
+    const keywords = extractKeywords(dilemma).slice(0, 2);
+    return `${recommendation} ${keywords.join(' ')} test avis guide`;
+  }
+  
+  return cleanQuery + ' test avis guide';
+}
+
+function extractMainContext(text: string): { isRestaurant: boolean, isTravel: boolean, isTech: boolean } {
+  const lowerText = text.toLowerCase();
+  
+  const restaurantKeywords = ['restaurant', 'manger', 'cuisine', 'gastronomie', 'repas', 'dîner', 'déjeuner', 'food', 'chef', 'menu'];
+  const travelKeywords = ['voyage', 'vacances', 'destination', 'visite', 'tourisme', 'séjour', 'week-end', 'city break'];
+  const techKeywords = ['smartphone', 'ordinateur', 'tech', 'app', 'logiciel', 'gadget', 'électronique'];
+  
+  return {
+    isRestaurant: restaurantKeywords.some(keyword => lowerText.includes(keyword)),
+    isTravel: travelKeywords.some(keyword => lowerText.includes(keyword)),
+    isTech: techKeywords.some(keyword => lowerText.includes(keyword))
+  };
+}
+
+function extractCityFromText(text: string): string {
+  const cityPattern = /(Londres|Paris|New York|Tokyo|Rome|Barcelona|Amsterdam|Berlin|Prague|Vienna|Zurich|Geneva|Lyon|Marseille|Nice|Bordeaux|Strasbourg|Toulouse|Nantes|Lille)/gi;
+  const matches = text.match(cityPattern);
+  return matches ? matches[0] : '';
+}
+
+function extractDestinationFromText(text: string): string {
+  const destinationPattern = /(Londres|Paris|New York|Tokyo|Rome|Barcelona|Amsterdam|Berlin|Prague|Vienna|Zurich|Geneva|Lyon|Marseille|Nice|Bordeaux|Strasbourg|Toulouse|Nantes|Lille|France|Italie|Espagne|Allemagne|Angleterre|Japon|États-Unis)/gi;
+  const matches = text.match(destinationPattern);
+  return matches ? matches[0] : '';
+}
+
+function extractCuisineFromText(text: string): string {
+  const cuisinePattern = /(française|italienne|japonaise|chinoise|indienne|mexicaine|thai|coréenne|libanaise|grecque|espagnole|américaine|fusion|gastronomique|bistronomie)/gi;
+  const matches = text.match(cuisinePattern);
+  return matches ? matches[0] : '';
 }
 
 function extractKeywords(text: string): string[] {
@@ -189,7 +256,7 @@ function extractKeywords(text: string): string[] {
   const properNouns = words.filter(word => 
     word.length > 2 && 
     word[0] === word[0].toUpperCase() && 
-    !/^(Le|La|Les|Un|Une|Des|Du|De|À|Au|Aux)$/.test(word)
+    !/^(Le|La|Les|Un|Une|Des|Du|De|À|Au|Aux|Et|Ou|Avec|Sans|Pour|Dans|Sur|Sous)$/.test(word)
   );
   
   keywords.push(...properNouns.slice(0, 2));
@@ -198,52 +265,66 @@ function extractKeywords(text: string): string[] {
 }
 
 function filterRelevantVideos(items: any[], dilemma?: string, recommendation?: string): any[] {
-  // Mots-clés à éviter (contenu non pertinent)
-  const irrelevantKeywords = [
-    'politique', 'élection', 'gouvernement', 'ministre', 'président',
-    'scandale', 'polémique', 'controverse', 'manifestation',
-    'guerre', 'conflit', 'terrorisme', 'violence',
-    'people', 'célébrité', 'star', 'buzz', 'clash'
+  // Mots-clés à ABSOLUMENT éviter
+  const strictlyForbiddenKeywords = [
+    // Politique et actualités sensibles
+    'politique', 'élection', 'gouvernement', 'ministre', 'président', 'macron', 'le pen', 'mélenchon',
+    'scandale', 'polémique', 'controverse', 'manifestation', 'grève',
+    // Violence et faits divers
+    'guerre', 'conflit', 'terrorisme', 'violence', 'mort', 'tué', 'poignardé', 
+    'accident', 'drame', 'tragédie', 'victime', 'police', 'crime', 'criminel',
+    // Contenu non pertinent
+    'people', 'célébrité', 'star', 'buzz', 'clash', 'drama',
+    // Memes et contenu humoristique non contextuel
+    'mew', 'meme', 'fail', 'wtf', 'omg', 'lol', 'xd'
   ];
   
-  // Mots-clés pertinents basés sur le contexte
+  // Mots-clés pertinents selon le contexte
   const contextKeywords = [];
   if (dilemma) {
-    contextKeywords.push(...extractKeywords(dilemma));
+    const context = extractMainContext(dilemma);
+    if (context.isRestaurant) {
+      contextKeywords.push('restaurant', 'cuisine', 'chef', 'food', 'gastronomie', 'test', 'avis', 'review');
+    }
+    if (context.isTravel) {
+      contextKeywords.push('voyage', 'visite', 'guide', 'tourism', 'destination');
+    }
+    if (context.isTech) {
+      contextKeywords.push('test', 'review', 'tech', 'comparaison', 'unboxing');
+    }
   }
-  if (recommendation) {
-    contextKeywords.push(...extractKeywords(recommendation));
-  }
+  
+  console.log('🎯 Context keywords for filtering:', contextKeywords);
   
   return items.filter(item => {
     const title = item.snippet.title.toLowerCase();
     const description = item.snippet.description?.toLowerCase() || '';
     const channel = item.snippet.channelTitle.toLowerCase();
+    const fullText = `${title} ${description} ${channel}`;
     
-    // Exclure le contenu clairement non pertinent
-    const hasIrrelevantContent = irrelevantKeywords.some(keyword => 
-      title.includes(keyword) || description.includes(keyword)
+    // Exclure absolument tout contenu avec des mots-clés interdits
+    const hasForbiddenContent = strictlyForbiddenKeywords.some(keyword => 
+      fullText.includes(keyword.toLowerCase())
     );
     
-    if (hasIrrelevantContent) {
-      console.log('🚫 Filtered out irrelevant video:', item.snippet.title);
+    if (hasForbiddenContent) {
+      console.log('🚫 BLOCKED - Forbidden content:', item.snippet.title);
       return false;
     }
     
-    // Si on a des mots-clés contextuels, privilégier les vidéos qui les contiennent
+    // Si on a des mots-clés contextuels, exiger qu'au moins un soit présent
     if (contextKeywords.length > 0) {
       const hasRelevantContent = contextKeywords.some(keyword => 
-        title.includes(keyword.toLowerCase()) || 
-        description.includes(keyword.toLowerCase()) ||
-        channel.includes(keyword.toLowerCase())
+        fullText.includes(keyword.toLowerCase())
       );
       
       if (!hasRelevantContent) {
-        console.log('🔍 Less relevant video:', item.snippet.title);
-        // Ne pas exclure complètement, mais noter comme moins pertinent
+        console.log('🔍 FILTERED - Not contextually relevant:', item.snippet.title);
+        return false;
       }
     }
     
+    console.log('✅ ACCEPTED - Relevant video:', item.snippet.title);
     return true;
   });
 }
