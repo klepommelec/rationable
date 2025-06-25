@@ -2,6 +2,7 @@
 import React from 'react';
 import { ExternalLink, Search } from 'lucide-react';
 import { ILink } from '@/types/decision';
+import { ContentModerationService } from '@/services/contentModerationService';
 
 interface ValidatedLinkProps {
   link: ILink;
@@ -14,33 +15,19 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
   fallbackSearchQuery, 
   className = "text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5" 
 }) => {
-  const isValidUrl = (url: string): boolean => {
-    try {
-      const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
-      return ['http:', 'https:'].includes(urlObj.protocol) && !url.includes('example.com');
-    } catch {
-      return false;
-    }
-  };
+  // Modération du titre du lien
+  const titleModeration = ContentModerationService.moderateText(link.title);
+  if (!titleModeration.isAppropriate) {
+    console.warn(`Lien bloqué - Titre inapproprié: ${link.title}`);
+    return null; // Ne pas afficher le lien
+  }
 
-  const generateFallbackUrl = (title: string, query?: string): string => {
-    const searchQuery = encodeURIComponent(query || title);
-    
-    // Check if it's a shopping-related link
-    if (title.toLowerCase().includes('achat') || 
-        title.toLowerCase().includes('acheter') || 
-        title.toLowerCase().includes('prix') ||
-        title.toLowerCase().includes('comparer')) {
-      return `https://www.google.fr/search?q=${searchQuery}&tbm=shop`;
-    }
-    
-    // Default to regular Google search
-    return `https://www.google.fr/search?q=${searchQuery}`;
-  };
-
-  const finalUrl = isValidUrl(link.url) ? 
+  // Validation stricte de l'URL
+  const urlValidation = ContentModerationService.validateUrl(link.url);
+  
+  const finalUrl = urlValidation.isValid ? 
     (link.url.startsWith('http') ? link.url : `https://${link.url}`) : 
-    generateFallbackUrl(link.title, fallbackSearchQuery);
+    ContentModerationService.generateSafeSearchUrl(link.title, fallbackSearchQuery?.includes('acheter'));
 
   const isSearchUrl = finalUrl.includes('google.fr/search');
 
@@ -53,7 +40,10 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
       title={isSearchUrl ? `Rechercher: ${link.title}` : link.title}
     >
       <span className="flex items-center gap-2 truncate flex-1 text-gray-700 dark:text-gray-300">
-        {isSearchUrl ? <Search className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-blue-500 dark:text-blue-400" aria-hidden="true" /> : <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-blue-500 dark:text-blue-400" aria-hidden="true" />}
+        {isSearchUrl ? 
+          <Search className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-blue-500 dark:text-blue-400" aria-hidden="true" /> : 
+          <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-blue-500 dark:text-blue-400" aria-hidden="true" />
+        }
         {link.description || link.title}
       </span>
     </a>

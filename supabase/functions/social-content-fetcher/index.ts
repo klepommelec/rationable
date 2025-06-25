@@ -6,6 +6,80 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Liste ultra-stricte de mots interdits
+const FORBIDDEN_KEYWORDS = [
+  // Politique et controverses
+  'politique', 'élection', 'gouvernement', 'ministre', 'président', 'député',
+  'scandale', 'polémique', 'controverse', 'manifestation', 'grève', 'syndicat',
+  'corruption', 'affaire', 'procès', 'tribunal', 'justice', 'condamnation',
+  
+  // Violence et contenu inapproprié
+  'guerre', 'conflit', 'terrorisme', 'violence', 'mort', 'tué', 'meurtre',
+  'accident', 'drame', 'tragédie', 'crime', 'criminel', 'agression',
+  'attentat', 'explosion', 'blessé', 'victime', 'danger', 'risque',
+  
+  // Contenu sensible
+  'sexe', 'sexy', 'nu', 'nudité', 'érotique', 'pornographie', 'adulte',
+  'drogue', 'alcool', 'cigarette', 'cannabis', 'stupéfiant',
+  
+  // Contenu négatif
+  'arnaque', 'escroquerie', 'fake', 'mensonge', 'trompeur', 'faux',
+  'boycott', 'interdiction', 'censure', 'problème', 'danger',
+  
+  // Contenu discriminatoire
+  'racisme', 'discrimination', 'homophobie', 'xénophobie', 'haine',
+  
+  // Mots anglais équivalents
+  'politics', 'scandal', 'controversy', 'war', 'violence', 'death', 'murder',
+  'crime', 'terrorist', 'drug', 'fake', 'scam', 'hate', 'discrimination'
+];
+
+// Mots-clés positifs requis pour la nourriture/restaurants
+const FOOD_POSITIVE_KEYWORDS = [
+  'restaurant', 'food', 'cuisine', 'chef', 'cooking', 'recipe', 'dish',
+  'meal', 'eat', 'taste', 'delicious', 'kitchen', 'dining', 'menu',
+  'gastronomy', 'culinary', 'bistro', 'café', 'bar', 'pizzeria',
+  'trattoria', 'brasserie', 'ristorante', 'tavola', 'cucina', 'cibo',
+  'manger', 'goûter', 'saveur', 'plat', 'repas', 'déjeuner', 'dîner'
+];
+
+function isContentAppropriate(title: string, description: string, channelTitle: string): boolean {
+  const fullText = `${title} ${description} ${channelTitle}`.toLowerCase();
+  
+  // Vérification des mots interdits
+  const hasForbiddenContent = FORBIDDEN_KEYWORDS.some(keyword => 
+    fullText.includes(keyword.toLowerCase())
+  );
+  
+  if (hasForbiddenContent) {
+    console.log('🚫 BLOCKED - Forbidden content detected:', title);
+    return false;
+  }
+  
+  // Pour les recherches de restaurants, vérifier la présence de mots-clés positifs
+  const hasPositiveKeywords = FOOD_POSITIVE_KEYWORDS.some(keyword => 
+    fullText.includes(keyword.toLowerCase())
+  );
+  
+  if (!hasPositiveKeywords) {
+    console.log('🚫 BLOCKED - No relevant food keywords:', title);
+    return false;
+  }
+  
+  // Vérifications supplémentaires pour les chaînes suspectes
+  const suspiciousChannelKeywords = ['news', 'actualité', 'breaking', 'urgent', 'live'];
+  const hasSuspiciousChannel = suspiciousChannelKeywords.some(keyword => 
+    channelTitle.toLowerCase().includes(keyword)
+  );
+  
+  if (hasSuspiciousChannel) {
+    console.log('🚫 BLOCKED - Suspicious channel:', channelTitle);
+    return false;
+  }
+  
+  return true;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -36,18 +110,18 @@ serve(async (req) => {
       })
     }
 
-    // Utiliser directement le nom de la recommandation (comme l'utilisateur l'a fait)
+    // Utiliser le nom de la recommandation pour une recherche plus précise
     const searchQuery = recommendation || query;
     console.log('📺 Searching YouTube for:', searchQuery);
     
-    // Recherche de vidéos YouTube (incluant les Shorts)
+    // Recherche de vidéos YouTube avec filtrage strict
     const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
     searchUrl.searchParams.set('part', 'snippet');
     searchUrl.searchParams.set('q', searchQuery);
     searchUrl.searchParams.set('type', 'video');
     searchUrl.searchParams.set('order', 'relevance');
     searchUrl.searchParams.set('publishedAfter', '2020-01-01T00:00:00Z');
-    searchUrl.searchParams.set('maxResults', '12'); // Plus de résultats pour avoir plus de choix
+    searchUrl.searchParams.set('maxResults', '20'); // Plus de résultats pour compenser le filtrage strict
     searchUrl.searchParams.set('key', youtubeApiKey);
 
     console.log('🌐 YouTube API URL:', searchUrl.toString().replace(youtubeApiKey, '[HIDDEN]'));
@@ -80,45 +154,27 @@ serve(async (req) => {
       })
     }
 
-    // Filtrer les résultats pour éliminer le contenu non pertinent
+    // Filtrage ultra-strict du contenu
     const filteredItems = searchData.items.filter(item => {
-      const title = item.snippet.title.toLowerCase();
-      const description = item.snippet.description?.toLowerCase() || '';
-      const channel = item.snippet.channelTitle.toLowerCase();
-      const fullText = `${title} ${description} ${channel}`;
+      const title = item.snippet.title || '';
+      const description = item.snippet.description || '';
+      const channelTitle = item.snippet.channelTitle || '';
       
-      // Mots-clés à éviter absolument
-      const forbiddenKeywords = [
-        'politique', 'élection', 'gouvernement', 'ministre', 'président', 
-        'scandale', 'polémique', 'controverse', 'manifestation', 'grève',
-        'guerre', 'conflit', 'terrorisme', 'violence', 'mort', 'tué',
-        'accident', 'drame', 'tragédie', 'crime', 'criminel'
-      ];
-      
-      const hasForbiddenContent = forbiddenKeywords.some(keyword => 
-        fullText.includes(keyword.toLowerCase())
-      );
-      
-      if (hasForbiddenContent) {
-        console.log('🚫 BLOCKED - Forbidden content:', item.snippet.title);
-        return false;
-      }
-      
-      console.log('✅ ACCEPTED - Video:', item.snippet.title);
-      return true;
+      return isContentAppropriate(title, description, channelTitle);
     });
 
     console.log('🔍 Filtered videos count:', filteredItems.length);
+    console.log('📝 Blocked videos count:', (searchData.items?.length || 0) - filteredItems.length);
 
     if (filteredItems.length === 0) {
-      console.log('📺 No relevant videos found after filtering');
+      console.log('📺 No appropriate videos found after strict filtering');
       return new Response(JSON.stringify({ youtubeVideos: [] }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       })
     }
 
-    // Prendre les 6 meilleurs résultats
+    // Prendre les 6 meilleurs résultats après filtrage
     const finalItems = filteredItems.slice(0, 6);
 
     // Récupérer les statistiques pour chaque vidéo
@@ -133,7 +189,7 @@ serve(async (req) => {
     const statsResponse = await fetch(statsUrl.toString());
     const statsData = statsResponse.ok ? await statsResponse.json() : { items: [] };
 
-    // Combiner les données
+    // Combiner les données avec validation finale
     const youtubeVideos = finalItems.map((item, index) => {
       const stats = statsData.items?.[index]?.statistics || {};
       const contentDetails = statsData.items?.[index]?.contentDetails || {};
@@ -155,7 +211,7 @@ serve(async (req) => {
       };
     });
 
-    console.log(`✅ Found ${youtubeVideos.length} YouTube videos`);
+    console.log(`✅ Found ${youtubeVideos.length} appropriate YouTube videos`);
     console.log('📝 Final video titles:', youtubeVideos.map(v => `${v.title} ${v.isShort ? '(Short)' : ''}`));
 
     return new Response(JSON.stringify({ youtubeVideos }), {
