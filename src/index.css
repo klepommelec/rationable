@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -97,6 +98,44 @@
     background-color: #020617; /* slate-950 */
   }
 
+  /* Enhanced animations for UX improvements */
+  @keyframes scale-x {
+    0% {
+      transform: scaleX(0);
+    }
+    100% {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes slide-up {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes gentle-bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.4s ease-out;
+  }
+
+  .animate-gentle-bounce {
+    animation: gentle-bounce 2s ease-in-out infinite;
+  }
+
   /* Pulsing glow effect for textarea - subtle gray tones with border color animation */
   @keyframes pulsing-glow {
     0%, 100% {
@@ -169,8 +208,13 @@
   @media (prefers-reduced-motion: reduce) {
     .pulsing-glow,
     .dark .pulsing-glow,
-    .pulsing-glow.drag-over {
+    .pulsing-glow.drag-over,
+    .animate-slide-up,
+    .animate-gentle-bounce {
       animation: none;
+    }
+    
+    .pulsing-glow {
       box-shadow: 
         0 0 6px rgba(148, 163, 184, 0.1),
         0 0 12px rgba(148, 163, 184, 0.05);
@@ -200,7 +244,7 @@
     animation: gradient-x 6s ease infinite;
   }
 
-  /* Amélioration des transitions pour tous les éléments interactifs */
+  /* Enhanced transitions for all interactive elements */
   button, 
   [role="button"], 
   a, 
@@ -210,6 +254,18 @@
   .card,
   .border {
     transition: all 0.2s ease-in-out;
+  }
+
+  /* Enhanced hover and focus states */
+  button:hover,
+  [role="button"]:hover,
+  a:hover {
+    transform: translateY(-1px);
+  }
+
+  button:active,
+  [role="button"]:active {
+    transform: translateY(0);
   }
 
   /* Amélioration du contraste pour les cartes */
@@ -288,6 +344,12 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+    
+    button:hover,
+    [role="button"]:hover,
+    a:hover {
+      transform: none;
+    }
   }
 
   /* Improve text readability */
@@ -342,6 +404,23 @@
 
   .dark .border {
     border-color: hsl(var(--border));
+  }
+
+  /* Enhanced shadow effects for dark mode */
+  .dark .shadow-lg {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -2px rgb(0 0 0 / 0.2);
+  }
+
+  .dark .shadow-xl {
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 10px 10px -5px rgb(0 0 0 / 0.2);
+  }
+
+  .dark .shadow-2xl {
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+  }
+
+  .dark .shadow-3xl {
+    box-shadow: 0 35px 60px -12px rgb(0 0 0 / 0.6);
   }
 
   /* Amélioration des dropdown menus */
@@ -425,5 +504,33 @@
 
   .input-enhanced {
     @apply bg-background border-input theme-transition;
+  }
+
+  /* Enhanced responsive utilities */
+  .responsive-padding {
+    @apply px-3 py-2 sm:px-4 sm:py-3;
+  }
+
+  .responsive-margin {
+    @apply mx-2 my-1 sm:mx-4 sm:my-2;
+  }
+
+  .responsive-text {
+    @apply text-sm sm:text-base;
+  }
+
+  .responsive-heading {
+    @apply text-lg sm:text-xl lg:text-2xl;
+  }
+
+  /* Smooth scroll behavior */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .smooth-scroll {
+      scroll-behavior: auto;
+    }
   }
 }

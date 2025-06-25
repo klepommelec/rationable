@@ -24,7 +24,20 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   if (!result) return null;
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
+    <div 
+      className="space-y-6 sm:space-y-8 animate-fade-in max-w-7xl mx-auto px-2 sm:px-4"
+      role="main"
+      aria-label="Résultats de l'analyse de décision"
+    >
+      {/* Skip to charts link for screen readers */}
+      <a 
+        href="#analysis-charts" 
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50 transition-all duration-200" 
+        aria-label="Aller aux graphiques d'analyse"
+      >
+        Aller aux graphiques
+      </a>
+
       <RecommendationCard 
         result={result}
         dilemma={dilemma}
@@ -32,10 +45,12 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         clearSession={clearSession}
       />
 
-      <AnalysisCharts 
-        breakdown={result.breakdown}
-        dilemma={dilemma}
-      />
+      <div id="analysis-charts" className="scroll-mt-4">
+        <AnalysisCharts 
+          breakdown={result.breakdown}
+          dilemma={dilemma}
+        />
+      </div>
     </div>
   );
 };
