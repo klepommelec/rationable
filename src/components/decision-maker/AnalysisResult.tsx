@@ -1,9 +1,7 @@
-
 import React from 'react';
 import { IResult } from '@/types/decision';
 import { RecommendationCard } from './RecommendationCard';
 import { AnalysisCharts } from './AnalysisCharts';
-
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
@@ -12,7 +10,6 @@ interface AnalysisResultProps {
   currentDecision?: any;
   dilemma?: string;
 }
-
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
   isUpdating,
@@ -22,37 +19,17 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   dilemma
 }) => {
   if (!result) return null;
-
-  return (
-    <div 
-      className="space-y-6 sm:space-y-8 animate-fade-in max-w-7xl mx-auto px-2 sm:px-4"
-      role="main"
-      aria-label="Résultats de l'analyse de décision"
-    >
+  return <div role="main" aria-label="Résultats de l'analyse de décision" className="space-y-6 sm:space-y-8 animate-fade-in max-w-7xl mx-auto sm:px-4 px-0">
       {/* Skip to charts link for screen readers */}
-      <a 
-        href="#analysis-charts" 
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50 transition-all duration-200" 
-        aria-label="Aller aux graphiques d'analyse"
-      >
+      <a href="#analysis-charts" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50 transition-all duration-200" aria-label="Aller aux graphiques d'analyse">
         Aller aux graphiques
       </a>
 
-      <RecommendationCard 
-        result={result}
-        dilemma={dilemma}
-        currentDecision={currentDecision}
-        clearSession={clearSession}
-      />
+      <RecommendationCard result={result} dilemma={dilemma} currentDecision={currentDecision} clearSession={clearSession} />
 
       <div id="analysis-charts" className="scroll-mt-4">
-        <AnalysisCharts 
-          breakdown={result.breakdown}
-          dilemma={dilemma}
-        />
+        <AnalysisCharts breakdown={result.breakdown} dilemma={dilemma} />
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default AnalysisResult;
