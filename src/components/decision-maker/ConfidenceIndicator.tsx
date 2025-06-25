@@ -42,7 +42,7 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
         >
           Score :
         </span>
-        <div className="flex items-center gap-2 flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-1 min-w-0 max-w-[240px]">
           <div 
             className="flex-1 h-2 sm:h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden transition-all duration-300"
             role="progressbar"
