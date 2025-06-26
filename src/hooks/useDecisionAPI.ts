@@ -5,6 +5,7 @@ import { generateCriteriaOnly, generateOptions } from '@/services/decisionServic
 import { uploadFilesToStorage, deleteFileFromStorage, UploadedFileInfo } from '@/services/fileUploadService';
 import { UploadedFile } from '@/components/FileUpload';
 import { AnalysisStep } from './useDecisionState';
+import { PerplexitySearchResult } from '@/services/perplexityService';
 
 interface UseDecisionAPIProps {
     dilemma: string;
@@ -93,10 +94,11 @@ export const useDecisionAPI = ({
             console.log("✅ [DEBUG] Files uploaded successfully");
           }
           
-          setProgressMessage("Analyse des options en cours...");
+          setProgressMessage("Génération des options optimisée...");
           console.log("📡 [DEBUG] Calling generateOptions API...");
           const startTime = Date.now();
           
+          // Pas de données Perplexity en cache pour cette fonction (elle est appelée manuellement)
           const apiResult = await generateOptions(dilemma, currentCriteria, uploadedFileInfos);
           
           const endTime = Date.now();
@@ -174,12 +176,13 @@ export const useDecisionAPI = ({
     };
 
     const handleStartAnalysis = async () => {
-        console.log("🚀 [DEBUG] Starting full analysis", { 
+        console.log("🚀 [DEBUG] Starting optimized full analysis", { 
           dilemma: dilemma.substring(0, 50) + "...",
           filesCount: uploadedFiles.length
         });
         
-        setProgressMessage("Génération des critères...");
+        // Feedback utilisateur immédiat
+        setProgressMessage("Démarrage de l'analyse...");
         setResult(null);
         setCriteria([]);
         setEmoji('🤔');
@@ -188,6 +191,7 @@ export const useDecisionAPI = ({
         resetRetry();
 
         let uploadedFileInfos: UploadedFileInfo[] = [];
+        let cachedRealTimeData: PerplexitySearchResult | undefined;
 
         try {
           // Upload des fichiers si présents
@@ -199,16 +203,19 @@ export const useDecisionAPI = ({
           }
           
           // Phase 1: Générer les critères et obtenir la catégorie suggérée
-          console.log("📡 [DEBUG] Phase 1: Generating criteria and category");
-          setProgressMessage("Analyse du contexte et génération des critères...");
+          console.log("📡 [DEBUG] Phase 1: Generating criteria and category (with potential Perplexity data)");
+          setProgressMessage("Génération des critères et analyse du contexte...");
           
           const response = await generateCriteriaOnly(dilemma, uploadedFileInfos);
+          cachedRealTimeData = response.realTimeData || undefined;
+          
           console.log("✅ [DEBUG] Criteria and category generated:", {
             emoji: response.emoji,
             criteriaCount: response.criteria?.length || 0,
             criteria: response.criteria,
             suggestedCategory: response.suggestedCategory,
-            filesAnalyzed: uploadedFileInfos.length
+            filesAnalyzed: uploadedFileInfos.length,
+            hasRealTimeData: !!cachedRealTimeData
           });
           
           const newCriteria = response.criteria.map((name: string) => ({
@@ -221,15 +228,16 @@ export const useDecisionAPI = ({
           setSelectedCategory(response.suggestedCategory);
           setAnalysisStep('criteria-loaded');
           
-          // Phase 2: Générer automatiquement les options
+          // Phase 2: Générer automatiquement les options avec un délai réduit pour l'UX
           setTimeout(async () => {
-            console.log("📡 [DEBUG] Phase 2: Auto-generating options");
+            console.log("📡 [DEBUG] Phase 2: Auto-generating options with cached data");
             setAnalysisStep('loading-options');
-            setProgressMessage("Génération des options...");
+            setProgressMessage("Génération des options avec données optimisées...");
             
             try {
-              const optionsResult = await generateOptions(dilemma, newCriteria, uploadedFileInfos);
-              console.log("✅ [DEBUG] Auto-options generated successfully");
+              // Passer les données Perplexity en cache pour éviter le double appel
+              const optionsResult = await generateOptions(dilemma, newCriteria, uploadedFileInfos, cachedRealTimeData);
+              console.log("✅ [DEBUG] Auto-options generated successfully with optimized performance");
               setResult(optionsResult);
               
               // Définir les critères de référence
@@ -248,7 +256,7 @@ export const useDecisionAPI = ({
               setCurrentDecisionId(newDecision.id);
               
               setAnalysisStep('done');
-              toast.success("Analyse complète générée !");
+              toast.success("Analyse complète générée avec performance optimisée !");
             } catch (error) {
               console.error("❌ [DEBUG] Error in auto-options generation:", error);
               const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
@@ -269,7 +277,7 @@ export const useDecisionAPI = ({
             } finally {
               setProgressMessage('');
             }
-          }, 800);
+          }, 200); // Réduit de 800ms à 200ms pour une meilleure réactivité
           
         } catch (error) {
           console.error("❌ [DEBUG] Error in analysis start:", error);

@@ -13,7 +13,7 @@ export interface PerplexitySearchResult {
 
 export const searchWithPerplexity = async (query: string, context?: string): Promise<PerplexitySearchResult> => {
   try {
-    console.log('🔍 Searching with Perplexity:', query);
+    console.log('🔍 Optimized Perplexity search:', query);
     
     const { data, error } = await supabase.functions.invoke('perplexity-search', {
       body: { query, context },
@@ -32,6 +32,7 @@ export const searchWithPerplexity = async (query: string, context?: string): Pro
       };
     }
 
+    console.log('✅ Perplexity search completed successfully');
     return data;
   } catch (error) {
     console.error('Perplexity service error:', error);

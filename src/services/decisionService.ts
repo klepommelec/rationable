@@ -3,7 +3,28 @@ import { ICriterion, IResult, DEFAULT_CATEGORIES } from '@/types/decision';
 import { callOpenAiApi } from './openai';
 import { UploadedFileInfo } from './fileUploadService';
 import { supabase } from '@/integrations/supabase/client';
-import { searchWithPerplexity, detectRealTimeQuery } from './perplexityService';
+import { searchWithPerplexity, detectRealTimeQuery, PerplexitySearchResult } from './perplexityService';
+
+// Cache simple pour éviter les appels Perplexity répétés
+const perplexityCache = new Map<string, { data: PerplexitySearchResult; timestamp: number }>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+const getCachedPerplexityData = async (query: string, context: string): Promise<PerplexitySearchResult> => {
+  const cacheKey = `${query}-${context}`;
+  const cached = perplexityCache.get(cacheKey);
+  
+  // Vérifier si le cache est encore valide
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    console.log('🚀 Using cached Perplexity data');
+    return cached.data;
+  }
+  
+  // Appeler Perplexity et mettre en cache
+  const data = await searchWithPerplexity(query, context);
+  perplexityCache.set(cacheKey, { data, timestamp: Date.now() });
+  
+  return data;
+};
 
 export const generateCriteriaOnly = async (dilemma: string, files?: UploadedFileInfo[]) => {
   // Détecter si la requête nécessite des données en temps réel
@@ -13,7 +34,7 @@ export const generateCriteriaOnly = async (dilemma: string, files?: UploadedFile
 
   if (needsRealTimeData) {
     console.log('🔍 Real-time data needed for:', dilemma);
-    realTimeData = await searchWithPerplexity(dilemma, 'Criteria generation for decision making');
+    realTimeData = await getCachedPerplexityData(dilemma, 'Criteria generation for decision making');
     if (realTimeData.content) {
       realTimeContext = `\n\nINFORMATIONS RÉCENTES (${realTimeData.timestamp}):\n${realTimeData.content}`;
     }
@@ -23,7 +44,7 @@ export const generateCriteriaOnly = async (dilemma: string, files?: UploadedFile
 Analysez ce dilemme et retournez une réponse JSON avec les éléments suivants :
 
 1. "emoji": Un emoji représentant le dilemme (ex: 💻, ✈️, 🏠, etc.)
-2. "criteria": Une liste de 3-6 critères importants pour évaluer les options de ce dilemme
+2. "criteria": Une liste de 3-6 critères importants pour évaluer les options de ce dilemma
 3. "suggestedCategory": L'ID de la catégorie la plus appropriée parmi : ${DEFAULT_CATEGORIES.map(c => `"${c.id}" (${c.name} ${c.emoji})`).join(', ')}
 
 Dilemme: "${dilemma}"${realTimeContext}`;
@@ -58,18 +79,28 @@ Exemple de format:
   };
 };
 
-export const generateOptions = async (dilemma: string, criteria: ICriterion[], files?: UploadedFileInfo[]): Promise<IResult> => {
+export const generateOptions = async (
+  dilemma: string, 
+  criteria: ICriterion[], 
+  files?: UploadedFileInfo[],
+  cachedRealTimeData?: PerplexitySearchResult
+): Promise<IResult> => {
   const criteriaList = criteria.map(c => c.name).join(', ');
   
-  // Détecter si la requête nécessite des données en temps réel
+  // Utiliser les données en cache si disponibles, sinon faire un nouvel appel
   const needsRealTimeData = detectRealTimeQuery(dilemma);
   let realTimeContext = '';
   let realTimeData = null;
   let confidenceContext = '';
 
   if (needsRealTimeData) {
-    console.log('🔍 Real-time data needed for options generation:', dilemma);
-    realTimeData = await searchWithPerplexity(dilemma, 'Options analysis and recommendations');
+    if (cachedRealTimeData) {
+      console.log('🚀 Réutilisation des données Perplexity en cache');
+      realTimeData = cachedRealTimeData;
+    } else {
+      console.log('🔍 Real-time data needed for options generation:', dilemma);
+      realTimeData = await getCachedPerplexityData(dilemma, 'Options analysis and recommendations');
+    }
     
     if (realTimeData.content) {
       realTimeContext = `\n\nINFORMATIONS RÉCENTES (${realTimeData.timestamp}):\n${realTimeData.content}`;
@@ -119,11 +150,24 @@ Générez 3-5 options différentes et pertinentes. Soyez concret et actionnable.
 
 Répondez UNIQUEMENT avec un objet JSON valide.`;
 
-  const result = await callOpenAiApi(prompt, files);
-  
+  // Lancer l'appel OpenAI et le fetch des vidéos YouTube en parallèle
+  const [result, socialData] = await Promise.allSettled([
+    callOpenAiApi(prompt, files),
+    fetchSocialContent(dilemma)
+  ]);
+
+  // Traiter les résultats
+  let finalResult;
+  if (result.status === 'fulfilled') {
+    finalResult = result.value;
+  } else {
+    console.error('❌ Error in OpenAI call:', result.reason);
+    throw result.reason;
+  }
+
   // Ajouter les métadonnées de données en temps réel
   if (realTimeData) {
-    result.realTimeData = {
+    finalResult.realTimeData = {
       hasRealTimeData: !!realTimeData.content,
       timestamp: realTimeData.timestamp,
       sourcesCount: realTimeData.sources?.length || 0,
@@ -131,30 +175,40 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
       error: realTimeData.error
     };
   }
+
+  // Ajouter le contenu social si disponible
+  if (socialData.status === 'fulfilled' && socialData.value?.youtubeVideos && socialData.value.youtubeVideos.length > 0) {
+    console.log(`✅ Found ${socialData.value.youtubeVideos.length} YouTube videos`);
+    finalResult.socialContent = {
+      youtubeVideos: socialData.value.youtubeVideos
+    };
+  } else if (socialData.status === 'rejected') {
+    console.error('❌ Social content fetch failed:', socialData.reason);
+  }
   
-  // Fetch social content (YouTube videos) en parallèle
+  return finalResult;
+};
+
+// Fonction helper pour fetch du contenu social en parallèle
+const fetchSocialContent = async (dilemma: string) => {
   try {
-    console.log('🔍 Fetching social content for:', result.recommendation);
-    const { data: socialData, error } = await supabase.functions.invoke('social-content-fetcher', {
+    console.log('🔍 Fetching social content in parallel for:', dilemma);
+    const { data, error } = await supabase.functions.invoke('social-content-fetcher', {
       body: { 
-        query: result.recommendation,
+        query: dilemma,
         dilemma: dilemma,
-        recommendation: result.recommendation
+        recommendation: dilemma // Utiliser le dilemme comme fallback
       }
     });
     
     if (error) {
       console.error('❌ Error fetching social content:', error);
-    } else if (socialData?.youtubeVideos && socialData.youtubeVideos.length > 0) {
-      console.log(`✅ Found ${socialData.youtubeVideos.length} YouTube videos`);
-      result.socialContent = {
-        youtubeVideos: socialData.youtubeVideos
-      };
+      return null;
     }
-  } catch (socialError) {
-    console.error('❌ Social content fetch failed:', socialError);
-    // Continue without social content
+    
+    return data;
+  } catch (error) {
+    console.error('❌ Social content fetch failed:', error);
+    return null;
   }
-  
-  return result;
 };
