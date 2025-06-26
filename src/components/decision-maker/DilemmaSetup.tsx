@@ -9,7 +9,7 @@ import { LoaderCircle, Sparkles, Clock, History, FileText, Upload } from 'lucide
 import { IDecision } from '@/types/decision';
 import { CategorySelector } from '@/components/CategorySelector';
 import { DecisionHistory } from '@/components/DecisionHistory';
-import { FileUpload, UploadedFile } from '@/components/FileUpload';
+import FileUpload, { UploadedFile } from '@/components/FileUpload';
 import { AnalysisStep } from '@/hooks/useDecisionState';
 
 interface DilemmaSetupProps {
@@ -58,7 +58,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   setUploadedFiles
 }) => {
   const isMainButtonDisabled = !dilemma.trim() || isLoading || isUpdating;
-  const isAnalysisInProgress = analysisStep === 'loading-criteria' || analysisStep === 'loading-options';
+  const isAnalysisInProgress = analysisStep === 'loading-options';
 
   const handleAnalysisClick = () => {
     if (!isMainButtonDisabled) {
@@ -114,8 +114,8 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
               Documents optionnels (PDF, images, etc.)
             </div>
             <FileUpload
-              uploadedFiles={uploadedFiles}
-              setUploadedFiles={setUploadedFiles}
+              files={uploadedFiles}
+              onFilesChange={setUploadedFiles}
               disabled={isAnalysisInProgress}
             />
           </div>
@@ -125,7 +125,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             <CategorySelector
               selectedCategory={selectedCategory}
               onCategoryChange={onCategoryChange}
-              disabled={isAnalysisInProgress}
             />
           </div>
 
@@ -171,10 +170,16 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
           <CardContent>
             <DecisionHistory
               history={history}
-              onLoadDecision={loadDecision}
-              onDeleteDecision={deleteDecision}
-              onClearHistory={clearHistory}
-              onUpdateCategory={onUpdateCategory}
+              onLoad={(decisionId: string) => {
+                const decision = history.find(d => d.id === decisionId);
+                if (decision) loadDecision(decision);
+              }}
+              onDelete={deleteDecision}
+              onClear={clearHistory}
+              onClose={() => {}}
+              onUpdateCategory={(decisionId: string, categoryId: string | undefined) => {
+                onUpdateCategory(categoryId);
+              }}
             />
           </CardContent>
         </Card>
