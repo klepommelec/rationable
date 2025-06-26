@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import SettingsSidebar from '@/components/settings/SettingsSidebar';
 import ProfileSettings from '@/components/settings/ProfileSettings';
@@ -6,10 +5,8 @@ import AppearanceSettings from '@/components/settings/AppearanceSettings';
 import NotificationSettings from '@/components/settings/NotificationSettings';
 import AppPreferencesSettings from '@/components/settings/AppPreferencesSettings';
 import DataManagementSettings from '@/components/settings/DataManagementSettings';
-
 const Settings = () => {
   const [activeSection, setActiveSection] = useState('profile');
-
   const renderActiveSection = () => {
     switch (activeSection) {
       case 'profile':
@@ -26,7 +23,6 @@ const Settings = () => {
         return <ProfileSettings />;
     }
   };
-
   const getSectionTitle = () => {
     const titles = {
       profile: 'Profil',
@@ -37,13 +33,8 @@ const Settings = () => {
     };
     return titles[activeSection as keyof typeof titles] || 'Paramètres';
   };
-
-  return (
-    <div className="flex min-h-screen">
-      <SettingsSidebar 
-        activeSection={activeSection} 
-        onSectionChange={setActiveSection} 
-      />
+  return <div className="flex min-h-screen border-t">
+      <SettingsSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
       <div className="flex-1 p-6">
         <div className="max-w-4xl">
           <div className="mb-6">
@@ -55,8 +46,6 @@ const Settings = () => {
           {renderActiveSection()}
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Settings;
