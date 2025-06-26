@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SharedDecision from "./pages/SharedDecision";
 import CommunityTemplates from "./pages/CommunityTemplates";
+import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import { ThemeProvider } from "./components/theme-provider";
 import { AuthProvider } from "./hooks/useAuth";
@@ -36,6 +37,11 @@ const App = () => (
                 <Route path="/templates" element={
                   <ProtectedRoute>
                     <CommunityTemplates />
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <Settings />
                   </ProtectedRoute>
                 } />
               </Route>

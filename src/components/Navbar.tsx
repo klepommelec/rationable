@@ -1,14 +1,16 @@
-import { Users, LogOut, User, Lightbulb, LightbulbOff, Monitor } from 'lucide-react';
+
+import { Users, LogOut, User, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import ShareButton from './ShareButton';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { useTheme } from 'next-themes';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
 interface NavbarProps {
   currentDecision?: any;
 }
+
 const Navbar: React.FC<NavbarProps> = ({
   currentDecision
 }) => {
@@ -18,10 +20,7 @@ const Navbar: React.FC<NavbarProps> = ({
     profile,
     signOut
   } = useAuth();
-  const {
-    setTheme,
-    theme
-  } = useTheme();
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
@@ -30,10 +29,13 @@ const Navbar: React.FC<NavbarProps> = ({
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
   const handleSignOut = async () => {
     await signOut();
   };
-  return <header className={`sticky top-0 z-50 w-full transition-all duration-150 ${isScrolled ? 'bg-white/95 backdrop-blur border-b supports-[backdrop-filter]:bg-white/90' : 'bg-transparent'}`}>
+
+  return (
+    <header className={`sticky top-0 z-50 w-full transition-all duration-150 ${isScrolled ? 'bg-white/95 backdrop-blur border-b supports-[backdrop-filter]:bg-white/90' : 'bg-transparent'}`}>
       <div className="container flex h-16 items-center">
         <Link to="/" className="flex items-center gap-2 mr-auto hover:underline transition-all duration-200">
           <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-9 w-9 rounded-none " />
@@ -41,13 +43,22 @@ const Navbar: React.FC<NavbarProps> = ({
         </Link>
         
         <div className="flex items-center gap-2">
-          {user ? <>
+          {user ? (
+            <>
               <Link to="/templates">
-                <Button variant="ghost" size="sm" className="rounded-full">
+                <Button variant="ghost" size="sm">
                   <Users className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Templates</span>
                 </Button>
               </Link>
+              
+              <Link to="/settings">
+                <Button variant="ghost" size="sm">
+                  <Settings className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Paramètres</span>
+                </Button>
+              </Link>
+              
               {currentDecision && <ShareButton decision={currentDecision} />}
               
               <DropdownMenu>
@@ -60,32 +71,24 @@ const Navbar: React.FC<NavbarProps> = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setTheme("light")}>
-                    <Lightbulb className="h-4 w-4 mr-2" />
-                    Thème clair
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme("dark")}>
-                    <LightbulbOff className="h-4 w-4 mr-2" />
-                    Thème sombre
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme("system")}>
-                    <Monitor className="h-4 w-4 mr-2" />
-                    Système
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Se déconnecter
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </> : <Link to="/auth">
+            </>
+          ) : (
+            <Link to="/auth">
               <Button variant="default" size="sm">
                 Se connecter
               </Button>
-            </Link>}
+            </Link>
+          )}
         </div>
       </div>
-    </header>;
+    </header>
+  );
 };
+
 export default Navbar;
