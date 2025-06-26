@@ -88,7 +88,7 @@ const DecisionMaker = () => {
               applyTemplate={applyTemplate}
               clearSession={clearSession}
               history={history}
-              loadDecision={(decision) => loadDecision(decision.id)}
+              loadDecision={loadDecision}
               deleteDecision={deleteDecision}
               clearHistory={clearHistory}
               handleStartAnalysis={handleStartAnalysis}
@@ -97,7 +97,7 @@ const DecisionMaker = () => {
               templates={templates}
               selectedCategory={selectedCategory}
               onCategoryChange={handleCategoryChange}
-              onUpdateCategory={handleUpdateCategory}
+              onUpdateCategory={(categoryId: string | undefined) => handleUpdateCategory(categoryId)}
               uploadedFiles={uploadedFiles}
               setUploadedFiles={setUploadedFiles}
             />
