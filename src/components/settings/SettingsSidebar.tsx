@@ -34,7 +34,7 @@ const SettingsSidebar = ({
         {settingsSections.map(section => {
         const Icon = section.icon;
         return <button key={section.id} onClick={() => onSectionChange(section.id)} className={cn("w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors", activeSection === section.id ? "bg-primary text-primary-foreground" : "hover:bg-muted")}>
-              <Icon className="h-5 w-5" />
+              <Icon className="h-4 w-4" />
               <span className="font-medium text-sm">{section.label}</span>
             </button>;
       })}
