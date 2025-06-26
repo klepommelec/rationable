@@ -52,13 +52,6 @@ const Navbar: React.FC<NavbarProps> = ({
                 </Button>
               </Link>
               
-              <Link to="/settings">
-                <Button variant="ghost" size="sm">
-                  <Settings className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Paramètres</span>
-                </Button>
-              </Link>
-              
               {currentDecision && <ShareButton decision={currentDecision} />}
               
               <DropdownMenu>
@@ -71,6 +64,13 @@ const Navbar: React.FC<NavbarProps> = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Paramètres
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Se déconnecter
