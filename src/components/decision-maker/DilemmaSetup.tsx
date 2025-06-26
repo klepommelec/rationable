@@ -6,11 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { LoaderCircle, Sparkles, Clock, History, FileText, Upload } from 'lucide-react';
-import { IDecision } from '@/types/decision';
+import { IDecision, ICriterion } from '@/types/decision';
 import { CategorySelector } from '@/components/CategorySelector';
 import { DecisionHistory } from '@/components/DecisionHistory';
 import FileUpload, { UploadedFile } from '@/components/FileUpload';
 import { AnalysisStep } from '@/hooks/useDecisionState';
+import { EmojiPicker } from '@/components/EmojiPicker';
+import { CriteriaManager } from '@/components/CriteriaManager';
+import ManualOptionsGenerator from '@/components/ManualOptionsGenerator';
 
 interface DilemmaSetupProps {
   dilemma: string;
@@ -33,6 +36,13 @@ interface DilemmaSetupProps {
   onUpdateCategory: (category: string | undefined) => void;
   uploadedFiles: UploadedFile[];
   setUploadedFiles: (files: UploadedFile[]) => void;
+  // Additional props for criteria-loaded state
+  criteria?: ICriterion[];
+  setCriteria?: (criteria: ICriterion[]) => void;
+  hasChanges?: boolean;
+  handleManualUpdate?: () => void;
+  emoji?: string;
+  setEmoji?: (emoji: string) => void;
 }
 
 const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
@@ -55,7 +65,13 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   onCategoryChange,
   onUpdateCategory,
   uploadedFiles,
-  setUploadedFiles
+  setUploadedFiles,
+  criteria = [],
+  setCriteria,
+  hasChanges = false,
+  handleManualUpdate,
+  emoji,
+  setEmoji
 }) => {
   const isMainButtonDisabled = !dilemma.trim() || isLoading || isUpdating;
   const isAnalysisInProgress = analysisStep === 'loading-options';
@@ -69,17 +85,29 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* En-tête principal */}
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Assistant de Décision IA
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Décrivez votre dilemme et laissez l'IA analyser vos options avec des données en temps réel
-        </p>
-      </div>
+      {/* Header - show emoji and title for criteria-loaded state */}
+      {analysisStep === 'criteria-loaded' && emoji && setEmoji ? (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 animate-fade-in">
+          <div className="flex items-center gap-4 w-full">
+            <EmojiPicker emoji={emoji} setEmoji={setEmoji} />
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-left break-words flex-1 min-w-0">
+              {dilemma}
+            </h1>
+          </div>
+        </div>
+      ) : (
+        // Main header for idle state
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Assistant de Décision IA
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Décrivez votre dilemme et laissez l'IA analyser vos options avec des données en temps réel
+          </p>
+        </div>
+      )}
 
-      {/* Formulaire principal */}
+      {/* Main form - always visible */}
       <Card className="mx-auto max-w-4xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -128,7 +156,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             />
           </div>
 
-          {/* Bouton principal avec feedback amélioré */}
+          {/* Bouton principal */}
           <div className="pt-4">
             {isAnalysisInProgress ? (
               <div className="space-y-3">
@@ -157,6 +185,29 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
           </div>
         </CardContent>
       </Card>
+
+      {/* Criteria management section - only show in criteria-loaded state */}
+      {analysisStep === 'criteria-loaded' && setCriteria && handleManualUpdate && (
+        <div className="mx-auto max-w-4xl space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <CriteriaManager 
+                criteria={criteria} 
+                setCriteria={setCriteria} 
+                isInteractionDisabled={isLoading || isUpdating} 
+                onUpdateAnalysis={handleManualUpdate} 
+                hasChanges={hasChanges} 
+              />
+            </CardContent>
+          </Card>
+          
+          <ManualOptionsGenerator 
+            onGenerateOptions={handleManualUpdate} 
+            isLoading={isUpdating} 
+            hasChanges={hasChanges} 
+          />
+        </div>
+      )}
 
       {/* Historique des décisions */}
       {history.length > 0 && (
