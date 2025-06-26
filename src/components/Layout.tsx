@@ -28,7 +28,7 @@ const Layout = () => {
       
       <div className="relative z-10">
         <Navbar currentDecision={currentDecision} />
-        <main role="main" id="main-content" className="flex-grow container mx-auto sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-full overflow-x-hidden">
+        <main role="main" id="main-content" className="flex-grow container mx-auto sm:px-6 lg:px-8 sm:py-6 lg:py-8 max-w-full overflow-x-hidden py-0">
           <Outlet />
         </main>
         <Footer />
