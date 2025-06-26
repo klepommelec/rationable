@@ -29,7 +29,7 @@ const SettingsSidebar = ({
   activeSection,
   onSectionChange
 }: SettingsSidebarProps) => {
-  return <div className="w-64 bg-muted/20 border-r p-6">
+  return <div className="w-64 border-r p-6 bg-white px-0 pr-4">
       <nav className="space-y-2">
         {settingsSections.map(section => {
         const Icon = section.icon;
