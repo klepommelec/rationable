@@ -1,3 +1,4 @@
+
 export interface ICriterion {
   id: string;
   name: string;
@@ -26,7 +27,7 @@ export interface IYouTubeVideo {
 }
 
 export interface ISocialContent {
-  youtubeVideos: IYouTubeVideo[];
+  youtubeVideos?: IYouTubeVideo[];
 }
 
 export interface IResult {

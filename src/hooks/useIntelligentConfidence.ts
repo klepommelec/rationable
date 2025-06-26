@@ -87,12 +87,12 @@ export const useIntelligentConfidence = (
     );
 
     // Fraîcheur des données
-    const dataFreshness = (() => {
+    const dataFreshness: 'very-fresh' | 'fresh' | 'moderate' | 'stale' = (() => {
       if (temporalFactor >= 85) return 'very-fresh';
       if (temporalFactor >= 70) return 'fresh';
       if (temporalFactor >= 50) return 'moderate';
       return 'stale';
-    })() as const;
+    })();
 
     // Niveau de confiance et couleur
     const { level, color, icon } = (() => {
