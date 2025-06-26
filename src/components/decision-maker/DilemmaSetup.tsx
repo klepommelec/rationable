@@ -2,13 +2,14 @@ import React, { useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { BrainCircuit, Paperclip, X, FileText, Image, ArrowRight } from 'lucide-react';
+import { BrainCircuit, Paperclip, X, FileText, Image, ArrowRight, Loader2 } from 'lucide-react';
 import { DecisionHistory } from '../DecisionHistory';
 import { AnimatedPlaceholder } from '../AnimatedPlaceholder';
 import MainActionButton from './MainActionButton';
 import { UploadedFile } from '../FileUpload';
 import { IDecision } from '@/types/decision';
 import { toast } from "sonner";
+
 interface DilemmaSetupProps {
   dilemma: string;
   setDilemma: (dilemma: string) => void;
@@ -34,6 +35,7 @@ interface DilemmaSetupProps {
   uploadedFiles: UploadedFile[];
   setUploadedFiles: (files: UploadedFile[]) => void;
 }
+
 const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   dilemma,
   setDilemma,
@@ -58,6 +60,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isAnalysisStarting, setIsAnalysisStarting] = useState(false);
 
   // Afficher seulement les 3 premiers modèles
   const displayedTemplates = templates.slice(0, 3);
@@ -161,7 +164,17 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
-  const isMainButtonDisabled = dilemma.trim() === '' || isLoading;
+  const isMainButtonDisabled = dilemma.trim() === '' || isLoading || isAnalysisStarting;
+  const handleAnalysisClick = async () => {
+    setIsAnalysisStarting(true);
+    toast.success("Analyse démarrée !");
+    
+    try {
+      await handleStartAnalysis();
+    } finally {
+      setIsAnalysisStarting(false);
+    }
+  };
   return <div className="mx-auto space-y-6">
             {/* Header principal occupant 72% de la hauteur de l'écran */}
             <div className="h-[72vh] flex items-center justify-center">
@@ -197,9 +210,13 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                         <Paperclip className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                                     </button>
                                     
-                                    {/* Bouton d'analyse */}
-                                    {analysisStep === 'idle' && <button type="button" onClick={handleStartAnalysis} disabled={isMainButtonDisabled} aria-label="Lancer l'analyse" title="Lancer l'analyse" className="p-2 bg-cyan-500 hover:bg-cyan-600 text-slate-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-full">
-                                            <ArrowRight className="h-4 w-4" />
+                                    {/* Bouton d'analyse avec feedback visuel */}
+                                    {analysisStep === 'idle' && <button type="button" onClick={handleAnalysisClick} disabled={isMainButtonDisabled} aria-label="Lancer l'analyse" title="Lancer l'analyse" className="p-2 bg-cyan-500 hover:bg-cyan-600 text-slate-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full hover:scale-105 active:scale-95">
+                                            {isAnalysisStarting ? (
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <ArrowRight className="h-4 w-4" />
+                                            )}
                                         </button>}
                                 </div>
                                 
