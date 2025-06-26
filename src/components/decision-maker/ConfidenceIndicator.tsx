@@ -1,10 +1,9 @@
 
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, TrendingUp, Target, Clock, Database } from 'lucide-react';
+import { AlertTriangle, TrendingUp, Target } from 'lucide-react';
 import { IBreakdownItem, IResult } from '@/types/decision';
 import { useIntelligentConfidence } from '@/hooks/useIntelligentConfidence';
-import { DataFreshnessIndicator } from './DataFreshnessIndicator';
 
 interface ConfidenceIndicatorProps {
   breakdown: IBreakdownItem[];
@@ -31,10 +30,6 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
         return TrendingUp;
       case 'Target':
         return Target;
-      case 'Clock':
-        return Clock;
-      case 'Database':
-        return Database;
       default:
         return AlertTriangle;
     }
@@ -82,8 +77,8 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
         </div>
       </div>
 
-      {/* Confidence Level and Data Freshness */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+      {/* Confidence Level - Simplifié */}
+      <div className="flex items-center gap-2">
         <Badge 
           className={`${intelligentConfidence.color} border-0 text-xs sm:text-sm transition-all duration-200 hover:scale-105 flex-shrink-0`}
           role="status"
@@ -94,32 +89,12 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
           <span className="hidden sm:inline">Confiance: </span>
           {intelligentConfidence.level}
         </Badge>
-
-        <DataFreshnessIndicator
-          hasRealTimeData={realTimeData?.hasRealTimeData || false}
-          timestamp={realTimeData?.timestamp}
-          sourcesCount={realTimeData?.sourcesCount}
-          dataFreshness={intelligentConfidence.dataFreshness}
-        />
       </div>
 
       {/* Recommendation Text */}
       <p className="text-xs text-muted-foreground italic">
         {intelligentConfidence.recommendationText}
       </p>
-
-      {/* Confidence Factors (expandable details) */}
-      <details className="text-xs text-muted-foreground">
-        <summary className="cursor-pointer hover:text-foreground transition-colors">
-          Détails de l'analyse
-        </summary>
-        <div className="mt-2 grid grid-cols-2 gap-2 p-2 bg-muted/50 rounded-md">
-          <div>Temporel: {intelligentConfidence.factors.temporal}%</div>
-          <div>Sources: {intelligentConfidence.factors.sources}%</div>
-          <div>Consensus: {intelligentConfidence.factors.consensus}%</div>
-          <div>Certitude: {intelligentConfidence.factors.uncertainty}%</div>
-        </div>
-      </details>
     </div>
   );
 };
