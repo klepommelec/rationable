@@ -2,7 +2,6 @@
 import { User, Lightbulb, Bell, Shield, Database, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface SettingsSidebarProps {
   activeSection: string;
@@ -48,8 +47,8 @@ const SettingsSidebar = ({
   };
 
   return (
-    <div className="w-64 border-r bg-white flex flex-col h-screen sticky top-0">
-      <ScrollArea className="flex-1 p-6 px-0 pr-4">
+    <div className="w-64 border-r bg-white flex flex-col h-full">
+      <div className="flex-1 p-6 px-3 pr-4">
         <nav className="space-y-1">
           {settingsSections.map(section => {
             const Icon = section.icon;
@@ -70,9 +69,9 @@ const SettingsSidebar = ({
             );
           })}
         </nav>
-      </ScrollArea>
+      </div>
       
-      <div className="p-6 px-0 pr-4 border-t">
+      <div className="p-6 px-3 pr-4 border-t">
         <button
           onClick={handleSignOut}
           className="w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
