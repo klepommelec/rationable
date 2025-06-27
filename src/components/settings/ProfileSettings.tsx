@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import AvatarUpload from '@/components/AvatarUpload';
 
 const ProfileSettings = () => {
-  const { user, profile, updateProfile, updateAvatar } = useAuth();
+  const { user, profile, updateProfile, updateAvatar, deleteAvatar } = useAuth();
   const { toast } = useToast();
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -51,6 +51,14 @@ const ProfileSettings = () => {
     }
   };
 
+  const handleAvatarDelete = async () => {
+    const { error } = await deleteAvatar();
+    
+    if (error) {
+      throw new Error(error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Section Avatar */}
@@ -69,6 +77,7 @@ const ProfileSettings = () => {
             currentAvatarUrl={profile?.avatar_url}
             userName={profile?.full_name || user?.email || 'Utilisateur'}
             onAvatarChange={handleAvatarChange}
+            onAvatarDelete={handleAvatarDelete}
             disabled={isUpdating}
           />
         </CardContent>

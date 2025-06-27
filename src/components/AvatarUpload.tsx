@@ -10,6 +10,7 @@ interface AvatarUploadProps {
   currentAvatarUrl?: string | null;
   userName?: string;
   onAvatarChange: (file: File) => Promise<void>;
+  onAvatarDelete?: () => Promise<void>;
   disabled?: boolean;
 }
 
@@ -17,6 +18,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   currentAvatarUrl,
   userName,
   onAvatarChange,
+  onAvatarDelete,
   disabled
 }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -63,6 +65,22 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
     maxSize: 2 * 1024 * 1024 // 2MB
   });
 
+  const handleDeleteAvatar = async () => {
+    if (!onAvatarDelete) return;
+    
+    setIsUploading(true);
+    try {
+      await onAvatarDelete();
+      setPreviewUrl(null);
+      toast.success('Avatar supprimé avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la suppression de l\'avatar:', error);
+      toast.error('Erreur lors de la suppression de l\'avatar');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const clearPreview = () => {
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
@@ -72,6 +90,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
 
   const displayUrl = previewUrl || currentAvatarUrl;
   const initials = userName ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U';
+  const hasAvatar = displayUrl || currentAvatarUrl;
 
   return (
     <div className="flex flex-col items-center space-y-4">
@@ -89,12 +108,12 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
           </AvatarFallback>
         </Avatar>
         
-        {previewUrl && (
+        {hasAvatar && !isUploading && (
           <Button
             variant="destructive"
             size="sm"
             className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
-            onClick={clearPreview}
+            onClick={previewUrl ? clearPreview : handleDeleteAvatar}
             disabled={isUploading}
           >
             <X className="h-3 w-3" />

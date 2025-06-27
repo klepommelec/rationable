@@ -1,8 +1,7 @@
-
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { uploadUserAvatar, AvatarUploadResult } from '@/services/avatarService';
+import { uploadUserAvatar, deleteUserAvatar, AvatarUploadResult } from '@/services/avatarService';
 
 interface Profile {
   id: string;
@@ -24,6 +23,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: any }>;
   updateAvatar: (file: File) => Promise<{ error: any }>;
+  deleteAvatar: () => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -130,6 +130,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const deleteAvatar = async () => {
+    if (!user) return { error: 'Not authenticated' };
+
+    try {
+      // Supprimer les fichiers de stockage
+      await deleteUserAvatar(user.id);
+      
+      // Mettre à jour le profil pour enlever l'URL de l'avatar
+      const { error } = await updateProfile({ avatar_url: null });
+      
+      return { error };
+    } catch (error) {
+      console.error('Error deleting avatar:', error);
+      return { error: error instanceof Error ? error.message : 'Failed to delete avatar' };
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -140,7 +157,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signIn,
       signOut,
       updateProfile,
-      updateAvatar
+      updateAvatar,
+      deleteAvatar
     }}>
       {children}
     </AuthContext.Provider>

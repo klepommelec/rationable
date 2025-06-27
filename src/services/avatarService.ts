@@ -59,17 +59,30 @@ export const uploadUserAvatar = async (file: File, userId: string): Promise<Avat
   }
 };
 
-export const deleteUserAvatar = async (filePath: string): Promise<void> => {
-  console.log('🗑️ Deleting avatar:', filePath);
+export const deleteUserAvatar = async (userId: string): Promise<void> => {
+  console.log('🗑️ Deleting avatars for user:', userId);
   
-  const { error } = await supabase.storage
-    .from('avatars')
-    .remove([filePath]);
-  
-  if (error) {
-    console.error('❌ Error deleting avatar:', error);
+  try {
+    // Lister tous les fichiers de l'utilisateur
+    const { data: existingFiles } = await supabase.storage
+      .from('avatars')
+      .list(userId);
+    
+    if (existingFiles && existingFiles.length > 0) {
+      const filesToDelete = existingFiles.map(f => `${userId}/${f.name}`);
+      const { error } = await supabase.storage
+        .from('avatars')
+        .remove(filesToDelete);
+      
+      if (error) {
+        console.error('❌ Error deleting avatars:', error);
+        throw error;
+      }
+      
+      console.log('✅ Avatars deleted successfully:', filesToDelete);
+    }
+  } catch (error) {
+    console.error('❌ Failed to delete avatars:', error);
     throw error;
   }
-  
-  console.log('✅ Avatar deleted successfully');
 };
