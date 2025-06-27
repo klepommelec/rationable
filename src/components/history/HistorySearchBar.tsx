@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -148,7 +147,6 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
                       <div className="flex items-center justify-between w-full gap-2">
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary" className="text-xs">
-                            <span className="mr-1">{category.emoji}</span>
                             {category.name}
                           </Badge>
                         </div>
