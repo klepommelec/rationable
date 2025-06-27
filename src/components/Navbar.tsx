@@ -79,7 +79,11 @@ const Navbar: React.FC<NavbarProps> = ({
                   <Button variant="ghost" size="sm" className="flex items-center gap-2">
                     <Avatar className="h-6 w-6">
                       {profile?.avatar_url && (
-                        <AvatarImage src={profile.avatar_url} alt="Avatar" />
+                        <AvatarImage 
+                          src={profile.avatar_url} 
+                          alt="Avatar" 
+                          className="object-cover w-full h-full"
+                        />
                       )}
                       <AvatarFallback className="text-xs">
                         {getUserInitials()}

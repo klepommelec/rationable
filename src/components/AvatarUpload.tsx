@@ -77,7 +77,13 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
     <div className="flex flex-col items-center space-y-4">
       <div className="relative">
         <Avatar className="h-24 w-24">
-          {displayUrl && <AvatarImage src={displayUrl} alt="Avatar" />}
+          {displayUrl && (
+            <AvatarImage 
+              src={displayUrl} 
+              alt="Avatar" 
+              className="object-cover w-full h-full"
+            />
+          )}
           <AvatarFallback className="text-lg font-medium">
             {initials}
           </AvatarFallback>
