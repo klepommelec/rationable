@@ -39,13 +39,13 @@ const Layout = () => {
       )}
       
       <div className="relative z-10 flex flex-col min-h-screen">
-        {!isSettingsPage && <Navbar currentDecision={currentDecision} />}
+        <Navbar currentDecision={currentDecision} />
         <main 
           role="main" 
           id="main-content" 
           className={`flex-grow ${
             isSettingsPage 
-              ? 'h-screen overflow-hidden' 
+              ? 'h-[calc(100vh-4rem)] overflow-hidden' 
               : 'container mx-auto sm:px-6 lg:px-8 sm:py-6 lg:py-8 max-w-full overflow-x-hidden px-[3px] py-0'
           }`}
         >
