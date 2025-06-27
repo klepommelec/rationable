@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import ShareButton from './ShareButton';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
@@ -38,6 +39,15 @@ const Navbar: React.FC<NavbarProps> = ({
     await signOut();
   };
 
+  const getUserDisplayName = () => {
+    return profile?.full_name || user?.email?.split('@')[0] || 'Utilisateur';
+  };
+
+  const getUserInitials = () => {
+    const name = getUserDisplayName();
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
   return (
     <header className={`sticky top-0 z-50 w-full transition-all duration-150 ${
       isScrolled 
@@ -66,10 +76,17 @@ const Navbar: React.FC<NavbarProps> = ({
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm">
-                    <User className="h-4 w-4 mr-2" />
+                  <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                    <Avatar className="h-6 w-6">
+                      {profile?.avatar_url && (
+                        <AvatarImage src={profile.avatar_url} alt="Avatar" />
+                      )}
+                      <AvatarFallback className="text-xs">
+                        {getUserInitials()}
+                      </AvatarFallback>
+                    </Avatar>
                     <span className="hidden sm:inline">
-                      {profile?.full_name || user.email?.split('@')[0] || 'Utilisateur'}
+                      {getUserDisplayName()}
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
