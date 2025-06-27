@@ -2,7 +2,7 @@
 import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Calendar, MoreHorizontal, Trash2, FileDown, FileText, Download } from 'lucide-react';
+import { Search, MoreHorizontal, Trash2, FileDown, FileText, Download } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
@@ -14,6 +14,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 import { DEFAULT_CATEGORIES } from '@/types/decision';
 import { IDecision } from '@/types/decision';
 import {
@@ -134,12 +135,23 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Toutes les catégories</SelectItem>
-                  <SelectItem value="uncategorized">Non catégorisées ({categoryCounts.uncategorized || 0})</SelectItem>
+                  <SelectItem value="uncategorized">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs">
+                        Non catégorisées
+                      </Badge>
+                      <span className="text-muted-foreground">({categoryCounts.uncategorized || 0})</span>
+                    </div>
+                  </SelectItem>
                   {DEFAULT_CATEGORIES.map(category => (
                     <SelectItem key={category.id} value={category.id}>
-                      <div className="flex items-center gap-2">
-                        <span>{category.emoji}</span>
-                        <span>{category.name}</span>
+                      <div className="flex items-center justify-between w-full gap-2">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            <span className="mr-1">{category.emoji}</span>
+                            {category.name}
+                          </Badge>
+                        </div>
                         <span className="text-muted-foreground">({categoryCounts[category.id] || 0})</span>
                       </div>
                     </SelectItem>
@@ -157,15 +169,10 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="date">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      Par date
-                    </div>
+                    Par date
                   </SelectItem>
                   <SelectItem value="category">
-                    <div className="flex items-center gap-2">
-                      Par catégorie
-                    </div>
+                    Par catégorie
                   </SelectItem>
                 </SelectContent>
               </Select>
