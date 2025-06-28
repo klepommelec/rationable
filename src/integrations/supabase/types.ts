@@ -57,6 +57,36 @@ export type Database = {
         }
         Relationships: []
       }
+      decision_comments: {
+        Row: {
+          comment_type: string
+          content: string
+          created_at: string
+          decision_id: string
+          id: string
+          step_context: string | null
+          updated_at: string
+        }
+        Insert: {
+          comment_type?: string
+          content: string
+          created_at?: string
+          decision_id: string
+          id?: string
+          step_context?: string | null
+          updated_at?: string
+        }
+        Update: {
+          comment_type?: string
+          content?: string
+          created_at?: string
+          decision_id?: string
+          id?: string
+          step_context?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
