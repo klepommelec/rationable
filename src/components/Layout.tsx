@@ -44,8 +44,8 @@ const Layout = () => {
           className="absolute top-0 left-0 w-full h-full pointer-events-none hidden dark:block" 
           style={{
             backgroundImage: 'url(/lovable-uploads/acbf0d3a-fb57-41c6-b877-a64d38b65f84.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            backgroundSize: 'contain',
+            backgroundPosition: 'center top',
             backgroundRepeat: 'no-repeat'
           }} 
         />
