@@ -43,9 +43,9 @@ const Layout = () => {
         <div 
           className="absolute top-0 left-0 w-full h-full pointer-events-none hidden dark:block" 
           style={{
-            backgroundImage: 'url(/lovable-uploads/b5fcad52-5808-4dc8-b6ff-0cd99578dade.png)',
-            backgroundSize: 'contain',
-            backgroundPosition: 'center top',
+            backgroundImage: 'url(/lovable-uploads/3d554ca5-e991-4710-a3a5-0af5f0e7a7e4.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat'
           }} 
         />
