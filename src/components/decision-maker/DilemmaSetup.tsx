@@ -9,7 +9,6 @@ import MainActionButton from './MainActionButton';
 import { UploadedFile } from '../FileUpload';
 import { IDecision } from '@/types/decision';
 import { toast } from "sonner";
-
 interface DilemmaSetupProps {
   dilemma: string;
   setDilemma: (dilemma: string) => void;
@@ -35,7 +34,6 @@ interface DilemmaSetupProps {
   uploadedFiles: UploadedFile[];
   setUploadedFiles: (files: UploadedFile[]) => void;
 }
-
 const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   dilemma,
   setDilemma,
@@ -168,7 +166,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   const handleAnalysisClick = async () => {
     setIsAnalysisStarting(true);
     toast.success("Analyse démarrée !");
-    
     try {
       await handleStartAnalysis();
     } finally {
@@ -212,11 +209,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                     
                                     {/* Bouton d'analyse avec feedback visuel */}
                                     {analysisStep === 'idle' && <button type="button" onClick={handleAnalysisClick} disabled={isMainButtonDisabled} aria-label="Lancer l'analyse" title="Lancer l'analyse" className="p-2 bg-cyan-500 hover:bg-cyan-600 text-slate-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full hover:scale-105 active:scale-95">
-                                            {isAnalysisStarting ? (
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                            ) : (
-                                                <ArrowRight className="h-4 w-4" />
-                                            )}
+                                            {isAnalysisStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
                                         </button>}
                                 </div>
                                 
@@ -267,7 +260,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             </div>
 
             {/* Historique intégré directement dans la page */}
-            <Card className="backdrop-blur-sm">
+            <Card className="backdrop-blur-sm bg-[14161A]">
                 <CardHeader className="pb-4">
                     <CardTitle className="font-semibold text-2xl">Historique des décisions</CardTitle>
                     <CardDescription className="text-muted-foreground">
