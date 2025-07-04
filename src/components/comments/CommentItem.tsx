@@ -137,12 +137,12 @@ export const CommentItem: React.FC<CommentItemProps> = ({
         <Textarea
           value={editContent}
           onChange={(e) => setEditContent(e.target.value)}
-          placeholder="Ajoutez votre commentaire..."
+          placeholder="Partagez votre commentaire, note ou réflexion..."
           className="min-h-[80px]"
           disabled={isLoading}
         />
       ) : (
-        <p className="text-sm text-gray-700 whitespace-pre-wrap">
+        <p className="text-sm text-foreground whitespace-pre-wrap">
           {comment.content}
         </p>
       )}
