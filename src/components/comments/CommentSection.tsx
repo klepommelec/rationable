@@ -123,13 +123,13 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
         )}
 
         {isAddingComment ? (
-          <Card className="p-4 space-y-3">
+          <Card className="p-4 space-y-3 bg-card border-border">
             <Textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder={placeholder}
               disabled={isLoading}
-              className="min-h-[80px] border-none px-[4px]"
+              className="min-h-[80px] border-none px-[4px] bg-card text-card-foreground"
             />
             <div className="flex gap-2">
               <Button
