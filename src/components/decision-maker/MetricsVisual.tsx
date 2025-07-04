@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -76,7 +75,7 @@ export const MetricsVisual: React.FC<MetricsVisualProps> = ({
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {metrics.map((metric, index) => <div key={metric.title} style={{
             animationDelay: `${index * 100}ms`
-          }} className="p-4 rounded-lg border bg-gray-50 border-gray-200 animate-fade-in transition-all hover:scale-105">
+          }} className="p-4 rounded-lg border bg-background border animate-fade-in transition-all hover:scale-105">
                 <div className="flex items-center justify-between mb-2">
                   {metric.icon}
                   <span className="text-2xl font-bold text-gray-900">
