@@ -3,8 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { MessageSquare, ChevronDown, Plus } from 'lucide-react';
+import { MessageSquare, Plus } from 'lucide-react';
 import { CommentItem } from './CommentItem';
 import { commentService } from '@/services/commentService';
 import { IComment, ICommentCreate } from '@/types/comment';
@@ -26,7 +25,6 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   placeholder = "Ajoutez un commentaire..."
 }) => {
   const [comments, setComments] = useState<IComment[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isAddingComment, setIsAddingComment] = useState(false);
@@ -37,10 +35,10 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   );
 
   useEffect(() => {
-    if (decisionId && isOpen) {
+    if (decisionId) {
       loadComments();
     }
-  }, [decisionId, isOpen]);
+  }, [decisionId]);
 
   const loadComments = async () => {
     setIsLoading(true);
@@ -102,29 +100,28 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   if (!decisionId) return null;
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-        <MessageSquare className="h-4 w-4" />
-        <span>{title}</span>
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <MessageSquare className="h-5 w-5 text-muted-foreground" />
+        <h3 className="text-lg font-medium">{title}</h3>
         {filteredComments.length > 0 && (
-          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
             {filteredComments.length}
           </span>
         )}
-        <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-      </CollapsibleTrigger>
+      </div>
 
-      <CollapsibleContent className="mt-3 space-y-3">
+      <div className="space-y-3">
         {isLoading && filteredComments.length === 0 ? (
-          <div className="text-center py-4 text-muted-foreground">
+          <div className="text-center py-8 text-muted-foreground">
             Chargement des commentaires...
           </div>
         ) : filteredComments.length === 0 ? (
-          <div className="text-center py-4 text-muted-foreground">
+          <div className="text-center py-8 text-muted-foreground">
             Aucun commentaire pour le moment
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {filteredComments.map(comment => (
               <CommentItem
                 key={comment.id}
@@ -177,7 +174,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
             Ajouter un commentaire
           </Button>
         )}
-      </CollapsibleContent>
-    </Collapsible>
+      </div>
+    </div>
   );
 };
