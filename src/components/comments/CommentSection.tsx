@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,7 +21,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   commentType,
   stepContext,
   title = "Commentaires",
-  placeholder = "Partagez votre commentaire, note ou réflexion..."
+  placeholder = "Ajoutez un commentaire..."
 }) => {
   const [comments, setComments] = useState<IComment[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -30,7 +29,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   const [isAddingComment, setIsAddingComment] = useState(false);
 
   const filteredComments = comments.filter(comment => 
-    comment.comment_type === commentType && 
+    comment.comment_type === commentType &&
     (!stepContext || comment.step_context === stepContext)
   );
 
@@ -84,7 +83,9 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   const handleUpdateComment = async (commentId: string, content: string) => {
     const updatedComment = await commentService.updateComment(commentId, content);
     if (updatedComment) {
-      setComments(prev => prev.map(c => c.id === commentId ? updatedComment : c));
+      setComments(prev => 
+        prev.map(c => c.id === commentId ? updatedComment : c)
+      );
     }
   };
 
@@ -123,13 +124,13 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
         )}
 
         {isAddingComment ? (
-          <Card className="p-4 space-y-3 bg-card border-border">
+          <Card className="p-4 space-y-3">
             <Textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder={placeholder}
+              className="min-h-[80px]"
               disabled={isLoading}
-              className="min-h-[80px] border-none px-[4px] bg-card text-card-foreground"
             />
             <div className="flex gap-2">
               <Button

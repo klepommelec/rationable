@@ -40,34 +40,42 @@
   }
 
   .dark {
-    --background: 220 13% 10%;
-    --foreground: 210 40% 95%;
-    --card: 220 13% 12%;
-    --card-foreground: 210 40% 95%;
-    --popover: 220 13% 12%;
-    --popover-foreground: 210 40% 95%;
-    --primary: 210 40% 95%;
-    --primary-foreground: 220 13% 10%;
-    --secondary: 217 19% 16%;
-    --secondary-foreground: 210 40% 95%;
-    --muted: 217 19% 16%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 19% 16%;
-    --accent-foreground: 210 40% 95%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217 19% 18%;
-    --input: 217 19% 18%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
     
     /* Sidebar variables for dark theme */
-    --sidebar-background: 220 13% 8%;
-    --sidebar-foreground: 210 40% 95%;
-    --sidebar-primary: 210 40% 95%;
-    --sidebar-primary-foreground: 220 13% 10%;
-    --sidebar-accent: 217 19% 16%;
-    --sidebar-accent-foreground: 210 40% 95%;
-    --sidebar-border: 217 19% 18%;
+    --sidebar-background: 217.2 32.6% 15%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 210 40% 98%;
+    --sidebar-primary-foreground: 222.2 47.4% 11.2%;
+    --sidebar-accent: 217.2 32.6% 20%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
     --sidebar-ring: 212.7 26.8% 83.9%;
   }
 }
@@ -78,14 +86,16 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
     transition: background-color 0.3s ease, color 0.3s ease;
+    /* Garder le body blanc en thème clair, sombre en thème sombre */
+    background-color: white;
   }
 
   .dark body {
-    background: hsl(220 13% 10%);
-    color: hsl(210 40% 95%);
+    background: radial-gradient(ellipse 80% 50% at 50% -20%,rgba(120,119,198,0.3),hsla(0,0%,100%,0));
+    background-color: #020617; /* slate-950 */
   }
 
   /* Enhanced animations for UX improvements */
@@ -147,13 +157,13 @@
       box-shadow: 
         0 0 12px rgba(71, 85, 105, 0.2),
         0 0 24px rgba(71, 85, 105, 0.1);
-      border-color: hsl(217 19% 18%);
+      border-color: hsl(217.2 32.6% 17.5%);
     }
     50% {
       box-shadow: 
         0 0 16px rgba(71, 85, 105, 0.3),
         0 0 32px rgba(71, 85, 105, 0.15);
-      border-color: hsl(217 19% 22%);
+      border-color: hsl(217.2 32.6% 22%);
     }
   }
 
@@ -219,45 +229,19 @@
     }
   }
 
-  /* Amélioration du contraste pour les cartes */
-  .card {
-    @apply bg-card text-card-foreground border border-border/50;
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  /* Gradient border animation */
+  @keyframes gradient-x {
+    0%, 100% {
+      transform: translateX(0%);
+    }
+    50% {
+      transform: translateX(100%);
+    }
   }
 
-  .dark .card {
-    @apply bg-card text-card-foreground border-border;
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
-  }
-
-  /* Amélioration des badges */
-  .badge {
-    transition: all 0.2s ease-in-out;
-  }
-
-  /* Amélioration des inputs */
-  input, textarea, select {
-    @apply bg-background border-input;
-    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  }
-
-  .dark input, 
-  .dark textarea, 
-  .dark select {
-    @apply bg-card border-input text-card-foreground;
-  }
-
-  input:focus, textarea:focus, select:focus {
-    @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
-  }
-
-  /* Amélioration du contraste pour le thème sombre */
-  .dark .text-muted-foreground {
-    color: hsl(215 20% 70%);
-  }
-
-  .dark .border {
-    border-color: hsl(var(--border));
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradient-x 6s ease infinite;
   }
 
   /* Enhanced transitions for all interactive elements */
@@ -282,6 +266,37 @@
   button:active,
   [role="button"]:active {
     transform: translateY(0);
+  }
+
+  /* Amélioration du contraste pour les cartes */
+  .card {
+    @apply bg-card text-card-foreground border border-border/50;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  }
+
+  .dark .card {
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    border-color: hsl(var(--border));
+  }
+
+  /* Amélioration des badges */
+  .badge {
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Amélioration des boutons */
+  .button {
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Amélioration des inputs */
+  input, textarea, select {
+    @apply bg-background border-input;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 
   /* Accessibility improvements */
@@ -382,6 +397,15 @@
     }
   }
 
+  /* Amélioration du contraste pour le thème sombre */
+  .dark .text-muted-foreground {
+    color: hsl(215 20.2% 70%);
+  }
+
+  .dark .border {
+    border-color: hsl(var(--border));
+  }
+
   /* Enhanced shadow effects for dark mode */
   .dark .shadow-lg {
     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -2px rgb(0 0 0 / 0.2);
@@ -407,6 +431,58 @@
 
   .dark .dropdown-menu {
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  }
+}
+
+/* Performance optimizations */
+@layer utilities {
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  .will-change-opacity {
+    will-change: opacity;
+  }
+
+  .gpu-accelerated {
+    transform: translateZ(0);
+  }
+
+  /* Responsive text utilities */
+  .text-responsive-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .text-responsive-xs {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
+  }
+
+  .text-responsive-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .text-responsive-sm {
+      font-size: 1rem;
+      line-height: 1.5rem;
+    }
+  }
+
+  .text-responsive-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .text-responsive-base {
+      font-size: 1.125rem;
+      line-height: 1.75rem;
+    }
   }
 
   /* Utility classes for better theme adaptation */

@@ -77,10 +77,10 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   };
 
   return (
-    <Card className="p-4 space-y-3 bg-card border-border">
+    <Card className="p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
+          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
             {getTypeLabel(comment.comment_type)}
           </span>
           {comment.step_context && (
@@ -138,11 +138,11 @@ export const CommentItem: React.FC<CommentItemProps> = ({
           value={editContent}
           onChange={(e) => setEditContent(e.target.value)}
           placeholder="Ajoutez votre commentaire..."
-          className="min-h-[80px] bg-card text-card-foreground border-input"
+          className="min-h-[80px]"
           disabled={isLoading}
         />
       ) : (
-        <p className="text-sm text-card-foreground whitespace-pre-wrap">
+        <p className="text-sm text-gray-700 whitespace-pre-wrap">
           {comment.content}
         </p>
       )}

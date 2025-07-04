@@ -1,3 +1,4 @@
+
 import { Users, LogOut, User, Settings } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -6,9 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
 interface NavbarProps {
   currentDecision?: any;
 }
+
 const Navbar: React.FC<NavbarProps> = ({
   currentDecision
 }) => {
@@ -22,6 +25,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
   // Check if we're on the settings page
   const isSettingsPage = location.pathname === '/settings';
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
@@ -30,25 +34,37 @@ const Navbar: React.FC<NavbarProps> = ({
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
   const handleSignOut = async () => {
     await signOut();
   };
+
   const getUserDisplayName = () => {
     return profile?.full_name || user?.email?.split('@')[0] || 'Utilisateur';
   };
+
   const getUserInitials = () => {
     const name = getUserDisplayName();
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
-  return <header className={`sticky top-0 z-50 w-full transition-all duration-150 ${isScrolled ? 'bg-white/95 backdrop-blur border-b supports-[backdrop-filter]:bg-white/90' : isSettingsPage ? 'bg-transparent border-b' : 'bg-transparent'}`}>
+
+  return (
+    <header className={`sticky top-0 z-50 w-full transition-all duration-150 ${
+      isScrolled 
+        ? 'bg-white/95 backdrop-blur border-b supports-[backdrop-filter]:bg-white/90' 
+        : isSettingsPage 
+          ? 'bg-transparent border-b'
+          : 'bg-transparent'
+    }`}>
       <div className="container flex h-16 items-center">
         <Link to="/" className="flex items-center gap-2 mr-auto hover:underline transition-all duration-200">
-          <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-9 w-9 rounded-none" />
+          <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-9 w-9 rounded-none " />
           <span className="text-xl font-medium">Rationable</span>
         </Link>
         
         <div className="flex items-center gap-2">
-          {user ? <>
+          {user ? (
+            <>
               <Link to="/templates">
                 <Button variant="ghost" size="sm">
                   <Users className="h-4 w-4 mr-2" />
@@ -62,7 +78,13 @@ const Navbar: React.FC<NavbarProps> = ({
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="flex items-center gap-2">
                     <Avatar className="h-6 w-6">
-                      {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt="Avatar" className="object-cover w-full h-full" />}
+                      {profile?.avatar_url && (
+                        <AvatarImage 
+                          src={profile.avatar_url} 
+                          alt="Avatar" 
+                          className="object-cover w-full h-full"
+                        />
+                      )}
                       <AvatarFallback className="text-xs">
                         {getUserInitials()}
                       </AvatarFallback>
@@ -86,13 +108,18 @@ const Navbar: React.FC<NavbarProps> = ({
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </> : <Link to="/auth">
+            </>
+          ) : (
+            <Link to="/auth">
               <Button variant="default" size="sm">
                 Se connecter
               </Button>
-            </Link>}
+            </Link>
+          )}
         </div>
       </div>
-    </header>;
+    </header>
+  );
 };
+
 export default Navbar;
