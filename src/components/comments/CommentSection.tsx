@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -101,24 +100,15 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <MessageSquare className="h-5 w-5 text-muted-foreground" />
-        <h3 className="text-lg font-medium">{title}</h3>
-        {filteredComments.length > 0 && (
-          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-            {filteredComments.length}
-          </span>
-        )}
-      </div>
-
       <div className="space-y-3">
         {isLoading && filteredComments.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             Chargement des commentaires...
           </div>
         ) : filteredComments.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Aucun commentaire pour le moment
+          <div className="text-center py-8 text-muted-foreground flex flex-col items-center gap-2">
+            <MessageSquare className="h-8 w-8 text-muted-foreground/50" />
+            <span>Aucun commentaire pour le moment</span>
           </div>
         ) : (
           <div className="space-y-3">
