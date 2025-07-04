@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, ChevronDown, Info, RefreshCw } from 'lucide-react';
 import { ICriterion } from '@/types/decision';
 import { CriterionRow } from './CriterionRow';
-import { CommentSection } from './comments/CommentSection';
 import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -178,18 +177,6 @@ export const CriteriaManager = ({
             </Button>
           )}
         </div>
-
-        {/* Section commentaires pour les critères */}
-        {currentDecisionId && (
-          <div className="mt-4 pt-4 border-t">
-            <CommentSection
-              decisionId={currentDecisionId}
-              commentType="criteria"
-              title="Commentaires sur les critères"
-              placeholder="Ajoutez un commentaire sur les critères de décision..."
-            />
-          </div>
-        )}
       </CollapsibleContent>
     </Collapsible>
   );

@@ -15,7 +15,10 @@ export const commentService = {
       return [];
     }
 
-    return data || [];
+    return (data || []).map(comment => ({
+      ...comment,
+      comment_type: comment.comment_type as 'general' | 'criteria' | 'option' | 'recommendation'
+    }));
   },
 
   async createComment(comment: ICommentCreate): Promise<IComment | null> {
@@ -30,7 +33,10 @@ export const commentService = {
       return null;
     }
 
-    return data;
+    return data ? {
+      ...data,
+      comment_type: data.comment_type as 'general' | 'criteria' | 'option' | 'recommendation'
+    } : null;
   },
 
   async updateComment(commentId: string, content: string): Promise<IComment | null> {
@@ -46,7 +52,10 @@ export const commentService = {
       return null;
     }
 
-    return data;
+    return data ? {
+      ...data,
+      comment_type: data.comment_type as 'general' | 'criteria' | 'option' | 'recommendation'
+    } : null;
   },
 
   async deleteComment(commentId: string): Promise<boolean> {

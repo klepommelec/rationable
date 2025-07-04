@@ -134,14 +134,14 @@ const DecisionMaker = () => {
           </React.Suspense>
         )}
 
-        {/* Section commentaires généraux */}
+        {/* Section commentaires généraux - uniquement en bas de page */}
         {currentDecision && analysisStep !== 'idle' && (
-          <div className="mt-8 mb-6">
+          <div className="mt-12 mb-8 border-t pt-8">
             <CommentSection
               decisionId={currentDecision.id}
               commentType="general"
-              title="Commentaires généraux"
-              placeholder="Ajoutez un commentaire général sur cette décision..."
+              title="Commentaires sur cette décision"
+              placeholder="Ajoutez vos réflexions, notes ou commentaires sur cette décision..."
             />
           </div>
         )}
