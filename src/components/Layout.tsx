@@ -25,12 +25,25 @@ const Layout = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground relative">
-      {/* Dégradé uniquement sur la home page et en thème clair */}
+      {/* Background pour le thème clair */}
       {isHomePage && (
         <div 
           className="absolute top-0 left-0 w-full h-full pointer-events-none dark:hidden" 
           style={{
             backgroundImage: 'url(/lovable-uploads/faef67a8-98c5-453e-84c7-2d077a111397.png)',
+            backgroundSize: 'contain',
+            backgroundPosition: 'center top',
+            backgroundRepeat: 'no-repeat'
+          }} 
+        />
+      )}
+
+      {/* Background pour le thème sombre */}
+      {isHomePage && (
+        <div 
+          className="absolute top-0 left-0 w-full h-full pointer-events-none hidden dark:block" 
+          style={{
+            backgroundImage: 'url(/lovable-uploads/b5fcad52-5808-4dc8-b6ff-0cd99578dade.png)',
             backgroundSize: 'contain',
             backgroundPosition: 'center top',
             backgroundRepeat: 'no-repeat'
