@@ -51,9 +51,9 @@ const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className={`sticky top-0 z-50 w-full transition-all duration-150 ${
       isScrolled 
-        ? 'bg-white/95 backdrop-blur border-b supports-[backdrop-filter]:bg-white/90' 
+        ? 'bg-background/95 backdrop-blur border-b border-border supports-[backdrop-filter]:bg-background/90' 
         : isSettingsPage 
-          ? 'bg-transparent border-b'
+          ? 'bg-transparent border-b border-border'
           : 'bg-transparent'
     }`}>
       <div className="container flex h-16 items-center">
