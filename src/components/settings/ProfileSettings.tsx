@@ -113,7 +113,7 @@ const ProfileSettings = () => {
                 <SelectValue placeholder="Sélectionnez votre contexte d'usage" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="personal" className="py-3">
+                <SelectItem value="personal" className="py-4">
                   <div className="flex flex-col items-start gap-1">
                     <span className="font-medium">Usage personnel</span>
                     <span className="text-sm text-muted-foreground">
@@ -121,7 +121,7 @@ const ProfileSettings = () => {
                     </span>
                   </div>
                 </SelectItem>
-                <SelectItem value="professional" className="py-3">
+                <SelectItem value="professional" className="py-4">
                   <div className="flex flex-col items-start gap-1">
                     <span className="font-medium">Usage professionnel</span>
                     <span className="text-sm text-muted-foreground">
