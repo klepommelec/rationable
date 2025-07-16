@@ -64,6 +64,10 @@ const ProfileSettings = () => {
     }
   };
 
+  const handleContextChange = (value: string) => {
+    setUseContext(value as 'personal' | 'professional');
+  };
+
   const hasChanges = fullName !== (profile?.full_name || '') || useContext !== (profile?.use_context || 'personal');
 
   return (
@@ -106,7 +110,7 @@ const ProfileSettings = () => {
             <Label htmlFor="context">Comment utilisez-vous principalement cette application ?</Label>
             <RadioGroup
               value={useContext}
-              onValueChange={setUseContext}
+              onValueChange={handleContextChange}
               className="grid grid-cols-1 gap-4"
             >
               <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-muted/50">
