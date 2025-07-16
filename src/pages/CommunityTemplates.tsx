@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { getCommunityTemplates } from '@/services/communityTemplateService';
 import { shareDecision } from '@/services/sharedDecisionService';
 import { PERSONAL_TEMPLATES, PROFESSIONAL_TEMPLATES } from '@/data/predefinedTemplates';
+import { useContextualContent } from '@/hooks/useContextualContent';
 import TemplateFilters from '@/components/templates/TemplateFilters';
 import TemplateGrid from '@/components/templates/TemplateGrid';
 
@@ -14,6 +15,7 @@ const CommunityTemplates = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'most_copied'>('newest');
   const [showPredefined, setShowPredefined] = useState(false);
+  const { context } = useContextualContent();
 
   const loadTemplates = async () => {
     try {
@@ -114,6 +116,7 @@ const CommunityTemplates = () => {
           filteredProfessionalTemplates={filteredProfessionalTemplates}
           onOpenTemplate={handleOpenTemplate}
           onResetFilters={handleResetFilters}
+          userContext={context}
         />
       )}
     </div>
