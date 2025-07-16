@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Lightbulb, Target, TrendingUp } from 'lucide-react';
+import { CheckCircle, Lightbulb, Target, TrendingUp, User, Building } from 'lucide-react';
 
 const Onboarding = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [fullName, setFullName] = useState('');
+  const [useContext, setUseContext] = useState<'personal' | 'professional'>('personal');
   const { profile, updateProfile } = useAuth();
-  const totalSteps = 3;
+  const totalSteps = 4;
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
@@ -22,6 +23,7 @@ const Onboarding = () => {
   const handleFinish = async () => {
     await updateProfile({ 
       full_name: fullName || profile?.full_name || '',
+      use_context: useContext,
       onboarding_completed: true 
     });
   };
@@ -87,6 +89,55 @@ const Onboarding = () => {
 
           {currentStep === 2 && (
             <div className="text-center space-y-6">
+              <CardTitle className="text-2xl">Comment utiliserez-vous Rationable ?</CardTitle>
+              <CardDescription>
+                Choisissez votre contexte d'utilisation principal pour une expérience personnalisée.
+              </CardDescription>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                <div 
+                  className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                    useContext === 'personal' 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                  onClick={() => setUseContext('personal')}
+                >
+                  <div className="flex items-center space-x-3 mb-3">
+                    <User className="h-6 w-6 text-primary" />
+                    <h3 className="font-semibold text-foreground">Usage Personnel</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground text-left">
+                    Décisions personnelles comme choisir un smartphone, une destination de vacances, ou des investissements personnels.
+                  </p>
+                </div>
+                
+                <div 
+                  className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                    useContext === 'professional' 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                  onClick={() => setUseContext('professional')}
+                >
+                  <div className="flex items-center space-x-3 mb-3">
+                    <Building className="h-6 w-6 text-primary" />
+                    <h3 className="font-semibold text-foreground">Usage Professionnel</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground text-left">
+                    Décisions d'entreprise comme choisir une stack technique, une stratégie marketing, ou des partenaires.
+                  </p>
+                </div>
+              </div>
+              
+              <Button onClick={handleNext} size="lg" className="w-full md:w-auto">
+                Continuer
+              </Button>
+            </div>
+          )}
+
+          {currentStep === 3 && (
+            <div className="text-center space-y-6">
               <CardTitle className="text-2xl">Personnalisons votre profil</CardTitle>
               <CardDescription>
                 Comment souhaitez-vous être appelé ?
@@ -108,7 +159,7 @@ const Onboarding = () => {
             </div>
           )}
 
-          {currentStep === 3 && (
+          {currentStep === 4 && (
             <div className="text-center space-y-6">
               <CheckCircle className="h-16 w-16 mx-auto text-green-500" />
               <CardTitle className="text-2xl">Tout est prêt !</CardTitle>

@@ -9,6 +9,7 @@ interface Profile {
   email: string | null;
   avatar_url: string | null;
   onboarding_completed: boolean | null;
+  use_context: 'personal' | 'professional' | null;
   created_at: string;
   updated_at: string;
 }
@@ -49,7 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               .select('*')
               .eq('id', session.user.id)
               .single();
-            setProfile(data);
+            setProfile(data as Profile);
           }, 0);
         } else {
           setProfile(null);

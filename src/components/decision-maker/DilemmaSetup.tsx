@@ -65,8 +65,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   // Afficher seulement les 3 premiers modèles
   const displayedTemplates = templates.slice(0, 3);
 
-  // Placeholders animés pour le textarea
-  const placeholders = ["Ex: Quel framework JS devrais-je apprendre en 2025 ?", "Ex: Dois-je changer de carrière professionnelle ?", "Ex: Quelle ville choisir pour mes études ?", "Ex: Investir en bourse ou dans l'immobilier ?", "Ex: Partir en voyage ou économiser de l'argent ?", "Ex: Accepter cette offre d'emploi ou continuer à chercher ?"];
   const handleTemplateClick = (template: {
     name: string;
     dilemma: string;
@@ -194,7 +192,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 <Textarea id="dilemma-input" placeholder="" value={dilemma} onChange={e => setDilemma(e.target.value)} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`pulsing-glow focus:ring-cyan-500 text-base md:text-sm h-[160px] resize-none pr-20 transition-colors dark:bg-card ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-over' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
                                 {dilemma === '' && !isDragOver && <div className="absolute top-2 left-3 pointer-events-none">
                                         <span className="text-muted-foreground text-base md:text-sm">
-                                            <AnimatedPlaceholder placeholders={placeholders} interval={2500} />
+                                            <AnimatedPlaceholder interval={2500} />
                                         </span>
                                     </div>}
                                 {isDragOver && <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
