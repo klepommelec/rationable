@@ -1,10 +1,11 @@
 
 import { useState } from 'react';
-import { User } from 'lucide-react';
+import { User, Briefcase } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import AvatarUpload from '@/components/AvatarUpload';
@@ -13,12 +14,16 @@ const ProfileSettings = () => {
   const { user, profile, updateProfile, updateAvatar, deleteAvatar } = useAuth();
   const { toast } = useToast();
   const [fullName, setFullName] = useState(profile?.full_name || '');
+  const [useContext, setUseContext] = useState(profile?.use_context || 'personal');
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleSaveProfile = async () => {
     setIsUpdating(true);
     try {
-      const { error } = await updateProfile({ full_name: fullName });
+      const { error } = await updateProfile({ 
+        full_name: fullName,
+        use_context: useContext as 'personal' | 'professional'
+      });
       
       if (error) {
         toast({
@@ -59,6 +64,8 @@ const ProfileSettings = () => {
     }
   };
 
+  const hasChanges = fullName !== (profile?.full_name || '') || useContext !== (profile?.use_context || 'personal');
+
   return (
     <div className="space-y-6">
       {/* Section Avatar */}
@@ -80,6 +87,52 @@ const ProfileSettings = () => {
             onAvatarDelete={handleAvatarDelete}
             disabled={isUpdating}
           />
+        </CardContent>
+      </Card>
+
+      {/* Section Contexte d'utilisation */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Briefcase className="h-5 w-5" />
+            Contexte d'utilisation
+          </CardTitle>
+          <CardDescription>
+            Choisissez votre contexte principal pour personnaliser votre expérience
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <Label htmlFor="context">Comment utilisez-vous principalement cette application ?</Label>
+            <RadioGroup
+              value={useContext}
+              onValueChange={setUseContext}
+              className="grid grid-cols-1 gap-4"
+            >
+              <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-muted/50">
+                <RadioGroupItem value="personal" id="personal" />
+                <div className="flex-1">
+                  <Label htmlFor="personal" className="font-medium cursor-pointer">
+                    Usage personnel
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Décisions personnelles, choix de vie, achats, loisirs
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-muted/50">
+                <RadioGroupItem value="professional" id="professional" />
+                <div className="flex-1">
+                  <Label htmlFor="professional" className="font-medium cursor-pointer">
+                    Usage professionnel
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Décisions business, stratégie, management, projets
+                  </p>
+                </div>
+              </div>
+            </RadioGroup>
+          </div>
         </CardContent>
       </Card>
 
@@ -119,7 +172,7 @@ const ProfileSettings = () => {
           </div>
           <Button 
             onClick={handleSaveProfile}
-            disabled={isUpdating || fullName === (profile?.full_name || '')}
+            disabled={isUpdating || !hasChanges}
           >
             {isUpdating ? 'Sauvegarde...' : 'Sauvegarder le profil'}
           </Button>
