@@ -71,7 +71,7 @@ const ProfileSettings = () => {
   const hasChanges = fullName !== (profile?.full_name || '') || useContext !== (profile?.use_context || 'personal');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mb-8">
       {/* Section Avatar */}
       <Card>
         <CardHeader>
