@@ -33,6 +33,82 @@ export const useContextualContent = () => {
     ];
   };
 
+  const getContextualTemplates = () => {
+    const context = profile?.use_context || 'personal';
+    
+    if (context === 'professional') {
+      return [
+        {
+          name: "🏢 Stack technique",
+          dilemma: "Quelle stack technique choisir pour notre nouveau projet ?",
+        },
+        {
+          name: "📈 Stratégie marketing",
+          dilemma: "Comment définir notre stratégie marketing pour Q2 ?",
+        },
+        {
+          name: "☁️ Fournisseur cloud",
+          dilemma: "Quel fournisseur cloud sélectionner pour notre infrastructure ?",
+        },
+        {
+          name: "🗺️ Roadmap produit",
+          dilemma: "Comment planifier notre roadmap produit pour 2025 ?",
+        },
+        {
+          name: "👥 Stratégie recrutement",
+          dilemma: "Quelle stratégie de recrutement adopter cette année ?",
+        },
+        {
+          name: "🤝 Partenariat",
+          dilemma: "Devons-nous accepter cette opportunité de partenariat ?",
+        },
+        {
+          name: "💼 Prestataire externe",
+          dilemma: "Quel prestataire externe choisir pour ce projet ?",
+        },
+        {
+          name: "🎯 Objectifs trimestriels",
+          dilemma: "Quels objectifs prioritaires fixer pour ce trimestre ?",
+        }
+      ];
+    }
+    
+    return [
+      {
+        name: "💻 Choisir un ordinateur",
+        dilemma: "Quel nouvel ordinateur portable devrais-je acheter ?",
+      },
+      {
+        name: "✈️ Choisir des vacances",
+        dilemma: "Où devrais-je partir pour mes prochaines vacances ?",
+      },
+      {
+        name: "🚗 Acheter une voiture",
+        dilemma: "Quelle voiture devrais-je acheter selon mon budget et mes besoins ?",
+      },
+      {
+        name: "🏠 Choisir un logement",
+        dilemma: "Dans quel quartier devrais-je déménager ?",
+      },
+      {
+        name: "💼 Opportunité de carrière",
+        dilemma: "Devrais-je accepter cette nouvelle offre d'emploi ?",
+      },
+      {
+        name: "📱 Smartphone",
+        dilemma: "Quel smartphone choisir pour remplacer mon ancien téléphone ?",
+      },
+      {
+        name: "💰 Investissement financier",
+        dilemma: "Comment devrais-je investir mes économies cette année ?",
+      },
+      {
+        name: "🎓 Formation personnelle",
+        dilemma: "Quelle formation devrais-je suivre pour mon développement personnel ?",
+      }
+    ];
+  };
+
   const getWelcomeMessage = () => {
     const context = profile?.use_context || 'personal';
     const name = profile?.full_name?.split(' ')[0] || '';
@@ -52,6 +128,7 @@ export const useContextualContent = () => {
     getTemplates,
     getExamples,
     getWelcomeMessage,
+    getContextualTemplates,
     context: profile?.use_context || 'personal'
   };
 };
