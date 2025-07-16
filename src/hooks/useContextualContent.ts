@@ -1,5 +1,5 @@
-import { useAuth } from './useAuth';
-import { useWorkspaces } from './useWorkspaces';
+import { useAuth } from '@/hooks/useAuth';
+import { useWorkspaces } from '@/hooks/useWorkspaces';
 import { PERSONAL_TEMPLATES, PROFESSIONAL_TEMPLATES } from '@/data/predefinedTemplates';
 
 export const useContextualContent = () => {
