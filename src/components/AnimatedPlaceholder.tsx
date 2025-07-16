@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useContextualContent } from '@/hooks/useContextualContent';
 
 interface AnimatedPlaceholderProps {
   placeholders?: string[];
@@ -11,31 +11,16 @@ export const AnimatedPlaceholder: React.FC<AnimatedPlaceholderProps> = ({
   placeholders,
   interval = 3000
 }) => {
-  const { profile } = useAuth();
+  const { getExamples } = useContextualContent();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
-  const personalPlaceholders = [
-    "Choisir mon prochain smartphone",
-    "Planifier mes vacances d'été",
-    "Décider de mon prochain investissement",
-    "Choisir ma nouvelle voiture",
-    "Sélectionner une formation personnelle"
-  ];
+  // Utiliser les exemples contextuels du hook useContextualContent
+  const contextualExamples = getExamples().map(example => 
+    example.replace(/^Ex: /, '')
+  );
 
-  const professionalPlaceholders = [
-    "Choisir notre stack technique",
-    "Définir notre stratégie marketing Q2",
-    "Sélectionner un nouveau fournisseur",
-    "Planifier notre roadmap produit",
-    "Décider de notre stratégie de recrutement"
-  ];
-
-  const contextPlaceholders = profile?.use_context === 'professional' 
-    ? professionalPlaceholders 
-    : personalPlaceholders;
-
-  const finalPlaceholders = placeholders || contextPlaceholders;
+  const finalPlaceholders = placeholders || contextualExamples;
 
   useEffect(() => {
     if (finalPlaceholders.length <= 1) return;
