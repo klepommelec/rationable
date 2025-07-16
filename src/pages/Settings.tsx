@@ -39,12 +39,12 @@ const Settings = () => {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen">
       <SettingsSidebar 
         activeSection={activeSection} 
         onSectionChange={setActiveSection} 
       />
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1">
         <div className="p-6 max-w-4xl">
           <div className="mb-6">
             <h1 className="text-3xl font-bold">{getSectionTitle()}</h1>
