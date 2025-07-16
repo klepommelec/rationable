@@ -110,7 +110,11 @@ const ProfileSettings = () => {
             <Label htmlFor="context">Comment utilisez-vous principalement cette application ?</Label>
             <Select value={useContext} onValueChange={handleContextChange}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Sélectionnez votre contexte d'usage" />
+                <SelectValue placeholder="Sélectionnez votre contexte d'usage">
+                  {useContext === 'personal' ? 'Usage personnel' : 
+                   useContext === 'professional' ? 'Usage professionnel' : 
+                   'Sélectionnez votre contexte d\'usage'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="personal">
