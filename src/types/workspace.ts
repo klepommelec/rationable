@@ -5,6 +5,7 @@ export interface Workspace {
   color: string;
   user_id: string;
   is_default: boolean;
+  use_context?: 'personal' | 'professional';
   created_at: string;
   updated_at: string;
 }

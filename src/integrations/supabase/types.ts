@@ -196,6 +196,7 @@ export type Database = {
           is_default: boolean
           name: string
           updated_at: string
+          use_context: string | null
           user_id: string
         }
         Insert: {
@@ -206,6 +207,7 @@ export type Database = {
           is_default?: boolean
           name: string
           updated_at?: string
+          use_context?: string | null
           user_id: string
         }
         Update: {
@@ -216,6 +218,7 @@ export type Database = {
           is_default?: boolean
           name?: string
           updated_at?: string
+          use_context?: string | null
           user_id?: string
         }
         Relationships: []

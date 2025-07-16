@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, Plus, Edit3, Trash2, Crown } from 'lucide-react';
+import { Building2, Plus, Edit3, Trash2, Crown, Briefcase } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -24,7 +25,12 @@ export const WorkspacesSettings: React.FC = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [workspaceToDelete, setWorkspaceToDelete] = useState<string | null>(null);
   const [editingWorkspace, setEditingWorkspace] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ name: '', description: '', color: '' });
+  const [editForm, setEditForm] = useState({ 
+    name: '', 
+    description: '', 
+    color: '', 
+    use_context: 'personal' as 'personal' | 'professional'
+  });
 
   const handleEditWorkspace = (workspace: any) => {
     setEditingWorkspace(workspace.id);
@@ -32,6 +38,7 @@ export const WorkspacesSettings: React.FC = () => {
       name: workspace.name,
       description: workspace.description || '',
       color: workspace.color,
+      use_context: workspace.use_context || 'personal',
     });
   };
 
@@ -42,6 +49,7 @@ export const WorkspacesSettings: React.FC = () => {
       name: editForm.name,
       description: editForm.description || undefined,
       color: editForm.color,
+      use_context: editForm.use_context,
     });
     
     setEditingWorkspace(null);
@@ -49,7 +57,7 @@ export const WorkspacesSettings: React.FC = () => {
 
   const handleCancelEdit = () => {
     setEditingWorkspace(null);
-    setEditForm({ name: '', description: '', color: '' });
+    setEditForm({ name: '', description: '', color: '', use_context: 'personal' });
   };
 
   const handleDeleteWorkspace = async () => {
@@ -122,6 +130,12 @@ export const WorkspacesSettings: React.FC = () => {
                           {workspace.description}
                         </CardDescription>
                       )}
+                      <div className="flex items-center gap-1 mt-1">
+                        <Briefcase className="h-3 w-3" />
+                        <span className="text-xs text-muted-foreground">
+                          {workspace.use_context === 'professional' ? 'Professionnel' : 'Personnel'}
+                        </span>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -202,6 +216,36 @@ export const WorkspacesSettings: React.FC = () => {
                         />
                       ))}
                     </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="editContext">Contexte d'utilisation</Label>
+                    <Select 
+                      value={editForm.use_context} 
+                      onValueChange={(value) => setEditForm({ ...editForm, use_context: value as 'personal' | 'professional' })}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="personal">
+                          <div className="flex flex-col items-start">
+                            <span className="font-medium">Usage personnel</span>
+                            <span className="text-sm text-muted-foreground">
+                              Décisions personnelles, choix de vie, achats, loisirs
+                            </span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="professional">
+                          <div className="flex flex-col items-start">
+                            <span className="font-medium">Usage professionnel</span>
+                            <span className="text-sm text-muted-foreground">
+                              Décisions business, stratégie, management, projets
+                            </span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </CardContent>

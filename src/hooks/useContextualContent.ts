@@ -1,16 +1,18 @@
 import { useAuth } from './useAuth';
+import { useWorkspaces } from './useWorkspaces';
 import { PERSONAL_TEMPLATES, PROFESSIONAL_TEMPLATES } from '@/data/predefinedTemplates';
 
 export const useContextualContent = () => {
   const { profile } = useAuth();
+  const { currentWorkspace } = useWorkspaces();
   
   const getTemplates = () => {
-    const context = profile?.use_context || 'personal';
+  const context = currentWorkspace?.use_context || 'personal';
     return context === 'professional' ? PROFESSIONAL_TEMPLATES : PERSONAL_TEMPLATES;
   };
 
   const getExamples = () => {
-    const context = profile?.use_context || 'personal';
+    const context = currentWorkspace?.use_context || 'personal';
     
     if (context === 'professional') {
       return [
@@ -34,7 +36,7 @@ export const useContextualContent = () => {
   };
 
   const getContextualTemplates = () => {
-    const context = profile?.use_context || 'personal';
+    const context = currentWorkspace?.use_context || 'personal';
     
     if (context === 'professional') {
       return [
@@ -110,7 +112,7 @@ export const useContextualContent = () => {
   };
 
   const getWelcomeMessage = () => {
-    const context = profile?.use_context || 'personal';
+    const context = currentWorkspace?.use_context || 'personal';
     const name = profile?.full_name?.split(' ')[0] || '';
     
     if (context === 'professional') {
@@ -129,6 +131,6 @@ export const useContextualContent = () => {
     getExamples,
     getWelcomeMessage,
     getContextualTemplates,
-    context: profile?.use_context || 'personal'
+    context: currentWorkspace?.use_context || 'personal'
   };
 };

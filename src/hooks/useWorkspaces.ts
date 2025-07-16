@@ -31,7 +31,7 @@ export const useWorkspaces = () => {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        setWorkspaces(data);
+        setWorkspaces(data as WorkspaceWithMembers[]);
         
         // Set current workspace from localStorage or default to first one
         const savedWorkspaceId = localStorage.getItem(CURRENT_WORKSPACE_KEY);
@@ -40,7 +40,7 @@ export const useWorkspaces = () => {
           : data.find(w => w.is_default) || data[0];
         
         if (targetWorkspace) {
-          setCurrentWorkspace(targetWorkspace);
+          setCurrentWorkspace(targetWorkspace as WorkspaceWithMembers);
         }
       } else {
         // Create default workspace if none exists
@@ -71,6 +71,7 @@ export const useWorkspaces = () => {
           color: DEFAULT_WORKSPACE_COLOR,
           user_id: user.id,
           is_default: true,
+          use_context: 'personal',
         })
         .select()
         .single();
@@ -78,8 +79,8 @@ export const useWorkspaces = () => {
       if (error) throw error;
 
       if (data) {
-        setWorkspaces([data]);
-        setCurrentWorkspace(data);
+        setWorkspaces([data as WorkspaceWithMembers]);
+        setCurrentWorkspace(data as WorkspaceWithMembers);
       }
     } catch (error) {
       console.error('Error creating default workspace:', error);
@@ -103,7 +104,7 @@ export const useWorkspaces = () => {
   };
 
   // Create a new workspace
-  const createWorkspace = async (name: string, description?: string, color: string = DEFAULT_WORKSPACE_COLOR) => {
+  const createWorkspace = async (name: string, description?: string, color: string = DEFAULT_WORKSPACE_COLOR, use_context: 'personal' | 'professional' = 'personal') => {
     if (!user) return null;
 
     try {
@@ -115,6 +116,7 @@ export const useWorkspaces = () => {
           color,
           user_id: user.id,
           is_default: false,
+          use_context,
         })
         .select()
         .single();
@@ -122,9 +124,9 @@ export const useWorkspaces = () => {
       if (error) throw error;
 
       if (data) {
-        const newWorkspaces = [...workspaces, data];
+        const newWorkspaces = [...workspaces, data as WorkspaceWithMembers];
         setWorkspaces(newWorkspaces);
-        switchWorkspace(data);
+        switchWorkspace(data as WorkspaceWithMembers);
         
         toast({
           title: "Workspace créé",
@@ -158,11 +160,11 @@ export const useWorkspaces = () => {
       if (error) throw error;
 
       if (data) {
-        const updatedWorkspaces = workspaces.map(w => w.id === id ? data : w);
+        const updatedWorkspaces = workspaces.map(w => w.id === id ? data as WorkspaceWithMembers : w);
         setWorkspaces(updatedWorkspaces);
         
         if (currentWorkspace?.id === id) {
-          setCurrentWorkspace(data);
+          setCurrentWorkspace(data as WorkspaceWithMembers);
         }
         
         toast({
