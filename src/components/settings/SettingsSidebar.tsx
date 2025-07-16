@@ -1,5 +1,5 @@
 
-import { User, Lightbulb, Bell, Shield, Database, LogOut } from 'lucide-react';
+import { User, Lightbulb, Bell, Shield, Database, LogOut, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -12,6 +12,10 @@ const settingsSections = [{
   id: 'profile',
   label: 'Profil',
   icon: User
+}, {
+  id: 'workspaces',
+  label: 'Workspaces',
+  icon: Building2
 }, {
   id: 'appearance',
   label: 'Apparence',

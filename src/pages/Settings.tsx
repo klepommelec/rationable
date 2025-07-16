@@ -6,6 +6,7 @@ import AppearanceSettings from '@/components/settings/AppearanceSettings';
 import NotificationSettings from '@/components/settings/NotificationSettings';
 import AppPreferencesSettings from '@/components/settings/AppPreferencesSettings';
 import DataManagementSettings from '@/components/settings/DataManagementSettings';
+import { WorkspacesSettings } from '@/components/settings/WorkspacesSettings';
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState('profile');
@@ -14,6 +15,8 @@ const Settings = () => {
     switch (activeSection) {
       case 'profile':
         return <ProfileSettings />;
+      case 'workspaces':
+        return <WorkspacesSettings />;
       case 'appearance':
         return <AppearanceSettings />;
       case 'notifications':
@@ -30,6 +33,7 @@ const Settings = () => {
   const getSectionTitle = () => {
     const titles = {
       profile: 'Profil',
+      workspaces: 'Workspaces',
       appearance: 'Apparence',
       notifications: 'Notifications',
       preferences: 'Préférences de l\'application',

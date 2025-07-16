@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { WorkspaceSelector } from '@/components/workspace/WorkspaceSelector';
 
 interface NavbarProps {
   currentDecision?: any;
@@ -95,13 +96,19 @@ const Navbar: React.FC<NavbarProps> = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <WorkspaceSelector />
+                  
+                  <DropdownMenuSeparator />
+                  
                   <DropdownMenuItem asChild>
                     <Link to="/settings">
                       <Settings className="h-4 w-4 mr-2" />
                       Paramètres
                     </Link>
                   </DropdownMenuItem>
+                  
                   <DropdownMenuSeparator />
+                  
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Se déconnecter

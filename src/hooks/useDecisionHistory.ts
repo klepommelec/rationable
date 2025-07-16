@@ -1,16 +1,28 @@
 
 import { useState, useEffect } from 'react';
 import { IDecision } from '@/types/decision';
+import { useWorkspaces } from '@/hooks/useWorkspaces';
 
 export const useDecisionHistory = () => {
+    const { currentWorkspace } = useWorkspaces();
+    const [allHistory, setAllHistory] = useState<Record<string, IDecision[]>>({});
     const [history, setHistory] = useState<IDecision[]>([]);
 
     useEffect(() => {
         try {
-            const storedHistory = localStorage.getItem('decisionHistory');
-            if (storedHistory) {
-                const parsedHistory: IDecision[] = JSON.parse(storedHistory);
-                // Data migration for old history items
+            // Load all workspace histories
+            const storedAllHistory = localStorage.getItem('workspaceDecisionHistory');
+            const storedOldHistory = localStorage.getItem('decisionHistory');
+            
+            let loadedAllHistory: Record<string, IDecision[]> = {};
+            
+            if (storedAllHistory) {
+                loadedAllHistory = JSON.parse(storedAllHistory);
+            }
+            
+            // Migrate old history to default workspace if it exists
+            if (storedOldHistory && !storedAllHistory) {
+                const parsedHistory: IDecision[] = JSON.parse(storedOldHistory);
                 const migratedHistory = parsedHistory.map(decision => {
                     let newDecision = { ...decision };
                     if (!newDecision.result.imageQuery && newDecision.result.recommendation) {
@@ -25,7 +37,6 @@ export const useDecisionHistory = () => {
                     if (!newDecision.emoji) {
                         newDecision.emoji = '🤔';
                     }
-                    // Migration pour les nouvelles propriétés
                     if (!newDecision.category) {
                         newDecision.category = undefined;
                     }
@@ -34,62 +45,115 @@ export const useDecisionHistory = () => {
                     }
                     return newDecision;
                 });
-                setHistory(migratedHistory);
+                
+                // Put migrated history in 'default' workspace
+                loadedAllHistory['default'] = migratedHistory;
+                
+                // Remove old storage
+                localStorage.removeItem('decisionHistory');
             }
+            
+            setAllHistory(loadedAllHistory);
         } catch (error) {
             console.error("Failed to load history from localStorage", error);
         }
     }, []);
 
+    // Update history when workspace changes
+    useEffect(() => {
+        if (currentWorkspace) {
+            const workspaceHistory = allHistory[currentWorkspace.id] || [];
+            setHistory(workspaceHistory);
+        } else {
+            // Fallback to default workspace or empty array
+            const defaultHistory = allHistory['default'] || [];
+            setHistory(defaultHistory);
+        }
+    }, [currentWorkspace, allHistory]);
+
     useEffect(() => {
         // Debounce saving to localStorage
         const timer = setTimeout(() => {
             try {
-                localStorage.setItem('decisionHistory', JSON.stringify(history));
+                localStorage.setItem('workspaceDecisionHistory', JSON.stringify(allHistory));
             } catch (error) {
                 console.error("Failed to save history to localStorage", error);
             }
         }, 500);
         return () => clearTimeout(timer);
-    }, [history]);
+    }, [allHistory]);
 
     const addDecision = (decision: IDecision) => {
-        setHistory(prevHistory => [decision, ...prevHistory]);
+        const workspaceId = currentWorkspace?.id || 'default';
+        setAllHistory(prevAllHistory => {
+            const workspaceHistory = prevAllHistory[workspaceId] || [];
+            return {
+                ...prevAllHistory,
+                [workspaceId]: [decision, ...workspaceHistory]
+            };
+        });
     };
 
     const updateDecision = (updatedDecision: IDecision) => {
-        setHistory(prevHistory => {
-            const index = prevHistory.findIndex(d => d.id === updatedDecision.id);
+        const workspaceId = currentWorkspace?.id || 'default';
+        setAllHistory(prevAllHistory => {
+            const workspaceHistory = prevAllHistory[workspaceId] || [];
+            const index = workspaceHistory.findIndex(d => d.id === updatedDecision.id);
+            
+            let newWorkspaceHistory;
             if (index > -1) {
-                const newHistory = [...prevHistory];
-                newHistory[index] = updatedDecision;
-                return newHistory;
+                newWorkspaceHistory = [...workspaceHistory];
+                newWorkspaceHistory[index] = updatedDecision;
+            } else {
+                newWorkspaceHistory = [updatedDecision, ...workspaceHistory];
             }
-            return [updatedDecision, ...prevHistory];
+            
+            return {
+                ...prevAllHistory,
+                [workspaceId]: newWorkspaceHistory
+            };
         });
     };
     
     const updateDecisionCategory = (decisionId: string, categoryId: string | undefined) => {
-        setHistory(prevHistory => {
-            const index = prevHistory.findIndex(d => d.id === decisionId);
+        const workspaceId = currentWorkspace?.id || 'default';
+        setAllHistory(prevAllHistory => {
+            const workspaceHistory = prevAllHistory[workspaceId] || [];
+            const index = workspaceHistory.findIndex(d => d.id === decisionId);
+            
             if (index > -1) {
-                const newHistory = [...prevHistory];
-                newHistory[index] = {
-                    ...newHistory[index],
+                const newWorkspaceHistory = [...workspaceHistory];
+                newWorkspaceHistory[index] = {
+                    ...newWorkspaceHistory[index],
                     category: categoryId
                 };
-                return newHistory;
+                
+                return {
+                    ...prevAllHistory,
+                    [workspaceId]: newWorkspaceHistory
+                };
             }
-            return prevHistory;
+            return prevAllHistory;
         });
     };
     
     const deleteDecision = (decisionId: string) => {
-        setHistory(prevHistory => prevHistory.filter(d => d.id !== decisionId));
+        const workspaceId = currentWorkspace?.id || 'default';
+        setAllHistory(prevAllHistory => {
+            const workspaceHistory = prevAllHistory[workspaceId] || [];
+            return {
+                ...prevAllHistory,
+                [workspaceId]: workspaceHistory.filter(d => d.id !== decisionId)
+            };
+        });
     };
 
     const clearHistory = () => {
-        setHistory([]);
+        const workspaceId = currentWorkspace?.id || 'default';
+        setAllHistory(prevAllHistory => ({
+            ...prevAllHistory,
+            [workspaceId]: []
+        }));
     };
 
     return { 
