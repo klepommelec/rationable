@@ -109,7 +109,7 @@ const ProfileSettings = () => {
           <div className="space-y-3">
             <Label htmlFor="context">Comment utilisez-vous principalement cette application ?</Label>
             <Select value={useContext} onValueChange={handleContextChange}>
-              <SelectTrigger className="w-full py-3">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Sélectionnez votre contexte d'usage" />
               </SelectTrigger>
               <SelectContent>
