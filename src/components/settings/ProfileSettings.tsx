@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import AvatarUpload from '@/components/AvatarUpload';
@@ -108,34 +108,29 @@ const ProfileSettings = () => {
         <CardContent className="space-y-4">
           <div className="space-y-3">
             <Label htmlFor="context">Comment utilisez-vous principalement cette application ?</Label>
-            <RadioGroup
-              value={useContext}
-              onValueChange={handleContextChange}
-              className="grid grid-cols-1 gap-4"
-            >
-              <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-muted/50">
-                <RadioGroupItem value="personal" id="personal" />
-                <div className="flex-1">
-                  <Label htmlFor="personal" className="font-medium cursor-pointer">
-                    Usage personnel
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Décisions personnelles, choix de vie, achats, loisirs
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-muted/50">
-                <RadioGroupItem value="professional" id="professional" />
-                <div className="flex-1">
-                  <Label htmlFor="professional" className="font-medium cursor-pointer">
-                    Usage professionnel
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Décisions business, stratégie, management, projets
-                  </p>
-                </div>
-              </div>
-            </RadioGroup>
+            <Select value={useContext} onValueChange={handleContextChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Sélectionnez votre contexte d'usage" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="personal">
+                  <div className="flex flex-col items-start">
+                    <span className="font-medium">Usage personnel</span>
+                    <span className="text-sm text-muted-foreground">
+                      Décisions personnelles, choix de vie, achats, loisirs
+                    </span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="professional">
+                  <div className="flex flex-col items-start">
+                    <span className="font-medium">Usage professionnel</span>
+                    <span className="text-sm text-muted-foreground">
+                      Décisions business, stratégie, management, projets
+                    </span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
