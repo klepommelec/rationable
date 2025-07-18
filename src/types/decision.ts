@@ -49,6 +49,10 @@ export interface IResult {
     searchQuery: string;
     error?: string;
   };
+  workspaceData?: {
+    documentsUsed: number;
+    documentSources: string[];
+  };
 }
 
 export interface IDecision {

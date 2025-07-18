@@ -33,8 +33,17 @@ const AnalysisResult = ({ result, isUpdating, clearSession, analysisStep, curren
         </div>
         
         <div className="flex flex-wrap items-center gap-2">
-          <ConfidenceIndicator level={result.confidenceLevel} />
-          <DataFreshnessIndicator freshness={result.dataFreshness} />
+          <ConfidenceIndicator 
+            breakdown={result.breakdown} 
+            topOption={result.breakdown[0]} 
+            result={result} 
+          />
+          <DataFreshnessIndicator 
+            hasRealTimeData={result.realTimeData?.hasRealTimeData || false}
+            timestamp={result.realTimeData?.timestamp}
+            sourcesCount={result.realTimeData?.sourcesCount || 0}
+            dataFreshness={result.dataFreshness || 'moderate'}
+          />
           <WorkspaceDocumentIndicator workspaceData={result.workspaceData} />
           {result.realTimeData?.hasRealTimeData && (
             <Badge variant="outline" className="gap-2 bg-purple-50 text-purple-700 border-purple-200">
