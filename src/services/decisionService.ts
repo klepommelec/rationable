@@ -4,8 +4,9 @@ import { callOpenAiApi } from './openai';
 import { UploadedFileInfo } from './fileUploadService';
 import { supabase } from '@/integrations/supabase/client';
 import { searchWithPerplexity, detectRealTimeQuery } from './perplexityService';
+import { getWorkspaceDocumentsForAnalysis, searchRelevantContent } from './workspaceDocumentService';
 
-export const generateCriteriaOnly = async (dilemma: string, files?: UploadedFileInfo[]) => {
+export const generateCriteriaOnly = async (dilemma: string, files?: UploadedFileInfo[], workspaceId?: string) => {
   // Détecter si la requête nécessite des données en temps réel
   const needsRealTimeData = detectRealTimeQuery(dilemma);
   let realTimeContext = '';
@@ -19,6 +20,23 @@ export const generateCriteriaOnly = async (dilemma: string, files?: UploadedFile
     }
   }
 
+  // Récupérer et analyser les documents du workspace
+  let workspaceContext = '';
+  let workspaceDocuments = [];
+  
+  if (workspaceId) {
+    console.log('📚 Fetching workspace documents for criteria generation...');
+    workspaceDocuments = await getWorkspaceDocumentsForAnalysis(workspaceId, dilemma);
+    
+    if (workspaceDocuments.length > 0) {
+      const relevantContent = searchRelevantContent(workspaceDocuments, dilemma, 8);
+      if (relevantContent) {
+        workspaceContext = `\n\n${relevantContent}`;
+        console.log(`✅ Using ${workspaceDocuments.length} workspace documents for context`);
+      }
+    }
+  }
+
   let prompt = `
 Analysez ce dilemme et retournez une réponse JSON avec les éléments suivants :
 
@@ -26,7 +44,7 @@ Analysez ce dilemme et retournez une réponse JSON avec les éléments suivants 
 2. "criteria": Une liste de 3-6 critères importants pour évaluer les options de ce dilemme
 3. "suggestedCategory": L'ID de la catégorie la plus appropriée parmi : ${DEFAULT_CATEGORIES.map(c => `"${c.id}" (${c.name} ${c.emoji})`).join(', ')}
 
-Dilemme: "${dilemma}"${realTimeContext}`;
+Dilemme: "${dilemma}"${realTimeContext}${workspaceContext}`;
 
   if (files && files.length > 0) {
     prompt += `
@@ -54,11 +72,12 @@ Exemple de format:
     emoji: response.emoji || '🤔',
     criteria: response.criteria || [],
     suggestedCategory: response.suggestedCategory,
-    realTimeData: realTimeData
+    realTimeData: realTimeData,
+    workspaceDocumentsUsed: workspaceDocuments.length
   };
 };
 
-export const generateOptions = async (dilemma: string, criteria: ICriterion[], files?: UploadedFileInfo[]): Promise<IResult> => {
+export const generateOptions = async (dilemma: string, criteria: ICriterion[], files?: UploadedFileInfo[], workspaceId?: string): Promise<IResult> => {
   const criteriaList = criteria.map(c => c.name).join(', ');
   
   // Détecter si la requête nécessite des données en temps réel
@@ -78,12 +97,30 @@ export const generateOptions = async (dilemma: string, criteria: ICriterion[], f
       confidenceContext = `\n\nATTENTION: Données en temps réel non disponibles (${realTimeData.fallbackMessage}). Analysez avec prudence et indiquez l'incertitude dans vos scores.`;
     }
   }
+
+  // Récupérer et analyser les documents du workspace
+  let workspaceContext = '';
+  let workspaceDocuments = [];
+  
+  if (workspaceId) {
+    console.log('📚 Fetching workspace documents for options generation...');
+    workspaceDocuments = await getWorkspaceDocumentsForAnalysis(workspaceId, dilemma);
+    
+    if (workspaceDocuments.length > 0) {
+      const relevantContent = searchRelevantContent(workspaceDocuments, dilemma, 15);
+      if (relevantContent) {
+        workspaceContext = `\n\n${relevantContent}`;
+        console.log(`✅ Using ${workspaceDocuments.length} workspace documents for analysis`);
+        confidenceContext += `\n\nANALYSE PERSONNALISÉE: Cette analyse utilise ${workspaceDocuments.length} document(s) de votre workspace personnel. Adaptez vos recommandations en fonction de ces informations spécifiques.`;
+      }
+    }
+  }
   
   let prompt = `
 Analysez ce dilemme et générez des options avec évaluation détaillée.
 
 Dilemme: "${dilemma}"
-Critères d'évaluation: ${criteriaList}${realTimeContext}${confidenceContext}`;
+Critères d'évaluation: ${criteriaList}${realTimeContext}${workspaceContext}${confidenceContext}`;
 
   if (files && files.length > 0) {
     prompt += `
@@ -129,6 +166,14 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
       sourcesCount: realTimeData.sources?.length || 0,
       searchQuery: realTimeData.searchQuery,
       error: realTimeData.error
+    };
+  }
+
+  // Ajouter les métadonnées des documents workspace
+  if (workspaceDocuments.length > 0) {
+    result.workspaceData = {
+      documentsUsed: workspaceDocuments.length,
+      documentSources: workspaceDocuments.map(doc => doc.document.file_name)
     };
   }
   

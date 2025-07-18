@@ -5,6 +5,7 @@ import { generateCriteriaOnly, generateOptions } from '@/services/decisionServic
 import { uploadFilesToStorage, deleteFileFromStorage, UploadedFileInfo } from '@/services/fileUploadService';
 import { UploadedFile } from '@/components/FileUpload';
 import { AnalysisStep } from './useDecisionState';
+import { useWorkspaceContext } from './useWorkspaceContext';
 
 interface UseDecisionAPIProps {
     dilemma: string;
@@ -51,15 +52,18 @@ export const useDecisionAPI = ({
     addDecision,
     uploadedFiles = []
 }: UseDecisionAPIProps) => {
+    const { getCurrentWorkspaceId, shouldUseWorkspaceDocuments } = useWorkspaceContext();
 
     const handleGenerateOptions = async (isRetry = false) => {
         const currentCriteria = criteria;
+        const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
         
         console.log("🔄 [DEBUG] Starting options generation", {
             isRetry,
             retryCount,
             criteriaCount: currentCriteria.length,
             filesCount: uploadedFiles.length,
+            workspaceId: workspaceId || 'none',
             dilemma: dilemma.substring(0, 50) + "..."
         });
         
@@ -93,16 +97,17 @@ export const useDecisionAPI = ({
             console.log("✅ [DEBUG] Files uploaded successfully");
           }
           
-          setProgressMessage("Analyse des options en cours...");
+          setProgressMessage(workspaceId ? "Analyse avec documents workspace..." : "Analyse des options en cours...");
           console.log("📡 [DEBUG] Calling generateOptions API...");
           const startTime = Date.now();
           
-          const apiResult = await generateOptions(dilemma, currentCriteria, uploadedFileInfos);
+          const apiResult = await generateOptions(dilemma, currentCriteria, uploadedFileInfos, workspaceId);
           
           const endTime = Date.now();
           console.log("✅ [DEBUG] API call successful", {
             duration: `${endTime - startTime}ms`,
             filesAnalyzed: uploadedFileInfos.length,
+            workspaceDocsUsed: apiResult.workspaceData?.documentsUsed || 0,
             resultStructure: {
               hasRecommendation: !!apiResult.recommendation,
               hasDescription: !!apiResult.description,
@@ -133,14 +138,19 @@ export const useDecisionAPI = ({
             }
           }
           
-          toast.success(isRetry ? "Options générées avec succès !" : "Analyse mise à jour !");
+          const successMessage = apiResult.workspaceData?.documentsUsed 
+            ? `Analyse générée avec ${apiResult.workspaceData.documentsUsed} document(s) de votre workspace !`
+            : isRetry ? "Options générées avec succès !" : "Analyse mise à jour !";
+          
+          toast.success(successMessage);
           
         } catch (error) {
           console.error("❌ [DEBUG] Error in generateOptions:", {
             error: error instanceof Error ? error.message : 'Unknown error',
             stack: error instanceof Error ? error.stack : undefined,
             retryCount,
-            filesCount: uploadedFiles.length
+            filesCount: uploadedFiles.length,
+            workspaceId
           });
           
           // Nettoyer les fichiers uploadés en cas d'erreur
@@ -174,12 +184,15 @@ export const useDecisionAPI = ({
     };
 
     const handleStartAnalysis = async () => {
+        const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
+        
         console.log("🚀 [DEBUG] Starting full analysis", { 
           dilemma: dilemma.substring(0, 50) + "...",
-          filesCount: uploadedFiles.length
+          filesCount: uploadedFiles.length,
+          workspaceId: workspaceId || 'none'
         });
         
-        setProgressMessage("Génération des critères...");
+        setProgressMessage(workspaceId ? "Analyse avec documents workspace..." : "Génération des critères...");
         setResult(null);
         setCriteria([]);
         setEmoji('🤔');
@@ -200,15 +213,16 @@ export const useDecisionAPI = ({
           
           // Phase 1: Générer les critères et obtenir la catégorie suggérée
           console.log("📡 [DEBUG] Phase 1: Generating criteria and category");
-          setProgressMessage("Analyse du contexte et génération des critères...");
+          setProgressMessage(workspaceId ? "Analyse du contexte avec documents workspace..." : "Analyse du contexte et génération des critères...");
           
-          const response = await generateCriteriaOnly(dilemma, uploadedFileInfos);
+          const response = await generateCriteriaOnly(dilemma, uploadedFileInfos, workspaceId);
           console.log("✅ [DEBUG] Criteria and category generated:", {
             emoji: response.emoji,
             criteriaCount: response.criteria?.length || 0,
             criteria: response.criteria,
             suggestedCategory: response.suggestedCategory,
-            filesAnalyzed: uploadedFileInfos.length
+            filesAnalyzed: uploadedFileInfos.length,
+            workspaceDocsUsed: response.workspaceDocumentsUsed || 0
           });
           
           const newCriteria = response.criteria.map((name: string) => ({
@@ -225,10 +239,10 @@ export const useDecisionAPI = ({
           setTimeout(async () => {
             console.log("📡 [DEBUG] Phase 2: Auto-generating options");
             setAnalysisStep('loading-options');
-            setProgressMessage("Génération des options...");
+            setProgressMessage(workspaceId ? "Génération des options avec documents workspace..." : "Génération des options...");
             
             try {
-              const optionsResult = await generateOptions(dilemma, newCriteria, uploadedFileInfos);
+              const optionsResult = await generateOptions(dilemma, newCriteria, uploadedFileInfos, workspaceId);
               console.log("✅ [DEBUG] Auto-options generated successfully");
               setResult(optionsResult);
               
@@ -248,7 +262,12 @@ export const useDecisionAPI = ({
               setCurrentDecisionId(newDecision.id);
               
               setAnalysisStep('done');
-              toast.success("Analyse complète générée !");
+              
+              const successMessage = optionsResult.workspaceData?.documentsUsed 
+                ? `Analyse complète générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
+                : "Analyse complète générée !";
+              
+              toast.success(successMessage);
             } catch (error) {
               console.error("❌ [DEBUG] Error in auto-options generation:", error);
               const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
