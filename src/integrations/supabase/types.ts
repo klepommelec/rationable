@@ -92,6 +92,41 @@ export type Database = {
         }
         Relationships: []
       }
+      document_content: {
+        Row: {
+          content_chunks: string[] | null
+          content_text: string
+          document_id: string
+          extracted_at: string
+          extraction_method: string | null
+          id: string
+        }
+        Insert: {
+          content_chunks?: string[] | null
+          content_text: string
+          document_id: string
+          extracted_at?: string
+          extraction_method?: string | null
+          id?: string
+        }
+        Update: {
+          content_chunks?: string[] | null
+          content_text?: string
+          document_id?: string
+          extracted_at?: string
+          extraction_method?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_content_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -154,6 +189,62 @@ export type Database = {
           view_count?: number
         }
         Relationships: []
+      }
+      workspace_documents: {
+        Row: {
+          category: string | null
+          content_extracted: string | null
+          file_name: string
+          file_size: number
+          file_type: string
+          file_url: string
+          id: string
+          last_used_at: string | null
+          metadata: Json | null
+          tags: string[] | null
+          uploaded_at: string
+          usage_count: number | null
+          workspace_id: string
+        }
+        Insert: {
+          category?: string | null
+          content_extracted?: string | null
+          file_name: string
+          file_size: number
+          file_type: string
+          file_url: string
+          id?: string
+          last_used_at?: string | null
+          metadata?: Json | null
+          tags?: string[] | null
+          uploaded_at?: string
+          usage_count?: number | null
+          workspace_id: string
+        }
+        Update: {
+          category?: string | null
+          content_extracted?: string | null
+          file_name?: string
+          file_size?: number
+          file_type?: string
+          file_url?: string
+          id?: string
+          last_used_at?: string | null
+          metadata?: Json | null
+          tags?: string[] | null
+          uploaded_at?: string
+          usage_count?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_documents_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workspace_members: {
         Row: {
@@ -246,6 +337,10 @@ export type Database = {
       }
       increment_template_like_count: {
         Args: { template_id: string }
+        Returns: undefined
+      }
+      update_document_usage: {
+        Args: { doc_id: string }
         Returns: undefined
       }
     }

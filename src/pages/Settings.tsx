@@ -7,9 +7,12 @@ import NotificationSettings from '@/components/settings/NotificationSettings';
 import AppPreferencesSettings from '@/components/settings/AppPreferencesSettings';
 import DataManagementSettings from '@/components/settings/DataManagementSettings';
 import { WorkspacesSettings } from '@/components/settings/WorkspacesSettings';
+import DocumentsSettings from '@/components/workspace/DocumentsSettings';
+import { useWorkspaces } from '@/hooks/useWorkspaces';
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState('profile');
+  const { currentWorkspace } = useWorkspaces();
 
   const renderActiveSection = () => {
     switch (activeSection) {
@@ -17,6 +20,8 @@ const Settings = () => {
         return <ProfileSettings />;
       case 'workspaces':
         return <WorkspacesSettings />;
+      case 'documents':
+        return currentWorkspace ? <DocumentsSettings workspaceId={currentWorkspace.id} /> : <div>Sélectionnez un workspace</div>;
       case 'appearance':
         return <AppearanceSettings />;
       case 'notifications':
@@ -34,6 +39,7 @@ const Settings = () => {
     const titles = {
       profile: 'Profil',
       workspaces: 'Workspaces',
+      documents: 'Documents',
       appearance: 'Apparence',
       notifications: 'Notifications',
       preferences: 'Préférences de l\'application',

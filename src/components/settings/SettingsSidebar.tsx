@@ -1,5 +1,5 @@
 
-import { User, Lightbulb, Bell, Shield, Database, LogOut, Building2 } from 'lucide-react';
+import { User, Lightbulb, Bell, Shield, Database, LogOut, Building2, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -28,6 +28,10 @@ const settingsSections = [{
   id: 'preferences',
   label: 'Préférences',
   icon: Shield
+}, {
+  id: 'documents',
+  label: 'Documents',
+  icon: FileText
 }, {
   id: 'data',
   label: 'Gestion des données',
