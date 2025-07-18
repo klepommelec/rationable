@@ -9,7 +9,7 @@ import { ConfidenceIndicator } from './ConfidenceIndicator';
 import { DataFreshnessIndicator } from './DataFreshnessIndicator';
 import { WorkspaceDocumentIndicator } from './WorkspaceDocumentIndicator';
 import { AIProviderIndicator } from './AIProviderIndicator';
-import { ValidatedLink } from '@/components/ValidatedLink';
+import ValidatedLink from '@/components/ValidatedLink';
 import { ExternalLink, RotateCcw, Lightbulb } from 'lucide-react';
 
 interface RecommendationCardProps {
@@ -37,13 +37,21 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             
             {/* Indicateurs de qualité */}
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              <ConfidenceIndicator level={result.confidenceLevel || 75} />
-              <DataFreshnessIndicator freshness={result.dataFreshness || 'moderate'} />
+              <ConfidenceIndicator 
+                breakdown={result.breakdown}
+                topOption={result.breakdown[0]}
+                result={result}
+              />
+              <DataFreshnessIndicator 
+                hasRealTimeData={result.realTimeData?.hasRealTimeData || false}
+                timestamp={result.realTimeData?.timestamp}
+                sourcesCount={result.realTimeData?.sourcesCount}
+                dataFreshness={result.dataFreshness || 'moderate'}
+              />
               
-              {result.workspaceData?.documentsUsed && (
+              {result.workspaceData && (
                 <WorkspaceDocumentIndicator 
-                  documentsUsed={result.workspaceData.documentsUsed}
-                  documentSources={result.workspaceData.documentSources}
+                  workspaceData={result.workspaceData}
                 />
               )}
               
@@ -94,34 +102,30 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                       <ExternalLink className="h-4 w-4" />
                       Liens utiles
                     </h4>
-                    <div className="space-y-1">
-                      {result.infoLinks.map((link, index) => (
-                        <ValidatedLink
-                          key={index}
-                          href={link.url}
-                          className="text-sm text-primary hover:text-primary/80 block"
-                        >
-                          {link.title}
-                        </ValidatedLink>
-                      ))}
-                    </div>
+                     <div className="space-y-1">
+                       {result.infoLinks.map((link, index) => (
+                         <ValidatedLink
+                           key={index}
+                           link={link}
+                           className="text-sm text-primary hover:text-primary/80 block"
+                         />
+                       ))}
+                     </div>
                   </div>
                 )}
 
                 {result.shoppingLinks?.length > 0 && (
                   <div>
                     <h4 className="font-medium mb-2">Liens d'achat</h4>
-                    <div className="space-y-1">
-                      {result.shoppingLinks.map((link, index) => (
-                        <ValidatedLink
-                          key={index}
-                          href={link.url}
-                          className="text-sm text-green-600 hover:text-green-500 block"
-                        >
-                          {link.title}
-                        </ValidatedLink>
-                      ))}
-                    </div>
+                     <div className="space-y-1">
+                       {result.shoppingLinks.map((link, index) => (
+                         <ValidatedLink
+                           key={index}
+                           link={link}
+                           className="text-sm text-green-600 hover:text-green-500 block"
+                         />
+                       ))}
+                     </div>
                   </div>
                 )}
               </div>
@@ -132,8 +136,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
           <div className="flex justify-center">
             <DecisionImage 
               imageQuery={result.imageQuery || result.recommendation}
-              dilemma={dilemma}
-              currentDecision={currentDecision}
+              alt={`Illustration pour ${result.recommendation}`}
             />
           </div>
         </div>

@@ -48,10 +48,17 @@ export interface IResult {
     sourcesCount: number;
     searchQuery: string;
     error?: string;
+    provider?: string;
   };
   workspaceData?: {
     documentsUsed: number;
     documentSources: string[];
+  };
+  aiProvider?: {
+    provider: string;
+    model: string;
+    success: boolean;
+    error?: string;
   };
 }
 
