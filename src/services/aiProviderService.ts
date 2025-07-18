@@ -34,20 +34,20 @@ export interface AIResponse {
 // Configuration des fournisseurs par ordre de priorité
 export const AI_PROVIDERS_CONFIG: AIProviderConfig[] = [
   {
-    provider: 'openai',
-    model: 'gpt-4o-mini',
-    priority: 1,
-    maxRetries: 3,
-    costLevel: 'medium',
-    capabilities: ['text', 'vision', 'json', 'criteria', 'options']
-  },
-  {
     provider: 'claude',
-    model: 'claude-3-5-sonnet-20241022',
-    priority: 2,
+    model: 'claude-sonnet-4-20250514',
+    priority: 1, // Priorité maximale pour Claude
     maxRetries: 2,
     costLevel: 'high',
     capabilities: ['text', 'vision', 'complex-reasoning', 'criteria', 'options']
+  },
+  {
+    provider: 'openai',
+    model: 'gpt-4.1-2025-04-14',
+    priority: 2,
+    maxRetries: 3,
+    costLevel: 'medium',
+    capabilities: ['text', 'vision', 'json', 'criteria', 'options']
   },
   {
     provider: 'perplexity',
@@ -189,10 +189,16 @@ export class AIProviderService {
   }
 
   private async callClaude(config: AIProviderConfig, request: AIRequest): Promise<any> {
-    // Pour l'instant, utiliser OpenAI comme fallback
-    // TODO: Implémenter l'API Claude directement
-    console.log('🔄 Claude not implemented yet, using OpenAI as fallback');
-    return await this.callOpenAI(config, request);
+    const { makeClaudeDecision } = await import('./claudeService');
+    
+    // Adapter la requête pour Claude
+    const claudeRequest = {
+      dilemma: request.prompt,
+      criteria: [], // Sera extrait du contexte si nécessaire
+      model: config.model
+    };
+    
+    return await makeClaudeDecision(claudeRequest);
   }
 
   private async callPerplexity(config: AIProviderConfig, request: AIRequest): Promise<any> {
