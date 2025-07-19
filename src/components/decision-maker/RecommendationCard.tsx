@@ -10,7 +10,11 @@ import { DataFreshnessIndicator } from './DataFreshnessIndicator';
 import { WorkspaceDocumentIndicator } from './WorkspaceDocumentIndicator';
 import { AIProviderIndicator } from './AIProviderIndicator';
 import ValidatedLink from '@/components/ValidatedLink';
-import { ExternalLink, RotateCcw, Lightbulb } from 'lucide-react';
+import { ExternalLink, RotateCcw, Lightbulb, BarChart3, Activity } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AIProviderDashboard } from './AIProviderDashboard';
+import { AIProviderMonitor } from './AIProviderMonitor';
 
 interface RecommendationCardProps {
   result: IResult;
@@ -66,15 +70,49 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             </div>
           </div>
           
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={clearSession}
-            className="flex items-center gap-2"
-          >
-            <RotateCcw className="h-4 w-4" />
-            Nouvelle analyse
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={clearSession}
+              className="flex items-center gap-2"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Nouvelle analyse
+            </Button>
+            
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Dashboard AI
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Dashboard AI Providers</DialogTitle>
+                </DialogHeader>
+                <Tabs defaultValue="dashboard" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="dashboard">
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      Statistiques
+                    </TabsTrigger>
+                    <TabsTrigger value="monitoring">
+                      <Activity className="h-4 w-4 mr-2" />
+                      Monitoring
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="dashboard" className="mt-4">
+                    <AIProviderDashboard />
+                  </TabsContent>
+                  <TabsContent value="monitoring" className="mt-4">
+                    <AIProviderMonitor />
+                  </TabsContent>
+                </Tabs>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </CardHeader>
 
