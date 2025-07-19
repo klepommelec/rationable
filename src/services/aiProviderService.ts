@@ -191,11 +191,35 @@ export class AIProviderService {
   private async callClaude(config: AIProviderConfig, request: AIRequest): Promise<any> {
     const { makeClaudeDecision } = await import('./claudeService');
     
-    // Adapter la requête pour Claude
+    // Extraire les critères du contexte si nécessaire
+    let criteria = [];
+    try {
+      // Essayer d'extraire les critères du prompt
+      const criteriaMatch = request.prompt.match(/Critères d'évaluation:\s*([^\n]+)/);
+      if (criteriaMatch) {
+        criteria = criteriaMatch[1].split(',').map(name => ({ name: name.trim() }));
+      }
+    } catch (error) {
+      console.warn('Could not extract criteria from prompt:', error);
+    }
+    
+    // Adapter la requête pour Claude avec toutes les données nécessaires
     const claudeRequest = {
-      dilemma: request.prompt,
-      criteria: [], // Sera extrait du contexte si nécessaire
-      model: config.model
+      dilemma: request.prompt.includes('Dilemme:') 
+        ? request.prompt.split('Dilemme:')[1].split('\n')[0].replace(/"/g, '').trim()
+        : request.prompt,
+      criteria,
+      model: config.model,
+      realTimeData: request.context ? {
+        content: request.context,
+        timestamp: new Date().toISOString(),
+        searchQuery: request.prompt,
+        provider: 'search'
+      } : null,
+      workspaceData: request.workspaceId ? {
+        documentsUsed: 0,
+        documentSources: []
+      } : null
     };
     
     return await makeClaudeDecision(claudeRequest);

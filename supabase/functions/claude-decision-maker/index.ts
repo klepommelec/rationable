@@ -26,64 +26,87 @@ serve(async (req) => {
       throw new Error('Clé API Anthropic non configurée');
     }
 
-    // Construction du prompt système
-    let systemPrompt = `Tu es un assistant expert en prise de décision. Analyse la situation suivante et fournis une recommandation structurée.
+    // Construction du prompt système amélioré
+    let systemPrompt = `Tu es un assistant expert en prise de décision avec accès aux informations les plus récentes.
 
-IMPORTANT: Tu dois répondre EXCLUSIVEMENT en JSON valide, sans texte avant ou après. Le format EXACT attendu est:
+IMPORTANT: 
+- Analyse en profondeur la question posée
+- Si c'est une question sur des événements récents (draft NBA, élections, actualités), utilise tes connaissances les plus à jour
+- Pour les questions sportives, considère les performances récentes, les statistiques, et les analyses d'experts
+- Sois précis et factuel dans tes réponses
+
+Tu dois répondre EXCLUSIVEMENT en JSON valide, sans texte avant ou après. Le format EXACT attendu est:
 {
-  "recommendation": "Titre de la recommandation",
-  "description": "Description détaillée de la recommandation",
+  "recommendation": "Titre de la recommandation (basé sur les faits)",
+  "description": "Description détaillée avec justification factuelle",
+  "imageQuery": "Description for generating an image (in English, descriptive)",
+  "confidenceLevel": 85,
+  "dataFreshness": "very-fresh",
   "breakdown": [
     {
       "option": "Nom de l'option",
-      "pros": ["Avantage 1", "Avantage 2"],
-      "cons": ["Inconvénient 1", "Inconvénient 2"],
+      "pros": ["Avantage factuel 1", "Avantage factuel 2"],
+      "cons": ["Inconvénient ou limitation 1", "Inconvénient 2"],
       "score": 85
     }
   ],
   "infoLinks": [
     {
-      "title": "Titre du lien",
-      "url": "URL complète",
-      "description": "Description optionnelle"
+      "title": "Titre du lien informatif",
+      "url": "https://example.com",
+      "description": "Description de la source"
     }
   ],
-  "shoppingLinks": [
-    {
-      "title": "Nom du produit/service",
-      "url": "URL d'achat",
-      "description": "Prix ou info supplémentaire"
-    }
-  ]
+  "shoppingLinks": []
 }`;
 
     // Ajout des données temps réel si disponibles
-    if (realTimeData?.hasRealTimeData) {
-      systemPrompt += `\n\nDonnées temps réel disponibles (récupérées ${realTimeData.timestamp}):
-Sources: ${realTimeData.sourcesCount}
-Requête: ${realTimeData.searchQuery}`;
+    if (realTimeData?.content) {
+      systemPrompt += `\n\nDonnées temps réel disponibles:
+${realTimeData.content}
+Source: ${realTimeData.provider}
+Timestamp: ${realTimeData.timestamp}
+
+UTILISE CES DONNÉES pour enrichir ton analyse et assurer l'exactitude de ta réponse.`;
     }
 
     // Ajout des données workspace si disponibles
     if (workspaceData?.documentsUsed > 0) {
-      systemPrompt += `\n\nDocuments workspace utilisés (${workspaceData.documentsUsed}):
+      systemPrompt += `\n\nDocuments workspace consultés (${workspaceData.documentsUsed}):
 ${workspaceData.documentSources.join(', ')}`;
     }
 
-    // Construction du prompt utilisateur
-    let userPrompt = `Dilemme: ${dilemma}`;
+    // Construction du prompt utilisateur amélioré
+    let userPrompt = `Question/Dilemme: "${dilemma}"`;
     
     if (criteria.length > 0) {
-      userPrompt += `\n\nCritères importants: ${criteria.map(c => c.name).join(', ')}`;
+      userPrompt += `\n\nCritères d'évaluation importants: ${criteria.map(c => c.name).join(', ')}`;
     }
 
-    userPrompt += `\n\nAnalyse cette situation et fournis:
-1. Une recommandation claire
-2. Une analyse détaillée des options avec scores (0-100)
-3. Des liens informatifs pertinents
-4. Des liens d'achat si applicable
+    // Détection du type de question pour adapter l'approche
+    const isCurrentEvent = /2024|2025|draft|élection|récent|aujourd'hui|maintenant|current|latest/i.test(dilemma);
+    const isSportsRelated = /draft|NBA|football|sport|joueur|équipe|match/i.test(dilemma);
+    
+    if (isCurrentEvent) {
+      userPrompt += `\n\n⚠️ ATTENTION: Cette question concerne des événements récents ou actuels. Utilise tes connaissances les plus à jour.`;
+    }
+    
+    if (isSportsRelated) {
+      userPrompt += `\n\n🏀 Question sportive détectée: Base ton analyse sur:
+- Performances statistiques récentes
+- Potentiel et développement des joueurs
+- Impact sur l'équipe et la franchise
+- Analyses d'experts et scouts
+- Comparaisons objectives`;
+    }
 
-Les scores doivent refléter la qualité objective de chaque option selon les critères.`;
+    userPrompt += `\n\nFournis une analyse complète avec:
+1. Une recommandation claire et factuelle
+2. Une justification détaillée basée sur des faits
+3. Une évaluation comparative des options (scores 0-100)
+4. Des liens vers des sources fiables si applicable
+
+Les scores doivent refléter l'évaluation objective selon les critères mentionnés.`;
 
     // Appel à l'API Claude
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -139,12 +162,19 @@ Les scores doivent refléter la qualité objective de chaque option selon les cr
     const result = {
       recommendation: parsedResult.recommendation || 'Recommandation non disponible',
       description: parsedResult.description || 'Description non disponible',
+      imageQuery: parsedResult.imageQuery || parsedResult.recommendation || 'decision analysis',
       breakdown: Array.isArray(parsedResult.breakdown) ? parsedResult.breakdown : [],
       infoLinks: Array.isArray(parsedResult.infoLinks) ? parsedResult.infoLinks : [],
       shoppingLinks: Array.isArray(parsedResult.shoppingLinks) ? parsedResult.shoppingLinks : [],
-      confidenceLevel: Math.min(95, Math.max(70, parsedResult.breakdown?.[0]?.score || 75)),
-      dataFreshness: realTimeData?.hasRealTimeData ? 'very-fresh' : 'moderate',
-      realTimeData: realTimeData,
+      confidenceLevel: parsedResult.confidenceLevel || Math.min(95, Math.max(70, parsedResult.breakdown?.[0]?.score || 75)),
+      dataFreshness: parsedResult.dataFreshness || (realTimeData?.content ? 'very-fresh' : 'moderate'),
+      realTimeData: realTimeData ? {
+        hasRealTimeData: !!realTimeData.content,
+        timestamp: realTimeData.timestamp,
+        sourcesCount: realTimeData.sources?.length || 0,
+        searchQuery: realTimeData.searchQuery,
+        provider: realTimeData.provider
+      } : undefined,
       workspaceData: workspaceData,
       aiProvider: {
         provider: 'claude',

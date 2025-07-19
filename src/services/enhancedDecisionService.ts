@@ -197,8 +197,21 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
   };
 
   try {
+    console.log('🔍 Sending request to AI providers:', {
+      dilemma,
+      criteriaList,
+      needsRealTimeData,
+      hasRealTimeData: !!realTimeData?.content,
+      promptLength: prompt.length
+    });
+    
     const response = await aiService.executeWithFallback(request);
     console.log(`✅ Options generated with ${response.provider}`);
+    console.log('📝 Response preview:', {
+      recommendation: response.content?.recommendation,
+      hasBreakdown: Array.isArray(response.content?.breakdown),
+      breakdownLength: response.content?.breakdown?.length || 0
+    });
     
     const result = response.content;
     
@@ -298,9 +311,16 @@ const detectRealTimeQuery = (dilemma: string): boolean => {
     'draft', '2024', '2025', '2026', 'élection', 'prochain', 'futur', 'prochaine',
     'récent', 'dernière', 'nouveau', 'nouvelle', 'tendance', 'actualité',
     'maintenant', 'aujourd\'hui', 'cette année', 'ce mois', 'cette semaine',
-    'current', 'latest', 'recent', 'now', 'today', 'this year'
+    'current', 'latest', 'recent', 'now', 'today', 'this year', 'premier choix',
+    'qui a été', 'qui sera', 'quel est', 'résultat', 'gagnant', 'classement'
   ];
   
   const lowerDilemma = dilemma.toLowerCase();
-  return realTimeKeywords.some(keyword => lowerDilemma.includes(keyword));
+  const hasRealTimeKeyword = realTimeKeywords.some(keyword => lowerDilemma.includes(keyword));
+  
+  // Détection spéciale pour les questions sportives récentes
+  const isSportsQuery = /draft|NBA|football|sport|joueur|équipe|match|championship/i.test(dilemma);
+  const isRecentYear = /(2024|2025|2026)/i.test(dilemma);
+  
+  return hasRealTimeKeyword || (isSportsQuery && isRecentYear);
 };
