@@ -28,9 +28,9 @@ serve(async (req) => {
       throw new Error('Clé API Anthropic non configurée');
     }
 
-    // Vérifier le format de la clé API
-    if (!anthropicApiKey.startsWith('sk-ant-')) {
-      console.error('❌ Invalid API key format. Anthropic keys should start with sk-ant-');
+    // Corriger la vérification du format de la clé API pour accepter les nouveaux formats
+    if (!anthropicApiKey.startsWith('sk-ant-api03-') && !anthropicApiKey.startsWith('sk-ant-')) {
+      console.error('❌ Invalid API key format. Anthropic keys should start with sk-ant-api03- or sk-ant-');
       throw new Error('Format de clé API Anthropic invalide');
     }
 

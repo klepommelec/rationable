@@ -29,9 +29,9 @@ serve(async (req) => {
     console.log('🔍 Perplexity search query:', query)
     console.log('📝 Context:', context)
 
-    // Utiliser les modèles corrects selon la documentation Perplexity
+    // Utiliser les modèles corrects selon la documentation Perplexity 2025
     const models = [
-      'llama-3.1-sonar-small-128k-online',
+      'llama-3.1-sonar-huge-128k-online',
       'llama-3.1-sonar-large-128k-online'
     ];
 
@@ -52,15 +52,15 @@ serve(async (req) => {
             messages: [
               {
                 role: 'system',
-                content: 'You are a research assistant. Provide factual, up-to-date information with sources. Focus on recent developments and expert analysis. Always include confidence level in your assessment. Respond in French if the query is in French.'
+                content: 'You are a research assistant specialized in providing factual, up-to-date information with sources. Focus on recent developments and expert analysis. Always include confidence level in your assessment. Respond in French if the query is in French.'
               },
               {
                 role: 'user',
-                content: `Recherchez des informations récentes sur: ${query}. Contexte: ${context || 'Recherche générale'}. Fournissez des sources récentes et une analyse d'experts.`
+                content: `Recherchez des informations récentes et précises sur: ${query}. Contexte: ${context || 'Recherche générale'}. Fournissez des sources récentes et une analyse d'experts avec des faits vérifiés.`
               }
             ],
             temperature: 0.1,
-            max_tokens: 800,
+            max_tokens: 1000,
             top_p: 0.9,
             return_images: false,
             return_related_questions: false,
@@ -84,7 +84,7 @@ serve(async (req) => {
           
           // Si c'est une erreur 400 avec le premier modèle, essayer le suivant
           if (response.status === 400 && model === models[0]) {
-            console.log('🔄 Retrying with larger model...')
+            console.log('🔄 Retrying with smaller model...')
             continue
           }
           

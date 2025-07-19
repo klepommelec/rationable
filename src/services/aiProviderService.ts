@@ -31,7 +31,7 @@ export interface AIResponse {
   };
 }
 
-// Configuration des fournisseurs par ordre de priorité
+// Configuration des fournisseurs par ordre de priorité - Claude en premier pour les meilleures réponses
 export const AI_PROVIDERS_CONFIG: AIProviderConfig[] = [
   {
     provider: 'claude',
@@ -42,20 +42,20 @@ export const AI_PROVIDERS_CONFIG: AIProviderConfig[] = [
     capabilities: ['text', 'vision', 'complex-reasoning', 'criteria', 'options']
   },
   {
-    provider: 'openai',
-    model: 'gpt-4.1-2025-04-14',
-    priority: 2,
-    maxRetries: 3,
-    costLevel: 'medium',
-    capabilities: ['text', 'vision', 'json', 'criteria', 'options']
-  },
-  {
     provider: 'perplexity',
-    model: 'llama-3.1-sonar-small-128k-online',
-    priority: 3,
+    model: 'llama-3.1-sonar-huge-128k-online',
+    priority: 2, // Perplexity pour les données temps réel
     maxRetries: 2,
     costLevel: 'low',
     capabilities: ['search', 'real-time']
+  },
+  {
+    provider: 'openai',
+    model: 'gpt-4.1-2025-04-14',
+    priority: 3, // OpenAI en dernier recours seulement
+    maxRetries: 3,
+    costLevel: 'medium',
+    capabilities: ['text', 'vision', 'json', 'criteria', 'options']
   }
 ];
 
@@ -93,11 +93,12 @@ export class AIProviderService {
         const aSuccessRate = this.successRates.get(a.provider) || 0;
         const bSuccessRate = this.successRates.get(b.provider) || 0;
         
+        // Prioriser Claude et Perplexity pour avoir les meilleures données
         if (Math.abs(aSuccessRate - bSuccessRate) > 20) {
           return bSuccessRate - aSuccessRate; // Meilleur taux de succès en premier
         }
         
-        return a.priority - b.priority; // Sinon par priorité
+        return a.priority - b.priority; // Sinon par priorité (Claude > Perplexity > OpenAI)
       });
   }
 
