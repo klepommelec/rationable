@@ -29,10 +29,10 @@ serve(async (req) => {
     console.log('🔍 Perplexity search query:', query)
     console.log('📝 Context:', context)
 
-    // Utiliser les modèles corrects selon la documentation Perplexity 2025
+    // Utiliser les nouveaux modèles PPLX 2025 disponibles
     const models = [
-      'llama-3.1-sonar-huge-128k-online',
-      'llama-3.1-sonar-large-128k-online'
+      'pplx-70b-online',
+      'pplx-7b-online'
     ];
 
     let lastError: string = '';

@@ -1,4 +1,3 @@
-
 export type AIProvider = 'openai' | 'claude' | 'perplexity';
 
 export interface AIProviderConfig {
@@ -31,11 +30,11 @@ export interface AIResponse {
   };
 }
 
-// Configuration des fournisseurs par ordre de priorité - Claude en premier pour les meilleures réponses
+// Configuration des fournisseurs par ordre de priorité - MODÈLES CORRIGÉS 2025
 export const AI_PROVIDERS_CONFIG: AIProviderConfig[] = [
   {
     provider: 'claude',
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-3-5-sonnet-20241022', // Modèle Claude vérifié disponible
     priority: 1, // Priorité maximale pour Claude
     maxRetries: 2,
     costLevel: 'high',
@@ -43,7 +42,7 @@ export const AI_PROVIDERS_CONFIG: AIProviderConfig[] = [
   },
   {
     provider: 'perplexity',
-    model: 'llama-3.1-sonar-huge-128k-online',
+    model: 'pplx-70b-online', // Nouveau modèle PPLX 2025 disponible
     priority: 2, // Perplexity pour les données temps réel
     maxRetries: 2,
     costLevel: 'low',
