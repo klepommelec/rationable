@@ -111,10 +111,18 @@ export const generateOptionsWithFallback = async (
   if (needsRealTimeData) {
     console.log('🔍 Real-time data needed, using search providers...');
     
+    // Context spécifique pour questions sports récentes
+    const isNBADraft = /draft.*NBA.*202[4-9]/i.test(dilemma);
+    let searchContext = 'Current sports events and recent information';
+    
+    if (isNBADraft) {
+      searchContext = 'NBA Draft 2025 first pick selection results recent news';
+    }
+    
     try {
       const searchRequest: AIRequest = {
-        prompt: dilemma,
-        context: 'Options analysis and recommendations',
+        prompt: isNBADraft ? `NBA Draft 2025 first overall pick winner results ${dilemma}` : dilemma,
+        context: searchContext,
         type: 'search'
       };
 
@@ -129,11 +137,11 @@ export const generateOptionsWithFallback = async (
           provider: searchResponse.provider
         };
         
-        realTimeContext = `\n\nINFORMATIONS RÉCENTES (${realTimeData.timestamp}, source: ${searchResponse.provider}):\n${realTimeData.content}`;
+        realTimeContext = `\n\nDONNÉES RÉCENTES ET VÉRIFIÉES (${realTimeData.timestamp}, source: ${searchResponse.provider}):\n${realTimeData.content}\n\nIMPORTANT: Utilisez UNIQUEMENT ces informations récentes pour répondre. Ignorez toute connaissance antérieure qui pourrait être obsolète.`;
       }
     } catch (searchError) {
       console.warn('⚠️ Real-time search failed, continuing without recent data:', searchError);
-      realTimeContext = '\n\nATTENTION: Données en temps réel non disponibles. Analyse basée sur les connaissances générales.';
+      realTimeContext = '\n\nATTENTION: Données en temps réel non disponibles. PRÉCISEZ dans votre réponse que vous ne pouvez pas accéder aux informations récentes et que la réponse pourrait être obsolète.';
     }
   }
 

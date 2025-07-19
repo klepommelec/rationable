@@ -31,8 +31,8 @@ serve(async (req) => {
 
     // Essayer d'abord avec le modèle small
     const models = [
-      'llama-3.1-sonar-small-128k-online',
-      'llama-3.1-sonar-large-128k-online'
+      'sonar-small-online',
+      'sonar-medium-online'
     ];
 
     let lastError: string = '';
