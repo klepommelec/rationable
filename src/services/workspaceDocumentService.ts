@@ -10,6 +10,14 @@ export interface DocumentContent {
 
 export const getWorkspaceDocumentsForAnalysis = async (workspaceId: string, dilemma: string): Promise<DocumentContent[]> => {
   try {
+    // Vérifier si la question nécessite réellement des documents workspace
+    const isOutOfContextQuestion = detectOutOfContextQuestion(dilemma);
+    
+    if (isOutOfContextQuestion) {
+      console.log('🚫 Question hors contexte détectée - ignorer les documents workspace:', dilemma);
+      return [];
+    }
+
     // Récupérer les documents du workspace avec leur contenu extrait
     const { data: documents, error: docsError } = await supabase
       .from('workspace_documents')
@@ -43,10 +51,15 @@ export const getWorkspaceDocumentsForAnalysis = async (workspaceId: string, dile
       }))
       .filter(doc => doc.content.length > 0);
 
-    console.log(`📚 Found ${documentsWithContent.length} documents with content for analysis`);
+    // Filtrer par pertinence réelle avant de marquer comme utilisés
+    const relevantDocuments = documentsWithContent.filter(docContent => 
+      isDocumentRelevant(docContent, dilemma)
+    );
+
+    console.log(`📚 Found ${relevantDocuments.length} relevant documents out of ${documentsWithContent.length} total`);
     
-    // Mettre à jour l'usage des documents utilisés
-    for (const docContent of documentsWithContent) {
+    // Mettre à jour l'usage UNIQUEMENT des documents pertinents
+    for (const docContent of relevantDocuments) {
       try {
         await supabase.rpc('update_document_usage', { doc_id: docContent.document.id });
       } catch (error) {
@@ -54,11 +67,67 @@ export const getWorkspaceDocumentsForAnalysis = async (workspaceId: string, dile
       }
     }
 
-    return documentsWithContent;
+    return relevantDocuments;
   } catch (error) {
     console.error('Error in getWorkspaceDocumentsForAnalysis:', error);
     return [];
   }
+};
+
+// Fonction pour détecter les questions hors contexte
+const detectOutOfContextQuestion = (dilemma: string): boolean => {
+  const outOfContextPatterns = [
+    /draft.*NBA/i,
+    /champion.*NBA/i,
+    /gagnant.*titre/i,
+    /premier.*choix/i,
+    /élection.*\d{4}/i,
+    /actualité.*sport/i,
+    /résultat.*match/i
+  ];
+  
+  return outOfContextPatterns.some(pattern => pattern.test(dilemma));
+};
+
+// Fonction pour vérifier la pertinence d'un document
+const isDocumentRelevant = (docContent: DocumentContent, dilemma: string): boolean => {
+  const queryLower = dilemma.toLowerCase();
+  const contentLower = docContent.content.toLowerCase();
+  
+  // Extraire les mots-clés principaux du dilemme (exclure les mots vides)
+  const stopWords = ['le', 'la', 'les', 'un', 'une', 'des', 'de', 'du', 'et', 'ou', 'que', 'qui', 'pour', 'avec', 'sur', 'dans'];
+  const queryWords = queryLower
+    .split(/\s+/)
+    .filter(word => word.length > 2 && !stopWords.includes(word));
+  
+  if (queryWords.length === 0) return false;
+  
+  // Calculer le score de pertinence
+  let relevanceScore = 0;
+  let foundWords = 0;
+  
+  queryWords.forEach(word => {
+    const matches = (contentLower.match(new RegExp(word, 'g')) || []).length;
+    if (matches > 0) {
+      foundWords++;
+      relevanceScore += matches;
+    }
+  });
+  
+  // Considérer comme pertinent si au moins 30% des mots-clés sont trouvés
+  // ET si le score total est significatif
+  const wordCoverage = foundWords / queryWords.length;
+  const isRelevant = wordCoverage >= 0.3 && relevanceScore >= 2;
+  
+  console.log(`📊 Document "${docContent.document.file_name}" relevance:`, {
+    wordCoverage: Math.round(wordCoverage * 100) + '%',
+    relevanceScore,
+    isRelevant,
+    foundWords,
+    totalWords: queryWords.length
+  });
+  
+  return isRelevant;
 };
 
 export const searchRelevantContent = (documents: DocumentContent[], query: string, maxChunks: number = 10): string => {

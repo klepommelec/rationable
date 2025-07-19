@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -19,12 +20,22 @@ serve(async (req) => {
       criteria = [], 
       realTimeData = null,
       workspaceData = null,
-      model = 'claude-sonnet-4-20250514'
+      model = 'claude-3-5-sonnet-20241022'
     } = await req.json();
 
     if (!anthropicApiKey) {
+      console.error('❌ ANTHROPIC_API_KEY not found in environment');
       throw new Error('Clé API Anthropic non configurée');
     }
+
+    // Vérifier le format de la clé API
+    if (!anthropicApiKey.startsWith('sk-ant-')) {
+      console.error('❌ Invalid API key format. Anthropic keys should start with sk-ant-');
+      throw new Error('Format de clé API Anthropic invalide');
+    }
+
+    console.log(`🤖 Using Claude model: ${model}`);
+    console.log(`🔑 API Key format: ${anthropicApiKey.substring(0, 10)}...`);
 
     // Construction du prompt système amélioré
     let systemPrompt = `Tu es un assistant expert en prise de décision avec accès aux informations les plus récentes.
@@ -70,7 +81,7 @@ Timestamp: ${realTimeData.timestamp}
 UTILISE CES DONNÉES pour enrichir ton analyse et assurer l'exactitude de ta réponse.`;
     }
 
-    // Ajout des données workspace si disponibles
+    // Ajout des données workspace si disponibles (mais seulement si pertinentes)
     if (workspaceData?.documentsUsed > 0) {
       systemPrompt += `\n\nDocuments workspace consultés (${workspaceData.documentsUsed}):
 ${workspaceData.documentSources.join(', ')}`;
@@ -130,21 +141,26 @@ Les scores doivent refléter l'évaluation objective selon les critères mention
       })
     });
 
+    console.log(`📡 Claude API response status: ${response.status}`);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Erreur API Claude:', response.status, errorText);
-      throw new Error(`Erreur API Claude: ${response.status}`);
+      console.error('❌ Erreur API Claude:', response.status, errorText);
+      throw new Error(`Erreur API Claude: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('Réponse Claude:', data);
+    console.log('📊 Réponse Claude reçue:', {
+      hasContent: !!data.content,
+      contentLength: data.content?.length || 0
+    });
 
     if (!data.content || !data.content[0] || !data.content[0].text) {
       throw new Error('Format de réponse invalide de Claude');
     }
 
     const content = data.content[0].text;
-    console.log('Contenu brut Claude:', content);
+    console.log('📝 Contenu brut Claude (preview):', content.substring(0, 200) + '...');
 
     // Parsing du JSON
     let parsedResult;
@@ -153,7 +169,7 @@ Les scores doivent refléter l'évaluation objective selon les critères mention
       const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       parsedResult = JSON.parse(cleanContent);
     } catch (parseError) {
-      console.error('Erreur parsing JSON:', parseError);
+      console.error('❌ Erreur parsing JSON:', parseError);
       console.error('Contenu à parser:', content);
       throw new Error('Impossible de parser la réponse Claude en JSON');
     }
@@ -183,18 +199,20 @@ Les scores doivent refléter l'évaluation objective selon les critères mention
       }
     };
 
+    console.log('✅ Claude analysis completed successfully');
+
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
-    console.error('Erreur dans claude-decision-maker:', error);
+    console.error('❌ Erreur dans claude-decision-maker:', error);
     
     return new Response(JSON.stringify({ 
       error: error.message,
       aiProvider: {
         provider: 'claude',
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-3-5-sonnet-20241022',
         success: false,
         error: error.message
       }

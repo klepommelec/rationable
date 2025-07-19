@@ -1,4 +1,3 @@
-
 import { ICriterion, IResult } from '@/types/decision';
 import { AIProviderService, AIRequest } from './aiProviderService';
 import { UploadedFileInfo } from './fileUploadService';
@@ -93,6 +92,36 @@ Exemple de format:
   }
 };
 
+// Fonction utilitaire pour détecter les requêtes temps réel
+const detectRealTimeQuery = (dilemma: string): boolean => {
+  const realTimeKeywords = [
+    'draft', '2024', '2025', '2026', 'élection', 'prochain', 'futur', 'prochaine',
+    'récent', 'dernière', 'nouveau', 'nouvelle', 'tendance', 'actualité',
+    'maintenant', 'aujourd\'hui', 'cette année', 'ce mois', 'cette semaine',
+    'current', 'latest', 'recent', 'now', 'today', 'this year', 'premier choix',
+    'qui a été', 'qui sera', 'quel est', 'résultat', 'gagnant', 'classement'
+  ];
+  
+  const lowerDilemma = dilemma.toLowerCase();
+  const hasRealTimeKeyword = realTimeKeywords.some(keyword => lowerDilemma.includes(keyword));
+  
+  // Détection spéciale pour les questions sportives récentes
+  const isSportsQuery = /draft|NBA|football|sport|joueur|équipe|match|championship/i.test(dilemma);
+  const isRecentYear = /(2024|2025|2026)/i.test(dilemma);
+  
+  const needsRealTime = hasRealTimeKeyword || (isSportsQuery && isRecentYear);
+  
+  console.log('🕒 Real-time detection:', {
+    dilemma: dilemma.substring(0, 50) + '...',
+    hasRealTimeKeyword,
+    isSportsQuery,
+    isRecentYear,
+    needsRealTime
+  });
+  
+  return needsRealTime;
+};
+
 export const generateOptionsWithFallback = async (
   dilemma: string, 
   criteria: ICriterion[], 
@@ -113,10 +142,13 @@ export const generateOptionsWithFallback = async (
     
     // Context spécifique pour questions sports récentes
     const isNBADraft = /draft.*NBA.*202[4-9]/i.test(dilemma);
+    const isNBATopic = /NBA|basketball/i.test(dilemma);
     let searchContext = 'Current sports events and recent information';
     
     if (isNBADraft) {
       searchContext = 'NBA Draft 2025 first pick selection results recent news';
+    } else if (isNBATopic) {
+      searchContext = 'NBA recent news and current season information';
     }
     
     try {
@@ -126,6 +158,7 @@ export const generateOptionsWithFallback = async (
         type: 'search'
       };
 
+      console.log('🔍 Searching for real-time data with context:', searchContext);
       const searchResponse = await aiService.executeWithFallback(searchRequest);
       
       if (searchResponse.success && searchResponse.content) {
@@ -138,6 +171,7 @@ export const generateOptionsWithFallback = async (
         };
         
         realTimeContext = `\n\nDONNÉES RÉCENTES ET VÉRIFIÉES (${realTimeData.timestamp}, source: ${searchResponse.provider}):\n${realTimeData.content}\n\nIMPORTANT: Utilisez UNIQUEMENT ces informations récentes pour répondre. Ignorez toute connaissance antérieure qui pourrait être obsolète.`;
+        console.log('✅ Real-time data retrieved successfully from:', searchResponse.provider);
       }
     } catch (searchError) {
       console.warn('⚠️ Real-time search failed, continuing without recent data:', searchError);
@@ -145,7 +179,7 @@ export const generateOptionsWithFallback = async (
     }
   }
 
-  // Récupérer les documents du workspace
+  // Récupérer les documents du workspace (avec filtrage de pertinence amélioré)
   let workspaceContext = '';
   let workspaceDocuments = [];
   
@@ -157,8 +191,10 @@ export const generateOptionsWithFallback = async (
       const relevantContent = searchRelevantContent(workspaceDocuments, dilemma, 15);
       if (relevantContent) {
         workspaceContext = `\n\n${relevantContent}`;
-        console.log(`✅ Using ${workspaceDocuments.length} workspace documents for analysis`);
+        console.log(`✅ Using ${workspaceDocuments.length} relevant workspace documents for analysis`);
       }
+    } else {
+      console.log('📝 No relevant workspace documents found for this query');
     }
   }
   
@@ -210,6 +246,7 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
       criteriaList,
       needsRealTimeData,
       hasRealTimeData: !!realTimeData?.content,
+      workspaceDocsFound: workspaceDocuments.length,
       promptLength: prompt.length
     });
     
@@ -234,7 +271,7 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
       };
     }
 
-    // Ajouter les métadonnées des documents workspace
+    // Ajouter les métadonnées des documents workspace (uniquement si vraiment utilisés)
     if (workspaceDocuments.length > 0) {
       result.workspaceData = {
         documentsUsed: workspaceDocuments.length,
@@ -311,24 +348,4 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
       } : undefined
     };
   }
-};
-
-// Fonction utilitaire pour détecter les requêtes temps réel
-const detectRealTimeQuery = (dilemma: string): boolean => {
-  const realTimeKeywords = [
-    'draft', '2024', '2025', '2026', 'élection', 'prochain', 'futur', 'prochaine',
-    'récent', 'dernière', 'nouveau', 'nouvelle', 'tendance', 'actualité',
-    'maintenant', 'aujourd\'hui', 'cette année', 'ce mois', 'cette semaine',
-    'current', 'latest', 'recent', 'now', 'today', 'this year', 'premier choix',
-    'qui a été', 'qui sera', 'quel est', 'résultat', 'gagnant', 'classement'
-  ];
-  
-  const lowerDilemma = dilemma.toLowerCase();
-  const hasRealTimeKeyword = realTimeKeywords.some(keyword => lowerDilemma.includes(keyword));
-  
-  // Détection spéciale pour les questions sportives récentes
-  const isSportsQuery = /draft|NBA|football|sport|joueur|équipe|match|championship/i.test(dilemma);
-  const isRecentYear = /(2024|2025|2026)/i.test(dilemma);
-  
-  return hasRealTimeKeyword || (isSportsQuery && isRecentYear);
 };

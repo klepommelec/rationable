@@ -29,10 +29,10 @@ serve(async (req) => {
     console.log('🔍 Perplexity search query:', query)
     console.log('📝 Context:', context)
 
-    // Essayer d'abord avec le modèle small
+    // Utiliser les modèles corrects selon la documentation Perplexity
     const models = [
-      'sonar-small-online',
-      'sonar-medium-online'
+      'llama-3.1-sonar-small-128k-online',
+      'llama-3.1-sonar-large-128k-online'
     ];
 
     let lastError: string = '';
