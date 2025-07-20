@@ -42,7 +42,7 @@ export const AI_PROVIDERS_CONFIG: AIProviderConfig[] = [
   },
   {
     provider: 'perplexity',
-    model: 'pplx-70b-online', // Nouveau modèle PPLX 2025 disponible
+    model: 'sonar-pro', // Vrai modèle Sonar Perplexity 2025
     priority: 2, // Perplexity pour les données temps réel
     maxRetries: 2,
     costLevel: 'low',

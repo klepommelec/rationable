@@ -29,10 +29,10 @@ serve(async (req) => {
     console.log('🔍 Perplexity search query:', query)
     console.log('📝 Context:', context)
 
-    // Utiliser les nouveaux modèles PPLX 2025 disponibles
+    // Utiliser les vrais modèles Sonar Perplexity 2025 
     const models = [
-      'pplx-70b-online',
-      'pplx-7b-online'
+      'sonar-pro',
+      'sonar'
     ];
 
     let lastError: string = '';
