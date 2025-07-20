@@ -2,7 +2,7 @@
 import { ICriterion, IResult, DEFAULT_CATEGORIES } from '@/types/decision';
 import { UploadedFileInfo } from './fileUploadService';
 import { AIProviderService } from './aiProviderService';
-import { detectQuestionType } from './questionTypeDetector';
+import { detectQuestionType, QuestionType } from './questionTypeDetector';
 
 export const generateCriteriaOnly = async (
   dilemma: string,
