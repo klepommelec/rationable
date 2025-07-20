@@ -5,8 +5,9 @@ import { AIProviderService } from './aiProviderService';
 
 export const generateCriteriaOnly = async (
   dilemma: string,
-  files?: UploadedFileInfo[]
-): Promise<ICriterion[]> => {
+  files?: UploadedFileInfo[],
+  workspaceId?: string
+): Promise<{criteria: ICriterion[], emoji: string, suggestedCategory: string}> => {
   console.log('🔍 Generating criteria with Perplexity only');
   
   const aiService = AIProviderService.getInstance();
@@ -35,7 +36,12 @@ Utilisez ces catégories : practical, financial, personal, social, environmental
       // Extraire le JSON de la réponse
       const jsonMatch = response.content.content?.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
+        const criteria = JSON.parse(jsonMatch[0]);
+        return {
+          criteria,
+          emoji: '🤔',
+          suggestedCategory: 'other'
+        };
       }
     }
     
@@ -49,7 +55,8 @@ Utilisez ces catégories : practical, financial, personal, social, environmental
 export const generateOptions = async (
   dilemma: string,
   criteria: ICriterion[],
-  files?: UploadedFileInfo[]
+  files?: UploadedFileInfo[],
+  workspaceId?: string
 ): Promise<IResult> => {
   console.log('🔍 Generating options with Perplexity only');
   
@@ -91,8 +98,9 @@ Répondez au format JSON exact suivant :
         breakdown: response.content.breakdown || [],
         realTimeData: {
           hasRealTimeData: true,
-          timestamp: response.content.timestamp,
+          timestamp: response.content.timestamp || new Date().toISOString(),
           sourcesCount: response.content.sources?.length || 0,
+          searchQuery: dilemma,
           provider: 'perplexity'
         },
         aiProvider: {

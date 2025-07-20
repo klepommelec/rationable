@@ -222,12 +222,12 @@ export const useDecisionAPI = ({
             criteria: response.criteria,
             suggestedCategory: response.suggestedCategory,
             filesAnalyzed: uploadedFileInfos.length,
-            workspaceDocsUsed: response.workspaceDocumentsUsed || 0
+            workspaceDocsUsed: 0
           });
           
-          const newCriteria = response.criteria.map((name: string) => ({
+          const newCriteria = response.criteria.map((criterion: ICriterion) => ({
             id: crypto.randomUUID(),
-            name,
+            name: criterion.name,
           }));
           
           setCriteria(newCriteria);
