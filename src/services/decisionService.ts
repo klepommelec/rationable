@@ -33,15 +33,23 @@ Utilisez ces catégories : practical, financial, personal, social, environmental
     });
 
     if (response.success && response.content) {
-      // Extraire le JSON de la réponse
-      const jsonMatch = response.content.content?.match(/\[[\s\S]*\]/);
+      // Extraire le JSON de la réponse Perplexity
+      const content = response.content.content || response.content.recommendation || '';
+      
+      // Chercher le JSON dans le contenu
+      const jsonMatch = content.match(/\[[\s\S]*?\]/);
       if (jsonMatch) {
-        const criteria = JSON.parse(jsonMatch[0]);
-        return {
-          criteria,
-          emoji: '🤔',
-          suggestedCategory: 'other'
-        };
+        try {
+          const criteria = JSON.parse(jsonMatch[0]);
+          return {
+            criteria,
+            emoji: '🤔',
+            suggestedCategory: 'other'
+          };
+        } catch (parseError) {
+          console.error('❌ JSON parsing error for criteria:', parseError);
+          throw new Error('Failed to parse criteria JSON from response');
+        }
       }
     }
     
@@ -92,10 +100,37 @@ Répondez au format JSON exact suivant :
     });
 
     if (response.success && response.content) {
+      const content = response.content.content || response.content.recommendation || '';
+      
+      // Chercher le JSON dans le contenu
+      const jsonMatch = content.match(/\{[\s\S]*?\}/);
+      let parsedResult: any = {};
+      
+      if (jsonMatch) {
+        try {
+          parsedResult = JSON.parse(jsonMatch[0]);
+        } catch (parseError) {
+          console.error('❌ JSON parsing error for options:', parseError);
+          // Fallback: utiliser le contenu brut
+          parsedResult = {
+            recommendation: content.split('\n')[0] || 'Recommandation basée sur Perplexity',
+            description: content,
+            breakdown: []
+          };
+        }
+      } else {
+        // Pas de JSON trouvé, utiliser le contenu brut
+        parsedResult = {
+          recommendation: content.split('\n')[0] || 'Recommandation basée sur Perplexity',
+          description: content,
+          breakdown: []
+        };
+      }
+
       const result = {
-        recommendation: response.content.recommendation || response.content.content,
-        description: response.content.description || response.content.content,
-        breakdown: response.content.breakdown || [],
+        recommendation: parsedResult.recommendation || content.split('\n')[0] || 'Recommandation',
+        description: parsedResult.description || content,
+        breakdown: parsedResult.breakdown || [],
         realTimeData: {
           hasRealTimeData: true,
           timestamp: response.content.timestamp || new Date().toISOString(),
