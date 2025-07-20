@@ -117,8 +117,8 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
       </CardHeader>
 
       <CardContent className="space-y-6">
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="space-y-4">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex-1 space-y-4">
             <div>
               <Badge variant="secondary" className="mb-2 bg-primary/10 text-primary">
                 Solution recommandée
@@ -170,13 +170,15 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             )}
           </div>
 
-          {/* Image de la décision */}
-          <div className="flex justify-center">
-            <DecisionImage 
-              imageQuery={result.imageQuery || result.recommendation}
-              alt={`Illustration pour ${result.recommendation}`}
-            />
-          </div>
+          {/* Image de la décision - cachée sur mobile, visible sur desktop */}
+          {result.imageQuery && (
+            <div className="hidden lg:flex lg:w-80 justify-center">
+              <DecisionImage 
+                imageQuery={result.imageQuery || result.recommendation}
+                alt={`Illustration pour ${result.recommendation}`}
+              />
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
