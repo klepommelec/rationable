@@ -29,6 +29,8 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   currentDecision,
   clearSession
 }) => {
+  const isFactual = result.resultType === 'factual';
+  
   return (
     <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
       <CardHeader className="pb-4">
@@ -36,7 +38,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
           <div className="flex-1">
             <CardTitle className="flex items-center gap-2 text-xl mb-2">
               <Lightbulb className="h-5 w-5 text-primary" />
-              Recommandation
+              {isFactual ? 'Réponse' : 'Recommandation'}
             </CardTitle>
             
             {/* Indicateurs de qualité */}
@@ -120,8 +122,8 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-1 space-y-4">
             <div>
-              <Badge variant="secondary" className="mb-2 bg-primary/10 text-primary">
-                Solution recommandée
+              <Badge variant="secondary" className={`mb-2 ${isFactual ? 'bg-green-100 text-green-800' : 'bg-primary/10 text-primary'}`}>
+                {isFactual ? 'Réponse factuelle' : 'Solution recommandée'}
               </Badge>
               <h3 className="text-lg font-semibold text-primary mb-2">
                 {result.recommendation}

@@ -60,6 +60,7 @@ export interface IResult {
     success: boolean;
     error?: string;
   };
+  resultType?: 'factual' | 'comparative'; // Nouveau champ pour le type de résultat
 }
 
 export interface IDecision {

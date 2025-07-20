@@ -1,6 +1,6 @@
 
 import { useMemo } from 'react';
-import { IBreakdownItem } from '@/types/decision';
+import { IBreakdownItem, IResult } from '@/types/decision';
 
 export interface IntelligentConfidenceData {
   level: string;
@@ -14,7 +14,8 @@ export const useIntelligentConfidence = (
   breakdown: IBreakdownItem[],
   hasRealTimeData: boolean = false,
   dataTimestamp?: string,
-  sourcesCount: number = 0
+  sourcesCount: number = 0,
+  resultType?: 'factual' | 'comparative'
 ): IntelligentConfidenceData => {
   
   return useMemo(() => {
@@ -28,29 +29,39 @@ export const useIntelligentConfidence = (
       };
     }
 
+    // Pour les questions factuelles : confiance automatiquement élevée
+    if (resultType === 'factual') {
+      const topOption = breakdown[0];
+      const isHighScore = topOption.score >= 95;
+      
+      return {
+        level: "Très Élevée",
+        color: "bg-green-100 text-green-800",
+        icon: "Target",
+        overallScore: isHighScore ? 95 : 85,
+        recommendationText: "Réponse factuelle vérifiée - Information fiable"
+      };
+    }
+
+    // Pour les questions comparatives : logique existante
     const sortedOptions = [...breakdown].sort((a, b) => b.score - a.score);
     const topOption = sortedOptions[0];
     const scoreDifference = breakdown.length > 1 ? topOption.score - sortedOptions[1].score : 0;
 
-    // Score de confiance basé principalement sur l'écart entre les options
-    let confidenceScore = 50; // Base
+    let confidenceScore = 50;
 
-    // Plus l'écart est grand, plus on est confiant
     if (scoreDifference >= 25) confidenceScore = 95;
     else if (scoreDifference >= 15) confidenceScore = 85;
     else if (scoreDifference >= 10) confidenceScore = 75;
     else if (scoreDifference >= 5) confidenceScore = 65;
     else confidenceScore = 45;
 
-    // Bonus si on a des données temps réel
     if (hasRealTimeData && sourcesCount > 0) {
       confidenceScore += 5;
     }
 
-    // Limite à 100
     confidenceScore = Math.min(100, confidenceScore);
 
-    // Niveau de confiance et couleur basés sur le score final
     const { level, color, icon } = (() => {
       if (confidenceScore >= 85) return {
         level: "Très Élevée",
@@ -74,7 +85,6 @@ export const useIntelligentConfidence = (
       };
     })();
 
-    // Texte de recommandation simplifié
     const recommendationText = (() => {
       if (confidenceScore >= 85) {
         return "Analyse très fiable - Recommandation forte";
@@ -95,5 +105,5 @@ export const useIntelligentConfidence = (
       overallScore: confidenceScore,
       recommendationText
     };
-  }, [breakdown, hasRealTimeData, dataTimestamp, sourcesCount]);
+  }, [breakdown, hasRealTimeData, dataTimestamp, sourcesCount, resultType]);
 };

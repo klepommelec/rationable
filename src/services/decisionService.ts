@@ -2,6 +2,7 @@
 import { ICriterion, IResult, DEFAULT_CATEGORIES } from '@/types/decision';
 import { UploadedFileInfo } from './fileUploadService';
 import { AIProviderService } from './aiProviderService';
+import { detectQuestionType } from './questionTypeDetector';
 
 export const generateCriteriaOnly = async (
   dilemma: string,
@@ -69,8 +70,35 @@ export const generateOptions = async (
   console.log('🔍 Generating options with Perplexity only');
   
   const aiService = AIProviderService.getInstance();
+  const questionType = detectQuestionType(dilemma);
   
-  const prompt = `Dilemme: "${dilemma}"
+  console.log(`📊 Question type detected: ${questionType}`);
+  
+  let prompt: string;
+  
+  if (questionType === 'factual') {
+    // Pour les questions factuelles : demander une réponse unique et précise
+    prompt = `Question factuelle: "${dilemma}"
+
+Fournissez une réponse factuelle précise et actualisée. Cette question a une réponse objective unique.
+
+Répondez au format JSON exact suivant :
+{
+  "recommendation": "Réponse factuelle précise",
+  "description": "Explication détaillée avec des faits récents et vérifiables",
+  "breakdown": [
+    {
+      "option": "Réponse factuelle",
+      "score": 100,
+      "pros": ["Fait vérifié 1", "Fait vérifié 2", "Information récente"],
+      "cons": [],
+      "scores": {}
+    }
+  ]
+}`;
+  } else {
+    // Pour les questions comparatives : maintenir l'approche actuelle
+    prompt = `Dilemme: "${dilemma}"
 
 Critères d'évaluation: ${criteria.map(c => c.name).join(', ')}
 
@@ -90,33 +118,31 @@ Répondez au format JSON exact suivant :
     }
   ]
 }`;
+  }
 
   try {
     const response = await aiService.executeWithFallback({
       prompt,
       type: 'options',
-      context: `Critères: ${criteria.map(c => c.name).join(', ')}`,
+      context: questionType === 'comparative' ? `Critères: ${criteria.map(c => c.name).join(', ')}` : 'Question factuelle',
       files
     });
 
     if (response.success && response.content) {
       const content = response.content.content || response.content.recommendation || '';
       
-      // Extraction robuste du contenu Perplexity
       console.log('📄 Processing Perplexity content for options...');
       
       let parsedResult: any = null;
       
       // 1. Essayer d'extraire le JSON complet du contenu
       try {
-        // Nettoyer le contenu d'abord
         const cleanContent = content
           .replace(/```json/g, '')
           .replace(/```/g, '')
           .replace(/^\s*json\s*/i, '')
           .trim();
         
-        // Chercher un objet JSON complet
         const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const jsonString = jsonMatch[0];
@@ -131,14 +157,13 @@ Répondez au format JSON exact suivant :
       if (!parsedResult) {
         console.log('📝 Extracting information from text content...');
         
-        // Chercher la recommandation principale
-        let recommendation = 'Recommandation basée sur Perplexity';
+        let recommendation = questionType === 'factual' ? 
+          'Réponse factuelle basée sur Perplexity' : 
+          'Recommandation basée sur Perplexity';
         let description = content;
         
-        // Nettoyer et extraire la recommandation
         const lines = content.split('\n').filter(line => line.trim());
         
-        // Chercher une recommandation claire
         for (const line of lines) {
           const cleanLine = line.replace(/["{}\[\],]/g, '').trim();
           if (cleanLine.length > 10 && (
@@ -152,25 +177,22 @@ Répondez au format JSON exact suivant :
           }
         }
         
-        // Si toujours du JSON brut, essayer de l'extraire autrement
         if (recommendation.includes('{') || recommendation.includes('"')) {
-          // Chercher après "recommendation"
           const recMatch = content.match(/"recommendation":\s*"([^"]+)"/);
           if (recMatch) {
             recommendation = recMatch[1];
           } else {
-            recommendation = 'Analyse de décision avec Perplexity';
+            recommendation = questionType === 'factual' ? 
+              'Réponse factuelle avec Perplexity' : 
+              'Analyse de décision avec Perplexity';
           }
         }
         
-        // Nettoyer la description du JSON brut
         if (description.includes('{') && description.includes('}')) {
-          // Extraire le texte lisible du JSON
           const descMatch = content.match(/"description":\s*"([^"]+)"/);
           if (descMatch) {
             description = descMatch[1];
           } else {
-            // Fallback: prendre les premiers mots lisibles
             const readableText = content
               .replace(/[\{\}"\[\],]/g, ' ')
               .replace(/\s+/g, ' ')
@@ -189,19 +211,22 @@ Répondez au format JSON exact suivant :
           breakdown: [
             {
               option: recommendation,
-              score: 85,
-              pros: ['Analyse basée sur des données récentes'],
-              cons: ['Format de réponse simplifié'],
+              score: questionType === 'factual' ? 100 : 85,
+              pros: questionType === 'factual' ? 
+                ['Réponse factuelle vérifiée', 'Données récentes'] : 
+                ['Analyse basée sur des données récentes'],
+              cons: questionType === 'factual' ? [] : ['Format de réponse simplifié'],
               scores: {}
             }
           ]
         };
       }
 
-      const result = {
+      const result: IResult = {
         recommendation: parsedResult.recommendation || content.split('\n')[0] || 'Recommandation',
         description: parsedResult.description || content,
         breakdown: parsedResult.breakdown || [],
+        resultType: questionType, // Nouveau champ
         realTimeData: {
           hasRealTimeData: true,
           timestamp: response.content.timestamp || new Date().toISOString(),

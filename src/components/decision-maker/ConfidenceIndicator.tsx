@@ -21,7 +21,8 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
     breakdown,
     realTimeData?.hasRealTimeData || false,
     realTimeData?.timestamp,
-    realTimeData?.sourcesCount || 0
+    realTimeData?.sourcesCount || 0,
+    result?.resultType // Nouveau paramètre
   );
   
   const getIcon = () => {
@@ -37,6 +38,9 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
 
   const ConfidenceIcon = getIcon();
 
+  // Pour les questions factuelles, afficher différemment
+  const isFactual = result?.resultType === 'factual';
+
   return (
     <div 
       className="flex flex-col gap-3 mb-4"
@@ -49,7 +53,7 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
           id="confidence-heading"
           className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 flex-shrink-0"
         >
-          Score :
+          {isFactual ? 'Fiabilité :' : 'Score :'}
         </span>
         <div className="flex items-center gap-2 flex-1 min-w-0 max-w-[240px]">
           <div 
@@ -58,10 +62,14 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
             aria-valuenow={topOption?.score || 0}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label={`Score de l'option: ${topOption?.score || 0} sur 100`}
+            aria-label={`${isFactual ? 'Fiabilité' : 'Score'} de l'option: ${topOption?.score || 0} sur 100`}
           >
             <div 
-              className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-1000 ease-out transform origin-left" 
+              className={`h-full rounded-full transition-all duration-1000 ease-out transform origin-left ${
+                isFactual 
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
+                  : 'bg-gradient-to-r from-blue-500 to-purple-500'
+              }`}
               style={{ 
                 width: `${topOption?.score || 0}%`,
                 animation: 'scale-x 1s ease-out'
@@ -77,7 +85,7 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
         </div>
       </div>
 
-      {/* Confidence Level - Simplifié */}
+      {/* Confidence Level */}
       <div className="flex items-center gap-2">
         <Badge 
           className={`${intelligentConfidence.color} border-0 text-xs sm:text-sm transition-all duration-200 hover:scale-105 flex-shrink-0`}
