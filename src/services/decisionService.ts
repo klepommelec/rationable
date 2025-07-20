@@ -102,45 +102,90 @@ Répondez au format JSON exact suivant :
     if (response.success && response.content) {
       const content = response.content.content || response.content.recommendation || '';
       
-      // Extraction simple et robuste des informations
+      // Extraction robuste du contenu Perplexity
       console.log('📄 Processing Perplexity content for options...');
       
-      // Essayer d'extraire le JSON, mais ne pas bloquer si ça échoue
       let parsedResult: any = null;
       
-      // Pattern pour JSON dans des blocs de code
-      const jsonBlockMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
-      if (jsonBlockMatch) {
-        try {
-          const jsonContent = jsonBlockMatch[1].trim();
-          parsedResult = JSON.parse(jsonContent);
-          console.log('✅ JSON extracted from code block');
-        } catch (e) {
-          console.log('⚠️ JSON in code block is malformed, using text extraction');
+      // 1. Essayer d'extraire le JSON complet du contenu
+      try {
+        // Nettoyer le contenu d'abord
+        const cleanContent = content
+          .replace(/```json/g, '')
+          .replace(/```/g, '')
+          .replace(/^\s*json\s*/i, '')
+          .trim();
+        
+        // Chercher un objet JSON complet
+        const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const jsonString = jsonMatch[0];
+          parsedResult = JSON.parse(jsonString);
+          console.log('✅ JSON extracted and parsed successfully');
         }
+      } catch (e) {
+        console.log('⚠️ Failed to parse JSON, trying text extraction...');
       }
       
-      // Si pas de JSON valide, extraire les informations du texte
+      // 2. Si pas de JSON valide, extraire intelligemment du texte
       if (!parsedResult) {
         console.log('📝 Extracting information from text content...');
         
-        // Chercher une recommandation
-        const lines = content.split('\n').filter(line => line.trim());
+        // Chercher la recommandation principale
         let recommendation = 'Recommandation basée sur Perplexity';
+        let description = content;
         
-        // Chercher une ligne qui ressemble à une recommandation
+        // Nettoyer et extraire la recommandation
+        const lines = content.split('\n').filter(line => line.trim());
+        
+        // Chercher une recommandation claire
         for (const line of lines) {
-          if (line.includes('recommandation') || line.includes('Recommandation') || 
-              line.includes('meilleur') || line.includes('choix') ||
-              line.includes('option') || line.includes('solution')) {
-            recommendation = line.replace(/[*#-]/g, '').trim();
+          const cleanLine = line.replace(/["{}\[\],]/g, '').trim();
+          if (cleanLine.length > 10 && (
+            cleanLine.toLowerCase().includes('recommandation') ||
+            cleanLine.toLowerCase().includes('meilleur') ||
+            cleanLine.toLowerCase().includes('choix') ||
+            (cleanLine.includes(':') && cleanLine.split(':')[1]?.trim())
+          )) {
+            recommendation = cleanLine.split(':').pop()?.trim() || cleanLine;
             break;
+          }
+        }
+        
+        // Si toujours du JSON brut, essayer de l'extraire autrement
+        if (recommendation.includes('{') || recommendation.includes('"')) {
+          // Chercher après "recommendation"
+          const recMatch = content.match(/"recommendation":\s*"([^"]+)"/);
+          if (recMatch) {
+            recommendation = recMatch[1];
+          } else {
+            recommendation = 'Analyse de décision avec Perplexity';
+          }
+        }
+        
+        // Nettoyer la description du JSON brut
+        if (description.includes('{') && description.includes('}')) {
+          // Extraire le texte lisible du JSON
+          const descMatch = content.match(/"description":\s*"([^"]+)"/);
+          if (descMatch) {
+            description = descMatch[1];
+          } else {
+            // Fallback: prendre les premiers mots lisibles
+            const readableText = content
+              .replace(/[\{\}"\[\],]/g, ' ')
+              .replace(/\s+/g, ' ')
+              .trim()
+              .split(' ')
+              .filter(word => word.length > 2)
+              .slice(0, 50)
+              .join(' ');
+            description = readableText || 'Analyse basée sur des données récentes de Perplexity';
           }
         }
         
         parsedResult = {
           recommendation,
-          description: content,
+          description,
           breakdown: [
             {
               option: recommendation,
