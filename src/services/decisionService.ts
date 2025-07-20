@@ -102,49 +102,54 @@ Répondez au format JSON exact suivant :
     if (response.success && response.content) {
       const content = response.content.content || response.content.recommendation || '';
       
-      // Chercher le JSON dans le contenu - parsing plus robuste
-      let parsedResult: any = {};
+      // Extraction simple et robuste des informations
+      console.log('📄 Processing Perplexity content for options...');
       
-      // Essayer différents patterns de JSON
-      const jsonPatterns = [
-        /```json\s*(\{[\s\S]*?\})\s*```/,  // JSON dans des blocs de code
-        /\{[\s\S]*?\}/,                     // JSON simple
-        /(\{[\s\S]*?\})(?=\n\n|\n$|$)/     // JSON jusqu'à une ligne vide
-      ];
+      // Essayer d'extraire le JSON, mais ne pas bloquer si ça échoue
+      let parsedResult: any = null;
       
-      let jsonFound = false;
-      
-      for (const pattern of jsonPatterns) {
-        const match = content.match(pattern);
-        if (match) {
-          try {
-            const jsonString = match[1] || match[0];
-            // Nettoyer le JSON avant parsing
-            const cleanedJson = jsonString
-              .replace(/,\s*}/g, '}')           // Supprimer les virgules trailing
-              .replace(/,\s*]/g, ']')           // Supprimer les virgules trailing dans arrays
-              .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Supprimer caractères de contrôle
-              .trim();
-            
-            parsedResult = JSON.parse(cleanedJson);
-            jsonFound = true;
-            console.log('✅ JSON parsed successfully with pattern:', pattern.source);
-            break;
-          } catch (parseError) {
-            console.log('❌ Failed to parse with pattern:', pattern.source, parseError);
-            continue;
-          }
+      // Pattern pour JSON dans des blocs de code
+      const jsonBlockMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
+      if (jsonBlockMatch) {
+        try {
+          const jsonContent = jsonBlockMatch[1].trim();
+          parsedResult = JSON.parse(jsonContent);
+          console.log('✅ JSON extracted from code block');
+        } catch (e) {
+          console.log('⚠️ JSON in code block is malformed, using text extraction');
         }
       }
       
-      if (!jsonFound) {
-        console.log('⚠️ No valid JSON found, using content as fallback');
-        // Fallback: extraire des informations du texte brut
+      // Si pas de JSON valide, extraire les informations du texte
+      if (!parsedResult) {
+        console.log('📝 Extracting information from text content...');
+        
+        // Chercher une recommandation
         const lines = content.split('\n').filter(line => line.trim());
+        let recommendation = 'Recommandation basée sur Perplexity';
+        
+        // Chercher une ligne qui ressemble à une recommandation
+        for (const line of lines) {
+          if (line.includes('recommandation') || line.includes('Recommandation') || 
+              line.includes('meilleur') || line.includes('choix') ||
+              line.includes('option') || line.includes('solution')) {
+            recommendation = line.replace(/[*#-]/g, '').trim();
+            break;
+          }
+        }
+        
         parsedResult = {
-          recommendation: lines[0] || 'Recommandation basée sur Perplexity',
+          recommendation,
           description: content,
-          breakdown: []
+          breakdown: [
+            {
+              option: recommendation,
+              score: 85,
+              pros: ['Analyse basée sur des données récentes'],
+              cons: ['Format de réponse simplifié'],
+              scores: {}
+            }
+          ]
         };
       }
 
