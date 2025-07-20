@@ -4,29 +4,36 @@ export type QuestionType = 'factual' | 'comparative';
 export const detectQuestionType = (dilemma: string): QuestionType => {
   const lowerDilemma = dilemma.toLowerCase();
   
-  // Mots-clés pour questions factuelles
+  // Mots-clés pour questions factuelles spécifiques
   const factualKeywords = [
-    'quel est', 'quelle est', 'qui est', 'combien coûte', 'combien mesure',
-    'quand', 'où', 'comment', 'pourquoi', 'définition de', 'qu\'est-ce que',
-    'date de', 'prix de', 'taille de', 'poids de', 'dernière version',
-    'dernier modèle', 'dernière mise à jour', 'caractéristiques de',
-    'spécifications de', 'what is', 'when is', 'how much', 'latest'
+    'quel est le dernier', 'quelle est la dernière', 'quel est le nouveau',
+    'quel est le plus récent', 'quelle est la plus récente',
+    'quel est le meilleur', 'quelle est la meilleure', // Ces questions ont une réponse objective
+    'qui est le', 'qui est la', 'combien coûte', 'combien mesure',
+    'quand sort', 'quand sortira', 'date de sortie', 'prix de',
+    'définition de', 'qu\'est-ce que', 'c\'est quoi',
+    'dernière version', 'dernier modèle', 'dernière mise à jour',
+    'what is the latest', 'what is the best', 'when is', 'how much'
   ];
   
-  // Mots-clés pour questions comparatives
+  // Mots-clés pour questions comparatives (choix entre options)
   const comparativeKeywords = [
-    'choisir entre', 'meilleur', 'mieux', 'préférer', 'comparer',
-    'différence entre', 'avantages', 'inconvénients', 'ou', 'vs',
-    'alternative', 'option', 'choix', 'décision', 'lequel',
-    'laquelle', 'que choisir', 'recommandation', 'conseil',
-    'better', 'best', 'choose', 'compare', 'versus', 'alternative'
+    'choisir entre', 'ou', 'vs', 'versus', 'comparer',
+    'différence entre', 'alternative', 'option', 'choix',
+    'lequel', 'laquelle', 'que choisir', 'recommandation',
+    'conseil', 'plutôt', 'better', 'choose between', 'compare'
   ];
   
-  // Détecter les questions avec "ou" (A ou B)
+  // Patterns spécifiques pour détecter les comparaisons
   const hasOrPattern = /\b(ou|or)\b/.test(lowerDilemma);
-  
-  // Détecter les listes (A, B, C)
+  const hasVsPattern = /\b(vs|versus)\b/.test(lowerDilemma);
   const hasListPattern = /,.*,/.test(dilemma);
+  const hasChoiceWords = /\b(choisir|choose|pick)\b/.test(lowerDilemma);
+  
+  // Si c'est clairement une comparaison
+  if (hasOrPattern || hasVsPattern || hasListPattern || hasChoiceWords) {
+    return 'comparative';
+  }
   
   // Compter les correspondances
   const factualMatches = factualKeywords.filter(keyword => 
@@ -37,19 +44,27 @@ export const detectQuestionType = (dilemma: string): QuestionType => {
     lowerDilemma.includes(keyword)
   ).length;
   
-  // Logique de décision
-  if (hasOrPattern || hasListPattern) {
-    return 'comparative';
-  }
-  
-  if (factualMatches > comparativeMatches && factualMatches > 0) {
+  // Logique de décision améliorée
+  if (factualMatches > 0 && factualMatches >= comparativeMatches) {
     return 'factual';
   }
   
-  if (comparativeMatches > factualMatches && comparativeMatches > 0) {
+  if (comparativeMatches > 0) {
     return 'comparative';
   }
   
-  // Par défaut, traiter comme comparatif pour maintenir le comportement actuel
+  // Questions ouvertes sans comparaisons explicites = factuelles
+  // Ex: "Où partir en vacances ?" -> factuel (recommandation unique)
+  const openQuestions = [
+    'où', 'quand', 'comment', 'pourquoi', 'que faire', 'où aller',
+    'where', 'when', 'how', 'why', 'what to do'
+  ];
+  
+  const hasOpenQuestion = openQuestions.some(word => lowerDilemma.includes(word));
+  if (hasOpenQuestion && !hasChoiceWords) {
+    return 'factual';
+  }
+  
+  // Par défaut, traiter comme comparatif
   return 'comparative';
 };

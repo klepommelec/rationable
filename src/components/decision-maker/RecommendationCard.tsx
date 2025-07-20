@@ -10,7 +10,7 @@ import { DataFreshnessIndicator } from './DataFreshnessIndicator';
 import { WorkspaceDocumentIndicator } from './WorkspaceDocumentIndicator';
 import { AIProviderIndicator } from './AIProviderIndicator';
 import ValidatedLink from '@/components/ValidatedLink';
-import { ExternalLink, RotateCcw, Lightbulb, BarChart3, Activity } from 'lucide-react';
+import { ExternalLink, RotateCcw, Lightbulb, BarChart3, Activity, CheckCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIProviderDashboard } from './AIProviderDashboard';
@@ -30,14 +30,19 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   clearSession
 }) => {
   const isFactual = result.resultType === 'factual';
+  const topOption = result.breakdown?.[0];
   
   return (
-    <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
+    <Card className={`border-2 ${isFactual ? 'border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50' : 'border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5'}`}>
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="flex items-center gap-2 text-xl mb-2">
-              <Lightbulb className="h-5 w-5 text-primary" />
+              {isFactual ? (
+                <CheckCircle className="h-5 w-5 text-emerald-600" />
+              ) : (
+                <Lightbulb className="h-5 w-5 text-primary" />
+              )}
               {isFactual ? 'Réponse' : 'Recommandation'}
             </CardTitle>
             
@@ -45,7 +50,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             <div className="flex flex-wrap items-center gap-2 mb-3">
               <ConfidenceIndicator 
                 breakdown={result.breakdown}
-                topOption={result.breakdown[0]}
+                topOption={topOption}
                 result={result}
               />
               <DataFreshnessIndicator 
@@ -122,16 +127,64 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-1 space-y-4">
             <div>
-              <Badge variant="secondary" className={`mb-2 ${isFactual ? 'bg-green-100 text-green-800' : 'bg-primary/10 text-primary'}`}>
+              <Badge 
+                variant="secondary" 
+                className={`mb-2 ${
+                  isFactual 
+                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100' 
+                    : 'bg-primary/10 text-primary'
+                }`}
+              >
                 {isFactual ? 'Réponse factuelle' : 'Solution recommandée'}
               </Badge>
-              <h3 className="text-lg font-semibold text-primary mb-2">
+              <h3 className={`text-lg font-semibold mb-2 ${
+                isFactual ? 'text-emerald-700 dark:text-emerald-300' : 'text-primary'
+              }`}>
                 {result.recommendation}
               </h3>
               <p className="text-muted-foreground leading-relaxed">
                 {result.description}
               </p>
             </div>
+
+            {/* Affichage des pros/cons pour la première option */}
+            {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && (
+              <div className="grid md:grid-cols-2 gap-4">
+                {topOption.pros?.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      {isFactual ? 'Caractéristiques' : 'Avantages'}
+                    </h4>
+                    <ul className="space-y-1">
+                      {topOption.pros.map((pro, index) => (
+                        <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                          <span className="text-green-500 mt-1">•</span>
+                          <span>{pro}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {topOption.cons?.length > 0 && !isFactual && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-orange-700 dark:text-orange-300 flex items-center gap-2">
+                      <ExternalLink className="h-4 w-4" />
+                      Points d'attention
+                    </h4>
+                    <ul className="space-y-1">
+                      {topOption.cons.map((con, index) => (
+                        <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                          <span className="text-orange-500 mt-1">•</span>
+                          <span>{con}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Liens utiles */}
             {(result.infoLinks?.length > 0 || result.shoppingLinks?.length > 0) && (
