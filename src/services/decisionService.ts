@@ -62,6 +62,8 @@ Utilisez ces catégories : practical, financial, personal, social, environmental
 };
 
 const extractTitleFromContent = (content: string, questionType: QuestionType): string => {
+  console.log(`🔍 Extracting title from content (type: ${questionType})`);
+  
   // Essayer d'extraire le titre depuis le JSON
   const titleMatch = content.match(/"recommendation":\s*"([^"]+)"/);
   if (titleMatch) {
@@ -77,9 +79,11 @@ const extractTitleFromContent = (content: string, questionType: QuestionType): s
         .replace(/ \(.*\)$/, '')
         .trim();
       
+      console.log(`📝 Cleaned factual title: "${cleanTitle}"`);
       return cleanTitle || title;
     }
     
+    console.log(`📝 Using title as-is: "${title}"`);
     return title;
   }
   
@@ -89,21 +93,27 @@ const extractTitleFromContent = (content: string, questionType: QuestionType): s
     const cleanLine = line.replace(/[*#\-•]/g, '').trim();
     if (cleanLine.length > 3 && cleanLine.length < 100) {
       // Chercher des patterns de recommandation
-      if (cleanLine.match(/^(iPhone|Samsung|Google|Apple|Pixel|MacBook|iPad)/i) ||
-          cleanLine.match(/^[A-Z][a-zA-Z\s]+ (Pro|Max|Plus|Air|Mini)/i)) {
+      if (cleanLine.match(/^(iPhone|Samsung|Google|Apple|Pixel|MacBook|iPad|Dell|HP|Lenovo|Asus|Acer)/i) ||
+          cleanLine.match(/^[A-Z][a-zA-Z\s]+ (Pro|Max|Plus|Air|Mini|Ultra)/i)) {
+        console.log(`📝 Extracted title from text: "${cleanLine}"`);
         return cleanLine;
       }
     }
   }
   
-  return questionType === 'factual' ? 
+  const fallbackTitle = questionType === 'factual' ? 
     'Réponse factuelle' : 
     'Recommandation basée sur l\'analyse';
+  
+  console.log(`📝 Using fallback title: "${fallbackTitle}"`);
+  return fallbackTitle;
 };
 
 const extractProsConsFromContent = (content: string, questionType: QuestionType) => {
   const pros: string[] = [];
   const cons: string[] = [];
+  
+  console.log(`🔍 Extracting pros/cons from content (type: ${questionType})`);
   
   // Essayer d'extraire depuis le JSON
   try {
@@ -116,6 +126,7 @@ const extractProsConsFromContent = (content: string, questionType: QuestionType)
         p.replace(/"/g, '').trim()
       ).filter(p => p.length > 3);
       pros.push(...prosArray);
+      console.log(`✅ Extracted ${prosArray.length} pros from JSON`);
     }
     
     if (consMatch) {
@@ -124,9 +135,10 @@ const extractProsConsFromContent = (content: string, questionType: QuestionType)
         c.replace(/"/g, '').trim()
       ).filter(c => c.length > 3);
       cons.push(...consArray);
+      console.log(`✅ Extracted ${consArray.length} cons from JSON`);
     }
   } catch (e) {
-    // Si l'extraction JSON échoue, continuer avec l'extraction textuelle
+    console.log(`⚠️ JSON extraction failed, trying text analysis`);
   }
   
   // Si pas assez d'éléments extraits, analyser le texte libre
@@ -137,16 +149,16 @@ const extractProsConsFromContent = (content: string, questionType: QuestionType)
       const clean = sentence.trim();
       
       // Chercher des avantages
-      if (clean.match(/\b(excellent|meilleur|performant|rapide|efficace|puissant|innovant|récent|nouveau)/i) &&
-          !clean.match(/\b(mais|cependant|toutefois|problème|difficulté)/i)) {
-        if (clean.length < 120) {
+      if (clean.match(/\b(excellent|meilleur|performant|rapide|efficace|puissant|innovant|récent|nouveau|autonomie|léger|compact|prix|abordable|qualité)/i) &&
+          !clean.match(/\b(mais|cependant|toutefois|problème|difficulté|cher|coûteux)/i)) {
+        if (clean.length < 120 && pros.length < 3) {
           pros.push(clean.charAt(0).toUpperCase() + clean.slice(1));
         }
       }
       
       // Chercher des inconvénients
-      if (clean.match(/\b(cher|coûteux|limité|problème|défaut|manque|difficile|complexe)/i)) {
-        if (clean.length < 120) {
+      if (clean.match(/\b(cher|coûteux|limité|problème|défaut|manque|difficile|complexe|lourd|encombrant)/i)) {
+        if (clean.length < 120 && cons.length < 2) {
           cons.push(clean.charAt(0).toUpperCase() + clean.slice(1));
         }
       }
@@ -166,6 +178,7 @@ const extractProsConsFromContent = (content: string, questionType: QuestionType)
     cons.push('D\'autres options peuvent convenir selon vos besoins');
   }
   
+  console.log(`📊 Final pros/cons: ${pros.length} pros, ${cons.length} cons`);
   return { pros: pros.slice(0, 3), cons: cons.slice(0, 2) };
 };
 
@@ -192,13 +205,13 @@ Fournissez une réponse factuelle précise et actualisée. Cette question a une 
 
 Répondez au format JSON exact suivant :
 {
-  "recommendation": "Nom précis du produit/lieu/chose recommandé (ex: iPhone 16 Pro, Monténégro)",
-  "description": "Explication détaillée avec des faits récents et vérifiables",
+  "recommendation": "Nom précis du produit/lieu/chose recommandé (ex: iPhone 16 Pro, MacBook Air M3)",
+  "description": "Explication détaillée avec des faits récents et vérifiables (juillet 2025)",
   "breakdown": [
     {
       "option": "Nom précis de la réponse",
       "score": 100,
-      "pros": ["Avantage concret 1", "Avantage concret 2", "Caractéristique récente"],
+      "pros": ["Caractéristique récente 1", "Avantage concret 2", "Spécification technique 3"],
       "cons": [],
       "scores": {}
     }
@@ -206,37 +219,46 @@ Répondez au format JSON exact suivant :
 }`;
   } else {
     // Pour les questions comparatives : générer plusieurs options
-    prompt = `Dilemme: "${dilemma}"
+    prompt = `Dilemme de choix: "${dilemma}"
 
 Critères d'évaluation: ${criteria.map(c => c.name).join(', ')}
 
-Analysez ce dilemme et proposez 3-4 options différentes avec leurs scores. Utilisez des données récentes et actuelles.
+Analysez ce dilemme et proposez 3-4 options différentes avec leurs scores réalistes. Utilisez des données récentes de juillet 2025.
+
+IMPORTANT: Générez plusieurs options avec des scores différents pour permettre la comparaison.
 
 Répondez au format JSON exact suivant :
 {
   "recommendation": "Nom de l'option la mieux notée",
-  "description": "Description détaillée avec informations récentes",
+  "description": "Description détaillée avec informations récentes (juillet 2025)",
   "breakdown": [
     {
-      "option": "Option 1 (nom précis)",
-      "score": 90,
-      "pros": ["Avantage réel 1", "Avantage réel 2"],
-      "cons": ["Inconvénient réel 1"],
-      "scores": {"critère1": 9, "critère2": 8}
+      "option": "MacBook Air M3 (2024)",
+      "score": 88,
+      "pros": ["Processeur M3 performant", "Autonomie 18h", "Design ultra-fin"],
+      "cons": ["Prix élevé", "Ports limités"],
+      "scores": {"performance": 9, "prix": 7, "autonomie": 9, "mobilité": 10}
     },
     {
-      "option": "Option 2 (nom précis)",
-      "score": 75,
-      "pros": ["Avantage réel 1", "Avantage réel 2"],
-      "cons": ["Inconvénient réel 1"],
-      "scores": {"critère1": 7, "critère2": 8}
+      "option": "Dell XPS 13 Plus",
+      "score": 82,
+      "pros": ["Écran tactile 4K", "Design premium", "Performances Intel solides"],
+      "cons": ["Autonomie moyenne", "Clavier tactile controversé"],
+      "scores": {"performance": 8, "prix": 8, "autonomie": 7, "mobilité": 9}
     },
     {
-      "option": "Option 3 (nom précis)",
-      "score": 65,
-      "pros": ["Avantage réel 1"],
-      "cons": ["Inconvénient réel 1", "Inconvénient réel 2"],
-      "scores": {"critère1": 6, "critère2": 7}
+      "option": "Lenovo ThinkPad X1 Carbon",
+      "score": 79,
+      "pros": ["Clavier excellent", "Robustesse professionnelle", "Connectivité complète"],
+      "cons": ["Design moins moderne", "Prix professionnel élevé"],
+      "scores": {"performance": 8, "prix": 7, "autonomie": 8, "mobilité": 8}
+    },
+    {
+      "option": "ASUS ZenBook 14",
+      "score": 74,
+      "pros": ["Rapport qualité-prix excellent", "Écran OLED disponible", "Compact et léger"],
+      "cons": ["Performances en retrait", "Autonomie correcte sans plus"],
+      "scores": {"performance": 7, "prix": 9, "autonomie": 7, "mobilité": 8}
     }
   ]
 }`;
@@ -254,6 +276,7 @@ Répondez au format JSON exact suivant :
       const content = response.content.content || response.content.recommendation || '';
       
       console.log('📄 Processing Perplexity content for options...');
+      console.log('📄 Content preview:', content.substring(0, 200) + '...');
       
       let parsedResult: any = null;
       
@@ -265,38 +288,87 @@ Répondez au format JSON exact suivant :
           .replace(/^\s*json\s*/i, '')
           .trim();
         
+        // Chercher le JSON principal
         const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const jsonString = jsonMatch[0];
+          console.log('🔍 Attempting to parse JSON:', jsonString.substring(0, 200) + '...');
           parsedResult = JSON.parse(jsonString);
           console.log('✅ JSON extracted and parsed successfully');
+          console.log('📊 Parsed result breakdown length:', parsedResult.breakdown?.length || 0);
         }
       } catch (e) {
-        console.log('⚠️ Failed to parse JSON, trying text extraction...');
+        console.log('⚠️ Failed to parse JSON, trying text extraction...', e);
       }
       
       // 2. Si pas de JSON valide, extraire intelligemment du texte
-      if (!parsedResult) {
+      if (!parsedResult || !parsedResult.breakdown || parsedResult.breakdown.length === 0) {
         console.log('📝 Extracting information from text content...');
         
         const recommendation = extractTitleFromContent(content, questionType);
         const { pros, cons } = extractProsConsFromContent(content, questionType);
         
-        parsedResult = {
-          recommendation,
-          description: content.length > 500 ? 
-            content.substring(0, 500) + '...' : 
-            content,
-          breakdown: [
-            {
-              option: recommendation,
-              score: questionType === 'factual' ? 100 : 85,
-              pros,
-              cons,
-              scores: {}
+        // Pour les questions comparatives, essayer d'extraire plusieurs options du texte
+        if (questionType === 'comparative') {
+          console.log('🔍 Trying to extract multiple options from text...');
+          
+          // Chercher des noms de produits/marques dans le contenu
+          const productPatterns = [
+            /\b(MacBook [A-Za-z0-9 ]+)/gi,
+            /\b(iPhone [A-Za-z0-9 ]+)/gi,
+            /\b(Dell [A-Za-z0-9 ]+)/gi,
+            /\b(HP [A-Za-z0-9 ]+)/gi,
+            /\b(Lenovo [A-Za-z0-9 ]+)/gi,
+            /\b(Asus [A-Za-z0-9 ]+)/gi,
+            /\b(Acer [A-Za-z0-9 ]+)/gi,
+            /\b(Samsung [A-Za-z0-9 ]+)/gi
+          ];
+          
+          const foundProducts = new Set<string>();
+          productPatterns.forEach(pattern => {
+            const matches = content.match(pattern);
+            if (matches) {
+              matches.forEach(match => foundProducts.add(match.trim()));
             }
-          ]
-        };
+          });
+          
+          if (foundProducts.size >= 2) {
+            console.log(`✅ Found ${foundProducts.size} products in text:`, Array.from(foundProducts));
+            
+            const breakdown = Array.from(foundProducts).slice(0, 4).map((product, index) => ({
+              option: product,
+              score: 90 - (index * 8), // Scores décroissants
+              pros: [`Recommandé pour ${product}`, 'Performances adaptées', 'Disponible sur le marché'],
+              cons: index === 0 ? [] : ['Alternative moins optimale selon les critères'],
+              scores: {}
+            }));
+            
+            parsedResult = {
+              recommendation: Array.from(foundProducts)[0],
+              description: `Analyse comparative basée sur les critères définis. ${content.substring(0, 200)}...`,
+              breakdown
+            };
+          }
+        }
+        
+        // Fallback pour une seule option
+        if (!parsedResult) {
+          parsedResult = {
+            recommendation,
+            description: content.length > 500 ? 
+              content.substring(0, 500) + '...' : 
+              content,
+            breakdown: [
+              {
+                option: recommendation,
+                score: questionType === 'factual' ? 100 : 85,
+                pros,
+                cons,
+                scores: {}
+              }
+            ]
+          };
+        }
       }
 
       // 3. Validation et nettoyage final
@@ -321,6 +393,8 @@ Répondez au format JSON exact suivant :
             ) : []
           }));
         }
+        
+        console.log(`📊 Final result: ${parsedResult.breakdown?.length || 0} options for ${questionType} question`);
       }
 
       const result: IResult = {
