@@ -102,26 +102,47 @@ Répondez au format JSON exact suivant :
     if (response.success && response.content) {
       const content = response.content.content || response.content.recommendation || '';
       
-      // Chercher le JSON dans le contenu
-      const jsonMatch = content.match(/\{[\s\S]*?\}/);
+      // Chercher le JSON dans le contenu - parsing plus robuste
       let parsedResult: any = {};
       
-      if (jsonMatch) {
-        try {
-          parsedResult = JSON.parse(jsonMatch[0]);
-        } catch (parseError) {
-          console.error('❌ JSON parsing error for options:', parseError);
-          // Fallback: utiliser le contenu brut
-          parsedResult = {
-            recommendation: content.split('\n')[0] || 'Recommandation basée sur Perplexity',
-            description: content,
-            breakdown: []
-          };
+      // Essayer différents patterns de JSON
+      const jsonPatterns = [
+        /```json\s*(\{[\s\S]*?\})\s*```/,  // JSON dans des blocs de code
+        /\{[\s\S]*?\}/,                     // JSON simple
+        /(\{[\s\S]*?\})(?=\n\n|\n$|$)/     // JSON jusqu'à une ligne vide
+      ];
+      
+      let jsonFound = false;
+      
+      for (const pattern of jsonPatterns) {
+        const match = content.match(pattern);
+        if (match) {
+          try {
+            const jsonString = match[1] || match[0];
+            // Nettoyer le JSON avant parsing
+            const cleanedJson = jsonString
+              .replace(/,\s*}/g, '}')           // Supprimer les virgules trailing
+              .replace(/,\s*]/g, ']')           // Supprimer les virgules trailing dans arrays
+              .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Supprimer caractères de contrôle
+              .trim();
+            
+            parsedResult = JSON.parse(cleanedJson);
+            jsonFound = true;
+            console.log('✅ JSON parsed successfully with pattern:', pattern.source);
+            break;
+          } catch (parseError) {
+            console.log('❌ Failed to parse with pattern:', pattern.source, parseError);
+            continue;
+          }
         }
-      } else {
-        // Pas de JSON trouvé, utiliser le contenu brut
+      }
+      
+      if (!jsonFound) {
+        console.log('⚠️ No valid JSON found, using content as fallback');
+        // Fallback: extraire des informations du texte brut
+        const lines = content.split('\n').filter(line => line.trim());
         parsedResult = {
-          recommendation: content.split('\n')[0] || 'Recommandation basée sur Perplexity',
+          recommendation: lines[0] || 'Recommandation basée sur Perplexity',
           description: content,
           breakdown: []
         };
