@@ -1,4 +1,5 @@
-export type AIProvider = 'openai' | 'claude' | 'perplexity';
+
+export type AIProvider = 'perplexity';
 
 export interface AIProviderConfig {
   provider: AIProvider;
@@ -30,31 +31,15 @@ export interface AIResponse {
   };
 }
 
-// Configuration des fournisseurs par ordre de priorité - MODÈLES CORRIGÉS 2025
+// Configuration simplifiée : UNIQUEMENT Perplexity pour les données récentes
 export const AI_PROVIDERS_CONFIG: AIProviderConfig[] = [
   {
-    provider: 'claude',
-    model: 'claude-3-5-sonnet-20241022', // Modèle Claude vérifié disponible
-    priority: 1, // Priorité maximale pour Claude
-    maxRetries: 2,
-    costLevel: 'high',
-    capabilities: ['text', 'vision', 'complex-reasoning', 'criteria', 'options']
-  },
-  {
     provider: 'perplexity',
-    model: 'sonar-pro', // Vrai modèle Sonar Perplexity 2025
-    priority: 2, // Perplexity pour les données temps réel
-    maxRetries: 2,
-    costLevel: 'low',
-    capabilities: ['search', 'real-time']
-  },
-  {
-    provider: 'openai',
-    model: 'gpt-4.1-2025-04-14',
-    priority: 3, // OpenAI en dernier recours seulement
+    model: 'sonar-pro',
+    priority: 1,
     maxRetries: 3,
-    costLevel: 'medium',
-    capabilities: ['text', 'vision', 'json', 'criteria', 'options']
+    costLevel: 'low',
+    capabilities: ['text', 'search', 'real-time', 'criteria', 'options']
   }
 ];
 
@@ -78,66 +63,44 @@ export class AIProviderService {
   }
 
   getAvailableProviders(requestType: string): AIProviderConfig[] {
-    return AI_PROVIDERS_CONFIG
-      .filter(config => {
-        // Filtrer par capacités
-        if (requestType === 'search') {
-          return config.capabilities.includes('search') || config.capabilities.includes('real-time');
-        }
-        return config.capabilities.includes(requestType) || 
-               config.capabilities.includes('text');
-      })
-      .sort((a, b) => {
-        // Trier par priorité et taux de succès
-        const aSuccessRate = this.successRates.get(a.provider) || 0;
-        const bSuccessRate = this.successRates.get(b.provider) || 0;
-        
-        // Prioriser Claude et Perplexity pour avoir les meilleures données
-        if (Math.abs(aSuccessRate - bSuccessRate) > 20) {
-          return bSuccessRate - aSuccessRate; // Meilleur taux de succès en premier
-        }
-        
-        return a.priority - b.priority; // Sinon par priorité (Claude > Perplexity > OpenAI)
-      });
+    return AI_PROVIDERS_CONFIG.filter(config => {
+      return config.capabilities.includes(requestType) || 
+             config.capabilities.includes('text') ||
+             config.capabilities.includes('search');
+    });
   }
 
   async executeWithFallback(request: AIRequest): Promise<AIResponse> {
     const providers = this.getAvailableProviders(request.type);
-    console.log(`🔄 Executing ${request.type} request with ${providers.length} available providers`);
+    console.log(`🔄 Executing ${request.type} request with Perplexity only`);
 
-    let lastError: string = '';
-
-    for (const providerConfig of providers) {
-      // Vérifier si le fournisseur est temporairement indisponible
-      const lastFailTime = this.lastFailure.get(providerConfig.provider);
-      if (lastFailTime && Date.now() - lastFailTime < 30000) { // 30 secondes de cooldown
-        console.log(`⏸️ Skipping ${providerConfig.provider} - cooling down`);
-        continue;
-      }
-
-      console.log(`🚀 Trying provider: ${providerConfig.provider} (${providerConfig.model})`);
-      
-      try {
-        const response = await this.callProvider(providerConfig, request);
-        
-        if (response.success) {
-          this.updateSuccessRate(providerConfig.provider, true);
-          console.log(`✅ Success with ${providerConfig.provider}`);
-          return response;
-        } else {
-          throw new Error(response.error || 'Provider returned unsuccessful response');
-        }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error(`❌ ${providerConfig.provider} failed:`, errorMessage);
-        
-        this.updateSuccessRate(providerConfig.provider, false);
-        this.lastFailure.set(providerConfig.provider, Date.now());
-        lastError = errorMessage;
-      }
+    const providerConfig = providers[0]; // Seul Perplexity disponible
+    
+    if (!providerConfig) {
+      throw new Error('No AI provider available');
     }
 
-    throw new Error(`All AI providers failed. Last error: ${lastError}`);
+    console.log(`🚀 Using provider: ${providerConfig.provider} (${providerConfig.model})`);
+    
+    try {
+      const response = await this.callProvider(providerConfig, request);
+      
+      if (response.success) {
+        this.updateSuccessRate(providerConfig.provider, true);
+        console.log(`✅ Success with ${providerConfig.provider}`);
+        return response;
+      } else {
+        throw new Error(response.error || 'Provider returned unsuccessful response');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`❌ ${providerConfig.provider} failed:`, errorMessage);
+      
+      this.updateSuccessRate(providerConfig.provider, false);
+      this.lastFailure.set(providerConfig.provider, Date.now());
+      
+      throw new Error(`Perplexity failed: ${errorMessage}`);
+    }
   }
 
   private async callProvider(config: AIProviderConfig, request: AIRequest): Promise<AIResponse> {
@@ -146,18 +109,10 @@ export class AIProviderService {
     try {
       let result: any;
 
-      switch (config.provider) {
-        case 'openai':
-          result = await this.callOpenAI(config, request);
-          break;
-        case 'claude':
-          result = await this.callClaude(config, request);
-          break;
-        case 'perplexity':
-          result = await this.callPerplexity(config, request);
-          break;
-        default:
-          throw new Error(`Unknown provider: ${config.provider}`);
+      if (config.provider === 'perplexity') {
+        result = await this.callPerplexity(config, request);
+      } else {
+        throw new Error(`Unknown provider: ${config.provider}`);
       }
 
       return {
@@ -183,48 +138,6 @@ export class AIProviderService {
     }
   }
 
-  private async callOpenAI(config: AIProviderConfig, request: AIRequest): Promise<any> {
-    const { callOpenAiApi } = await import('./openai');
-    return await callOpenAiApi(request.prompt, request.files);
-  }
-
-  private async callClaude(config: AIProviderConfig, request: AIRequest): Promise<any> {
-    const { makeClaudeDecision } = await import('./claudeService');
-    
-    // Extraire les critères du contexte si nécessaire
-    let criteria = [];
-    try {
-      // Essayer d'extraire les critères du prompt
-      const criteriaMatch = request.prompt.match(/Critères d'évaluation:\s*([^\n]+)/);
-      if (criteriaMatch) {
-        criteria = criteriaMatch[1].split(',').map(name => ({ name: name.trim() }));
-      }
-    } catch (error) {
-      console.warn('Could not extract criteria from prompt:', error);
-    }
-    
-    // Adapter la requête pour Claude avec toutes les données nécessaires
-    const claudeRequest = {
-      dilemma: request.prompt.includes('Dilemme:') 
-        ? request.prompt.split('Dilemme:')[1].split('\n')[0].replace(/"/g, '').trim()
-        : request.prompt,
-      criteria,
-      model: config.model,
-      realTimeData: request.context ? {
-        content: request.context,
-        timestamp: new Date().toISOString(),
-        searchQuery: request.prompt,
-        provider: 'search'
-      } : null,
-      workspaceData: request.workspaceId ? {
-        documentsUsed: 0,
-        documentSources: []
-      } : null
-    };
-    
-    return await makeClaudeDecision(claudeRequest);
-  }
-
   private async callPerplexity(config: AIProviderConfig, request: AIRequest): Promise<any> {
     const { searchWithPerplexity } = await import('./perplexityService');
     const result = await searchWithPerplexity(request.prompt, request.context);
@@ -237,7 +150,9 @@ export class AIProviderService {
       content: result.content,
       sources: result.sources,
       timestamp: result.timestamp,
-      searchQuery: result.searchQuery
+      searchQuery: result.searchQuery,
+      recommendation: result.content, // Pour compatibilité avec l'interface existante
+      description: result.content
     };
   }
 
