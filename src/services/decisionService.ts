@@ -750,40 +750,58 @@ Format JSON EXACT (sans texte avant ou après):
       const cleanDescription = (text: string): string => {
         if (!text) return text;
         
-        // Supprimer le JSON brut au début du texte
-        let cleaned = text.replace(/^[^.]*?\{[^}]*\}[.,\s]*/, '');
+        let cleaned = text;
         
-        // Supprimer toute référence JSON restante
-        cleaned = cleaned.replace(/\{[^}]*\}/g, '');
+        // Supprimer tout le JSON brut qui commence par "Analyse comparative..."
+        cleaned = cleaned.replace(/^.*?Analyse comparative[^{]*\{.*?\}[^"]*"[^"]*"[^"]*"[^"]*".*?$/gm, '');
         
-        // Supprimer les phrases avec "Analyse comparative..." qui contiennent du JSON
-        cleaned = cleaned.replace(/Analyse comparative[^.]*\{[^}]*\}[^.]*\.?/g, '');
+        // Supprimer les patterns JSON complets
+        cleaned = cleaned.replace(/\{[^}]*"recommendation"[^}]*\}/g, '');
+        cleaned = cleaned.replace(/\{[^}]*"description"[^}]*\}/g, '');
         
-        // Nettoyer les patterns comme "juillet 2025. {" ou similaires
-        cleaned = cleaned.replace(/\b\d{4}\.\s*\{.*$/g, '');
+        // Supprimer tout JSON partiel ou cassé
+        cleaned = cleaned.replace(/\{[^}]*"[^"]*"[^}]*\}/g, '');
+        cleaned = cleaned.replace(/\{[^}]*:/g, '');
+        cleaned = cleaned.replace(/[^}]*\}/g, '');
         
-        // Nettoyer les doublons d'espaces et caractères bizarres
+        // Supprimer les fragments JSON comme '" "recommendation":' 
+        cleaned = cleaned.replace(/["']\s*["']\s*\w+["']\s*:/g, '');
+        cleaned = cleaned.replace(/["']\s*\w+["']\s*:/g, '');
+        
+        // Supprimer "Analyse comparative..." au début
+        cleaned = cleaned.replace(/^.*?Analyse comparative[^.]*\./gi, '');
+        
+        // Nettoyer les caractères orphelins
+        cleaned = cleaned.replace(/^[^a-zA-Z]*/, '');
+        cleaned = cleaned.replace(/[{}'":\[\],]/g, '');
+        
+        // Nettoyer les espaces multiples et trim
         cleaned = cleaned.replace(/\s+/g, ' ').trim();
         
-        // Supprimer les "..." en début de phrase
-        cleaned = cleaned.replace(/^\.{3,}\s*/, '');
-        
-        // Si le texte est trop court après nettoyage, essayer une extraction plus intelligente
-        if (cleaned.length < 50 && text.length > 100) {
-          // Chercher une phrase complète dans le texte original
+        // Si le texte est trop court, essayer d'extraire une phrase valide du texte original
+        if (cleaned.length < 50) {
+          // Chercher une phrase qui commence par une majuscule et se termine par un point
           const sentences = text.split(/[.!?]+/);
-          const validSentence = sentences.find(s => 
-            s.length > 30 && 
-            !s.includes('{') && 
-            !s.includes('}') &&
-            !s.match(/^\s*Analyse comparative/)
-          );
+          const validSentence = sentences.find(s => {
+            const trimmed = s.trim();
+            return trimmed.length > 30 && 
+                   trimmed.match(/^[A-Z]/) &&
+                   !trimmed.includes('{') && 
+                   !trimmed.includes('}') &&
+                   !trimmed.includes('"') &&
+                   !trimmed.match(/Analyse comparative/i) &&
+                   !trimmed.match(/recommendation/i);
+          });
+          
           if (validSentence) {
             cleaned = validSentence.trim() + '.';
+          } else {
+            // Dernier recours : utiliser une description générique
+            cleaned = 'Analyse des options disponibles avec recommandation basée sur les critères sélectionnés.';
           }
         }
         
-        return cleaned || text; // Retourner le texte original si le nettoyage a tout supprimé
+        return cleaned;
       };
 
       const result: IResult = {
