@@ -746,9 +746,49 @@ Format JSON EXACT (sans texte avant ou après):
         }
       }
 
+      // Fonction de nettoyage intelligent de la description
+      const cleanDescription = (text: string): string => {
+        if (!text) return text;
+        
+        // Supprimer le JSON brut au début du texte
+        let cleaned = text.replace(/^[^.]*?\{[^}]*\}[.,\s]*/, '');
+        
+        // Supprimer toute référence JSON restante
+        cleaned = cleaned.replace(/\{[^}]*\}/g, '');
+        
+        // Supprimer les phrases avec "Analyse comparative..." qui contiennent du JSON
+        cleaned = cleaned.replace(/Analyse comparative[^.]*\{[^}]*\}[^.]*\.?/g, '');
+        
+        // Nettoyer les patterns comme "juillet 2025. {" ou similaires
+        cleaned = cleaned.replace(/\b\d{4}\.\s*\{.*$/g, '');
+        
+        // Nettoyer les doublons d'espaces et caractères bizarres
+        cleaned = cleaned.replace(/\s+/g, ' ').trim();
+        
+        // Supprimer les "..." en début de phrase
+        cleaned = cleaned.replace(/^\.{3,}\s*/, '');
+        
+        // Si le texte est trop court après nettoyage, essayer une extraction plus intelligente
+        if (cleaned.length < 50 && text.length > 100) {
+          // Chercher une phrase complète dans le texte original
+          const sentences = text.split(/[.!?]+/);
+          const validSentence = sentences.find(s => 
+            s.length > 30 && 
+            !s.includes('{') && 
+            !s.includes('}') &&
+            !s.match(/^\s*Analyse comparative/)
+          );
+          if (validSentence) {
+            cleaned = validSentence.trim() + '.';
+          }
+        }
+        
+        return cleaned || text; // Retourner le texte original si le nettoyage a tout supprimé
+      };
+
       const result: IResult = {
         recommendation: parsedResult.recommendation || 'Recommandation',
-        description: parsedResult.description || content,
+        description: cleanDescription(parsedResult.description || content),
         breakdown: parsedResult.breakdown || [],
         resultType: questionType,
         realTimeData: {
