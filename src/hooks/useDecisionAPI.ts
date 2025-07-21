@@ -58,24 +58,32 @@ export const useDecisionAPI = ({
         const currentCriteria = criteria;
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
         
+        // Importer la détection de type de question
+        const { detectQuestionType } = await import('@/services/questionTypeDetector');
+        const questionType = detectQuestionType(dilemma);
+        
         console.log("🔄 [DEBUG] Starting options generation", {
             isRetry,
             retryCount,
+            questionType,
             criteriaCount: currentCriteria.length,
             filesCount: uploadedFiles.length,
             workspaceId: workspaceId || 'none',
             dilemma: dilemma.substring(0, 50) + "..."
         });
         
-        if (currentCriteria.length < 2) {
-          console.log("❌ [DEBUG] Not enough criteria");
-          toast.error("Veuillez définir au moins 2 critères.");
-          return;
-        }
-        if (currentCriteria.some(c => c.name.trim() === '')) {
-          console.log("❌ [DEBUG] Empty criteria names found");
-          toast.error("Veuillez nommer tous les critères avant de continuer.");
-          return;
+        // Pour les questions comparatives seulement, vérifier les critères
+        if (questionType === 'comparative') {
+            if (currentCriteria.length < 2) {
+              console.log("❌ [DEBUG] Not enough criteria for comparative question");
+              toast.error("Veuillez définir au moins 2 critères.");
+              return;
+            }
+            if (currentCriteria.some(c => c.name.trim() === '')) {
+              console.log("❌ [DEBUG] Empty criteria names found");
+              toast.error("Veuillez nommer tous les critères avant de continuer.");
+              return;
+            }
         }
 
         setIsUpdating(true);
@@ -186,8 +194,13 @@ export const useDecisionAPI = ({
     const handleStartAnalysis = async () => {
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
         
+        // Importer la détection de type de question
+        const { detectQuestionType } = await import('@/services/questionTypeDetector');
+        const questionType = detectQuestionType(dilemma);
+        
         console.log("🚀 [DEBUG] Starting full analysis", { 
           dilemma: dilemma.substring(0, 50) + "...",
+          questionType,
           filesCount: uploadedFiles.length,
           workspaceId: workspaceId || 'none'
         });
@@ -211,7 +224,34 @@ export const useDecisionAPI = ({
             console.log("✅ [DEBUG] Files uploaded for analysis");
           }
           
-          // Phase 1: Générer les critères et obtenir la catégorie suggérée
+          // Pour les questions factuelles, pas besoin de critères
+          if (questionType === 'factual') {
+            console.log("🎯 [DEBUG] Factual question detected - skipping criteria generation");
+            setProgressMessage("Recherche de la réponse factuelle...");
+            setAnalysisStep('loading-options');
+            
+            const optionsResult = await generateOptions(dilemma, [], uploadedFileInfos, workspaceId);
+            console.log("✅ [DEBUG] Factual answer generated successfully");
+            setResult(optionsResult);
+            
+            const newDecision: IDecision = {
+              id: crypto.randomUUID(),
+              timestamp: Date.now(),
+              dilemma,
+              emoji: '💡',
+              criteria: [],
+              result: optionsResult,
+              category: 'other'
+            };
+            addDecision(newDecision);
+            setCurrentDecisionId(newDecision.id);
+            
+            setAnalysisStep('done');
+            toast.success("Réponse factuelle trouvée !");
+            return;
+          }
+          
+          // Phase 1: Générer les critères et obtenir la catégorie suggérée (questions comparatives seulement)
           console.log("📡 [DEBUG] Phase 1: Generating criteria and category");
           setProgressMessage(workspaceId ? "Analyse du contexte avec documents workspace..." : "Analyse du contexte et génération des critères...");
           

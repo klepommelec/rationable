@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
+import { detectQuestionType } from '@/services/questionTypeDetector';
 import { EmojiPicker } from './EmojiPicker';
 import { CriteriaManager } from './CriteriaManager';
 import { OptionsLoadingSkeleton } from './OptionsLoadingSkeleton';
@@ -41,6 +42,11 @@ const DecisionMaker = () => {
     setUploadedFiles
   } = useDecisionMaker();
   const currentDecision = getCurrentDecision();
+  
+  // Déterminer si c'est une question factuelle pour masquer les critères
+  const questionType = dilemma ? detectQuestionType(dilemma) : 'comparative';
+  const isFactualQuestion = questionType === 'factual';
+  
   return <div className="w-full mx-auto px-4 sm:px-6 lg:px-[80px]">
       {/* Skip to main content link for screen readers */}
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50" aria-label="Aller au contenu principal">
@@ -57,9 +63,12 @@ const DecisionMaker = () => {
                 </h1>
               </div>
             </div>
-            <div className="w-full mb-6 px-0">
-              <CriteriaManager criteria={criteria} setCriteria={setCriteria} isInteractionDisabled={analysisStep === 'loading-options' || isLoading || isUpdating} onUpdateAnalysis={handleManualUpdate} hasChanges={hasChanges} currentDecisionId={currentDecision?.id} />
-            </div>
+            {/* Masquer les critères pour les questions factuelles */}
+            {!isFactualQuestion && (
+              <div className="w-full mb-6 px-0">
+                <CriteriaManager criteria={criteria} setCriteria={setCriteria} isInteractionDisabled={analysisStep === 'loading-options' || isLoading || isUpdating} onUpdateAnalysis={handleManualUpdate} hasChanges={hasChanges} currentDecisionId={currentDecision?.id} />
+              </div>
+            )}
           </>}
 
         {analysisStep === 'idle' && <React.Suspense fallback={<div className="flex items-center justify-center p-8" role="status" aria-label="Chargement en cours">

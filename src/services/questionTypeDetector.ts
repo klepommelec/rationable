@@ -17,7 +17,12 @@ export const detectQuestionType = (dilemma: string): QuestionType => {
     /\b(qu'est-ce que|c'est quoi|définition de|what is|define)\b/i,
     /\b(combien coûte|combien mesure|how much|how tall|how long)\b/i,
     /\b(quand sort|quand sortira|date de sortie|when will|release date)\b/i,
-    /\b(qui est le|qui est la|who is)\b/i,
+    /\b(qui est le|qui est la|qui a été|who is|who was)\b/i,
+    
+    // Questions spécifiques à réponse unique
+    /\b(qui a été.*choix|who was.*pick|who was.*selected)\b/i,
+    /\b(quel.*premier choix|what.*first pick|which.*first choice)\b/i,
+    /\b(1er choix|premier choix|first pick|first choice)\b/i,
     
     // Questions avec réponse unique évidente
     /\b(prix de|price of|cost of)\b/i
