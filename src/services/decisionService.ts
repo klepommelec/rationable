@@ -166,34 +166,30 @@ const cleanAndParseJSON = (content: string): any => {
 const extractMultipleProductsFromText = (content: string, questionType: QuestionType) => {
   console.log('🔍 Extracting multiple products from text...');
   
-  // Patterns de produits étendus pour différentes catégories
+  // D'abord, essayer d'extraire depuis le JSON si présent
+  const jsonProducts = extractProductsFromJSON(content);
+  if (jsonProducts.length >= 2) {
+    console.log('✅ Extracted products from JSON:', jsonProducts);
+    return jsonProducts;
+  }
+  
+  // Patterns de produits très spécifiques pour éviter les fragments
   const productPatterns = [
-    // Ordinateurs portables
-    /\b(MacBook [A-Za-z0-9 ]+(?:M[0-9]+)?[^.]*)/gi,
-    /\b(Dell [A-Za-z0-9 ]+(?:XPS|Inspiron|Latitude)[^.]*)/gi,
-    /\b(HP [A-Za-z0-9 ]+(?:Pavilion|Envy|Spectre)[^.]*)/gi,
-    /\b(Lenovo [A-Za-z0-9 ]+(?:ThinkPad|IdeaPad|Yoga)[^.]*)/gi,
-    /\b(Asus [A-Za-z0-9 ]+(?:ZenBook|VivoBook|ROG)[^.]*)/gi,
-    /\b(Acer [A-Za-z0-9 ]+(?:Swift|Aspire)[^.]*)/gi,
-    /\b(Microsoft Surface [A-Za-z0-9 ]+)/gi,
+    // Ordinateurs portables - patterns plus précis
+    /\b((?:Apple\s+)?MacBook\s+(?:Air|Pro)\s*(?:M[0-9]+)?(?:\s+[0-9]+(?:\.\d+)?")?)\b/gi,
+    /\b(Dell\s+XPS\s+[0-9]+(?:\s+Plus)?)\b/gi,
+    /\b(HP\s+(?:Pavilion|Envy|Spectre)\s+[A-Za-z0-9-]+)\b/gi,
+    /\b(Lenovo\s+(?:ThinkPad|IdeaPad|Yoga)\s+[A-Za-z0-9-]+)\b/gi,
+    /\b(Asus\s+(?:ZenBook|VivoBook|ROG)\s+[A-Za-z0-9-]+)\b/gi,
+    /\b(Microsoft\s+Surface\s+(?:Laptop|Pro)\s*[0-9]*)\b/gi,
     
-    // Smartphones
-    /\b(iPhone [0-9]+ [A-Za-z ]*)/gi,
-    /\b(Samsung Galaxy [A-Za-z0-9 ]+)/gi,
-    /\b(Google Pixel [0-9]+ [A-Za-z]*)/gi,
-    /\b(OnePlus [0-9]+ [A-Za-z]*)/gi,
+    // Smartphones - plus précis
+    /\b(iPhone\s+[0-9]+\s*(?:Pro|Plus|Max|Mini)?)\b/gi,
+    /\b(Samsung\s+Galaxy\s+[A-Za-z0-9]+(?:\s+Ultra)?)\b/gi,
+    /\b(Google\s+Pixel\s+[0-9]+(?:\s+Pro)?)\b/gi,
     
-    // Voitures
-    /\b(Tesla Model [A-Za-z0-9]+)/gi,
-    /\b(BMW [A-Za-z0-9 ]+)/gi,
-    /\b(Mercedes [A-Za-z0-9 ]+)/gi,
-    /\b(Audi [A-Za-z0-9 ]+)/gi,
-    /\b(Volkswagen [A-Za-z0-9 ]+)/gi,
-    /\b(Renault [A-Za-z0-9 ]+)/gi,
-    /\b(Peugeot [A-Za-z0-9 ]+)/gi,
-    
-    // Destinations
-    /\b([A-Z][a-zA-ZÀ-ÿ\s\-]{3,30}(?:, [A-Z][a-zA-ZÀ-ÿ]+)?)\b/g
+    // Destinations - plus strict
+    /\b([A-Z][a-zA-ZÀ-ÿ]{2,}(?:\s+[A-Z][a-zA-ZÀ-ÿ]{2,})?(?:,\s+[A-Z][a-zA-ZÀ-ÿ]+)?)\b/g
   ];
 
   const foundProducts = new Set<string>();
@@ -202,16 +198,54 @@ const extractMultipleProductsFromText = (content: string, questionType: Question
     const matches = content.match(pattern);
     if (matches) {
       matches.forEach(match => {
-        const cleaned = match.trim().replace(/[^\w\s\-À-ÿ]/g, '');
-        if (cleaned.length > 5 && cleaned.length < 60) {
+        const cleaned = cleanProductName(match.trim());
+        if (cleaned && cleaned.length >= 5 && cleaned.length <= 50) {
           foundProducts.add(cleaned);
         }
       });
     }
   });
 
-  console.log(`✅ Found ${foundProducts.size} products:`, Array.from(foundProducts));
-  return Array.from(foundProducts);
+  const products = Array.from(foundProducts).slice(0, 4);
+  console.log(`✅ Found ${products.length} products:`, products);
+  return products;
+};
+
+// Nouvelle fonction pour extraire les produits depuis le JSON
+const extractProductsFromJSON = (content: string): string[] => {
+  const products: string[] = [];
+  
+  try {
+    // Chercher les patterns "option": "nom du produit"
+    const optionMatches = content.match(/"option"\s*:\s*"([^"]+)"/g);
+    if (optionMatches) {
+      optionMatches.forEach(match => {
+        const optionMatch = match.match(/"option"\s*:\s*"([^"]+)"/);
+        if (optionMatch && optionMatch[1]) {
+          const cleaned = cleanProductName(optionMatch[1]);
+          if (cleaned && cleaned.length >= 5) {
+            products.push(cleaned);
+          }
+        }
+      });
+    }
+  } catch (e) {
+    console.log('⚠️ Error extracting from JSON:', e);
+  }
+  
+  return products;
+};
+
+// Fonction pour nettoyer et normaliser les noms de produits
+const cleanProductName = (name: string): string => {
+  return name
+    .trim()
+    .replace(/^(Le|La|L'|Les|The)\s+/i, '') // Supprimer articles
+    .replace(/\s*-\s*[A-Za-z\s]*$/, '') // Supprimer suffixes après tiret
+    .replace(/\s*\([^)]*\)$/, '') // Supprimer parenthèses à la fin
+    .replace(/[^\w\s\-À-ÿ]/g, '') // Garder seulement lettres, chiffres, espaces, tirets
+    .replace(/\s+/g, ' ') // Normaliser espaces
+    .trim();
 };
 
 // Fonction améliorée pour générer des pros/cons réalistes
@@ -383,40 +417,42 @@ const extractTitleFromContent = (content: string, questionType: QuestionType): s
   
   // Essayer d'extraire le titre depuis le JSON
   const titleMatch = content.match(/"recommendation":\s*"([^"]+)"/);
-  if (titleMatch) {
-    let title = titleMatch[1];
-    
-    if (questionType === 'factual') {
-      const cleanTitle = title
-        .replace(/^(Le |La |L'|Les |The )/i, '')
-        .replace(/ : .*$/, '')
-        .replace(/ - .*$/, '')
-        .replace(/ \(.*\)$/, '')
-        .trim();
-      
-      console.log(`📝 Cleaned factual title: "${cleanTitle}"`);
-      return cleanTitle || title;
-    }
-    
-    console.log(`📝 Using title as-is: "${title}"`);
+  if (titleMatch && titleMatch[1]) {
+    const title = cleanProductName(titleMatch[1]);
+    console.log(`📝 Extracted and cleaned title from JSON: "${title}"`);
     return title;
   }
   
-  const lines = content.split('\n').filter(line => line.trim());
-  for (const line of lines) {
-    const cleanLine = line.replace(/[*#\-•]/g, '').trim();
-    if (cleanLine.length > 3 && cleanLine.length < 100) {
-      if (cleanLine.match(/^(iPhone|Samsung|Google|Apple|Pixel|MacBook|iPad|Dell|HP|Lenovo|Asus|Acer)/i) ||
-          cleanLine.match(/^[A-Z][a-zA-Z\s]+ (Pro|Max|Plus|Air|Mini|Ultra)/i)) {
-        console.log(`📝 Extracted title from text: "${cleanLine}"`);
-        return cleanLine;
-      }
+  // Essayer d'extraire la première option valide
+  const firstOptionMatch = content.match(/"option":\s*"([^"]+)"/);
+  if (firstOptionMatch && firstOptionMatch[1]) {
+    const title = cleanProductName(firstOptionMatch[1]);
+    console.log(`📝 Extracted title from first option: "${title}"`);
+    return title;
+  }
+  
+  // Chercher des noms de produits dans le texte libre
+  const productPatterns = [
+    /\b((?:Apple\s+)?MacBook\s+(?:Air|Pro)\s*(?:M[0-9]+)?(?:\s+[0-9]+(?:\.\d+)?")?)\b/i,
+    /\b(iPhone\s+[0-9]+\s*(?:Pro|Plus|Max|Mini)?)\b/i,
+    /\b(Dell\s+XPS\s+[0-9]+(?:\s+Plus)?)\b/i,
+    /\b(Samsung\s+Galaxy\s+[A-Za-z0-9]+)\b/i,
+    /\b(Google\s+Pixel\s+[0-9]+(?:\s+Pro)?)\b/i,
+    /\b(Lenovo\s+(?:ThinkPad|IdeaPad|Yoga)\s+[A-Za-z0-9-]+)\b/i
+  ];
+  
+  for (const pattern of productPatterns) {
+    const match = content.match(pattern);
+    if (match && match[1]) {
+      const title = cleanProductName(match[1]);
+      console.log(`📝 Extracted title from pattern: "${title}"`);
+      return title;
     }
   }
   
   const fallbackTitle = questionType === 'factual' ? 
     'Réponse factuelle' : 
-    'Recommandation basée sur l\'analyse';
+    'Recommandation principale';
   
   console.log(`📝 Using fallback title: "${fallbackTitle}"`);
   return fallbackTitle;
