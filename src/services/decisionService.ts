@@ -746,68 +746,107 @@ Format JSON EXACT (sans texte avant ou après):
         }
       }
 
-      // Fonction de nettoyage intelligent de la description
+      // Fonction de nettoyage intelligent pour descriptions et titres
       const cleanDescription = (text: string): string => {
         if (!text) return text;
         
         let cleaned = text;
         
-        // Supprimer tout le JSON brut qui commence par "Analyse comparative..."
-        cleaned = cleaned.replace(/^.*?Analyse comparative[^{]*\{.*?\}[^"]*"[^"]*"[^"]*"[^"]*".*?$/gm, '');
+        // Supprimer le préfixe "json" malformé au début
+        cleaned = cleaned.replace(/^json\s+/i, '');
         
-        // Supprimer les patterns JSON complets
-        cleaned = cleaned.replace(/\{[^}]*"recommendation"[^}]*\}/g, '');
-        cleaned = cleaned.replace(/\{[^}]*"description"[^}]*\}/g, '');
+        // Supprimer tout JSON brut complet (format ```json{...}```)
+        cleaned = cleaned.replace(/```json\s*\{[\s\S]*?\}\s*```/g, '');
         
-        // Supprimer tout JSON partiel ou cassé
-        cleaned = cleaned.replace(/\{[^}]*"[^"]*"[^}]*\}/g, '');
-        cleaned = cleaned.replace(/\{[^}]*:/g, '');
-        cleaned = cleaned.replace(/[^}]*\}/g, '');
+        // Supprimer les blocs JSON sans markdown
+        cleaned = cleaned.replace(/\{[\s\S]*?"recommendation"[\s\S]*?\}/g, '');
+        cleaned = cleaned.replace(/\{[\s\S]*?"description"[\s\S]*?\}/g, '');
+        cleaned = cleaned.replace(/\{[\s\S]*?"breakdown"[\s\S]*?\}/g, '');
         
-        // Supprimer les fragments JSON comme '" "recommendation":' 
-        cleaned = cleaned.replace(/["']\s*["']\s*\w+["']\s*:/g, '');
-        cleaned = cleaned.replace(/["']\s*\w+["']\s*:/g, '');
+        // Supprimer les fragments JSON partiels comme '{ "recommendation":'
+        cleaned = cleaned.replace(/\{\s*["']?\w+["']?\s*:/g, '');
+        cleaned = cleaned.replace(/["']\s*:\s*["'][^"']*["']/g, '');
         
-        // Supprimer "Analyse comparative..." au début
+        // Supprimer tous caractères JSON restants
+        cleaned = cleaned.replace(/[{}"\[\]:,]/g, '');
+        
+        // Nettoyer les phrases techniques inutiles
         cleaned = cleaned.replace(/^.*?Analyse comparative[^.]*\./gi, '');
+        cleaned = cleaned.replace(/Format de r[ée]ponse[^.]*\./gi, '');
+        cleaned = cleaned.replace(/G[ée]n[ée]rez[^.]*\./gi, '');
         
-        // Nettoyer les caractères orphelins
-        cleaned = cleaned.replace(/^[^a-zA-Z]*/, '');
-        cleaned = cleaned.replace(/[{}'":\[\],]/g, '');
-        
-        // Nettoyer les espaces multiples et trim
+        // Nettoyer les caractères orphelins et espaces
+        cleaned = cleaned.replace(/^\W+/, ''); // Caractères non-word au début
         cleaned = cleaned.replace(/\s+/g, ' ').trim();
         
-        // Si le texte est trop court, essayer d'extraire une phrase valide du texte original
-        if (cleaned.length < 50) {
-          // Chercher une phrase qui commence par une majuscule et se termine par un point
+        // Extraire la première phrase valide si le nettoyage a échoué
+        if (cleaned.length < 30 || !cleaned.match(/^[A-ZÀ-Ý]/)) {
           const sentences = text.split(/[.!?]+/);
-          const validSentence = sentences.find(s => {
-            const trimmed = s.trim();
-            return trimmed.length > 30 && 
-                   trimmed.match(/^[A-Z]/) &&
-                   !trimmed.includes('{') && 
-                   !trimmed.includes('}') &&
-                   !trimmed.includes('"') &&
-                   !trimmed.match(/Analyse comparative/i) &&
-                   !trimmed.match(/recommendation/i);
-          });
-          
-          if (validSentence) {
-            cleaned = validSentence.trim() + '.';
-          } else {
-            // Dernier recours : utiliser une description générique
-            cleaned = 'Analyse des options disponibles avec recommandation basée sur les critères sélectionnés.';
+          for (const sentence of sentences) {
+            const trimmed = sentence.trim();
+            if (trimmed.length > 30 && 
+                trimmed.match(/^[A-ZÀ-Ý]/) &&
+                !trimmed.match(/^(json|```|\{|Format|Analyse|Générez)/i) &&
+                !trimmed.includes('"') &&
+                !trimmed.includes('{')) {
+              cleaned = trimmed + '.';
+              break;
+            }
           }
+        }
+        
+        // Fallback si rien n'a marché
+        if (cleaned.length < 10 || !cleaned.match(/^[A-ZÀ-Ý]/)) {
+          cleaned = 'Analyse comparative des options disponibles avec recommandation personnalisée.';
         }
         
         return cleaned;
       };
 
+      // Fonction pour nettoyer les noms d'options
+      const cleanOptionName = (optionName: string, content: string): string => {
+        if (!optionName) return 'Option';
+        
+        // Si c'est un nom générique, essayer d'extraire du contenu
+        if (optionName.match(/^Option\s+\d+/i)) {
+          // Chercher des noms spécifiques dans le contenu
+          const specificNames = content.match(/([A-ZÀ-Ý][a-zà-ý]+\s+[A-ZÀ-Ý][a-zà-ý]+(?:\s+[A-ZÀ-Ý][a-zà-ý]+)?)/g);
+          if (specificNames && specificNames.length > 0) {
+            return specificNames[0];
+          }
+          
+          // Chercher des marques ou modèles
+          const brands = content.match(/(Renault|Toyota|Citroën|Peugeot|BMW|Mercedes|Audi|Volkswagen|Ford|Opel|Seat|Skoda|Hyundai|Kia|Nissan|Honda|Mazda|Mitsubishi)[^.]*?(?=[.,])/gi);
+          if (brands && brands.length > 0) {
+            return brands[0].trim();
+          }
+          
+          // Chercher des destinations pour les voyages
+          const destinations = content.match(/(Açores|Portugal|Islande|Norvège|Suède|Danemark|Finlande|Estonie|Lettonie|Lituanie|Pologne|République tchèque|Slovaquie|Hongrie|Slovénie|Croatie|Bosnie|Serbie|Monténégro|Macédoine|Albanie|Bulgarie|Roumanie|Moldavie|Ukraine|Biélorussie|Russie)[^.]*?(?=[.,])/gi);
+          if (destinations && destinations.length > 0) {
+            return destinations[0].trim();
+          }
+        }
+        
+        // Nettoyer le nom existant
+        let cleaned = optionName.replace(/^Option\s+\d+\s*[-:]\s*/i, '');
+        cleaned = cleaned.replace(/[{}"\[\]]/g, '');
+        cleaned = cleaned.trim();
+        
+        return cleaned || 'Option';
+      };
+
+      // Nettoyer la recommandation et les titres d'options
+      const cleanedRecommendation = cleanOptionName(parsedResult.recommendation || 'Recommandation', content);
+      const cleanedBreakdown = (parsedResult.breakdown || []).map((item: any, index: number) => ({
+        ...item,
+        option: cleanOptionName(item.option, content)
+      }));
+
       const result: IResult = {
-        recommendation: parsedResult.recommendation || 'Recommandation',
+        recommendation: cleanedRecommendation,
         description: cleanDescription(parsedResult.description || content),
-        breakdown: parsedResult.breakdown || [],
+        breakdown: cleanedBreakdown,
         resultType: questionType,
         realTimeData: {
           hasRealTimeData: true,
