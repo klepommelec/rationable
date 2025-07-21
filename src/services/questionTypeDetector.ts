@@ -1,5 +1,5 @@
 
-export type QuestionType = 'factual' | 'comparative';
+export type QuestionType = 'factual' | 'comparative' | 'simple-choice';
 
 export const detectQuestionType = (dilemma: string): QuestionType => {
   const lowerDilemma = dilemma.toLowerCase();
@@ -28,21 +28,34 @@ export const detectQuestionType = (dilemma: string): QuestionType => {
     /\b(prix de|price of|cost of)\b/i
   ];
   
-  // Patterns pour questions comparatives/de choix
-  const comparativePatterns = [
-    // Questions de choix/achat sans spécifier "dernier" ou "nouveau"
-    /\b(quel .* (acheter|choisir|prendre|conseiller))\b/i,
-    /\b(quelle .* (acheter|choisir|prendre|conseiller))\b/i,
-    /\b(what .* (buy|choose|get|recommend))\b/i,
+  // Patterns pour questions de choix simple (une recommandation forte)
+  const simpleChoicePatterns = [
+    // Questions "quel est le meilleur" sans comparaison explicite
+    /\b(quel est le meilleur|quelle est la meilleure|what is the best|which is the best)\b/i,
+    /\b(quel.*recommand|quelle.*recommand|what.*recommend|which.*recommend)\b/i,
+    /\b(que me conseillez|que me conseilles|what do you recommend)\b/i,
+    /\b(le top|le meilleur choix|best choice|top choice)\b/i,
     
-    // Mots-clés comparatifs explicites
+    // Questions d'achat/choix sans comparaison explicite
+    /\b(quel .* (acheter|choisir|prendre) pour|quelle .* (acheter|choisir|prendre) pour)\b/i,
+    /\b(what .* (buy|choose|get) for)\b/i,
+    
+    // Questions avec contexte spécifique mais pas de comparaison
+    /\b(pour .* quel|pour .* quelle|for .* what|for .* which)\b/i
+  ];
+  
+  // Patterns pour questions comparatives (vraie comparaison)
+  const comparativePatterns = [
+    // Questions de choix/comparaison explicite
     /\b(choisir entre|ou|vs|versus|comparer|compare)\b/i,
-    /\b(différence entre|alternative|option|choix|choice)\b/i,
-    /\b(lequel|laquelle|que choisir|which one|better)\b/i,
-    /\b(recommandation|conseil|recommend|suggest)\b/i,
+    /\b(différence entre|alternative|lequel|laquelle|which one|better)\b/i,
     /\b(plutôt|rather|instead)\b/i,
     
-    // Questions ouvertes de conseil
+    // Listes d'options (virgules, "ou")
+    /\b(ou|or)\b/,
+    /,.*,/,
+    
+    // Questions ouvertes de conseil avec options multiples implicites
     /\b(où (partir|aller|voyager)|where to (go|travel|visit))\b/i,
     /\b(que faire|what to do|how to)\b/i
   ];
@@ -54,11 +67,18 @@ export const detectQuestionType = (dilemma: string): QuestionType => {
     return 'factual';
   }
   
-  // Vérifier les patterns comparatifs
+  // Vérifier les patterns comparatifs explicites
   const isComparative = comparativePatterns.some(pattern => pattern.test(dilemma));
   if (isComparative) {
     console.log(`✅ Detected as COMPARATIVE: comparative pattern matched`);
     return 'comparative';
+  }
+  
+  // Vérifier les patterns de choix simple
+  const isSimpleChoice = simpleChoicePatterns.some(pattern => pattern.test(dilemma));
+  if (isSimpleChoice) {
+    console.log(`✅ Detected as SIMPLE-CHOICE: simple choice pattern matched`);
+    return 'simple-choice';
   }
   
   // Logique spéciale pour les questions d'achat/choix
@@ -69,28 +89,17 @@ export const detectQuestionType = (dilemma: string): QuestionType => {
   const hasPurchaseIntent = [...purchaseWords, ...choiceWords, ...recommendWords]
     .some(word => lowerDilemma.includes(word));
   
-  // Si c'est une question d'achat/choix ET qu'il n'y a pas de spécificité factuelle
   if (hasPurchaseIntent) {
-    // Vérifier s'il n'y a pas de spécificité factuelle comme "dernier", "nouveau"
+    // Si pas de spécificité factuelle et pas de comparaison explicite -> simple choice
     const hasFactualSpecificity = /\b(dernier|dernière|nouveau|nouvelle|récent|récente|latest|newest|new)\b/i.test(dilemma);
     
     if (!hasFactualSpecificity) {
-      console.log(`✅ Detected as COMPARATIVE: purchase/choice intent without factual specificity`);
-      return 'comparative';
+      console.log(`✅ Detected as SIMPLE-CHOICE: purchase intent without comparison`);
+      return 'simple-choice';
     }
   }
   
-  // Détecter les listes d'options (virgules, "ou")
-  const hasOrPattern = /\b(ou|or)\b/.test(lowerDilemma);
-  const hasVsPattern = /\b(vs|versus)\b/.test(lowerDilemma);
-  const hasListPattern = /,.*,/.test(dilemma);
-  
-  if (hasOrPattern || hasVsPattern || hasListPattern) {
-    console.log(`✅ Detected as COMPARATIVE: explicit choice patterns`);
-    return 'comparative';
-  }
-  
-  // Par défaut pour les questions ouvertes sans spécificité -> comparatif
-  console.log(`🎯 Default to COMPARATIVE for open-ended question`);
-  return 'comparative';
+  // Par défaut pour les questions ouvertes -> simple choice (éviter les comparaisons artificielles)
+  console.log(`🎯 Default to SIMPLE-CHOICE for open-ended question`);
+  return 'simple-choice';
 };

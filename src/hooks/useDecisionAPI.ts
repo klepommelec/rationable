@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import { ICriterion, IResult, IDecision } from '@/types/decision';
 import { generateCriteriaOnly, generateOptions } from '@/services/decisionService';
@@ -6,6 +5,7 @@ import { uploadFilesToStorage, deleteFileFromStorage, UploadedFileInfo } from '@
 import { UploadedFile } from '@/components/FileUpload';
 import { AnalysisStep } from './useDecisionState';
 import { useWorkspaceContext } from './useWorkspaceContext';
+import { generateContextualEmoji } from '@/services/contextualEmojiService';
 
 interface UseDecisionAPIProps {
     dilemma: string;
@@ -105,7 +105,13 @@ export const useDecisionAPI = ({
             console.log("✅ [DEBUG] Files uploaded successfully");
           }
           
-          setProgressMessage(workspaceId ? "Analyse avec documents workspace..." : "Analyse des options en cours...");
+          const progressMessage = questionType === 'factual' 
+            ? "Recherche de la réponse factuelle..."
+            : questionType === 'simple-choice'
+            ? "Recherche de la meilleure recommandation..."
+            : "Analyse des options en cours...";
+          
+          setProgressMessage(workspaceId ? `${progressMessage} avec documents workspace` : progressMessage);
           console.log("📡 [DEBUG] Calling generateOptions API...");
           const startTime = Date.now();
           
@@ -116,6 +122,7 @@ export const useDecisionAPI = ({
             duration: `${endTime - startTime}ms`,
             filesAnalyzed: uploadedFileInfos.length,
             workspaceDocsUsed: apiResult.workspaceData?.documentsUsed || 0,
+            questionType,
             resultStructure: {
               hasRecommendation: !!apiResult.recommendation,
               hasDescription: !!apiResult.description,
@@ -124,6 +131,9 @@ export const useDecisionAPI = ({
               shoppingLinksCount: apiResult.shoppingLinks?.length || 0
             }
           });
+          
+          // Marquer le type de résultat
+          apiResult.resultType = questionType;
           
           setResult(apiResult);
           setAnalysisStep('done');
@@ -146,9 +156,16 @@ export const useDecisionAPI = ({
             }
           }
           
-          const successMessage = apiResult.workspaceData?.documentsUsed 
-            ? `Analyse générée avec ${apiResult.workspaceData.documentsUsed} document(s) de votre workspace !`
-            : isRetry ? "Options générées avec succès !" : "Analyse mise à jour !";
+          let successMessage;
+          if (apiResult.workspaceData?.documentsUsed) {
+            successMessage = `Analyse générée avec ${apiResult.workspaceData.documentsUsed} document(s) de votre workspace !`;
+          } else {
+            successMessage = questionType === 'factual' 
+              ? "Réponse factuelle trouvée !"
+              : questionType === 'simple-choice'
+              ? "Recommandation générée !"
+              : isRetry ? "Options générées avec succès !" : "Analyse mise à jour !";
+          }
           
           toast.success(successMessage);
           
@@ -158,7 +175,8 @@ export const useDecisionAPI = ({
             stack: error instanceof Error ? error.stack : undefined,
             retryCount,
             filesCount: uploadedFiles.length,
-            workspaceId
+            workspaceId,
+            questionType
           });
           
           // Nettoyer les fichiers uploadés en cas d'erreur
@@ -205,10 +223,12 @@ export const useDecisionAPI = ({
           workspaceId: workspaceId || 'none'
         });
         
-        setProgressMessage(workspaceId ? "Analyse avec documents workspace..." : "Génération des critères...");
+        // Générer un emoji contextuel
+        const contextualEmoji = generateContextualEmoji(dilemma);
+        
         setResult(null);
         setCriteria([]);
-        setEmoji('🤔');
+        setEmoji(contextualEmoji);
         setCurrentDecisionId(null);
         setHasChanges(false);
         resetRetry();
@@ -224,21 +244,27 @@ export const useDecisionAPI = ({
             console.log("✅ [DEBUG] Files uploaded for analysis");
           }
           
-          // Pour les questions factuelles, pas besoin de critères
-          if (questionType === 'factual') {
-            console.log("🎯 [DEBUG] Factual question detected - skipping criteria generation");
-            setProgressMessage("Recherche de la réponse factuelle...");
+          // Pour les questions factuelles et simple-choice, pas besoin de critères complexes
+          if (questionType === 'factual' || questionType === 'simple-choice') {
+            const progressMsg = questionType === 'factual' 
+              ? "Recherche de la réponse factuelle..."
+              : "Recherche de la meilleure recommandation...";
+              
+            console.log(`🎯 [DEBUG] ${questionType} question detected - generating direct answer`);
+            setProgressMessage(workspaceId ? `${progressMsg} avec documents workspace` : progressMsg);
             setAnalysisStep('loading-options');
             
             const optionsResult = await generateOptions(dilemma, [], uploadedFileInfos, workspaceId);
-            console.log("✅ [DEBUG] Factual answer generated successfully");
+            optionsResult.resultType = questionType;
+            
+            console.log(`✅ [DEBUG] ${questionType} answer generated successfully`);
             setResult(optionsResult);
             
             const newDecision: IDecision = {
               id: crypto.randomUUID(),
               timestamp: Date.now(),
               dilemma,
-              emoji: '💡',
+              emoji: contextualEmoji,
               criteria: [],
               result: optionsResult,
               category: 'other'
@@ -247,12 +273,17 @@ export const useDecisionAPI = ({
             setCurrentDecisionId(newDecision.id);
             
             setAnalysisStep('done');
-            toast.success("Réponse factuelle trouvée !");
+            
+            const successMessage = optionsResult.workspaceData?.documentsUsed 
+              ? `${questionType === 'factual' ? 'Réponse' : 'Recommandation'} générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
+              : questionType === 'factual' ? "Réponse factuelle trouvée !" : "Recommandation générée !";
+            
+            toast.success(successMessage);
             return;
           }
           
-          // Phase 1: Générer les critères et obtenir la catégorie suggérée (questions comparatives seulement)
-          console.log("📡 [DEBUG] Phase 1: Generating criteria and category");
+          // Phase 1: Générer les critères pour les questions comparatives
+          console.log("📡 [DEBUG] Phase 1: Generating criteria for comparative question");
           setProgressMessage(workspaceId ? "Analyse du contexte avec documents workspace..." : "Analyse du contexte et génération des critères...");
           
           const response = await generateCriteriaOnly(dilemma, uploadedFileInfos, workspaceId);
@@ -271,18 +302,21 @@ export const useDecisionAPI = ({
           }));
           
           setCriteria(newCriteria);
-          setEmoji(response.emoji || '🤔');
+          // Utiliser l'emoji contextuel plutôt que celui de l'API
+          setEmoji(contextualEmoji);
           setSelectedCategory(response.suggestedCategory);
           setAnalysisStep('criteria-loaded');
           
           // Phase 2: Générer automatiquement les options
           setTimeout(async () => {
-            console.log("📡 [DEBUG] Phase 2: Auto-generating options");
+            console.log("📡 [DEBUG] Phase 2: Auto-generating options for comparative question");
             setAnalysisStep('loading-options');
-            setProgressMessage(workspaceId ? "Génération des options avec documents workspace..." : "Génération des options...");
+            setProgressMessage(workspaceId ? "Génération des options avec documents workspace..." : "Génération des options comparatives...");
             
             try {
               const optionsResult = await generateOptions(dilemma, newCriteria, uploadedFileInfos, workspaceId);
+              optionsResult.resultType = questionType;
+              
               console.log("✅ [DEBUG] Auto-options generated successfully");
               setResult(optionsResult);
               
@@ -293,7 +327,7 @@ export const useDecisionAPI = ({
                 id: crypto.randomUUID(),
                 timestamp: Date.now(),
                 dilemma,
-                emoji: response.emoji || '🤔',
+                emoji: contextualEmoji,
                 criteria: newCriteria,
                 result: optionsResult,
                 category: response.suggestedCategory
@@ -304,8 +338,8 @@ export const useDecisionAPI = ({
               setAnalysisStep('done');
               
               const successMessage = optionsResult.workspaceData?.documentsUsed 
-                ? `Analyse complète générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
-                : "Analyse complète générée !";
+                ? `Analyse comparative générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
+                : "Analyse comparative générée !";
               
               toast.success(successMessage);
             } catch (error) {

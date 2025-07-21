@@ -1,4 +1,3 @@
-
 export interface ICriterion {
   id: string;
   name: string;
@@ -33,34 +32,27 @@ export interface ISocialContent {
 export interface IResult {
   recommendation: string;
   description: string;
-  imageQuery?: string;
-  confidenceLevel?: number;
-  dataFreshness?: 'very-fresh' | 'fresh' | 'moderate' | 'stale';
   breakdown: IBreakdownItem[];
   infoLinks?: ILink[];
   shoppingLinks?: ILink[];
-  socialContent?: {
-    youtubeVideos?: IYouTubeVideo[];
+  imageQuery?: string;
+  workspaceData?: {
+    documentsUsed: number;
+    documentsContent: string[];
   };
   realTimeData?: {
     hasRealTimeData: boolean;
-    timestamp: string;
-    sourcesCount: number;
-    searchQuery: string;
-    error?: string;
+    timestamp?: string;
+    sourcesCount?: number;
     provider?: string;
-  };
-  workspaceData?: {
-    documentsUsed: number;
-    documentSources: string[];
   };
   aiProvider?: {
     provider: string;
     model: string;
     success: boolean;
-    error?: string;
   };
-  resultType?: 'factual' | 'comparative'; // Nouveau champ pour le type de résultat
+  dataFreshness?: 'fresh' | 'moderate' | 'stale';
+  resultType?: 'factual' | 'comparative' | 'simple-choice'; // Nouveau champ
 }
 
 export interface IDecision {

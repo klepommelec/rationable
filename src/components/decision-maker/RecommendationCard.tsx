@@ -10,7 +10,7 @@ import { DataFreshnessIndicator } from './DataFreshnessIndicator';
 import { WorkspaceDocumentIndicator } from './WorkspaceDocumentIndicator';
 import { AIProviderIndicator } from './AIProviderIndicator';
 import ValidatedLink from '@/components/ValidatedLink';
-import { ExternalLink, RotateCcw, Lightbulb, BarChart3, Activity, CheckCircle } from 'lucide-react';
+import { ExternalLink, RotateCcw, Lightbulb, BarChart3, Activity, CheckCircle, Target, Zap } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIProviderDashboard } from './AIProviderDashboard';
@@ -29,21 +29,55 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   currentDecision,
   clearSession
 }) => {
-  const isFactual = result.resultType === 'factual';
+  const resultType = result.resultType || 'comparative';
   const topOption = result.breakdown?.[0];
   
+  // Configuration selon le type de résultat
+  const getResultConfig = () => {
+    switch (resultType) {
+      case 'factual':
+        return {
+          icon: <CheckCircle className="h-5 w-5 text-emerald-600" />,
+          title: 'Réponse',
+          badge: 'Réponse factuelle',
+          borderColor: 'border-emerald-200',
+          bgGradient: 'bg-gradient-to-r from-emerald-50 to-green-50',
+          badgeColor: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100',
+          titleColor: 'text-emerald-700 dark:text-emerald-300'
+        };
+      case 'simple-choice':
+        return {
+          icon: <Target className="h-5 w-5 text-blue-600" />,
+          title: 'Recommandation',
+          badge: 'Meilleur choix',
+          borderColor: 'border-blue-200',
+          bgGradient: 'bg-gradient-to-r from-blue-50 to-indigo-50',
+          badgeColor: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
+          titleColor: 'text-blue-700 dark:text-blue-300'
+        };
+      default: // comparative
+        return {
+          icon: <Lightbulb className="h-5 w-5 text-primary" />,
+          title: 'Recommandation',
+          badge: 'Solution recommandée',
+          borderColor: 'border-primary/20',
+          bgGradient: 'bg-gradient-to-r from-primary/5 to-secondary/5',
+          badgeColor: 'bg-primary/10 text-primary',
+          titleColor: 'text-primary'
+        };
+    }
+  };
+  
+  const config = getResultConfig();
+  
   return (
-    <Card className={`border-2 ${isFactual ? 'border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50' : 'border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5'}`}>
+    <Card className={`border-2 ${config.borderColor} ${config.bgGradient}`}>
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="flex items-center gap-2 text-xl mb-2">
-              {isFactual ? (
-                <CheckCircle className="h-5 w-5 text-emerald-600" />
-              ) : (
-                <Lightbulb className="h-5 w-5 text-primary" />
-              )}
-              {isFactual ? 'Réponse' : 'Recommandation'}
+              {config.icon}
+              {config.title}
             </CardTitle>
             
             {/* Indicateurs de qualité */}
@@ -127,19 +161,10 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-1 space-y-4">
             <div>
-              <Badge 
-                variant="secondary" 
-                className={`mb-2 ${
-                  isFactual 
-                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100' 
-                    : 'bg-primary/10 text-primary'
-                }`}
-              >
-                {isFactual ? 'Réponse factuelle' : 'Solution recommandée'}
+              <Badge variant="secondary" className={`mb-2 ${config.badgeColor}`}>
+                {config.badge}
               </Badge>
-              <h3 className={`text-lg font-semibold mb-2 ${
-                isFactual ? 'text-emerald-700 dark:text-emerald-300' : 'text-primary'
-              }`}>
+              <h3 className={`text-lg font-semibold mb-2 ${config.titleColor}`}>
                 {result.recommendation}
               </h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -154,7 +179,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   <div className="space-y-2">
                     <h4 className="font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
                       <CheckCircle className="h-4 w-4" />
-                      {isFactual ? 'Caractéristiques' : 'Avantages'}
+                      {resultType === 'factual' ? 'Caractéristiques' : 'Avantages'}
                     </h4>
                     <ul className="space-y-1">
                       {topOption.pros.map((pro, index) => (
@@ -167,7 +192,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   </div>
                 )}
                 
-                {topOption.cons?.length > 0 && !isFactual && (
+                {topOption.cons?.length > 0 && resultType !== 'factual' && (
                   <div className="space-y-2">
                     <h4 className="font-medium text-orange-700 dark:text-orange-300 flex items-center gap-2">
                       <ExternalLink className="h-4 w-4" />
