@@ -39,17 +39,20 @@ export interface IResult {
   workspaceData?: {
     documentsUsed: number;
     documentsContent: string[];
+    documentSources?: string[];
   };
   realTimeData?: {
     hasRealTimeData: boolean;
     timestamp?: string;
     sourcesCount?: number;
     provider?: string;
+    searchQuery?: string;
   };
   aiProvider?: {
     provider: string;
     model: string;
     success: boolean;
+    error?: string;
   };
   dataFreshness?: 'fresh' | 'moderate' | 'stale';
   resultType?: 'factual' | 'comparative' | 'simple-choice'; // Nouveau champ

@@ -318,7 +318,6 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
       recommendation: "Analyse manuelle requise",
       description: "Tous les fournisseurs IA ont échoué. Une analyse manuelle est recommandée pour ce dilemme complexe.",
       imageQuery: "decision making analysis flowchart",
-      confidenceLevel: 20,
       dataFreshness: "stale" as const,
       infoLinks: [],
       shoppingLinks: [],
@@ -344,6 +343,7 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
       },
       workspaceData: workspaceDocuments.length > 0 ? {
         documentsUsed: workspaceDocuments.length,
+        documentsContent: [],
         documentSources: workspaceDocuments.map(doc => doc.document.file_name)
       } : undefined
     };

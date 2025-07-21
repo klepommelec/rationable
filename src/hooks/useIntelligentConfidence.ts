@@ -15,7 +15,7 @@ export const useIntelligentConfidence = (
   hasRealTimeData: boolean = false,
   dataTimestamp?: string,
   sourcesCount: number = 0,
-  resultType?: 'factual' | 'comparative'
+  resultType?: 'factual' | 'comparative' | 'simple-choice'
 ): IntelligentConfidenceData => {
   
   return useMemo(() => {
@@ -29,8 +29,8 @@ export const useIntelligentConfidence = (
       };
     }
 
-    // Pour les questions factuelles : confiance automatiquement très élevée
-    if (resultType === 'factual') {
+    // Pour les questions factuelles et choix simples : confiance automatiquement très élevée
+    if (resultType === 'factual' || resultType === 'simple-choice') {
       const topOption = breakdown[0];
       const hasGoodScore = topOption.score >= 90;
       
@@ -40,8 +40,8 @@ export const useIntelligentConfidence = (
         icon: "Target",
         overallScore: hasGoodScore ? 95 : 90,
         recommendationText: hasRealTimeData 
-          ? "Réponse factuelle vérifiée avec données récentes" 
-          : "Réponse factuelle basée sur des sources fiables"
+          ? (resultType === 'factual' ? "Réponse factuelle vérifiée avec données récentes" : "Recommandation vérifiée avec données récentes")
+          : (resultType === 'factual' ? "Réponse factuelle basée sur des sources fiables" : "Recommandation basée sur des sources fiables")
       };
     }
 

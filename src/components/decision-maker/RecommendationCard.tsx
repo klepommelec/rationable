@@ -96,7 +96,10 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               
               {result.workspaceData && (
                 <WorkspaceDocumentIndicator 
-                  workspaceData={result.workspaceData}
+                  workspaceData={{
+                    documentsUsed: result.workspaceData.documentsUsed,
+                    documentSources: result.workspaceData.documentSources || []
+                  }}
                 />
               )}
               
