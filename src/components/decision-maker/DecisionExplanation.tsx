@@ -21,9 +21,10 @@ export const DecisionExplanation: React.FC<DecisionExplanationProps> = ({ result
   const getConfidenceLevel = () => {
     if (!topOption || result.breakdown.length < 2) return { level: "Moyenne", color: "bg-yellow-100 text-yellow-800", icon: AlertTriangle };
     
-    const secondBest = result.breakdown
-      .filter(item => item.option !== topOption.option)
-      .reduce((prev, current) => prev.score > current.score ? prev : current);
+    const otherOptions = result.breakdown.filter(item => item.option !== topOption.option);
+    if (otherOptions.length === 0) return { level: "Moyenne", color: "bg-yellow-100 text-yellow-800", icon: AlertTriangle };
+    
+    const secondBest = otherOptions.reduce((prev, current) => prev.score > current.score ? prev : current);
 
     const scoreDifference = topOption.score - secondBest.score;
     
