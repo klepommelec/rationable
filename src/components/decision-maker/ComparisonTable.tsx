@@ -41,15 +41,15 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
             {sortedOptions.map((option, index) => (
               <TableRow key={index} className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''}>
                 <TableCell className="font-medium">
-                  <div className="flex items-center gap-2">
-                    {index === 0 && (
-                      <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
-                        Recommandé
-                      </Badge>
-                    )}
+                  <div className="flex flex-col gap-1">
                     <span className="text-sm">
                       {option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
                     </span>
+                    {index === 0 && (
+                      <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 w-fit">
+                        Recommandé
+                      </Badge>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="text-center">
