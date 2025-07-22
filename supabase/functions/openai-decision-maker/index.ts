@@ -281,7 +281,8 @@ Replace [recommendation] with the actual recommendation in URLs and titles. Thes
         shoppingLinks = fallbackLinks.shoppingLinks;
       }
     }
-    
+
+    // Ajout des liens au résultat final
     jsonContent.infoLinks = infoLinks;
     jsonContent.shoppingLinks = shoppingLinks;
 

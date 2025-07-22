@@ -285,7 +285,8 @@ Les scores doivent refléter l'évaluation objective selon les critères mention
         shoppingLinks = fallbackLinks.shoppingLinks;
       }
     }
-    
+
+    // Ajout des liens au résultat
     result.infoLinks = infoLinks;
     result.shoppingLinks = shoppingLinks;
 
