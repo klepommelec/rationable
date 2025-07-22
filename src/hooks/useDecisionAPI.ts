@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import { ICriterion, IResult, IDecision } from '@/types/decision';
 import { generateCriteriaOnly, generateOptions } from '@/services/decisionService';
@@ -119,17 +118,14 @@ export const useDecisionAPI = ({
           const apiResult = await generateOptions(dilemma, currentCriteria, uploadedFileInfos, workspaceId);
           
           const endTime = Date.now();
-          console.log("✅ [DEBUG] API call successful", {
+          console.log("✅ [DEBUG] API call successful with enhanced links", {
             duration: `${endTime - startTime}ms`,
             filesAnalyzed: uploadedFileInfos.length,
             workspaceDocsUsed: apiResult.workspaceData?.documentsUsed || 0,
             questionType,
-            resultStructure: {
-              hasRecommendation: !!apiResult.recommendation,
-              hasDescription: !!apiResult.description,
-              breakdownCount: apiResult.breakdown?.length || 0,
-              infoLinksCount: apiResult.infoLinks?.length || 0,
-              shoppingLinksCount: apiResult.shoppingLinks?.length || 0
+            linksEnhanced: {
+              infoLinks: apiResult.infoLinks?.length || 0,
+              shoppingLinks: apiResult.shoppingLinks?.length || 0
             }
           });
           
@@ -306,18 +302,20 @@ export const useDecisionAPI = ({
           setSelectedCategory(response.suggestedCategory);
           setAnalysisStep('criteria-loaded');
           
-          // Phase 2: Générer automatiquement les options
+          // Phase 2: Générer automatiquement les options avec liens enrichis
           setTimeout(async () => {
-            console.log("📡 [DEBUG] Phase 2: Auto-generating options for comparative question");
+            console.log("📡 [DEBUG] Phase 2: Auto-generating options with enhanced links");
             setAnalysisStep('loading-options');
-            setProgressMessage(workspaceId ? "Génération des options avec documents workspace..." : "Génération des options comparatives...");
+            setProgressMessage(workspaceId ? "Génération des options avec documents workspace..." : "Génération des options et recherche de liens utiles...");
             
             try {
               const optionsResult = await generateOptions(dilemma, newCriteria, uploadedFileInfos, workspaceId);
               optionsResult.resultType = questionType;
               
-              console.log("✅ [DEBUG] Auto-options generated successfully");
-              setResult(optionsResult);
+              console.log("✅ [DEBUG] Auto-options generated successfully with enhanced links", {
+                infoLinksCount: optionsResult.infoLinks?.length || 0,
+                shoppingLinksCount: optionsResult.shoppingLinks?.length || 0
+              });
               
               // Définir les critères de référence
               initialCriteriaRef.current = newCriteria;

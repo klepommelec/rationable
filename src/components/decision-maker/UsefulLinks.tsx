@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, ExternalLink } from 'lucide-react';
 import { ILink, ISocialContent } from '@/types/decision';
@@ -25,8 +24,19 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
                     (socialContent?.youtubeVideos && socialContent.youtubeVideos.length > 0);
   
   if (!hasContent) {
+    console.log("⚠️ [UsefulLinks] No content to display", {
+      infoLinksCount: infoLinks?.length || 0,
+      shoppingLinksCount: shoppingLinks?.length || 0,
+      youtubeVideosCount: socialContent?.youtubeVideos?.length || 0
+    });
     return null;
   }
+
+  console.log("✅ [UsefulLinks] Displaying content", {
+    infoLinksCount: infoLinks?.length || 0,
+    shoppingLinksCount: shoppingLinks?.length || 0,
+    youtubeVideosCount: socialContent?.youtubeVideos?.length || 0
+  });
 
   return (
     <section 
@@ -76,7 +86,7 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
                 id="info-links-heading"
               >
                 <span className="text-base sm:text-lg" aria-hidden="true">📚</span>
-                Ressources d'information
+                Ressources d'information ({infoLinks.length})
               </h4>
               <div 
                 className="space-y-2"
@@ -107,7 +117,7 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
                 id="shopping-links-heading"
               >
                 <span className="text-base sm:text-lg" aria-hidden="true">🛒</span>
-                Liens d'achat
+                Liens d'achat ({shoppingLinks.length})
               </h4>
               <div 
                 className="space-y-2"
