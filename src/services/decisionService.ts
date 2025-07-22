@@ -12,20 +12,20 @@ export const generateCriteriaOnly = async (
   emoji: string;
 }> => {
   try {
-    const response = await fetch('/api/criteria-generator', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ dilemma, uploadedFiles, workspaceId }),
-    });
+    // Pour l'instant, on génère des critères basiques côté client
+    // TODO: Implémenter une vraie génération via IA si nécessaire
+    const basicCriteria: ICriterion[] = [
+      { id: "prix", name: "Prix" },
+      { id: "qualite", name: "Qualité" },
+      { id: "facilite", name: "Facilité d'utilisation" },
+      { id: "durabilite", name: "Durabilité" }
+    ];
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data;
+    return {
+      criteria: basicCriteria,
+      suggestedCategory: "Général",
+      emoji: "🤔"
+    };
   } catch (error) {
     console.error('Error generating criteria:', error);
     throw error;
