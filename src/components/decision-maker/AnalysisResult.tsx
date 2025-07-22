@@ -3,6 +3,7 @@ import React from 'react';
 import { IResult } from '@/types/decision';
 import { RecommendationCard } from './RecommendationCard';
 import { AnalysisCharts } from './AnalysisCharts';
+import { EnhancedDecisionInsights } from './EnhancedDecisionInsights';
 import { UsefulLinks } from './UsefulLinks';
 import { ScoreChart } from './ScoreChart';
 import { EnhancedRadarChart } from './EnhancedRadarChart';
@@ -49,6 +50,9 @@ const AnalysisResult = ({
         clearSession={clearSession}
       />
 
+      {/* Analyse approfondie de la recommandation */}
+      <EnhancedDecisionInsights result={result} />
+
       {/* Liens utiles */}
       {(result.infoLinks?.length > 0 || result.shoppingLinks?.length > 0 || (result as any).socialContent?.youtubeVideos?.length > 0) && (
         <UsefulLinks
@@ -87,10 +91,6 @@ const AnalysisResult = ({
                 <PieChart className="h-4 w-4" />
                 Répartition
               </TabsTrigger>
-              <TabsTrigger value="table" className="flex items-center gap-2">
-                <Table className="h-4 w-4" />
-                Tableau
-              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="overview" className="mt-6">
@@ -107,10 +107,6 @@ const AnalysisResult = ({
             
             <TabsContent value="pie" className="mt-6">
               <ScorePieChart data={result.breakdown} />
-            </TabsContent>
-            
-            <TabsContent value="table" className="mt-6">
-              <ComparisonTable breakdown={result.breakdown} />
             </TabsContent>
           </Tabs>
         </CardContent>
