@@ -6,6 +6,20 @@ import { supabase } from '@/integrations/supabase/client';
 
 const aiService = AIProviderService.getInstance();
 
+const cleanAIResponse = (text: string): string => {
+  if (!text) return text;
+  
+  return text
+    // Supprimer les artefacts numériques en fin de texte
+    .replace(/\s*123\s*$/g, '')
+    .replace(/\s+\d{1,3}\s*$/g, '')
+    // Supprimer les références malformées
+    .replace(/\[\d+\]\s*$/g, '')
+    // Nettoyer les espaces
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
 export const generateCriteriaWithFallback = async (
   dilemma: string, 
   files?: UploadedFileInfo[], 
@@ -252,13 +266,26 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
     
     const response = await aiService.executeWithFallback(request);
     console.log(`✅ Options generated with ${response.provider}`);
-    console.log('📝 Response preview:', {
-      recommendation: response.content?.recommendation,
-      hasBreakdown: Array.isArray(response.content?.breakdown),
-      breakdownLength: response.content?.breakdown?.length || 0
-    });
     
     const result = response.content;
+    
+    // Nettoyer la recommandation et la description
+    if (result.recommendation) {
+      result.recommendation = cleanAIResponse(result.recommendation);
+    }
+    if (result.description) {
+      result.description = cleanAIResponse(result.description);
+    }
+    
+    // Nettoyer les breakdown items
+    if (result.breakdown && Array.isArray(result.breakdown)) {
+      result.breakdown = result.breakdown.map(item => ({
+        ...item,
+        option: cleanAIResponse(item.option || ''),
+        pros: item.pros?.map(pro => cleanAIResponse(pro)) || [],
+        cons: item.cons?.map(con => cleanAIResponse(con)) || []
+      }));
+    }
     
     // Ajouter les métadonnées de données en temps réel
     if (realTimeData) {
@@ -271,11 +298,12 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
       };
     }
 
-    // Ajouter les métadonnées des documents workspace (uniquement si vraiment utilisés)
+    // Ajouter les métadonnées des documents workspace
     if (workspaceDocuments.length > 0) {
       result.workspaceData = {
         documentsUsed: workspaceDocuments.length,
-        documentSources: workspaceDocuments.map(doc => doc.document.file_name)
+        documentSources: workspaceDocuments.map(doc => doc.document.file_name),
+        documentsContent: []
       };
     }
 

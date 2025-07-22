@@ -11,6 +11,25 @@ export interface PerplexitySearchResult {
   fallbackMessage?: string;
 }
 
+const cleanPerplexityResponse = (content: string): string => {
+  if (!content) return content;
+  
+  // Supprimer les artefacts numériques parasites
+  let cleaned = content
+    // Supprimer les "123" en fin de texte
+    .replace(/\s*123\s*$/g, '')
+    // Supprimer les numéros isolés en fin de phrase
+    .replace(/\s+\d{1,3}\s*$/g, '')
+    // Supprimer les références de citation malformées
+    .replace(/\[\d+\]\s*$/g, '')
+    // Supprimer les espaces multiples
+    .replace(/\s+/g, ' ')
+    // Supprimer les espaces en début et fin
+    .trim();
+  
+  return cleaned;
+};
+
 export const searchWithPerplexity = async (query: string, context?: string): Promise<PerplexitySearchResult> => {
   try {
     console.log('🔍 Perplexity search - Query:', query);
@@ -36,10 +55,12 @@ export const searchWithPerplexity = async (query: string, context?: string): Pro
       throw new Error('Perplexity returned no content');
     }
 
-    console.log('✅ Perplexity search successful - Content length:', data.content.length);
+    // Nettoyer la réponse avant de la retourner
+    const cleanedContent = cleanPerplexityResponse(data.content);
+    console.log('✅ Perplexity search successful - Content cleaned and ready');
     
     return {
-      content: data.content,
+      content: cleanedContent,
       sources: data.sources || [],
       timestamp: data.timestamp || new Date().toISOString(),
       searchQuery: query,
@@ -47,7 +68,7 @@ export const searchWithPerplexity = async (query: string, context?: string): Pro
     };
   } catch (error) {
     console.error('❌ Perplexity service error:', error);
-    throw error; // Relancer l'erreur pour que le système ne tombe pas en fallback
+    throw error;
   }
 };
 

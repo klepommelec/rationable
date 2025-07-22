@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIProviderDashboard } from './AIProviderDashboard';
 import { AIProviderMonitor } from './AIProviderMonitor';
+import { ExpandableText } from '@/components/ExpandableText';
 
 interface RecommendationCardProps {
   result: IResult;
@@ -32,7 +32,6 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   const resultType = result.resultType || 'comparative';
   const topOption = result.breakdown?.[0];
   
-  // Configuration selon le type de résultat
   const getResultConfig = () => {
     switch (resultType) {
       case 'factual':
@@ -102,15 +101,6 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   }}
                 />
               )}
-              
-              {result.aiProvider && (
-                <AIProviderIndicator
-                  provider={result.aiProvider.provider}
-                  model={result.aiProvider.model}
-                  success={result.aiProvider.success}
-                  realTimeProvider={result.realTimeData?.provider}
-                />
-              )}
             </div>
           </div>
           
@@ -170,12 +160,12 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               <h3 className={`text-lg font-semibold mb-2 ${config.titleColor}`}>
                 {result.recommendation}
               </h3>
-              <p className="text-muted-foreground leading-relaxed">
-                {result.description}
-              </p>
+              <ExpandableText 
+                text={result.description} 
+                maxLength={300}
+              />
             </div>
 
-            {/* Affichage des pros/cons pour la première option */}
             {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && (
               <div className="grid md:grid-cols-2 gap-4">
                 {topOption.pros?.length > 0 && (
@@ -214,7 +204,6 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               </div>
             )}
 
-            {/* Liens utiles */}
             {(result.infoLinks?.length > 0 || result.shoppingLinks?.length > 0) && (
               <div className="space-y-3">
                 {result.infoLinks?.length > 0 && (
@@ -253,7 +242,6 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             )}
           </div>
 
-          {/* Image de la décision - cachée sur mobile, visible sur desktop */}
           {result.imageQuery && (
             <div className="hidden lg:flex lg:w-80 justify-center">
               <DecisionImage 
