@@ -74,30 +74,28 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     <Card className={`border-2 ${config.borderColor} ${config.bgGradient}`}>
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="flex items-center gap-2 text-xl mb-2">
-              {config.icon}
-              {config.title}
-            </CardTitle>
+          <CardTitle className="flex items-center gap-2 text-xl mb-2">
+            {config.icon}
+            {config.title}
+          </CardTitle>
+          
+          {/* Indicateurs de qualité - Sources temporairement supprimées */}
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <DataFreshnessIndicator 
+              hasRealTimeData={result.realTimeData?.hasRealTimeData || false}
+              timestamp={result.realTimeData?.timestamp}
+              sourcesCount={result.realTimeData?.sourcesCount}
+              dataFreshness={result.dataFreshness || 'moderate'}
+            />
             
-            {/* Indicateurs de qualité - Sources temporairement supprimées */}
-            <div className="flex flex-wrap items-center gap-2 mb-3">
-              <DataFreshnessIndicator 
-                hasRealTimeData={result.realTimeData?.hasRealTimeData || false}
-                timestamp={result.realTimeData?.timestamp}
-                sourcesCount={result.realTimeData?.sourcesCount}
-                dataFreshness={result.dataFreshness || 'moderate'}
+            {result.workspaceData && (
+              <WorkspaceDocumentIndicator 
+                workspaceData={{
+                  documentsUsed: result.workspaceData.documentsUsed,
+                  documentSources: result.workspaceData.documentSources || []
+                }}
               />
-              
-              {result.workspaceData && (
-                <WorkspaceDocumentIndicator 
-                  workspaceData={{
-                    documentsUsed: result.workspaceData.documentsUsed,
-                    documentSources: result.workspaceData.documentSources || []
-                  }}
-                />
-              )}
-            </div>
+            )}
           </div>
           
           <div className="flex items-center gap-2">
