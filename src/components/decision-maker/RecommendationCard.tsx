@@ -121,7 +121,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             </div>
             
             <div>
-              <ExpandableText text={result.description} maxLength={300} />
+              <ExpandableText text={result.description} maxLength={200} />
             </div>
 
             {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && <div className="grid md:grid-cols-2 gap-4">
