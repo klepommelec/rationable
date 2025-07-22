@@ -1,3 +1,4 @@
+
 import { ICriterion, IResult } from '@/types/decision';
 import { AIProviderService, AIRequest } from './aiProviderService';
 import { UploadedFileInfo } from './fileUploadService';
@@ -22,6 +23,65 @@ const cleanAIResponse = (text: string): string => {
     // Nettoyer les espaces
     .replace(/\s+/g, ' ')
     .trim();
+};
+
+// Fonction pour calculer la fraîcheur des données
+const calculateDataFreshness = (realTimeData: any, hasWorkspaceData: boolean): 'very-fresh' | 'fresh' | 'moderate' | 'stale' => {
+  console.log('🕒 Calculating data freshness...', { realTimeData: !!realTimeData, hasWorkspaceData });
+  
+  // Si on a des données temps réel récentes
+  if (realTimeData?.hasRealTimeData && realTimeData.content) {
+    const timestamp = realTimeData.timestamp;
+    const sourcesCount = realTimeData.sourcesCount || realTimeData.sources?.length || 0;
+    
+    if (timestamp) {
+      const dataAge = Date.now() - new Date(timestamp).getTime();
+      const ageInHours = dataAge / (1000 * 60 * 60);
+      
+      console.log('📊 Data age analysis:', {
+        ageInHours: Math.round(ageInHours),
+        sourcesCount,
+        provider: realTimeData.provider
+      });
+      
+      // Données très récentes (moins de 6 heures) avec plusieurs sources
+      if (ageInHours < 6 && sourcesCount >= 3) {
+        console.log('✅ Data is very fresh');
+        return 'very-fresh';
+      }
+      
+      // Données récentes (moins de 24 heures)
+      if (ageInHours < 24 && sourcesCount >= 1) {
+        console.log('✅ Data is fresh');
+        return 'fresh';
+      }
+      
+      // Données modérément récentes (moins de 7 jours)
+      if (ageInHours < 168) {
+        console.log('⚠️ Data is moderately fresh');
+        return 'moderate';
+      }
+    }
+    
+    // Si on a des sources mais pas de timestamp fiable
+    if (sourcesCount >= 2) {
+      console.log('✅ Data is fresh (based on sources count)');
+      return 'fresh';
+    }
+    
+    console.log('⚠️ Data is moderate (real-time but limited)');
+    return 'moderate';
+  }
+  
+  // Si on a des documents workspace mais pas de données temps réel
+  if (hasWorkspaceData) {
+    console.log('📚 Data is moderate (workspace documents only)');
+    return 'moderate';
+  }
+  
+  // Pas de données récentes
+  console.log('❌ Data is stale (no recent data)');
+  return 'stale';
 };
 
 export const generateCriteriaWithFallback = async (
@@ -305,6 +365,12 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
         cons: item.cons?.map(con => cleanAIResponse(con)) || []
       }));
     }
+    
+    // Calculer et assigner la fraîcheur des données
+    const calculatedFreshness = calculateDataFreshness(realTimeData, workspaceDocuments.length > 0);
+    result.dataFreshness = calculatedFreshness;
+    
+    console.log(`📊 Data freshness calculated: ${calculatedFreshness}`);
     
     // Ajouter les métadonnées de données en temps réel
     if (realTimeData) {

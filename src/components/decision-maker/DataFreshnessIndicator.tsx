@@ -25,7 +25,7 @@ export const DataFreshnessIndicator: React.FC<DataFreshnessIndicatorProps> = ({
           label: "Très récent",
           color: "bg-green-100 text-green-800 border-green-200",
           icon: Wifi,
-          description: "Données mises à jour récemment"
+          description: "Données mises à jour récemment avec sources multiples"
         };
       case 'fresh':
         return {

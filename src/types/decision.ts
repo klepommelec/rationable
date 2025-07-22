@@ -1,3 +1,4 @@
+
 export interface ICriterion {
   id: string;
   name: string;
@@ -55,7 +56,7 @@ export interface IResult {
     success: boolean;
     error?: string;
   };
-  dataFreshness?: 'fresh' | 'moderate' | 'stale';
+  dataFreshness?: 'very-fresh' | 'fresh' | 'moderate' | 'stale';
   resultType?: 'factual' | 'comparative' | 'simple-choice'; // Nouveau champ
 }
 
