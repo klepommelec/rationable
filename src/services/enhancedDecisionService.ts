@@ -1,8 +1,10 @@
+
 import { ICriterion, IResult } from '@/types/decision';
 import { AIProviderService, AIRequest } from './aiProviderService';
 import { UploadedFileInfo } from './fileUploadService';
 import { getWorkspaceDocumentsForAnalysis, searchRelevantContent } from './workspaceDocumentService';
 import { supabase } from '@/integrations/supabase/client';
+import { summarizeDecisionDescription } from './descriptionSummaryService';
 
 const aiService = AIProviderService.getInstance();
 
@@ -272,12 +274,27 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
     
     const result = response.content;
     
-    // Nettoyer la recommandation et la description
+    // Nettoyer la recommandation
     if (result.recommendation) {
       result.recommendation = cleanAIResponse(result.recommendation);
     }
-    if (result.description) {
-      result.description = cleanAIResponse(result.description);
+    
+    // Résumer la description automatiquement
+    if (result.description && result.recommendation) {
+      console.log('📝 Summarizing description...');
+      try {
+        const summarizedDescription = await summarizeDecisionDescription(
+          result.description,
+          result.recommendation,
+          dilemma
+        );
+        result.description = summarizedDescription;
+        console.log('✅ Description summarized successfully');
+      } catch (summaryError) {
+        console.warn('⚠️ Failed to summarize description, keeping original:', summaryError);
+        // Garder la description originale mais la nettoyer
+        result.description = cleanAIResponse(result.description);
+      }
     }
     
     // Nettoyer les breakdown items
