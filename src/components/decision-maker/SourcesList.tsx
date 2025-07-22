@@ -43,7 +43,7 @@ export const SourcesList: React.FC<SourcesListProps> = ({
       
       <div className="grid gap-2">
         {displayedSources.map((source, index) => (
-          <ValidatedLink
+          <a
             key={index}
             href={source}
             className="flex items-center gap-2 p-2 rounded-md border border-border/50 hover:border-border transition-colors group bg-card/50 hover:bg-card"
@@ -54,7 +54,7 @@ export const SourcesList: React.FC<SourcesListProps> = ({
             <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors truncate">
               {extractDomain(source)}
             </span>
-          </ValidatedLink>
+          </a>
         ))}
         
         {sources.length > 5 && (
