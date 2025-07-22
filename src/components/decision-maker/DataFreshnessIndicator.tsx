@@ -67,26 +67,5 @@ export const DataFreshnessIndicator: React.FC<DataFreshnessIndicatorProps> = ({
     return date.toLocaleDateString('fr-FR');
   };
 
-  return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <Badge 
-        className={`${color} border text-xs flex items-center gap-1 transition-all duration-200`}
-        title={description}
-      >
-        <Icon className="h-3 w-3" aria-hidden="true" />
-        {label}
-      </Badge>
-      
-      {hasRealTimeData && (
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Database className="h-3 w-3" aria-hidden="true" />
-          <span title="Sites web et bases de données consultés pour obtenir des informations récentes">
-            {sourcesCount > 0 && `${sourcesCount} sources web`}
-            {timestamp && sourcesCount > 0 && ' • '}
-            {timestamp && formatTimestamp(timestamp)}
-          </span>
-        </div>
-      )}
-    </div>
-  );
+  return null;
 };
