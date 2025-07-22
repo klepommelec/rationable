@@ -10,11 +10,14 @@ const cleanAIResponse = (text: string): string => {
   if (!text) return text;
   
   return text
-    // Supprimer les artefacts numériques en fin de texte
-    .replace(/\s*123\s*$/g, '')
+    // Supprimer les séquences numériques en fin de texte (123, 1234, 12345, etc.)
+    .replace(/\s*\d{3,6}\s*$/g, '')
+    // Supprimer les numéros isolés en fin de phrase
     .replace(/\s+\d{1,3}\s*$/g, '')
     // Supprimer les références malformées
     .replace(/\[\d+\]\s*$/g, '')
+    // Supprimer les patterns numériques en milieu de phrase aussi
+    .replace(/\s+\d{3,6}(?=\s|$)/g, '')
     // Nettoyer les espaces
     .replace(/\s+/g, ' ')
     .trim();
@@ -235,8 +238,8 @@ Retournez un objet JSON avec:
 3. "imageQuery": Description pour générer une image (en anglais, très descriptive)
 4. "confidenceLevel": Niveau de confiance de l'analyse (1-100)
 5. "dataFreshness": Fraîcheur des données utilisées ("very-fresh", "fresh", "moderate", "stale")
-6. "infoLinks": Tableau de liens utiles avec "title" et "url"
-7. "shoppingLinks": Tableau de liens d'achat avec "title" et "url"
+6. "infoLinks": Tableau de 3-5 liens utiles avec "title" et "url" (obligatoire)
+7. "shoppingLinks": Tableau de 2-3 liens d'achat avec "title" et "url" (obligatoire)
 8. "breakdown": Tableau d'objets avec:
    - "option": Nom de l'option
    - "pros": Tableau des avantages

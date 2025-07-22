@@ -16,12 +16,14 @@ const cleanPerplexityResponse = (content: string): string => {
   
   // Supprimer les artefacts numériques parasites
   let cleaned = content
-    // Supprimer les "123" en fin de texte
-    .replace(/\s*123\s*$/g, '')
+    // Supprimer les séquences numériques en fin de texte (123, 1234, 12345, etc.)
+    .replace(/\s*\d{3,6}\s*$/g, '')
     // Supprimer les numéros isolés en fin de phrase
     .replace(/\s+\d{1,3}\s*$/g, '')
     // Supprimer les références de citation malformées
     .replace(/\[\d+\]\s*$/g, '')
+    // Supprimer les patterns numériques en milieu de phrase aussi
+    .replace(/\s+\d{3,6}(?=\s|$)/g, '')
     // Supprimer les espaces multiples
     .replace(/\s+/g, ' ')
     // Supprimer les espaces en début et fin

@@ -3,7 +3,7 @@ import React from 'react';
 import { IResult } from '@/types/decision';
 import { RecommendationCard } from './RecommendationCard';
 import { AnalysisCharts } from './AnalysisCharts';
-import { DecisionExplanation } from './DecisionExplanation';
+import { UsefulLinks } from './UsefulLinks';
 import { ScoreChart } from './ScoreChart';
 import { EnhancedRadarChart } from './EnhancedRadarChart';
 import { ScorePieChart } from './PieChart';
@@ -49,8 +49,16 @@ const AnalysisResult = ({
         clearSession={clearSession}
       />
 
-      {/* Explication de la décision */}
-      <DecisionExplanation result={result} />
+      {/* Liens utiles */}
+      {(result.infoLinks?.length > 0 || result.shoppingLinks?.length > 0 || (result as any).socialContent?.youtubeVideos?.length > 0) && (
+        <UsefulLinks
+          infoLinks={result.infoLinks}
+          shoppingLinks={result.shoppingLinks}
+          socialContent={(result as any).socialContent}
+          dilemma={dilemma}
+          recommendation={result.recommendation}
+        />
+      )}
 
       {/* Graphiques et visualisations avec onglets */}
       <Card>
@@ -62,14 +70,14 @@ const AnalysisResult = ({
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
                 Vue d'ensemble
               </TabsTrigger>
               <TabsTrigger value="charts" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
-                Graphiques
+                Scores
               </TabsTrigger>
               <TabsTrigger value="radar" className="flex items-center gap-2">
                 <Radar className="h-4 w-4" />

@@ -115,13 +115,14 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               Nouvelle analyse
             </Button>
             
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4" />
-                  Dashboard AI
-                </Button>
-              </DialogTrigger>
+            {import.meta.env.DEV && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    Dashboard AI
+                  </Button>
+                </DialogTrigger>
               <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Dashboard AI Providers</DialogTitle>
@@ -146,6 +147,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 </Tabs>
               </DialogContent>
             </Dialog>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -204,42 +206,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               </div>
             )}
 
-            {(result.infoLinks?.length > 0 || result.shoppingLinks?.length > 0) && (
-              <div className="space-y-3">
-                {result.infoLinks?.length > 0 && (
-                  <div>
-                    <h4 className="font-medium mb-2 flex items-center gap-2">
-                      <ExternalLink className="h-4 w-4" />
-                      Liens utiles
-                    </h4>
-                     <div className="space-y-1">
-                       {result.infoLinks.map((link, index) => (
-                         <ValidatedLink
-                           key={index}
-                           link={link}
-                           className="text-sm text-primary hover:text-primary/80 block"
-                         />
-                       ))}
-                     </div>
-                  </div>
-                )}
-
-                {result.shoppingLinks?.length > 0 && (
-                  <div>
-                    <h4 className="font-medium mb-2">Liens d'achat</h4>
-                     <div className="space-y-1">
-                       {result.shoppingLinks.map((link, index) => (
-                         <ValidatedLink
-                           key={index}
-                           link={link}
-                           className="text-sm text-green-600 hover:text-green-500 block"
-                         />
-                       ))}
-                     </div>
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Section Liens utiles sera gérée par le composant UsefulLinks dans AnalysisResult */}
           </div>
 
           {result.imageQuery && (
