@@ -82,11 +82,6 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             
             {/* Indicateurs de qualité - Sources temporairement supprimées */}
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              <ConfidenceIndicator 
-                breakdown={result.breakdown}
-                topOption={topOption}
-                result={result}
-              />
               <DataFreshnessIndicator 
                 hasRealTimeData={result.realTimeData?.hasRealTimeData || false}
                 timestamp={result.realTimeData?.timestamp}
@@ -163,6 +158,11 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               <h3 className={`text-lg font-semibold mb-2 ${config.titleColor}`}>
                 {result.recommendation}
               </h3>
+              <ConfidenceIndicator 
+                breakdown={result.breakdown}
+                topOption={topOption}
+                result={result}
+              />
               <ExpandableText 
                 text={result.description} 
                 maxLength={300}
