@@ -91,16 +91,6 @@ const DecisionMaker = () => {
               </div>
             </div>
             
-            {/* Indicateur du type de question détecté */}
-            {dilemma && (
-              <div className="mb-4 text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted">
-                  {questionType === 'factual' && '🎯 Question factuelle'}
-                  {questionType === 'comparative' && '⚖️ Question comparative'}
-                  {questionType === 'simple-choice' && '💡 Recherche de recommandation'}
-                </span>
-              </div>
-            )}
             
             {/* Afficher les critères uniquement pour les questions comparatives */}
             {shouldShowCriteria && (
