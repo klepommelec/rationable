@@ -74,10 +74,6 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     <Card className={`border-2 ${config.borderColor} ${config.bgGradient}`}>
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
-          <CardTitle className="flex items-center gap-2 text-xl mb-2">
-            {config.icon}
-            {config.title}
-          </CardTitle>
           
           {/* Indicateurs de qualité - Sources temporairement supprimées */}
           <div className="flex flex-wrap items-center gap-2 mb-3">
