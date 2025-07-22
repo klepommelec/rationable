@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,14 +15,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIProviderDashboard } from './AIProviderDashboard';
 import { AIProviderMonitor } from './AIProviderMonitor';
 import { ExpandableText } from '@/components/ExpandableText';
-
 interface RecommendationCardProps {
   result: IResult;
   dilemma: string;
   currentDecision: any;
   clearSession: () => void;
 }
-
 export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   result,
   dilemma,
@@ -32,7 +29,6 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
 }) => {
   const resultType = result.resultType || 'comparative';
   const topOption = result.breakdown?.[0];
-  
   const getResultConfig = () => {
     switch (resultType) {
       case 'factual':
@@ -55,7 +51,8 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
           badgeColor: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
           titleColor: 'text-blue-700 dark:text-blue-300'
         };
-      default: // comparative
+      default:
+        // comparative
         return {
           icon: <Lightbulb className="h-5 w-5 text-primary" />,
           title: 'Recommandation',
@@ -67,11 +64,8 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
         };
     }
   };
-  
   const config = getResultConfig();
-  
-  return (
-    <Card className={`border-2 ${config.borderColor} ${config.bgGradient}`}>
+  return <Card className={`border-2 ${config.borderColor} ${config.bgGradient}`}>
       <CardContent className="space-y-6">
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-1 space-y-4">
@@ -83,26 +77,16 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 <h3 className={`text-lg font-semibold mb-2 ${config.titleColor}`}>
                   {result.recommendation}
                 </h3>
-                <ConfidenceIndicator 
-                  breakdown={result.breakdown}
-                  topOption={topOption}
-                  result={result}
-                />
+                <ConfidenceIndicator breakdown={result.breakdown} topOption={topOption} result={result} />
               </div>
               
               <div className="flex items-center gap-2 flex-shrink-0">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={clearSession}
-                  className="flex items-center gap-2"
-                >
+                <Button variant="outline" size="sm" onClick={clearSession} className="flex items-center gap-2">
                   <RotateCcw className="h-4 w-4" />
                   Nouvelle analyse
                 </Button>
                 
-                {import.meta.env.DEV && (
-                  <Dialog>
+                {import.meta.env.DEV && <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="outline" size="sm" className="flex items-center gap-2">
                         <BarChart3 className="h-4 w-4" />
@@ -132,69 +116,49 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                         </TabsContent>
                       </Tabs>
                     </DialogContent>
-                  </Dialog>
-                )}
+                  </Dialog>}
               </div>
             </div>
             
             <div>
-              <ExpandableText 
-                text={result.description} 
-                maxLength={300}
-              />
+              <ExpandableText text={result.description} maxLength={300} />
             </div>
 
-            {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && (
-              <div className="grid md:grid-cols-2 gap-4">
-                {topOption.pros?.length > 0 && (
-                  <div className="space-y-2">
+            {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && <div className="grid md:grid-cols-2 gap-4">
+                {topOption.pros?.length > 0 && <div className="space-y-2">
                     <h4 className="font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
                       <CheckCircle className="h-4 w-4" />
                       {resultType === 'factual' ? 'Caractéristiques' : 'Avantages'}
                     </h4>
                     <ul className="space-y-1">
-                      {topOption.pros.map((pro, index) => (
-                        <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                      {topOption.pros.map((pro, index) => <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
                           <span className="text-green-500 mt-1">•</span>
                           <span>{pro}</span>
-                        </li>
-                      ))}
+                        </li>)}
                     </ul>
-                  </div>
-                )}
+                  </div>}
                 
-                {topOption.cons?.length > 0 && resultType !== 'factual' && (
-                  <div className="space-y-2">
+                {topOption.cons?.length > 0 && resultType !== 'factual' && <div className="space-y-2">
                     <h4 className="font-medium text-orange-700 dark:text-orange-300 flex items-center gap-2">
                       <ExternalLink className="h-4 w-4" />
                       Points d'attention
                     </h4>
                     <ul className="space-y-1">
-                      {topOption.cons.map((con, index) => (
-                        <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                      {topOption.cons.map((con, index) => <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
                           <span className="text-orange-500 mt-1">•</span>
                           <span>{con}</span>
-                        </li>
-                      ))}
+                        </li>)}
                     </ul>
-                  </div>
-                )}
-              </div>
-            )}
+                  </div>}
+              </div>}
 
             {/* Section Liens utiles sera gérée par le composant UsefulLinks dans AnalysisResult */}
           </div>
 
-          {result.imageQuery && (
-            <div className="hidden lg:flex lg:w-80 justify-center">
-              <DecisionImage 
-                imageQuery={result.imageQuery || result.recommendation}
-                alt={`Illustration pour ${result.recommendation}`}
-              />
-            </div>
-          )}
+          {result.imageQuery && <div className="hidden lg:flex lg:w-80 justify-center">
+              <DecisionImage imageQuery={result.imageQuery || result.recommendation} alt={`Illustration pour ${result.recommendation}`} />
+            </div>}
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
