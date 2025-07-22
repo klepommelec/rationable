@@ -1,4 +1,3 @@
-
 import { ICriterion, IResult } from '@/types/decision';
 import { AIProviderService, AIRequest } from './aiProviderService';
 import { UploadedFileInfo } from './fileUploadService';
@@ -13,24 +12,88 @@ const cleanAIResponse = (text: string): string => {
   if (!text) return text;
   
   return text
-    // Supprimer les séquences numériques en fin de texte (123, 1234, 12345, etc.)
     .replace(/\s*\d{3,6}\s*$/g, '')
-    // Supprimer les numéros isolés en fin de phrase
     .replace(/\s+\d{1,3}\s*$/g, '')
-    // Supprimer les références malformées
     .replace(/\[\d+\]\s*$/g, '')
-    // Supprimer les patterns numériques en milieu de phrase aussi
     .replace(/\s+\d{3,6}(?=\s|$)/g, '')
-    // Nettoyer les espaces
     .replace(/\s+/g, ' ')
     .trim();
+};
+
+// Fonction pour générer des liens de fallback intelligents
+const generateFallbackLinks = (dilemma: string, recommendation: string) => {
+  const cleanDilemma = encodeURIComponent(dilemma);
+  const cleanRecommendation = encodeURIComponent(recommendation || 'solution');
+  
+  console.log('🔗 Generating fallback links for:', { dilemma: dilemma.substring(0, 50), recommendation });
+  
+  const infoLinks = [
+    {
+      title: `Guide complet : ${recommendation || 'Solution'}`,
+      url: `https://www.google.fr/search?q=${cleanRecommendation}+guide+complet`,
+      description: `Guide détaillé sur ${recommendation || 'la solution recommandée'}`
+    },
+    {
+      title: `Avis et tests : ${recommendation || 'Solution'}`,
+      url: `https://www.google.fr/search?q=${cleanRecommendation}+avis+test+comparatif`,
+      description: `Avis d'experts et tests utilisateurs`
+    },
+    {
+      title: `Informations complémentaires`,
+      url: `https://fr.wikipedia.org/wiki/Special:Search?search=${cleanRecommendation}`,
+      description: `Ressources encyclopédiques et techniques`
+    }
+  ];
+  
+  const shoppingLinks = [
+    {
+      title: `Acheter ${recommendation || 'produit recommandé'} - Amazon`,
+      url: `https://www.amazon.fr/s?k=${cleanRecommendation}`,
+      description: `Voir les prix sur Amazon`
+    },
+    {
+      title: `Comparer les prix - ${recommendation || 'Produit'}`,
+      url: `https://www.google.fr/search?q=${cleanRecommendation}+prix+comparateur+achat&tbm=shop`,
+      description: `Comparaison de prix en ligne`
+    },
+    {
+      title: `Où acheter ${recommendation || 'ce produit'}`,
+      url: `https://www.google.fr/search?q=où+acheter+${cleanRecommendation}+magasin`,
+      description: `Trouver des points de vente`
+    }
+  ];
+  
+  return { infoLinks, shoppingLinks };
+};
+
+// Fonction pour valider et compléter les liens
+const validateAndEnhanceLinks = (result: any, dilemma: string): void => {
+  const recommendation = result.recommendation || 'solution recommandée';
+  
+  // Vérifier les infoLinks
+  if (!Array.isArray(result.infoLinks) || result.infoLinks.length < 2) {
+    console.log('⚠️ Missing or insufficient infoLinks, generating fallbacks');
+    const fallbackLinks = generateFallbackLinks(dilemma, recommendation);
+    result.infoLinks = fallbackLinks.infoLinks;
+  }
+  
+  // Vérifier les shoppingLinks
+  if (!Array.isArray(result.shoppingLinks) || result.shoppingLinks.length < 2) {
+    console.log('⚠️ Missing or insufficient shoppingLinks, generating fallbacks');
+    const fallbackLinks = generateFallbackLinks(dilemma, recommendation);
+    result.shoppingLinks = fallbackLinks.shoppingLinks;
+  }
+  
+  console.log('✅ Links validation completed:', {
+    infoLinksCount: result.infoLinks?.length || 0,
+    shoppingLinksCount: result.shoppingLinks?.length || 0
+  });
 };
 
 // Fonction pour calculer la fraîcheur des données
 const calculateDataFreshness = (realTimeData: any, hasWorkspaceData: boolean): 'very-fresh' | 'fresh' | 'moderate' | 'stale' => {
   console.log('🕒 Calculating data freshness...', { realTimeData: !!realTimeData, hasWorkspaceData });
   
-  // Si on a des données temps réel récentes
   if (realTimeData?.hasRealTimeData && realTimeData.content) {
     const timestamp = realTimeData.timestamp;
     const sourcesCount = realTimeData.sourcesCount || realTimeData.sources?.length || 0;
@@ -45,26 +108,22 @@ const calculateDataFreshness = (realTimeData: any, hasWorkspaceData: boolean): '
         provider: realTimeData.provider
       });
       
-      // Données très récentes (moins de 6 heures) avec plusieurs sources
       if (ageInHours < 6 && sourcesCount >= 3) {
         console.log('✅ Data is very fresh');
         return 'very-fresh';
       }
       
-      // Données récentes (moins de 24 heures)
       if (ageInHours < 24 && sourcesCount >= 1) {
         console.log('✅ Data is fresh');
         return 'fresh';
       }
       
-      // Données modérément récentes (moins de 7 jours)
       if (ageInHours < 168) {
         console.log('⚠️ Data is moderately fresh');
         return 'moderate';
       }
     }
     
-    // Si on a des sources mais pas de timestamp fiable
     if (sourcesCount >= 2) {
       console.log('✅ Data is fresh (based on sources count)');
       return 'fresh';
@@ -74,13 +133,11 @@ const calculateDataFreshness = (realTimeData: any, hasWorkspaceData: boolean): '
     return 'moderate';
   }
   
-  // Si on a des documents workspace mais pas de données temps réel
   if (hasWorkspaceData) {
     console.log('📚 Data is moderate (workspace documents only)');
     return 'moderate';
   }
   
-  // Pas de données récentes
   console.log('❌ Data is stale (no recent data)');
   return 'stale';
 };
@@ -92,7 +149,6 @@ export const generateCriteriaWithFallback = async (
 ) => {
   console.log('🎯 Generating criteria with multi-provider fallback');
 
-  // Récupérer les documents du workspace si disponibles
   let workspaceContext = '';
   let workspaceDocuments = [];
   
@@ -159,7 +215,6 @@ Exemple de format:
   } catch (error) {
     console.error('❌ All providers failed for criteria generation:', error);
     
-    // Fallback manuel avec critères génériques
     return {
       emoji: '🤔',
       criteria: ['Coût', 'Qualité', 'Facilité', 'Temps', 'Impact'],
@@ -171,7 +226,6 @@ Exemple de format:
   }
 };
 
-// Fonction utilitaire pour détecter les requêtes temps réel
 const detectRealTimeQuery = (dilemma: string): boolean => {
   const realTimeKeywords = [
     'draft', '2024', '2025', '2026', 'élection', 'prochain', 'futur', 'prochaine',
@@ -184,7 +238,6 @@ const detectRealTimeQuery = (dilemma: string): boolean => {
   const lowerDilemma = dilemma.toLowerCase();
   const hasRealTimeKeyword = realTimeKeywords.some(keyword => lowerDilemma.includes(keyword));
   
-  // Détection spéciale pour les questions sportives récentes
   const isSportsQuery = /draft|NBA|football|sport|joueur|équipe|match|championship/i.test(dilemma);
   const isRecentYear = /(2024|2025|2026)/i.test(dilemma);
   
@@ -209,13 +262,11 @@ export const generateOptionsWithFallback = async (
 ): Promise<IResult> => {
   console.log('🎯 Generating options with multi-provider fallback');
 
-  // Déterminer le type de question en utilisant le service de classification
   const questionType = await detectQuestionType(dilemma);
   console.log(`🎯 Question type determined: ${questionType}`);
 
   const criteriaList = criteria.map(c => c.name).join(', ');
   
-  // Vérifier si on a besoin de données temps réel
   const needsRealTimeData = detectRealTimeQuery(dilemma);
   let realTimeContext = '';
   let realTimeData = null;
@@ -223,7 +274,6 @@ export const generateOptionsWithFallback = async (
   if (needsRealTimeData) {
     console.log('🔍 Real-time data needed, using search providers...');
     
-    // Context spécifique pour questions sports récentes
     const isNBADraft = /draft.*NBA.*202[4-9]/i.test(dilemma);
     const isNBATopic = /NBA|basketball/i.test(dilemma);
     let searchContext = 'Current sports events and recent information';
@@ -263,7 +313,6 @@ export const generateOptionsWithFallback = async (
     }
   }
 
-  // Récupérer les documents du workspace (avec filtrage de pertinence amélioré)
   let workspaceContext = '';
   let workspaceDocuments = [];
   
@@ -284,9 +333,7 @@ export const generateOptionsWithFallback = async (
   
   let prompt = '';
 
-  // Adapter le prompt selon le type de question
   if (questionType === 'factual') {
-    // Pour les questions factuelles : demander UNE réponse directe
     prompt = `
 Analysez cette question factuelle et donnez LA réponse précise et directe.
 
@@ -309,20 +356,19 @@ Retournez un objet JSON avec:
 3. "imageQuery": Description pour générer une image (en anglais, très descriptive)
 4. "confidenceLevel": Niveau de confiance de la réponse (1-100)
 5. "dataFreshness": Fraîcheur des données utilisées ("very-fresh", "fresh", "moderate", "stale")
-6. "infoLinks": Tableau de 3-5 liens utiles avec "title" et "url" (obligatoire)
-7. "shoppingLinks": Tableau de 2-3 liens d'achat avec "title" et "url" (obligatoire)
+6. "infoLinks": Tableau de EXACTEMENT 3 liens utiles avec "title", "url" et "description" (OBLIGATOIRE)
+7. "shoppingLinks": Tableau de EXACTEMENT 3 liens d'achat avec "title", "url" et "description" (OBLIGATOIRE)
 8. "breakdown": Tableau avec UN SEUL objet contenant:
    - "option": La réponse factuelle
    - "pros": Tableau des éléments factuels positifs/caractéristiques
    - "cons": Tableau des limitations/précisions (si applicable)
    - "score": 100 (réponse factuelle = score maximal)
 
-IMPORTANT: Pour une question factuelle, générez UN SEUL élément dans le breakdown avec score 100.
+IMPORTANT: Les infoLinks et shoppingLinks sont OBLIGATOIRES et doivent contenir exactement 3 éléments chacun.
 
 Répondez UNIQUEMENT avec un objet JSON valide.`;
 
   } else {
-    // Pour les questions de choix (comparative ou simple-choice) : forcer 3-5 options
     prompt = `
 Analysez ce dilemme de choix et générez EXACTEMENT 3 à 5 options différentes avec évaluation détaillée.
 
@@ -348,23 +394,15 @@ Retournez un objet JSON avec:
 3. "imageQuery": Description pour générer une image (en anglais, très descriptive)
 4. "confidenceLevel": Niveau de confiance de l'analyse (1-100)
 5. "dataFreshness": Fraîcheur des données utilisées ("very-fresh", "fresh", "moderate", "stale")
-6. "infoLinks": Tableau de 3-5 liens utiles avec "title" et "url" (obligatoire)
-7. "shoppingLinks": Tableau de 2-3 liens d'achat avec "title" et "url" (obligatoire)
+6. "infoLinks": Tableau de EXACTEMENT 3 liens utiles avec "title", "url" et "description" (OBLIGATOIRE)
+7. "shoppingLinks": Tableau de EXACTEMENT 3 liens d'achat avec "title", "url" et "description" (OBLIGATOIRE)
 8. "breakdown": Tableau de 3-5 objets avec:
    - "option": Nom de l'option (différent pour chaque option)
    - "pros": Tableau des avantages spécifiques
    - "cons": Tableau des inconvénients spécifiques
    - "score": Note sur 100 (VARIEZ les scores: 85-95 pour la meilleure, 70-84 pour les bonnes, 50-69 pour les moyennes)
 
-Exemple de breakdown attendu:
-[
-  {"option": "Tesla Model 3", "pros": ["..."], "cons": ["..."], "score": 88},
-  {"option": "BMW i4", "pros": ["..."], "cons": ["..."], "score": 82},
-  {"option": "Peugeot e-208", "pros": ["..."], "cons": ["..."], "score": 76},
-  {"option": "Renault Zoe", "pros": ["..."], "cons": ["..."], "score": 71}
-]
-
-Générez des options concrètes et pertinentes avec des scores réalistes et variés.
+IMPORTANT: Les infoLinks et shoppingLinks sont OBLIGATOIRES et doivent contenir exactement 3 éléments chacun avec des URLs réelles.
 
 Répondez UNIQUEMENT avec un objet JSON valide.`;
   }
@@ -392,12 +430,10 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
     
     const result = response.content;
     
-    // Nettoyer la recommandation
     if (result.recommendation) {
       result.recommendation = cleanAIResponse(result.recommendation);
     }
     
-    // Résumer la description automatiquement
     if (result.description && result.recommendation) {
       console.log('📝 Summarizing description...');
       try {
@@ -410,12 +446,10 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
         console.log('✅ Description summarized successfully');
       } catch (summaryError) {
         console.warn('⚠️ Failed to summarize description, keeping original:', summaryError);
-        // Garder la description originale mais la nettoyer
         result.description = cleanAIResponse(result.description);
       }
     }
     
-    // Nettoyer les breakdown items
     if (result.breakdown && Array.isArray(result.breakdown)) {
       result.breakdown = result.breakdown.map(item => ({
         ...item,
@@ -425,16 +459,15 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
       }));
     }
     
-    // Calculer et assigner la fraîcheur des données
+    validateAndEnhanceLinks(result, dilemma);
+    
     const calculatedFreshness = calculateDataFreshness(realTimeData, workspaceDocuments.length > 0);
     result.dataFreshness = calculatedFreshness;
     
     console.log(`📊 Data freshness calculated: ${calculatedFreshness}`);
     
-    // Ajouter le type de résultat
     result.resultType = questionType;
     
-    // Ajouter les métadonnées de données en temps réel (mais sans afficher les sources dans l'UI pour l'instant)
     if (realTimeData) {
       result.realTimeData = {
         hasRealTimeData: !!realTimeData.content,
@@ -446,7 +479,6 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
       };
     }
 
-    // Ajouter les métadonnées des documents workspace
     if (workspaceDocuments.length > 0) {
       result.workspaceData = {
         documentsUsed: workspaceDocuments.length,
@@ -455,14 +487,12 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
       };
     }
 
-    // Ajouter les métadonnées du fournisseur
     result.aiProvider = {
       provider: response.provider,
       model: response.model,
       success: true
     };
     
-    // Fetch social content en parallèle
     try {
       console.log('🔍 Fetching social content for:', result.recommendation);
       const { data: socialData, error } = await supabase.functions.invoke('social-content-fetcher', {
@@ -489,15 +519,16 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
   } catch (error) {
     console.error('❌ All providers failed for options generation:', error);
     
-    // Fallback manuel avec options génériques
+    const fallbackLinks = generateFallbackLinks(dilemma, 'solution recommandée');
+    
     return {
       recommendation: "Analyse manuelle requise",
       description: "Tous les fournisseurs IA ont échoué. Une analyse manuelle est recommandée pour ce dilemme complexe.",
       imageQuery: "decision making analysis flowchart",
       dataFreshness: "stale" as const,
       resultType: questionType,
-      infoLinks: [],
-      shoppingLinks: [],
+      infoLinks: fallbackLinks.infoLinks,
+      shoppingLinks: fallbackLinks.shoppingLinks,
       breakdown: questionType === 'factual' ? [
         {
           option: "Réponse non disponible",
