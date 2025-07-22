@@ -1,7 +1,7 @@
 
 import * as React from 'react';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
-import { detectQuestionType } from '@/services/questionTypeDetector';
+import { detectQuestionType } from '@/services/questionClassificationService';
 import { EmojiPicker } from './EmojiPicker';
 import { CriteriaManager } from './CriteriaManager';
 import { OptionsLoadingSkeleton } from './OptionsLoadingSkeleton';
@@ -46,8 +46,30 @@ const DecisionMaker = () => {
   
   const currentDecision = getCurrentDecision();
   
-  // Déterminer le type de question pour adapter l'interface
-  const questionType = dilemma ? detectQuestionType(dilemma) : 'comparative';
+  // État pour le type de question avec classification asynchrone
+  const [questionType, setQuestionType] = React.useState<'factual' | 'comparative' | 'simple-choice'>('comparative');
+  
+  // Effet pour classifier la question quand elle change
+  React.useEffect(() => {
+    const classifyQuestion = async () => {
+      if (dilemma && dilemma.trim()) {
+        try {
+          const type = await detectQuestionType(dilemma);
+          setQuestionType(type);
+          console.log(`🎯 Question classified as: ${type}`);
+        } catch (error) {
+          console.error('❌ Error classifying question:', error);
+          // Fallback par défaut
+          setQuestionType('comparative');
+        }
+      }
+    };
+    
+    // Debounce pour éviter trop d'appels pendant que l'utilisateur tape
+    const timeoutId = setTimeout(classifyQuestion, 500);
+    return () => clearTimeout(timeoutId);
+  }, [dilemma]);
+  
   const shouldShowCriteria = questionType === 'comparative' || questionType === 'simple-choice';
   
   return (
@@ -68,6 +90,17 @@ const DecisionMaker = () => {
                 </h1>
               </div>
             </div>
+            
+            {/* Indicateur du type de question détecté */}
+            {dilemma && (
+              <div className="mb-4 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted">
+                  {questionType === 'factual' && '🎯 Question factuelle'}
+                  {questionType === 'comparative' && '⚖️ Question comparative'}
+                  {questionType === 'simple-choice' && '💡 Recherche de recommandation'}
+                </span>
+              </div>
+            )}
             
             {/* Afficher les critères uniquement pour les questions comparatives */}
             {shouldShowCriteria && (

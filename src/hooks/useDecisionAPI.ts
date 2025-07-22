@@ -1,3 +1,4 @@
+
 import { toast } from "sonner";
 import { ICriterion, IResult, IDecision } from '@/types/decision';
 import { generateCriteriaOnly, generateOptions } from '@/services/decisionService';
@@ -6,6 +7,7 @@ import { UploadedFile } from '@/components/FileUpload';
 import { AnalysisStep } from './useDecisionState';
 import { useWorkspaceContext } from './useWorkspaceContext';
 import { generateContextualEmoji } from '@/services/contextualEmojiService';
+import { detectQuestionType } from '@/services/questionClassificationService';
 
 interface UseDecisionAPIProps {
     dilemma: string;
@@ -58,9 +60,8 @@ export const useDecisionAPI = ({
         const currentCriteria = criteria;
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
         
-        // Importer la détection de type de question
-        const { detectQuestionType } = await import('@/services/questionTypeDetector');
-        const questionType = detectQuestionType(dilemma);
+        // Utiliser la nouvelle classification IA
+        const questionType = await detectQuestionType(dilemma);
         
         console.log("🔄 [DEBUG] Starting options generation", {
             isRetry,
@@ -212,9 +213,8 @@ export const useDecisionAPI = ({
     const handleStartAnalysis = async () => {
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
         
-        // Importer la détection de type de question
-        const { detectQuestionType } = await import('@/services/questionTypeDetector');
-        const questionType = detectQuestionType(dilemma);
+        // Utiliser la nouvelle classification IA
+        const questionType = await detectQuestionType(dilemma);
         
         console.log("🚀 [DEBUG] Starting full analysis", { 
           dilemma: dilemma.substring(0, 50) + "...",
