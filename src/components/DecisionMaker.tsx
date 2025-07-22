@@ -48,7 +48,7 @@ const DecisionMaker = () => {
   
   // Déterminer le type de question pour adapter l'interface
   const questionType = dilemma ? detectQuestionType(dilemma) : 'comparative';
-  const shouldShowCriteria = questionType === 'comparative';
+  const shouldShowCriteria = questionType === 'comparative' || questionType === 'simple-choice';
   
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-[80px]">
