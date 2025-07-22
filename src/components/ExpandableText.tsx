@@ -19,7 +19,7 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
 
   return (
     <div className={className}>
-      <p className="text-muted-foreground leading-relaxed">
+      <p className="text-muted-foreground leading-relaxed break-words">
         {displayText}
         {shouldTruncate && !isExpanded && '...'}
       </p>
