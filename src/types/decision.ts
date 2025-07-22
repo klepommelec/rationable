@@ -36,6 +36,7 @@ export interface IResult {
   breakdown: IBreakdownItem[];
   infoLinks?: ILink[];
   shoppingLinks?: ILink[];
+  socialContent?: ISocialContent;
   imageQuery?: string;
   workspaceData?: {
     documentsUsed: number;

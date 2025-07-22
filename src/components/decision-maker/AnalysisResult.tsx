@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BarChart3, Table2, ExternalLink, Lightbulb } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { YouTubeVideoCard } from '@/components/YouTubeVideoCard';
+import YouTubeVideoCard from '@/components/YouTubeVideoCard';
 
 interface AnalysisResultProps {
   result: IResult | null;
@@ -54,7 +54,13 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           clearSession={clearSession}
         />
         
-        <UsefulLinks result={result} />
+        <UsefulLinks 
+          infoLinks={result.infoLinks}
+          shoppingLinks={result.shoppingLinks}
+          socialContent={result.socialContent}
+          dilemma={dilemma}
+          recommendation={result.recommendation}
+        />
         
         {hasYouTubeVideos && (
           <Card>
@@ -74,7 +80,11 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </Card>
         )}
         
-        <AnalysisInsights result={result} />
+        <AnalysisInsights 
+          breakdown={result.breakdown || []}
+          topOption={result.breakdown?.[0] || {} as any}
+          cleanOptionName={result.breakdown?.[0]?.option || result.recommendation}
+        />
       </div>
     );
   }
@@ -89,7 +99,13 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         clearSession={clearSession}
       />
       
-      <UsefulLinks result={result} />
+      <UsefulLinks 
+        infoLinks={result.infoLinks}
+        shoppingLinks={result.shoppingLinks}
+        socialContent={result.socialContent}
+        dilemma={dilemma}
+        recommendation={result.recommendation}
+      />
       
       {hasMultipleOptions && (
         <Tabs defaultValue="comparison" className="w-full">
@@ -138,7 +154,11 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </TabsContent>
           
           <TabsContent value="insights" className="mt-6">
-            <AnalysisInsights result={result} />
+            <AnalysisInsights 
+              breakdown={result.breakdown || []}
+              topOption={result.breakdown?.[0] || {} as any}
+              cleanOptionName={result.breakdown?.[0]?.option || result.recommendation}
+            />
           </TabsContent>
         </Tabs>
       )}
