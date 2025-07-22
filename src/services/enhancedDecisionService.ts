@@ -1,4 +1,3 @@
-
 import { ICriterion, IResult } from '@/types/decision';
 import { AIProviderService, AIRequest } from './aiProviderService';
 import { UploadedFileInfo } from './fileUploadService';
@@ -314,7 +313,8 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
         timestamp: realTimeData.timestamp,
         sourcesCount: realTimeData.sources?.length || 0,
         searchQuery: realTimeData.searchQuery,
-        provider: realTimeData.provider
+        provider: realTimeData.provider,
+        sources: realTimeData.sources || []
       };
     }
 

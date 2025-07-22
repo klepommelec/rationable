@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIProviderDashboard } from './AIProviderDashboard';
 import { AIProviderMonitor } from './AIProviderMonitor';
 import { ExpandableText } from '@/components/ExpandableText';
+import { SourcesList } from './SourcesList';
 
 interface RecommendationCardProps {
   result: IResult;
@@ -102,6 +103,13 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 />
               )}
             </div>
+            
+            {/* Affichage des sources web si disponibles */}
+            {result.realTimeData?.sources && result.realTimeData.sources.length > 0 && (
+              <div className="mb-4">
+                <SourcesList sources={result.realTimeData.sources} />
+              </div>
+            )}
           </div>
           
           <div className="flex items-center gap-2">

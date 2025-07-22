@@ -47,6 +47,7 @@ export interface IResult {
     sourcesCount?: number;
     provider?: string;
     searchQuery?: string;
+    sources?: string[];
   };
   aiProvider?: {
     provider: string;
