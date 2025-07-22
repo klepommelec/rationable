@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useExpandableText } from '@/hooks/useExpandableText';
@@ -15,13 +15,20 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
   maxLength = 300,
   className = ""
 }) => {
-  const { displayText, isExpanded, shouldTruncate, toggleExpanded } = useExpandableText(text, maxLength);
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Simple check if text is long enough to potentially need expansion
+  const shouldTruncate = text.length > 150; // Rough estimate for 3 lines
+  const toggleExpanded = () => setIsExpanded(!isExpanded);
 
   return (
     <div className={className}>
-      <p className="text-muted-foreground leading-relaxed break-words">
-        {displayText}
-        {shouldTruncate && !isExpanded && '...'}
+      <p className={`text-muted-foreground leading-relaxed break-words ${
+        !isExpanded && shouldTruncate 
+          ? 'line-clamp-3' 
+          : ''
+      }`}>
+        {text}
       </p>
       {shouldTruncate && (
         <Button
