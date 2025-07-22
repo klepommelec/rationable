@@ -80,8 +80,8 @@ export const DataFreshnessIndicator: React.FC<DataFreshnessIndicatorProps> = ({
       {hasRealTimeData && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Database className="h-3 w-3" aria-hidden="true" />
-          <span>
-            {sourcesCount > 0 && `${sourcesCount} sources`}
+          <span title="Sites web et bases de données consultés pour obtenir des informations récentes">
+            {sourcesCount > 0 && `${sourcesCount} sources web`}
             {timestamp && sourcesCount > 0 && ' • '}
             {timestamp && formatTimestamp(timestamp)}
           </span>
