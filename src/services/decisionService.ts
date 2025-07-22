@@ -1,9 +1,7 @@
-
 import { ICriterion, IResult, DEFAULT_CATEGORIES } from '@/types/decision';
 import { UploadedFileInfo } from './fileUploadService';
 import { AIProviderService } from './aiProviderService';
 import { detectQuestionType, QuestionType } from './questionTypeDetector';
-import { supabase } from '@/integrations/supabase/client';
 
 export const generateCriteriaOnly = async (
   dilemma: string,
@@ -62,382 +60,817 @@ Utilisez ces catégories : practical, financial, personal, social, environmental
   }
 };
 
-// Nouvelle fonction pour utiliser les Edge Functions pour la génération d'options
-export const generateOptions = async (
-  dilemma: string,
-  criteria: ICriterion[],
-  files?: UploadedFileInfo[],
-  workspaceId?: string
-): Promise<IResult> => {
-  console.log('🤖 Generating options with OpenAI/Claude Edge Functions');
+// Fonction ultra-robuste pour nettoyer et parser le JSON avec réparation automatique
+const cleanAndParseJSON = (content: string): any => {
+  console.log('🧹 Raw content to clean (first 500 chars):', content.substring(0, 500));
+  console.log('🧹 Full content length:', content.length);
   
-  const questionType = detectQuestionType(dilemma);
-  console.log(`📊 Question type detected: ${questionType}`);
+  // Étapes de nettoyage progressives
+  let cleanContent = content
+    .replace(/```json/gi, '')
+    .replace(/```/g, '')
+    .replace(/^\s*json\s*/i, '')
+    .replace(/^[^{]*({.*})[^}]*$/s, '$1')  // Extraire seulement le JSON
+    .trim();
+
+  console.log('🧹 After basic cleaning:', cleanContent.substring(0, 300));
+
+  // Détecter si le JSON est tronqué
+  const openBraces = (cleanContent.match(/\{/g) || []).length;
+  const closeBraces = (cleanContent.match(/\}/g) || []).length;
+  const openBrackets = (cleanContent.match(/\[/g) || []).length;
+  const closeBrackets = (cleanContent.match(/\]/g) || []).length;
   
-  // Construire le prompt optimisé selon le type de question
-  let systemPrompt = '';
-  let userPrompt = '';
-  
-  if (questionType === 'factual') {
-    systemPrompt = `Tu es un expert qui répond à des questions factuelles avec précision. 
-    Réponds UNIQUEMENT en JSON valide avec cette structure exacte :
-    {
-      "recommendation": "Réponse factuelle précise",
-      "description": "Explication détaillée avec des faits vérifiables",
-      "breakdown": [
-        {
-          "option": "Réponse factuelle",
-          "score": 100,
-          "pros": ["Fait vérifié 1", "Fait vérifié 2"],
-          "cons": [],
-          "scores": {}
+  console.log(`🔍 JSON structure check: {${openBraces}/${closeBraces}} [${openBrackets}/${closeBrackets}]`);
+
+  // Patterns pour extraire le JSON (du plus spécifique au plus général)
+  const jsonPatterns = [
+    /\{\s*"recommendation"[\s\S]*?"breakdown"\s*:\s*\[[\s\S]*?\]\s*\}/,  // JSON complet
+    /\{\s*"recommendation"[\s\S]*?"breakdown"\s*:\s*\[[\s\S]*$/,  // JSON tronqué
+    /\{[\s\S]*"breakdown"[\s\S]*\}/,  // JSON avec breakdown
+    /\{[\s\S]*"recommendation"[\s\S]*\}/,  // JSON avec recommendation
+    /\{[\s\S]*\}/  // Tout JSON
+  ];
+
+  for (let i = 0; i < jsonPatterns.length; i++) {
+    const pattern = jsonPatterns[i];
+    const match = cleanContent.match(pattern);
+    if (match) {
+      let jsonString = match[0];
+      console.log(`🎯 Pattern ${i+1} matched - JSON length: ${jsonString.length}`);
+      
+      // Techniques de réparation automatique pour JSON mal formé
+      jsonString = jsonString
+        // Supprimer les commentaires
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/\/\/.*$/gm, '')
+        
+        // Réparer les virgules
+        .replace(/,(\s*[}\]])/g, '$1')  // Virgules en trop avant } ou ]
+        .replace(/([}\]])(\s*)([{\[])/g, '$1,$2$3')  // Virgules manquantes entre objets/arrays
+        
+        // Réparer les guillemets
+        .replace(/([{,]\s*)(\w+)(\s*):/g, '$1"$2"$3:')  // Clés sans guillemets
+        .replace(/:\s*([^",{\[\s][^",}\]]*[^",}\]\s])(\s*[,}\]])/g, ':"$1"$2')  // Valeurs sans guillemets
+        
+        // Réparer les caractères d'échappement
+        .replace(/\\"/g, '"')
+        .replace(/\\\//g, '/')
+        
+        // Normaliser les espaces
+        .replace(/\n/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      // Si JSON tronqué, essayer de le compléter intelligemment
+      if (i === 1 || (openBraces > closeBraces) || (openBrackets > closeBrackets)) {
+        console.log('🔧 Attempting to repair truncated JSON...');
+        
+        // Compléter les arrays non fermés
+        if (jsonString.includes('"breakdown"') && !jsonString.match(/\]\s*\}?\s*$/)) {
+          if (jsonString.includes('"option"')) {
+            // Fermer l'objet en cours et l'array breakdown
+            jsonString = jsonString.replace(/,?\s*$/, '') + '}]}';
+          } else {
+            // Fermer l'array breakdown vide
+            jsonString = jsonString.replace(/\[\s*$/, '[]') + '}';
+          }
         }
-      ]
-    }`;
-    
-    userPrompt = `Question factuelle: "${dilemma}"
-    
-    Critères d'évaluation: ${criteria.map(c => c.name).join(', ')}
-    
-    Fournis une réponse factuelle précise avec une seule option dans le breakdown.`;
-  } else {
-    // Question comparative - demander explicitement plusieurs options
-    systemPrompt = `Tu es un expert en prise de décision qui analyse des choix comparatifs.
-    Tu dois TOUJOURS générer exactement 4 options différentes avec des scores variés.
-    
-    Réponds UNIQUEMENT en JSON valide avec cette structure exacte :
-    {
-      "recommendation": "Nom de la meilleure option",
-      "description": "Description comparative détaillée",
-      "breakdown": [
-        {
-          "option": "Option 1 - La meilleure",
-          "score": 87,
-          "pros": ["Avantage 1", "Avantage 2", "Avantage 3"],
-          "cons": ["Inconvénient mineur"],
-          "scores": {}
-        },
-        {
-          "option": "Option 2 - Deuxième choix",
-          "score": 82,
-          "pros": ["Avantage 1", "Avantage 2"],
-          "cons": ["Inconvénient 1", "Inconvénient 2"],
-          "scores": {}
-        },
-        {
-          "option": "Option 3 - Troisième choix",
-          "score": 76,
-          "pros": ["Avantage 1", "Avantage 2"],
-          "cons": ["Inconvénient 1", "Inconvénient 2"],
-          "scores": {}
-        },
-        {
-          "option": "Option 4 - Quatrième choix",
-          "score": 71,
-          "pros": ["Avantage 1", "Avantage 2"],
-          "cons": ["Inconvénient 1", "Inconvénient 2"],
-          "scores": {}
+        
+        // Compléter les objets non fermés
+        while (openBraces > (jsonString.match(/\}/g) || []).length) {
+          jsonString += '}';
         }
-      ]
-    }`;
-    
-    userPrompt = `Question comparative: "${dilemma}"
-    
-    Critères d'évaluation: ${criteria.map(c => c.name).join(', ')}
-    
-    IMPORTANT: Génère EXACTEMENT 4 options différentes avec des scores décroissants (entre 65-90).
-    Chaque option doit avoir des avantages et inconvénients spécifiques.
-    Base ton analyse sur les critères fournis.`;
+        
+        console.log('🔧 Repaired JSON preview:', jsonString.substring(jsonString.length - 100));
+      }
+
+      try {
+        const parsed = JSON.parse(jsonString);
+        console.log('✅ Successfully parsed JSON with keys:', Object.keys(parsed));
+        console.log('✅ Breakdown length:', parsed.breakdown?.length || 0);
+        return parsed;
+      } catch (e) {
+        console.log(`❌ Pattern ${i+1} failed to parse:`, e.message);
+        console.log('❌ Failed JSON preview:', jsonString.substring(0, 200));
+        continue;
+      }
+    }
   }
+
+  console.log('❌ No valid JSON pattern found in content');
+  return null;
+};
+
+// Fonction améliorée pour extraire des produits multiples depuis le texte
+const extractMultipleProductsFromText = (content: string, questionType: QuestionType) => {
+  console.log('🔍 Extracting multiple products from text...');
+  
+  // D'abord, essayer d'extraire depuis le JSON si présent
+  const jsonProducts = extractProductsFromJSON(content);
+  if (jsonProducts.length >= 2) {
+    console.log('✅ Extracted products from JSON:', jsonProducts);
+    return jsonProducts;
+  }
+  
+  // Patterns de produits très spécifiques pour éviter les fragments
+  const productPatterns = [
+    // Ordinateurs portables - patterns plus précis
+    /\b((?:Apple\s+)?MacBook\s+(?:Air|Pro)\s*(?:M[0-9]+)?(?:\s+[0-9]+(?:\.\d+)?")?)\b/gi,
+    /\b(Dell\s+XPS\s+[0-9]+(?:\s+Plus)?)\b/gi,
+    /\b(HP\s+(?:Pavilion|Envy|Spectre)\s+[A-Za-z0-9-]+)\b/gi,
+    /\b(Lenovo\s+(?:ThinkPad|IdeaPad|Yoga)\s+[A-Za-z0-9-]+)\b/gi,
+    /\b(Asus\s+(?:ZenBook|VivoBook|ROG)\s+[A-Za-z0-9-]+)\b/gi,
+    /\b(Microsoft\s+Surface\s+(?:Laptop|Pro)\s*[0-9]*)\b/gi,
+    
+    // Smartphones - plus précis
+    /\b(iPhone\s+[0-9]+\s*(?:Pro|Plus|Max|Mini)?)\b/gi,
+    /\b(Samsung\s+Galaxy\s+[A-Za-z0-9]+(?:\s+Ultra)?)\b/gi,
+    /\b(Google\s+Pixel\s+[0-9]+(?:\s+Pro)?)\b/gi,
+    
+    // Destinations - plus strict
+    /\b([A-Z][a-zA-ZÀ-ÿ]{2,}(?:\s+[A-Z][a-zA-ZÀ-ÿ]{2,})?(?:,\s+[A-Z][a-zA-ZÀ-ÿ]+)?)\b/g
+  ];
+
+  const foundProducts = new Set<string>();
+  
+  productPatterns.forEach(pattern => {
+    const matches = content.match(pattern);
+    if (matches) {
+      matches.forEach(match => {
+        const cleaned = cleanProductName(match.trim());
+        if (cleaned && cleaned.length >= 5 && cleaned.length <= 50) {
+          foundProducts.add(cleaned);
+        }
+      });
+    }
+  });
+
+  const products = Array.from(foundProducts).slice(0, 4);
+  console.log(`✅ Found ${products.length} products:`, products);
+  return products;
+};
+
+// Nouvelle fonction pour extraire les produits depuis le JSON
+const extractProductsFromJSON = (content: string): string[] => {
+  const products: string[] = [];
   
   try {
-    // Essayer d'abord avec OpenAI
-    console.log('🚀 Trying OpenAI Edge Function first');
-    const { data: openaiData, error: openaiError } = await supabase.functions.invoke('openai-decision-maker', {
-      body: {
-        prompt: `${systemPrompt}\n\n${userPrompt}`,
-        files: files || []
-      }
-    });
-    
-    if (!openaiError && openaiData && !openaiData.error) {
-      console.log('✅ OpenAI Edge Function succeeded');
-      
-      // Valider et traiter la réponse OpenAI
-      const result = processEdgeFunctionResponse(openaiData, questionType, dilemma);
-      
-      // Vérifier si on a assez d'options pour une question comparative
-      if (questionType === 'comparative' && result.breakdown && result.breakdown.length < 3) {
-        console.log('⚠️ OpenAI returned insufficient options, generating synthetic ones');
-        result.breakdown = generateSyntheticOptions(dilemma, result.breakdown[0] || {}, criteria);
-      }
-      
-      return result;
+    // Chercher les patterns "option": "nom du produit"
+    const optionMatches = content.match(/"option"\s*:\s*"([^"]+)"/g);
+    if (optionMatches) {
+      optionMatches.forEach(match => {
+        const optionMatch = match.match(/"option"\s*:\s*"([^"]+)"/);
+        if (optionMatch && optionMatch[1]) {
+          const cleaned = cleanProductName(optionMatch[1]);
+          if (cleaned && cleaned.length >= 5) {
+            products.push(cleaned);
+          }
+        }
+      });
     }
-    
-    // Si OpenAI échoue, essayer Claude
-    console.log('🧠 Trying Claude Edge Function as fallback');
-    const { data: claudeData, error: claudeError } = await supabase.functions.invoke('claude-decision-maker', {
-      body: {
-        dilemma: dilemma,
-        criteria: criteria,
-        model: 'claude-sonnet-4-20250514'
-      }
-    });
-    
-    if (!claudeError && claudeData && !claudeData.error) {
-      console.log('✅ Claude Edge Function succeeded');
-      
-      const result = processEdgeFunctionResponse(claudeData, questionType, dilemma);
-      
-      // Vérifier si on a assez d'options pour une question comparative
-      if (questionType === 'comparative' && result.breakdown && result.breakdown.length < 3) {
-        console.log('⚠️ Claude returned insufficient options, generating synthetic ones');
-        result.breakdown = generateSyntheticOptions(dilemma, result.breakdown[0] || {}, criteria);
-      }
-      
-      return result;
-    }
-    
-    // Si les deux échouent, utiliser Perplexity en dernier recours
-    console.log('🔄 Both Edge Functions failed, using Perplexity as last resort');
-    return await generateOptionsWithPerplexity(dilemma, criteria, files, workspaceId);
-    
-  } catch (error) {
-    console.error('❌ Error generating options:', error);
-    throw error;
-  }
-};
-
-// Fonction pour traiter les réponses des Edge Functions
-const processEdgeFunctionResponse = (data: any, questionType: QuestionType, dilemma: string): IResult => {
-  console.log('📋 Processing Edge Function response');
-  
-  // Normaliser la structure de réponse
-  let processedData = data;
-  
-  // Si c'est une réponse d'OpenAI, elle peut avoir une structure différente
-  if (data.result) {
-    processedData = data.result;
+  } catch (e) {
+    console.log('⚠️ Error extracting from JSON:', e);
   }
   
-  // Assurer que la structure est complète
-  const result: IResult = {
-    recommendation: processedData.recommendation || 'Recommandation non disponible',
-    description: processedData.description || 'Description non disponible',
-    breakdown: Array.isArray(processedData.breakdown) ? processedData.breakdown : [],
-    resultType: questionType,
-    realTimeData: {
-      hasRealTimeData: false,
-      timestamp: new Date().toISOString(),
-      sourcesCount: 0,
-      searchQuery: dilemma,
-      provider: 'edge-function'
-    },
-    aiProvider: {
-      provider: data.aiProvider?.provider || 'openai',
-      model: data.aiProvider?.model || 'gpt-4o-mini',
-      success: true
-    }
-  };
-  
-  console.log(`✅ Processed result: ${result.breakdown?.length || 0} options`);
-  return result;
+  return products;
 };
 
-// Fonction pour générer des options synthétiques intelligentes
-const generateSyntheticOptions = (dilemma: string, baseOption: any, criteria: ICriterion[]) => {
+// Fonction pour nettoyer et normaliser les noms de produits
+const cleanProductName = (name: string): string => {
+  return name
+    .trim()
+    .replace(/^(Le|La|L'|Les|The)\s+/i, '') // Supprimer articles
+    .replace(/\s*-\s*[A-Za-z\s]*$/, '') // Supprimer suffixes après tiret
+    .replace(/\s*\([^)]*\)$/, '') // Supprimer parenthèses à la fin
+    .replace(/[^\w\s\-À-ÿ]/g, '') // Garder seulement lettres, chiffres, espaces, tirets
+    .replace(/\s+/g, ' ') // Normaliser espaces
+    .trim();
+};
+
+// Fonction améliorée pour générer des pros/cons réalistes
+const generateRealisticProsAndCons = (product: string, content: string, index: number) => {
+  const pros: string[] = [];
+  const cons: string[] = [];
+  
+  // Chercher des caractéristiques spécifiques dans le contenu
+  const sentences = content.split(/[.!?]/).filter(s => s.trim().length > 10);
+  
+  for (const sentence of sentences) {
+    const lower = sentence.toLowerCase();
+    if (lower.includes(product.toLowerCase()) || (index === 0 && sentences.indexOf(sentence) < 5)) {
+      
+      // Avantages potentiels
+      if (lower.match(/\b(excellent|performant|rapide|efficace|puissant|léger|autonomie|qualité|innovant|récent|abordable|compact)/)) {
+        const cleanSentence = sentence.trim().replace(/^[^A-Za-z]*/, '');
+        if (cleanSentence.length > 10 && cleanSentence.length < 100 && pros.length < 3) {
+          pros.push(cleanSentence);
+        }
+      }
+      
+      // Inconvénients potentiels
+      if (lower.match(/\b(cher|coûteux|limité|problème|défaut|lourd|complexe|manque)/)) {
+        const cleanSentence = sentence.trim().replace(/^[^A-Za-z]*/, '');
+        if (cleanSentence.length > 10 && cleanSentence.length < 100 && cons.length < 2) {
+          cons.push(cleanSentence);
+        }
+      }
+    }
+  }
+  
+  // Fallbacks génériques mais pertinents
+  if (pros.length === 0) {
+    const genericPros = [
+      `${product} offre de bonnes performances`,
+      `Design et qualité de construction appréciés`,
+      `Rapport qualité-prix intéressant`
+    ];
+    pros.push(genericPros[index % genericPros.length]);
+  }
+  
+  if (cons.length === 0 && index > 0) {
+    const genericCons = [
+      `Prix plus élevé que certaines alternatives`,
+      `Disponibilité parfois limitée`
+    ];
+    cons.push(genericCons[index % genericCons.length]);
+  }
+  
+  return { pros: pros.slice(0, 3), cons: cons.slice(0, 2) };
+};
+
+// Génération d'options synthétiques intelligentes pour les questions comparatives
+const generateSyntheticOptions = (dilemma: string, baseOption: any, content: string) => {
   console.log('🤖 Generating synthetic options for comparative question');
   
+  // Analyser le type de dilemme pour créer des options pertinentes
   const dilemmaLower = dilemma.toLowerCase();
+  
   let options: any[] = [];
   
-  // Garder l'option de base si elle existe
-  if (baseOption && baseOption.option) {
-    options.push(baseOption);
-  }
-  
-  // Générer des options spécifiques selon le type de dilemme
   if (dilemmaLower.includes('ordinateur') || dilemmaLower.includes('laptop') || dilemmaLower.includes('portable')) {
-    const laptopOptions = [
+    options = [
       { 
         option: 'MacBook Air M3 15"', 
-        score: 85, 
+        score: 82, 
         pros: ['Excellent écran Liquid Retina', 'Autonomie exceptionnelle 18h', 'Performance puissante M3'], 
         cons: ['Prix premium', 'Ports limités'], 
         scores: {} 
       },
       { 
         option: 'Dell XPS 13 Plus', 
-        score: 80, 
-        pros: ['Design ultra-premium', 'Écran InfinityEdge 4K', 'Clavier rétroéclairé'], 
+        score: 78, 
+        pros: ['Design ultra-premium', 'Écran InfinityEdge 4K'], 
         cons: ['Autonomie moyenne', 'Clavier tactile perfectible'], 
         scores: {} 
       },
       { 
         option: 'Lenovo ThinkPad X1 Carbon', 
-        score: 76, 
-        pros: ['Robustesse professionnelle', 'Excellent clavier', 'Sécurité avancée'], 
+        score: 74, 
+        pros: ['Robustesse professionnelle', 'Excellent clavier'], 
         cons: ['Design moins moderne', 'Prix élevé'], 
         scores: {} 
-      },
-      { 
-        option: 'HP Spectre x360', 
-        score: 72, 
-        pros: ['Écran tactile convertible', 'Design élégant', 'Bonnes performances'], 
-        cons: ['Ventilateur parfois bruyant', 'Autonomie correcte'], 
-        scores: {} 
       }
     ];
-    options = laptopOptions;
-  } else if (dilemmaLower.includes('smartphone') || dilemmaLower.includes('téléphone')) {
-    const phoneOptions = [
-      { 
-        option: 'iPhone 16 Pro', 
-        score: 88, 
-        pros: ['Processeur A18 Pro ultra-puissant', 'Système photo professionnel', 'Écosystème iOS'], 
-        cons: ['Prix très élevé'], 
-        scores: {} 
-      },
-      { 
-        option: 'Samsung Galaxy S25 Ultra', 
-        score: 84, 
-        pros: ['Écran Dynamic AMOLED 6.8"', 'S Pen intégré', 'Zoom optique 100x'], 
-        cons: ['Interface One UI complexe', 'Prix premium'], 
-        scores: {} 
-      },
-      { 
-        option: 'Google Pixel 9 Pro', 
-        score: 79, 
-        pros: ['IA Google avancée', 'Photographie computationnelle', 'Android pur'], 
-        cons: ['Disponibilité limitée', 'Modem moins performant'], 
-        scores: {} 
-      },
-      { 
-        option: 'OnePlus 13', 
-        score: 75, 
-        pros: ['Rapport qualité-prix', 'Charge ultra-rapide', 'OxygenOS fluide'], 
-        cons: ['Support photos moyen', 'Pas de charge sans fil'], 
-        scores: {} 
-      }
-    ];
-    options = phoneOptions;
   } else if (dilemmaLower.includes('voyage') || dilemmaLower.includes('vacances') || dilemmaLower.includes('destination')) {
-    const travelOptions = [
+    options = [
       { 
         option: 'Provence, France', 
-        score: 86, 
-        pros: ['Accessible sans visa', 'Climat méditerranéen', 'Riche patrimoine'], 
+        score: 83, 
+        pros: ['Accessible sans visa', 'Climat méditerranéen idéal', 'Riche patrimoine culturel'], 
         cons: ['Très touristique en été'], 
         scores: {} 
       },
       { 
         option: 'Costa Rica', 
-        score: 82, 
-        pros: ['Biodiversité exceptionnelle', 'Activités aventure', 'Éco-tourisme'], 
-        cons: ['Saison des pluies', 'Budget plus élevé'], 
+        score: 79, 
+        pros: ['Biodiversité exceptionnelle', 'Activités aventure variées'], 
+        cons: ['Saison des pluies possible', 'Budget plus élevé'], 
         scores: {} 
       },
       { 
         option: 'Portugal', 
-        score: 78, 
-        pros: ['Coût de la vie abordable', 'Littoral magnifique', 'Gastronomie'], 
-        cons: ['Bondé en été', 'Chaleur intense'], 
-        scores: {} 
-      },
-      { 
-        option: 'Islande', 
-        score: 73, 
-        pros: ['Paysages uniques', 'Aurores boréales', 'Sécurité maximale'], 
-        cons: ['Très cher', 'Climat imprévisible'], 
+        score: 75, 
+        pros: ['Coût de la vie abordable', 'Littoral magnifique'], 
+        cons: ['Peut être bondé en été', 'Chaleur intense'], 
         scores: {} 
       }
     ];
-    options = travelOptions;
-  } else {
-    // Options génériques mais pertinentes
-    const baseName = baseOption?.option?.split(' ')[0] || 'Option';
+  } else if (dilemmaLower.includes('smartphone') || dilemmaLower.includes('téléphone')) {
     options = [
       { 
-        option: `${baseName} Premium`, 
+        option: 'iPhone 16 Pro', 
         score: 84, 
-        pros: ['Qualité supérieure', 'Fonctionnalités avancées', 'Support premium'], 
+        pros: ['Processeur A18 Pro ultra-puissant', 'Système photo professionnel', 'Écosystème iOS intégré'], 
+        cons: ['Prix très élevé'], 
+        scores: {} 
+      },
+      { 
+        option: 'Samsung Galaxy S25 Ultra', 
+        score: 80, 
+        pros: ['Écran Dynamic AMOLED 6.8"', 'S Pen intégré', 'Zoom optique 100x'], 
+        cons: ['Interface One UI complexe', 'Autonomie moyenne'], 
+        scores: {} 
+      },
+      { 
+        option: 'Google Pixel 9 Pro', 
+        score: 76, 
+        pros: ['IA Google avancée', 'Photographie computationnelle', 'Android pur'], 
+        cons: ['Disponibilité limitée', 'Modem moins performant'], 
+        scores: {} 
+      }
+    ];
+  } else {
+    // Options génériques mais pertinentes
+    const baseName = baseOption.option.split(' ')[0] || 'Option';
+    options = [
+      { 
+        option: `${baseName} Alternative Premium`, 
+        score: 81, 
+        pros: ['Qualité supérieure', 'Fonctionnalités avancées'], 
         cons: ['Prix plus élevé'], 
         scores: {} 
       },
       { 
-        option: `${baseName} Standard`, 
-        score: 78, 
-        pros: ['Bon rapport qualité-prix', 'Polyvalent', 'Fiable'], 
-        cons: ['Moins de fonctionnalités premium'], 
+        option: `${baseName} Milieu de gamme`, 
+        score: 77, 
+        pros: ['Bon rapport qualité-prix', 'Polyvalent'], 
+        cons: ['Moins de fonctionnalités premium', 'Performance standard'], 
         scores: {} 
       },
       { 
         option: `${baseName} Économique`, 
-        score: 73, 
+        score: 72, 
         pros: ['Prix attractif', 'Fonctionnalités essentielles'], 
-        cons: ['Qualité moindre', 'Support limité'], 
-        scores: {} 
-      },
-      { 
-        option: `${baseName} Alternatif`, 
-        score: 69, 
-        pros: ['Approche différente', 'Innovation'], 
-        cons: ['Moins testé', 'Risque plus élevé'], 
+        cons: ['Qualité moindre', 'Durabilité limitée'], 
         scores: {} 
       }
     ];
   }
   
-  console.log(`✅ Generated ${options.length} synthetic options`);
+  console.log(`✅ Generated ${options.length} synthetic options with scores: ${options.map(o => o.score).join(', ')}`);
   return options;
 };
 
-// Fonction de fallback avec Perplexity (version simplifiée)
-const generateOptionsWithPerplexity = async (
+const extractTitleFromContent = (content: string, questionType: QuestionType): string => {
+  console.log(`🔍 Extracting title from content (type: ${questionType})`);
+  
+  // Essayer d'extraire le titre depuis le JSON
+  const titleMatch = content.match(/"recommendation":\s*"([^"]+)"/);
+  if (titleMatch && titleMatch[1]) {
+    const title = cleanProductName(titleMatch[1]);
+    console.log(`📝 Extracted and cleaned title from JSON: "${title}"`);
+    return title;
+  }
+  
+  // Essayer d'extraire la première option valide
+  const firstOptionMatch = content.match(/"option":\s*"([^"]+)"/);
+  if (firstOptionMatch && firstOptionMatch[1]) {
+    const title = cleanProductName(firstOptionMatch[1]);
+    console.log(`📝 Extracted title from first option: "${title}"`);
+    return title;
+  }
+  
+  // Chercher des noms de produits dans le texte libre
+  const productPatterns = [
+    /\b((?:Apple\s+)?MacBook\s+(?:Air|Pro)\s*(?:M[0-9]+)?(?:\s+[0-9]+(?:\.\d+)?")?)\b/i,
+    /\b(iPhone\s+[0-9]+\s*(?:Pro|Plus|Max|Mini)?)\b/i,
+    /\b(Dell\s+XPS\s+[0-9]+(?:\s+Plus)?)\b/i,
+    /\b(Samsung\s+Galaxy\s+[A-Za-z0-9]+)\b/i,
+    /\b(Google\s+Pixel\s+[0-9]+(?:\s+Pro)?)\b/i,
+    /\b(Lenovo\s+(?:ThinkPad|IdeaPad|Yoga)\s+[A-Za-z0-9-]+)\b/i
+  ];
+  
+  for (const pattern of productPatterns) {
+    const match = content.match(pattern);
+    if (match && match[1]) {
+      const title = cleanProductName(match[1]);
+      console.log(`📝 Extracted title from pattern: "${title}"`);
+      return title;
+    }
+  }
+  
+  const fallbackTitle = questionType === 'factual' ? 
+    'Réponse factuelle' : 
+    'Recommandation principale';
+  
+  console.log(`📝 Using fallback title: "${fallbackTitle}"`);
+  return fallbackTitle;
+};
+
+const extractProsConsFromContent = (content: string, questionType: QuestionType) => {
+  const pros: string[] = [];
+  const cons: string[] = [];
+  
+  console.log(`🔍 Extracting pros/cons from content (type: ${questionType})`);
+  
+  try {
+    const prosMatch = content.match(/"pros":\s*\[([^\]]+)\]/);
+    const consMatch = content.match(/"cons":\s*\[([^\]]+)\]/);
+    
+    if (prosMatch) {
+      const prosText = prosMatch[1];
+      const prosArray = prosText.split(',').map(p => 
+        p.replace(/"/g, '').trim()
+      ).filter(p => p.length > 3);
+      pros.push(...prosArray);
+      console.log(`✅ Extracted ${prosArray.length} pros from JSON`);
+    }
+    
+    if (consMatch) {
+      const consText = consMatch[1];
+      const consArray = consText.split(',').map(c => 
+        c.replace(/"/g, '').trim()
+      ).filter(c => c.length > 3);
+      cons.push(...consArray);
+      console.log(`✅ Extracted ${consArray.length} cons from JSON`);
+    }
+  } catch (e) {
+    console.log(`⚠️ JSON extraction failed, trying text analysis`);
+  }
+  
+  if (pros.length < 2) {
+    const sentences = content.split(/[.!?]/).filter(s => s.trim().length > 10);
+    
+    for (const sentence of sentences) {
+      const clean = sentence.trim();
+      
+      if (clean.match(/\b(excellent|meilleur|performant|rapide|efficace|puissant|innovant|récent|nouveau|autonomie|léger|compact|prix|abordable|qualité)/i) &&
+          !clean.match(/\b(mais|cependant|toutefois|problème|difficulté|cher|coûteux)/i)) {
+        if (clean.length < 120 && pros.length < 3) {
+          pros.push(clean.charAt(0).toUpperCase() + clean.slice(1));
+        }
+      }
+      
+      if (clean.match(/\b(cher|coûteux|limité|problème|défaut|manque|difficile|complexe|lourd|encombrant)/i)) {
+        if (clean.length < 120 && cons.length < 2) {
+          cons.push(clean.charAt(0).toUpperCase() + clean.slice(1));
+        }
+      }
+    }
+  }
+  
+  if (pros.length === 0) {
+    if (questionType === 'factual') {
+      pros.push('Information vérifiée et à jour', 'Réponse basée sur des sources fiables');
+    } else {
+      pros.push('Analyse complète des critères', 'Recommandation personnalisée');
+    }
+  }
+  
+  if (cons.length === 0 && questionType === 'comparative') {
+    cons.push('D\'autres options peuvent convenir selon vos besoins');
+  }
+  
+  console.log(`📊 Final pros/cons: ${pros.length} pros, ${cons.length} cons`);
+  return { pros: pros.slice(0, 3), cons: cons.slice(0, 2) };
+};
+
+export const generateOptions = async (
   dilemma: string,
   criteria: ICriterion[],
   files?: UploadedFileInfo[],
   workspaceId?: string
 ): Promise<IResult> => {
-  console.log('🔄 Using Perplexity as fallback for options');
+  console.log('🔍 Generating options with Perplexity only');
   
   const aiService = AIProviderService.getInstance();
   const questionType = detectQuestionType(dilemma);
   
-  const response = await aiService.executeWithFallback({
-    prompt: `Analyse comparative pour: "${dilemma}"\nCritères: ${criteria.map(c => c.name).join(', ')}`,
-    type: 'options',
-    files
-  });
+  console.log(`📊 Question type detected: ${questionType}`);
   
-  if (response.success && response.content) {
-    const content = response.content.content || response.content.recommendation || '';
-    
-    // Génération simplifiée basée sur Perplexity
-    const result: IResult = {
-      recommendation: 'Analyse basée sur recherche temps réel',
-      description: content.substring(0, 500) + '...',
-      breakdown: generateSyntheticOptions(dilemma, { option: 'Option principale', score: 85 }, criteria),
-      resultType: questionType,
-      realTimeData: {
-        hasRealTimeData: true,
-        timestamp: response.content.timestamp || new Date().toISOString(),
-        sourcesCount: response.content.sources?.length || 0,
-        searchQuery: dilemma,
-        provider: 'perplexity'
-      },
-      aiProvider: {
-        provider: response.provider,
-        model: response.model,
-        success: response.success
-      }
-    };
-    
-    return result;
+  let prompt: string;
+  
+  if (questionType === 'factual') {
+    prompt = `Question factuelle: "${dilemma}"
+
+Fournissez une réponse factuelle précise et actualisée. Cette question a une réponse objective unique.
+
+Répondez au format JSON exact suivant :
+{
+  "recommendation": "Nom précis du produit/lieu/chose recommandé (ex: iPhone 16 Pro, MacBook Air M3)",
+  "description": "Explication détaillée avec des faits récents et vérifiables (juillet 2025)",
+  "breakdown": [
+    {
+      "option": "Nom précis de la réponse",
+      "score": 100,
+      "pros": ["Caractéristique récente 1", "Avantage concret 2", "Spécification technique 3"],
+      "cons": [],
+      "scores": {}
+    }
+  ]
+}`;
+  } else {
+    // Prompt simplifié et plus clair pour les questions comparatives
+    prompt = `Question de choix: "${dilemma}"
+
+Critères d'évaluation: ${criteria.map(c => c.name).join(', ')}
+
+Proposez exactement 4 options différentes avec des scores variés (entre 65 et 90).
+
+IMPORTANT: Générez TOUJOURS 4 options avec des scores DIFFÉRENTS pour la comparaison.
+
+Format JSON EXACT (sans texte avant ou après):
+{
+  "recommendation": "Nom de la meilleure option",
+  "description": "Description avec informations juillet 2025",
+  "breakdown": [
+    {
+      "option": "Option 1 - La meilleure",
+      "score": 87,
+      "pros": ["Avantage 1", "Avantage 2", "Avantage 3"],
+      "cons": ["Inconvénient mineur"],
+      "scores": {}
+    },
+    {
+      "option": "Option 2 - Deuxième choix",
+      "score": 82,
+      "pros": ["Avantage 1", "Avantage 2"],
+      "cons": ["Inconvénient 1", "Inconvénient 2"],
+      "scores": {}
+    },
+    {
+      "option": "Option 3 - Troisième choix",
+      "score": 76,
+      "pros": ["Avantage 1", "Avantage 2"],
+      "cons": ["Inconvénient 1", "Inconvénient 2"],
+      "scores": {}
+    },
+    {
+      "option": "Option 4 - Quatrième choix",
+      "score": 71,
+      "pros": ["Avantage 1", "Avantage 2"],
+      "cons": ["Inconvénient 1", "Inconvénient 2"],
+      "scores": {}
+    }
+  ]
+}`;
   }
-  
-  throw new Error('Failed to generate options with any provider');
+
+  try {
+    const response = await aiService.executeWithFallback({
+      prompt,
+      type: 'options',
+      context: questionType === 'comparative' ? `Critères: ${criteria.map(c => c.name).join(', ')}` : 'Question factuelle',
+      files
+    });
+
+    if (response.success && response.content) {
+      const content = response.content.content || response.content.recommendation || '';
+      
+      console.log('📄 Processing Perplexity content for options...');
+      console.log('📄 Raw content received:', content.substring(0, 300) + '...');
+      
+      let parsedResult: any = null;
+      
+      // 1. Essayer d'abord le parsing JSON amélioré
+      parsedResult = cleanAndParseJSON(content);
+      
+      // 2. Si le JSON parsing échoue, utiliser l'extraction intelligente
+      if (!parsedResult || !parsedResult.breakdown || parsedResult.breakdown.length === 0) {
+        console.log('📝 JSON parsing failed, using intelligent text extraction...');
+        
+        if (questionType === 'comparative') {
+          console.log('🔍 Extracting multiple options for comparative question...');
+          
+          const foundProducts = extractMultipleProductsFromText(content, questionType);
+          
+          if (foundProducts.length >= 2) {
+            console.log(`✅ Found ${foundProducts.length} products, generating comparative breakdown`);
+            
+            const breakdown = foundProducts.slice(0, 4).map((product, index) => {
+              const { pros, cons } = generateRealisticProsAndCons(product, content, index);
+              return {
+                option: product,
+                score: 90 - (index * 5), // Scores décroissants réalistes
+                pros,
+                cons: index === 0 ? [] : cons, // Première option sans inconvénients
+                scores: {}
+              };
+            });
+            
+            parsedResult = {
+              recommendation: foundProducts[0],
+              description: `Analyse comparative des meilleures options disponibles en juillet 2025. ${content.substring(0, 200)}...`,
+              breakdown
+            };
+          }
+        }
+        
+        // Fallback si rien d'autre ne fonctionne
+        if (!parsedResult) {
+          console.log('⚠️ Using fallback single option extraction');
+          const recommendation = extractTitleFromContent(content, questionType);
+          const { pros, cons } = extractProsConsFromContent(content, questionType);
+          
+          parsedResult = {
+            recommendation,
+            description: content.length > 500 ? 
+              content.substring(0, 500) + '...' : 
+              content,
+            breakdown: [
+              {
+                option: recommendation,
+                score: questionType === 'factual' ? 100 : 85,
+                pros,
+                cons,
+                scores: {}
+              }
+            ]
+          };
+        }
+      }
+
+      // 3. Validation et nettoyage final
+      if (parsedResult) {
+        console.log(`📊 Final validation: ${parsedResult.breakdown?.length || 0} options for ${questionType} question`);
+        
+        // VALIDATION STRICTE: Questions comparatives DOIVENT avoir 3-4 options minimum
+        if (questionType === 'comparative' && (!parsedResult.breakdown || parsedResult.breakdown.length < 3)) {
+          console.log(`⚠️ Insufficient options (${parsedResult.breakdown?.length || 0}) for comparative question, generating synthetic options`);
+          
+          const extractedProducts = extractMultipleProductsFromText(content, questionType);
+          
+          if (extractedProducts.length >= 3) {
+            // Utiliser les produits extraits pour créer 4 options
+            console.log('✅ Using extracted products for options');
+            parsedResult.breakdown = extractedProducts.slice(0, 4).map((product, index) => {
+              const { pros, cons } = generateRealisticProsAndCons(product, content, index);
+              return {
+                option: product,
+                score: 87 - (index * 4), // Scores décroissants: 87, 83, 79, 75
+                pros,
+                cons: index === 0 ? [] : cons,
+                scores: {}
+              };
+            });
+            parsedResult.recommendation = extractedProducts[0];
+          } else {
+            // Générer des options synthétiques intelligentes basées sur le dilemme
+            console.log('⚠️ Creating synthetic options from dilemma analysis');
+            
+            const baseOption = parsedResult.breakdown?.[0] || {
+              option: extractTitleFromContent(content, questionType),
+              score: 85,
+              pros: extractProsConsFromContent(content, questionType).pros,
+              cons: extractProsConsFromContent(content, questionType).cons,
+              scores: {}
+            };
+            
+            const syntheticOptions = generateSyntheticOptions(dilemma, baseOption, content);
+            
+            parsedResult.breakdown = [baseOption, ...syntheticOptions];
+            parsedResult.recommendation = baseOption.option;
+          }
+        }
+        
+        // Nettoyer les titres trop longs
+        if (parsedResult.recommendation && parsedResult.recommendation.length > 80) {
+          parsedResult.recommendation = extractTitleFromContent(parsedResult.recommendation, questionType);
+        }
+        
+        // Nettoyer les options du breakdown
+        if (parsedResult.breakdown) {
+          parsedResult.breakdown = parsedResult.breakdown.map((item: any) => ({
+            ...item,
+            option: item.option && item.option.length > 80 ? 
+              extractTitleFromContent(item.option, questionType) : 
+              item.option,
+            pros: Array.isArray(item.pros) ? item.pros.filter((p: string) => 
+              p && p.length > 5 && !p.includes('Format de réponse') && !p.includes('Analyse basée')
+            ) : [],
+            cons: Array.isArray(item.cons) ? item.cons.filter((c: string) => 
+              c && c.length > 5 && !c.includes('Format de réponse') && !c.includes('Analyse basée')
+            ) : []
+          }));
+        }
+      }
+
+      // Fonction de nettoyage intelligent pour descriptions et titres
+      const cleanDescription = (text: string): string => {
+        if (!text) return text;
+        
+        let cleaned = text;
+        
+        // Supprimer le préfixe "json" malformé au début
+        cleaned = cleaned.replace(/^json\s+/i, '');
+        
+        // Supprimer tout JSON brut complet (format ```json{...}```)
+        cleaned = cleaned.replace(/```json\s*\{[\s\S]*?\}\s*```/g, '');
+        
+        // Supprimer les blocs JSON sans markdown
+        cleaned = cleaned.replace(/\{[\s\S]*?"recommendation"[\s\S]*?\}/g, '');
+        cleaned = cleaned.replace(/\{[\s\S]*?"description"[\s\S]*?\}/g, '');
+        cleaned = cleaned.replace(/\{[\s\S]*?"breakdown"[\s\S]*?\}/g, '');
+        
+        // Supprimer les fragments JSON partiels comme '{ "recommendation":'
+        cleaned = cleaned.replace(/\{\s*["']?\w+["']?\s*:/g, '');
+        cleaned = cleaned.replace(/["']\s*:\s*["'][^"']*["']/g, '');
+        
+        // Supprimer tous caractères JSON restants
+        cleaned = cleaned.replace(/[{}"\[\]:,]/g, '');
+        
+        // Nettoyer les phrases techniques inutiles
+        cleaned = cleaned.replace(/^.*?Analyse comparative[^.]*\./gi, '');
+        cleaned = cleaned.replace(/Format de r[ée]ponse[^.]*\./gi, '');
+        cleaned = cleaned.replace(/G[ée]n[ée]rez[^.]*\./gi, '');
+        
+        // Nettoyer les caractères orphelins et espaces
+        cleaned = cleaned.replace(/^\W+/, ''); // Caractères non-word au début
+        cleaned = cleaned.replace(/\s+/g, ' ').trim();
+        
+        // Extraire la première phrase valide si le nettoyage a échoué
+        if (cleaned.length < 30 || !cleaned.match(/^[A-ZÀ-Ý]/)) {
+          const sentences = text.split(/[.!?]+/);
+          for (const sentence of sentences) {
+            const trimmed = sentence.trim();
+            if (trimmed.length > 30 && 
+                trimmed.match(/^[A-ZÀ-Ý]/) &&
+                !trimmed.match(/^(json|```|\{|Format|Analyse|Générez)/i) &&
+                !trimmed.includes('"') &&
+                !trimmed.includes('{')) {
+              cleaned = trimmed + '.';
+              break;
+            }
+          }
+        }
+        
+        // Fallback si rien n'a marché
+        if (cleaned.length < 10 || !cleaned.match(/^[A-ZÀ-Ý]/)) {
+          cleaned = 'Analyse comparative des options disponibles avec recommandation personnalisée.';
+        }
+        
+        return cleaned;
+      };
+
+      // Fonction pour nettoyer les noms d'options
+      const cleanOptionName = (optionName: string, content: string): string => {
+        if (!optionName) return 'Option';
+        
+        // Si c'est un nom générique, essayer d'extraire du contenu
+        if (optionName.match(/^Option\s+\d+/i)) {
+          // Chercher des noms spécifiques dans le contenu
+          const specificNames = content.match(/([A-ZÀ-Ý][a-zà-ý]+\s+[A-ZÀ-Ý][a-zà-ý]+(?:\s+[A-ZÀ-Ý][a-zà-ý]+)?)/g);
+          if (specificNames && specificNames.length > 0) {
+            return specificNames[0];
+          }
+          
+          // Chercher des marques ou modèles
+          const brands = content.match(/(Renault|Toyota|Citroën|Peugeot|BMW|Mercedes|Audi|Volkswagen|Ford|Opel|Seat|Skoda|Hyundai|Kia|Nissan|Honda|Mazda|Mitsubishi)[^.]*?(?=[.,])/gi);
+          if (brands && brands.length > 0) {
+            return brands[0].trim();
+          }
+          
+          // Chercher des destinations pour les voyages
+          const destinations = content.match(/(Açores|Portugal|Islande|Norvège|Suède|Danemark|Finlande|Estonie|Lettonie|Lituanie|Pologne|République tchèque|Slovaquie|Hongrie|Slovénie|Croatie|Bosnie|Serbie|Monténégro|Macédoine|Albanie|Bulgarie|Roumanie|Moldavie|Ukraine|Biélorussie|Russie)[^.]*?(?=[.,])/gi);
+          if (destinations && destinations.length > 0) {
+            return destinations[0].trim();
+          }
+        }
+        
+        // Nettoyer le nom existant
+        let cleaned = optionName.replace(/^Option\s+\d+\s*[-:]\s*/i, '');
+        cleaned = cleaned.replace(/[{}"\[\]]/g, '');
+        cleaned = cleaned.trim();
+        
+        return cleaned || 'Option';
+      };
+
+      // Nettoyer la recommandation et les titres d'options
+      const cleanedRecommendation = cleanOptionName(parsedResult.recommendation || 'Recommandation', content);
+      const cleanedBreakdown = (parsedResult.breakdown || []).map((item: any, index: number) => ({
+        ...item,
+        option: cleanOptionName(item.option, content)
+      }));
+
+      const result: IResult = {
+        recommendation: cleanedRecommendation,
+        description: cleanDescription(parsedResult.description || content),
+        breakdown: cleanedBreakdown,
+        resultType: questionType,
+        realTimeData: {
+          hasRealTimeData: true,
+          timestamp: response.content.timestamp || new Date().toISOString(),
+          sourcesCount: response.content.sources?.length || 0,
+          searchQuery: dilemma,
+          provider: 'perplexity'
+        },
+        aiProvider: {
+          provider: response.provider,
+          model: response.model,
+          success: response.success
+        }
+      };
+
+      console.log(`✅ Final result: ${result.breakdown?.length || 0} options generated`);
+      return result;
+    }
+    
+    throw new Error('Failed to generate options');
+  } catch (error) {
+    console.error('Error generating options:', error);
+    throw error;
+  }
 };
 
 // Réexporter pour compatibilité
