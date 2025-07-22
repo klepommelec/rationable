@@ -1,120 +1,165 @@
 
-import React from 'react';
-import { IResult } from '@/types/decision';
+import React, { Suspense } from 'react';
+import { IResult, IDecision } from '@/types/decision';
 import { RecommendationCard } from './RecommendationCard';
+import { ComparisonTable } from './ComparisonTable';
 import { AnalysisCharts } from './AnalysisCharts';
 import { UsefulLinks } from './UsefulLinks';
-import { ScoreChart } from './ScoreChart';
-import { EnhancedRadarChart } from './EnhancedRadarChart';
-import { ScorePieChart } from './PieChart';
-import { ComparisonTable } from './ComparisonTable';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, Radar, PieChart, Table } from 'lucide-react';
+import { AnalysisInsights } from './AnalysisInsights';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { BarChart3, Table2, ExternalLink, Lightbulb } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { YouTubeVideoCard } from '@/components/YouTubeVideoCard';
 
 interface AnalysisResultProps {
-  result: IResult;
+  result: IResult | null;
   isUpdating: boolean;
   clearSession: () => void;
   analysisStep: string;
-  currentDecision: any;
+  currentDecision: IDecision | null;
   dilemma: string;
 }
 
-const AnalysisResult = ({ 
-  result, 
-  isUpdating, 
-  clearSession, 
-  analysisStep, 
-  currentDecision, 
-  dilemma 
-}: AnalysisResultProps) => {
-  const isLoading = isUpdating && analysisStep === 'loading-options';
-
-  if (isLoading || !result?.breakdown || result.breakdown.length === 0) {
+const AnalysisResult: React.FC<AnalysisResultProps> = ({
+  result,
+  isUpdating,
+  clearSession,
+  analysisStep,
+  currentDecision,
+  dilemma
+}) => {
+  if (!result) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="space-y-6 animate-fade-in">
+        <div className="text-center p-8">
+          <p className="text-muted-foreground">Aucun résultat disponible</p>
+        </div>
       </div>
     );
   }
 
+  const resultType = result.resultType || 'comparative';
+  const hasMultipleOptions = result.breakdown && result.breakdown.length > 1;
+  const hasYouTubeVideos = result.socialContent?.youtubeVideos && result.socialContent.youtubeVideos.length > 0;
+
+  // Pour les questions factuelles, on simplifie l'affichage
+  if (resultType === 'factual') {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <RecommendationCard 
+          result={result}
+          dilemma={dilemma}
+          currentDecision={currentDecision}
+          clearSession={clearSession}
+        />
+        
+        <UsefulLinks result={result} />
+        
+        {hasYouTubeVideos && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ExternalLink className="h-5 w-5" />
+                Contenu vidéo recommandé
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {result.socialContent!.youtubeVideos!.slice(0, 6).map((video) => (
+                  <YouTubeVideoCard key={video.id} video={video} />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        <AnalysisInsights result={result} />
+      </div>
+    );
+  }
+
+  // Pour les questions de choix (comparative/simple-choice), affichage complet
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Carte de recommandation principale */}
-      <RecommendationCard
+      <RecommendationCard 
         result={result}
         dilemma={dilemma}
         currentDecision={currentDecision}
         clearSession={clearSession}
       />
-
-      {/* Liens utiles */}
-      {(result.infoLinks?.length > 0 || result.shoppingLinks?.length > 0 || (result as any).socialContent?.youtubeVideos?.length > 0) && (
-        <UsefulLinks
-          infoLinks={result.infoLinks}
-          shoppingLinks={result.shoppingLinks}
-          socialContent={(result as any).socialContent}
-          dilemma={dilemma}
-          recommendation={result.recommendation}
-        />
+      
+      <UsefulLinks result={result} />
+      
+      {hasMultipleOptions && (
+        <Tabs defaultValue="comparison" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="comparison" className="flex items-center gap-2">
+              <Table2 className="h-4 w-4" />
+              Comparaison
+            </TabsTrigger>
+            <TabsTrigger value="analysis" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Analyse
+            </TabsTrigger>
+            <TabsTrigger value="insights" className="flex items-center gap-2">
+              <Lightbulb className="h-4 w-4" />
+              Insights
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="comparison" className="mt-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Table2 className="h-5 w-5" />
+                    Tableau comparatif
+                  </CardTitle>
+                  <Badge variant="outline">
+                    {result.breakdown?.length || 0} options
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ComparisonTable 
+                  breakdown={result.breakdown || []} 
+                  dilemma={dilemma}
+                  resultType={resultType}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="analysis" className="mt-6">
+            <Suspense fallback={<div>Chargement des graphiques...</div>}>
+              <AnalysisCharts breakdown={result.breakdown || []} />
+            </Suspense>
+          </TabsContent>
+          
+          <TabsContent value="insights" className="mt-6">
+            <AnalysisInsights result={result} />
+          </TabsContent>
+        </Tabs>
       )}
-
-      {/* Graphiques et visualisations avec onglets */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            Visualisations et Analyses
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="overview" className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                Vue d'ensemble
-              </TabsTrigger>
-              <TabsTrigger value="charts" className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                Scores
-              </TabsTrigger>
-              <TabsTrigger value="radar" className="flex items-center gap-2">
-                <Radar className="h-4 w-4" />
-                Radar
-              </TabsTrigger>
-              <TabsTrigger value="pie" className="flex items-center gap-2">
-                <PieChart className="h-4 w-4" />
-                Répartition
-              </TabsTrigger>
-              <TabsTrigger value="table" className="flex items-center gap-2">
-                <Table className="h-4 w-4" />
-                Tableau
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="overview" className="mt-6">
-              <AnalysisCharts breakdown={result.breakdown} dilemma={dilemma} />
-            </TabsContent>
-            
-            <TabsContent value="charts" className="mt-6">
-              <ScoreChart data={result.breakdown} />
-            </TabsContent>
-            
-            <TabsContent value="radar" className="mt-6">
-              <EnhancedRadarChart data={result.breakdown} />
-            </TabsContent>
-            
-            <TabsContent value="pie" className="mt-6">
-              <ScorePieChart data={result.breakdown} />
-            </TabsContent>
-            
-            <TabsContent value="table" className="mt-6">
-              <ComparisonTable breakdown={result.breakdown} />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+      
+      {hasYouTubeVideos && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ExternalLink className="h-5 w-5" />
+              Contenu vidéo recommandé
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {result.socialContent!.youtubeVideos!.slice(0, 6).map((video) => (
+                <YouTubeVideoCard key={video.id} video={video} />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

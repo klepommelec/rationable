@@ -8,11 +8,13 @@ import { CheckCircle, XCircle } from 'lucide-react';
 interface ComparisonTableProps {
   breakdown: IBreakdownItem[];
   dilemma?: string;
+  resultType?: 'factual' | 'comparative' | 'simple-choice';
 }
 
 export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   breakdown,
-  dilemma
+  dilemma,
+  resultType = 'comparative'
 }) => {
   if (!breakdown || breakdown.length === 0) {
     return (
@@ -22,8 +24,24 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
     );
   }
 
-  // Trier par score décroissant
+  // Pour les questions factuelles, ne pas afficher le tableau comparatif
+  // car il n'y a qu'une seule réponse
+  if (resultType === 'factual') {
+    return null;
+  }
+
+  // Pour les questions de choix, trier par score décroissant
   const sortedOptions = [...breakdown].sort((a, b) => b.score - a.score);
+
+  // Vérifier qu'on a bien plusieurs options pour justifier un tableau
+  if (sortedOptions.length < 2) {
+    console.warn(`⚠️ Only ${sortedOptions.length} option(s) found for comparison table (expected 3-5 for ${resultType} questions)`);
+    return (
+      <div className="flex items-center justify-center p-8 text-muted-foreground">
+        <p>Pas assez d'options pour un tableau comparatif (attendu: 3-5 options)</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

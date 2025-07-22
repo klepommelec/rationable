@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIProviderDashboard } from './AIProviderDashboard';
 import { AIProviderMonitor } from './AIProviderMonitor';
 import { ExpandableText } from '@/components/ExpandableText';
-import { SourcesList } from './SourcesList';
 
 interface RecommendationCardProps {
   result: IResult;
@@ -80,7 +80,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               {config.title}
             </CardTitle>
             
-            {/* Indicateurs de qualité */}
+            {/* Indicateurs de qualité - Sources temporairement supprimées */}
             <div className="flex flex-wrap items-center gap-2 mb-3">
               <ConfidenceIndicator 
                 breakdown={result.breakdown}
@@ -103,13 +103,6 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 />
               )}
             </div>
-            
-            {/* Affichage des sources web si disponibles */}
-            {result.realTimeData?.sources && result.realTimeData.sources.length > 0 && (
-              <div className="mb-4">
-                <SourcesList sources={result.realTimeData.sources} />
-              </div>
-            )}
           </div>
           
           <div className="flex items-center gap-2">
