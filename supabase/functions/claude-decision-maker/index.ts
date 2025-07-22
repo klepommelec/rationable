@@ -20,7 +20,7 @@ serve(async (req) => {
       criteria = [], 
       realTimeData = null,
       workspaceData = null,
-      model = 'claude-3-5-sonnet-20241022'
+      model = 'claude-sonnet-4-20250514'
     } = await req.json();
 
     if (!anthropicApiKey) {
@@ -37,38 +37,55 @@ serve(async (req) => {
     console.log(`🤖 Using Claude model: ${model}`);
     console.log(`🔑 API Key format: ${anthropicApiKey.substring(0, 10)}...`);
 
+    // Détecter le type de question
+    const dilemmaLower = dilemma.toLowerCase();
+    const isFactual = /qui\s+(est|a|sont)|qu'est-ce\s+(que|qui)|comment\s+|pourquoi\s+|quelle?\s+est|combien\s+|définition\s+de|expliquer\s+|what\s+is|who\s+is|how\s+|why\s+/.test(dilemmaLower);
+    const isComparative = /choisir|meilleur|mieux|préférer|comparer|versus|ou\s+|alternative|option|choix|sélectionner|recommander|conseiller|quel|quelle|lequel|entre|différence|choose|better|best|prefer|compare|vs|or|alternative|option|choice|select|recommend|which|between|difference/.test(dilemmaLower);
+
     // Construction du prompt système amélioré
     let systemPrompt = `Tu es un assistant expert en prise de décision avec accès aux informations les plus récentes.
 
-IMPORTANT: 
-- Analyse en profondeur la question posée
-- Si c'est une question sur des événements récents (draft NBA, élections, actualités), utilise tes connaissances les plus à jour
-- Pour les questions sportives, considère les performances récentes, les statistiques, et les analyses d'experts
-- Sois précis et factuel dans tes réponses
+RÈGLES IMPORTANTES:
+1. Si la question est COMPARATIVE (choix entre plusieurs options), génère EXACTEMENT 4 options différentes dans le breakdown
+2. Si la question est FACTUELLE (une seule réponse correcte), génère 1 seule option dans le breakdown
+3. Les scores doivent être différents et réalistes (entre 65-90 pour les comparatives, 90-100 pour les factuelles)
+4. Chaque option doit avoir des pros et cons spécifiques et pertinents
+5. Base ton analyse sur les critères fournis
+
+DÉTECTION DE TYPE:
+- Question détectée comme: ${isFactual ? 'FACTUELLE' : (isComparative ? 'COMPARATIVE' : 'COMPARATIVE par défaut')}
+- ${isFactual ? 'Fournis UNE réponse précise et factuelle' : 'Fournis QUATRE options différentes avec analyse comparative'}
 
 Tu dois répondre EXCLUSIVEMENT en JSON valide, sans texte avant ou après. Le format EXACT attendu est:
 {
-  "recommendation": "Titre de la recommandation (basé sur les faits)",
-  "description": "Description détaillée avec justification factuelle",
-  "imageQuery": "Description for generating an image (in English, descriptive)",
-  "confidenceLevel": 85,
-  "dataFreshness": "very-fresh",
+  "recommendation": "Titre de la recommandation principale",
+  "description": "Description détaillée avec justification",
   "breakdown": [
     {
       "option": "Nom de l'option",
-      "pros": ["Avantage factuel 1", "Avantage factuel 2"],
-      "cons": ["Inconvénient ou limitation 1", "Inconvénient 2"],
+      "pros": ["Avantage 1", "Avantage 2", "Avantage 3"],
+      "cons": ["Inconvénient 1", "Inconvénient 2"],
       "score": 85
-    }
-  ],
-  "infoLinks": [
+    }${isFactual ? '' : `,
     {
-      "title": "Titre du lien informatif",
-      "url": "https://example.com",
-      "description": "Description de la source"
-    }
-  ],
-  "shoppingLinks": []
+      "option": "Nom de l'option 2",
+      "pros": ["Avantage 1", "Avantage 2"],
+      "cons": ["Inconvénient 1", "Inconvénient 2"],
+      "score": 80
+    },
+    {
+      "option": "Nom de l'option 3",
+      "pros": ["Avantage 1", "Avantage 2"],
+      "cons": ["Inconvénient 1", "Inconvénient 2"],
+      "score": 75
+    },
+    {
+      "option": "Nom de l'option 4",
+      "pros": ["Avantage 1", "Avantage 2"],
+      "cons": ["Inconvénient 1", "Inconvénient 2"],
+      "score": 70
+    }`}
+  ]
 }`;
 
     // Ajout des données temps réel si disponibles
@@ -81,43 +98,26 @@ Timestamp: ${realTimeData.timestamp}
 UTILISE CES DONNÉES pour enrichir ton analyse et assurer l'exactitude de ta réponse.`;
     }
 
-    // Ajout des données workspace si disponibles (mais seulement si pertinentes)
+    // Ajout des données workspace si disponibles
     if (workspaceData?.documentsUsed > 0) {
       systemPrompt += `\n\nDocuments workspace consultés (${workspaceData.documentsUsed}):
 ${workspaceData.documentSources.join(', ')}`;
     }
 
     // Construction du prompt utilisateur amélioré
-    let userPrompt = `Question/Dilemme: "${dilemma}"`;
+    let userPrompt = `${isFactual ? 'Question factuelle' : 'Question comparative'}: "${dilemma}"`;
     
     if (criteria.length > 0) {
       userPrompt += `\n\nCritères d'évaluation importants: ${criteria.map(c => c.name).join(', ')}`;
     }
 
-    // Détection du type de question pour adapter l'approche
-    const isCurrentEvent = /2024|2025|draft|élection|récent|aujourd'hui|maintenant|current|latest/i.test(dilemma);
-    const isSportsRelated = /draft|NBA|football|sport|joueur|équipe|match/i.test(dilemma);
-    
-    if (isCurrentEvent) {
-      userPrompt += `\n\n⚠️ ATTENTION: Cette question concerne des événements récents ou actuels. Utilise tes connaissances les plus à jour.`;
+    if (isFactual) {
+      userPrompt += `\n\nFournis UNE réponse factuelle précise avec une seule option dans le breakdown.`;
+    } else {
+      userPrompt += `\n\nFournis EXACTEMENT 4 options différentes avec des scores décroissants.
+      Chaque option doit être distincte avec ses propres avantages et inconvénients.
+      Base ton analyse sur les critères mentionnés.`;
     }
-    
-    if (isSportsRelated) {
-      userPrompt += `\n\n🏀 Question sportive détectée: Base ton analyse sur:
-- Performances statistiques récentes
-- Potentiel et développement des joueurs
-- Impact sur l'équipe et la franchise
-- Analyses d'experts et scouts
-- Comparaisons objectives`;
-    }
-
-    userPrompt += `\n\nFournis une analyse complète avec:
-1. Une recommandation claire et factuelle
-2. Une justification détaillée basée sur des faits
-3. Une évaluation comparative des options (scores 0-100)
-4. Des liens vers des sources fiables si applicable
-
-Les scores doivent refléter l'évaluation objective selon les critères mentionnés.`;
 
     // Appel à l'API Claude
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -178,10 +178,7 @@ Les scores doivent refléter l'évaluation objective selon les critères mention
     const result = {
       recommendation: parsedResult.recommendation || 'Recommandation non disponible',
       description: parsedResult.description || 'Description non disponible',
-      imageQuery: parsedResult.imageQuery || parsedResult.recommendation || 'decision analysis',
       breakdown: Array.isArray(parsedResult.breakdown) ? parsedResult.breakdown : [],
-      infoLinks: Array.isArray(parsedResult.infoLinks) ? parsedResult.infoLinks : [],
-      shoppingLinks: Array.isArray(parsedResult.shoppingLinks) ? parsedResult.shoppingLinks : [],
       confidenceLevel: parsedResult.confidenceLevel || Math.min(95, Math.max(70, parsedResult.breakdown?.[0]?.score || 75)),
       dataFreshness: parsedResult.dataFreshness || (realTimeData?.content ? 'very-fresh' : 'moderate'),
       realTimeData: realTimeData ? {
@@ -196,8 +193,17 @@ Les scores doivent refléter l'évaluation objective selon les critères mention
         provider: 'claude',
         model: model,
         success: true
-      }
+      },
+      timestamp: new Date().toISOString()
     };
+
+    // Log du résultat
+    console.log('📊 Résultat final:', {
+      hasRecommendation: !!result.recommendation,
+      hasDescription: !!result.description,
+      breakdownCount: result.breakdown?.length || 0,
+      questionType: isFactual ? 'factual' : 'comparative'
+    });
 
     console.log('✅ Claude analysis completed successfully');
 
@@ -212,10 +218,11 @@ Les scores doivent refléter l'évaluation objective selon les critères mention
       error: error.message,
       aiProvider: {
         provider: 'claude',
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-sonnet-4-20250514',
         success: false,
         error: error.message
-      }
+      },
+      timestamp: new Date().toISOString()
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
