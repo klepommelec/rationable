@@ -80,11 +80,13 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </Card>
         )}
         
-        <AnalysisInsights 
-          breakdown={result.breakdown || []}
-          topOption={result.breakdown?.[0] || {} as any}
-          cleanOptionName={result.breakdown?.[0]?.option || result.recommendation}
-        />
+        {result.breakdown && result.breakdown.length > 0 && (
+          <AnalysisInsights 
+            breakdown={result.breakdown}
+            topOption={result.breakdown[0]}
+            cleanOptionName={result.breakdown[0]?.option || result.recommendation}
+          />
+        )}
       </div>
     );
   }
@@ -154,11 +156,13 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </TabsContent>
           
           <TabsContent value="insights" className="mt-6">
-            <AnalysisInsights 
-              breakdown={result.breakdown || []}
-              topOption={result.breakdown?.[0] || {} as any}
-              cleanOptionName={result.breakdown?.[0]?.option || result.recommendation}
-            />
+            {result.breakdown && result.breakdown.length > 0 && (
+              <AnalysisInsights 
+                breakdown={result.breakdown}
+                topOption={result.breakdown[0]}
+                cleanOptionName={result.breakdown[0]?.option || result.recommendation}
+              />
+            )}
           </TabsContent>
         </Tabs>
       )}
