@@ -244,11 +244,9 @@ export const useDecisionAPI = ({
             console.log("✅ [DEBUG] Files uploaded for analysis");
           }
           
-          // Pour les questions factuelles et simple-choice, pas besoin de critères complexes
-          if (questionType === 'factual' || questionType === 'simple-choice') {
-            const progressMsg = questionType === 'factual' 
-              ? "Recherche de la réponse factuelle..."
-              : "Recherche de la meilleure recommandation...";
+          // Pour les questions factuelles, pas besoin de critères complexes
+          if (questionType === 'factual') {
+            const progressMsg = "Recherche de la réponse factuelle...";
               
             console.log(`🎯 [DEBUG] ${questionType} question detected - generating direct answer`);
             setProgressMessage(workspaceId ? `${progressMsg} avec documents workspace` : progressMsg);
@@ -275,15 +273,16 @@ export const useDecisionAPI = ({
             setAnalysisStep('done');
             
             const successMessage = optionsResult.workspaceData?.documentsUsed 
-              ? `${questionType === 'factual' ? 'Réponse' : 'Recommandation'} générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
-              : questionType === 'factual' ? "Réponse factuelle trouvée !" : "Recommandation générée !";
+              ? `Réponse générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
+              : "Réponse factuelle trouvée !";
+            
             
             toast.success(successMessage);
             return;
           }
           
-          // Phase 1: Générer les critères pour les questions comparatives
-          console.log("📡 [DEBUG] Phase 1: Generating criteria for comparative question");
+          // Phase 1: Générer les critères pour les questions comparatives et simple-choice
+          console.log("📡 [DEBUG] Phase 1: Generating criteria for question");
           setProgressMessage(workspaceId ? "Analyse du contexte avec documents workspace..." : "Analyse du contexte et génération des critères...");
           
           const response = await generateCriteriaOnly(dilemma, uploadedFileInfos, workspaceId);
