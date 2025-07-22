@@ -242,10 +242,11 @@ export const generateOptionsWithFallback = async (
       if (searchResponse.success && searchResponse.content) {
         realTimeData = {
           content: searchResponse.content.content || searchResponse.content,
-          sources: searchResponse.content.sources || [],
+          sources: searchResponse.content.sources || searchResponse.content.citations || [],
           timestamp: searchResponse.content.timestamp || new Date().toISOString(),
           searchQuery: dilemma,
-          provider: searchResponse.provider
+          provider: searchResponse.provider,
+          hasRealTimeData: true
         };
         
         realTimeContext = `\n\nDONNÉES RÉCENTES ET VÉRIFIÉES (${realTimeData.timestamp}, source: ${searchResponse.provider}):\n${realTimeData.content}\n\nIMPORTANT: Utilisez UNIQUEMENT ces informations récentes pour répondre. Ignorez toute connaissance antérieure qui pourrait être obsolète.`;
