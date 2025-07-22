@@ -12,50 +12,6 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_ANON_KEY') ?? ''
 )
 
-// Fonction pour générer des liens de fallback intelligents
-const generateFallbackLinks = (dilemma: string, recommendation: string) => {
-  const cleanDilemma = encodeURIComponent(dilemma);
-  const cleanRecommendation = encodeURIComponent(recommendation);
-  
-  const infoLinks = [
-    {
-      title: `Guide complet : ${recommendation}`,
-      url: `https://www.google.fr/search?q=${cleanRecommendation}+guide+complet`,
-      description: `Guide détaillé sur ${recommendation}`
-    },
-    {
-      title: `Avis et tests : ${recommendation}`,
-      url: `https://www.google.fr/search?q=${cleanRecommendation}+avis+test+comparatif`,
-      description: `Avis d'experts et tests utilisateurs`
-    },
-    {
-      title: `Informations techniques : ${recommendation}`,
-      url: `https://fr.wikipedia.org/wiki/Special:Search?search=${cleanRecommendation}`,
-      description: `Ressources techniques et encyclopédiques`
-    }
-  ];
-  
-  const shoppingLinks = [
-    {
-      title: `Acheter ${recommendation} - Amazon`,
-      url: `https://www.amazon.fr/s?k=${cleanRecommendation}`,
-      description: `Voir les prix sur Amazon`
-    },
-    {
-      title: `Comparer les prix - ${recommendation}`,
-      url: `https://www.google.fr/search?q=${cleanRecommendation}+prix+comparateur+achat&tbm=shop`,
-      description: `Comparaison de prix en ligne`
-    },
-    {
-      title: `Où acheter ${recommendation}`,
-      url: `https://www.google.fr/search?q=où+acheter+${cleanRecommendation}+magasin`,
-      description: `Trouver des magasins près de chez vous`
-    }
-  ];
-  
-  return { infoLinks, shoppingLinks };
-};
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -87,57 +43,9 @@ serve(async (req) => {
     console.log('📁 Files to analyze:', files?.length || 0);
     const startTime = Date.now();
 
-    // Préparer les messages pour OpenAI avec prompt amélioré pour les liens
+    // Préparer les messages pour OpenAI
     const messages = [
-      { role: 'system', content: `You are a world-class decision making assistant. Your responses must be in French and in a valid JSON object format.
-
-IMPORTANT: You MUST ALWAYS include exactly 3 infoLinks and 3 shoppingLinks in your response. These links are MANDATORY and cannot be omitted.
-
-Expected JSON format:
-{
-  "recommendation": "Your recommendation",
-  "description": "Detailed description",
-  "imageQuery": "Description for image generation (in English)",
-  "confidenceLevel": 85,
-  "dataFreshness": "moderate",
-  "breakdown": [...],
-  "infoLinks": [
-    {
-      "title": "Complete guide: [recommendation]",
-      "url": "https://www.google.fr/search?q=[recommendation]+guide+complet",
-      "description": "Detailed guide and complete information"
-    },
-    {
-      "title": "Reviews and comparisons - [recommendation]",
-      "url": "https://www.google.fr/search?q=[recommendation]+avis+test+comparatif", 
-      "description": "Expert reviews and user tests"
-    },
-    {
-      "title": "Technical information - [recommendation]",
-      "url": "https://fr.wikipedia.org/wiki/Special:Search?search=[recommendation]",
-      "description": "Technical and encyclopedic resources"
-    }
-  ],
-  "shoppingLinks": [
-    {
-      "title": "Buy [recommendation] - Amazon",
-      "url": "https://www.amazon.fr/s?k=[recommendation]",
-      "description": "See prices and availability"
-    },
-    {
-      "title": "Compare prices - [recommendation]",
-      "url": "https://www.google.fr/search?q=[recommendation]+prix+comparateur+achat&tbm=shop",
-      "description": "Online price comparison"
-    },
-    {
-      "title": "Where to buy [recommendation]",
-      "url": "https://www.google.fr/search?q=où+acheter+[recommendation]+magasin",
-      "description": "Find retail stores"
-    }
-  ]
-}
-
-Replace [recommendation] with the actual recommendation in URLs and titles. These links are ESSENTIAL and must be included.` },
+      { role: 'system', content: 'You are a world-class decision making assistant. Your responses must be in French and in a valid JSON object format.' },
       { role: 'user', content: prompt }
     ];
 
@@ -149,6 +57,7 @@ Replace [recommendation] with the actual recommendation in URLs and titles. Thes
         try {
           console.log(`📄 Processing file: ${fileInfo.fileName} (${fileInfo.fileType})`);
           
+          // Télécharger le fichier depuis Supabase Storage
           const { data: fileData, error: downloadError } = await supabase.storage
             .from('decision-files')
             .download(fileInfo.filePath);
@@ -158,13 +67,16 @@ Replace [recommendation] with the actual recommendation in URLs and titles. Thes
             continue;
           }
           
+          // Traiter selon le type de fichier
           if (fileInfo.fileType.startsWith('image/')) {
             console.log(`🖼️ Processing image: ${fileInfo.fileName}`);
             
+            // Convertir l'image en base64
             const arrayBuffer = await fileData.arrayBuffer();
             const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
             const dataUrl = `data:${fileInfo.fileType};base64,${base64}`;
             
+            // Ajouter l'image au message pour GPT-4o vision
             messages.push({
               role: 'user',
               content: [
@@ -181,6 +93,8 @@ Replace [recommendation] with the actual recommendation in URLs and titles. Thes
           } else if (fileInfo.fileType === 'application/pdf') {
             console.log(`📄 Processing PDF: ${fileInfo.fileName}`);
             
+            // Pour les PDFs, on ajoutera l'extraction de texte plus tard
+            // Pour l'instant, on informe juste OpenAI qu'il y a un PDF
             messages.push({
               role: 'user',
               content: `Un document PDF a été joint (${fileInfo.fileName}). Veuillez tenir compte de ce contexte dans votre analyse. Note: L'extraction automatique de texte PDF sera implémentée prochainement.`
@@ -199,6 +113,7 @@ Replace [recommendation] with the actual recommendation in URLs and titles. Thes
       }
     }
 
+    // Utiliser GPT-4o pour supporter l'analyse d'images
     const model = files && files.some(f => f.fileType.startsWith('image/')) ? 'gpt-4o' : 'gpt-4o-mini';
     console.log(`🤖 Using model: ${model}`);
 
@@ -265,39 +180,16 @@ Replace [recommendation] with the actual recommendation in URLs and titles. Thes
       throw new Error("La réponse de l'API n'était pas un JSON valide.");
     }
 
-    // Vérification et génération de liens de fallback si nécessaire
-    let infoLinks = Array.isArray(jsonContent.infoLinks) ? jsonContent.infoLinks : [];
-    let shoppingLinks = Array.isArray(jsonContent.shoppingLinks) ? jsonContent.shoppingLinks : [];
-    
-    // Générer des liens de fallback si insuffisants
-    if (infoLinks.length < 2 || shoppingLinks.length < 2) {
-      console.log('⚠️ Liens insuffisants générés par OpenAI, ajout de liens de fallback');
-      const fallbackLinks = generateFallbackLinks(prompt, jsonContent.recommendation || 'solution recommandée');
-      
-      if (infoLinks.length < 2) {
-        infoLinks = fallbackLinks.infoLinks;
-      }
-      if (shoppingLinks.length < 2) {
-        shoppingLinks = fallbackLinks.shoppingLinks;
-      }
-    }
-
-    // Ajout des liens au résultat final
-    jsonContent.infoLinks = infoLinks;
-    jsonContent.shoppingLinks = shoppingLinks;
-
     // Log successful response structure (without sensitive data)
     console.log('📊 Response structure:', {
       hasEmoji: !!jsonContent.emoji,
       hasCriteria: Array.isArray(jsonContent.criteria),
       criteriaCount: jsonContent.criteria?.length || 0,
       hasResult: !!jsonContent.result,
-      hasRecommendation: !!jsonContent.result?.recommendation || !!jsonContent.recommendation,
-      hasBreakdown: Array.isArray(jsonContent.result?.breakdown) || Array.isArray(jsonContent.breakdown),
-      breakdownCount: jsonContent.result?.breakdown?.length || jsonContent.breakdown?.length || 0,
-      filesProcessed: files?.length || 0,
-      infoLinksCount: infoLinks.length,
-      shoppingLinksCount: shoppingLinks.length
+      hasRecommendation: !!jsonContent.result?.recommendation,
+      hasBreakdown: Array.isArray(jsonContent.result?.breakdown),
+      breakdownCount: jsonContent.result?.breakdown?.length || 0,
+      filesProcessed: files?.length || 0
     });
     
     return new Response(JSON.stringify(jsonContent), {
