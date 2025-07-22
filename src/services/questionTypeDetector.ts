@@ -17,7 +17,19 @@ export const detectQuestionType = (dilemma: string): QuestionType => {
     /\b(qu'est-ce que|c'est quoi|définition de|what is|define)\b/i,
     /\b(combien coûte|combien mesure|how much|how tall|how long)\b/i,
     /\b(quand sort|quand sortira|date de sortie|when will|release date)\b/i,
-    /\b(qui est le|qui est la|qui a été|who is|who was)\b/i,
+    
+    // Questions "qui est" améliorées pour les champions et records
+    /\b(qui est)\b.*\b(champion|championne|vainqueur|gagnant|détenteur|détentrice)\b/i,
+    /\b(qui est)\b.*\b(record|titre|médaille|prix|trophée)\b/i,
+    /\b(qui détient|qui possède|qui a)\b.*\b(record|titre|championnat)\b/i,
+    /\b(who is|who holds|who has)\b.*\b(champion|record|title|medal)\b/i,
+    
+    // Questions sportives spécifiques
+    /\b(qui est champion|qui est championne)\b.*\b(olympique|du monde|mondial|mondiale)\b/i,
+    /\b(champion olympique|championne olympique|médaille d'or|record du monde|record olympique)\b/i,
+    /\b(olympic champion|world champion|gold medal|world record|olympic record)\b/i,
+    /\b(qui a gagné|qui a remporté|vainqueur de|gagnant de)\b.*\b(championnat|compétition|tournoi|jeux)\b/i,
+    /\b(who won|winner of|champion of)\b.*\b(championship|competition|tournament|games)\b/i,
     
     // Questions spécifiques à réponse unique
     /\b(qui a été.*choix|who was.*pick|who was.*selected)\b/i,
@@ -25,7 +37,11 @@ export const detectQuestionType = (dilemma: string): QuestionType => {
     /\b(1er choix|premier choix|first pick|first choice)\b/i,
     
     // Questions avec réponse unique évidente
-    /\b(prix de|price of|cost of)\b/i
+    /\b(prix de|price of|cost of)\b/i,
+    
+    // Questions de classement et palmarès
+    /\b(classement|ranking|palmarès|meilleur temps|best time)\b/i,
+    /\b(numéro un|number one|premier au monde|world number one)\b/i
   ];
   
   // Patterns pour questions de choix simple (une recommandation forte)
@@ -41,7 +57,11 @@ export const detectQuestionType = (dilemma: string): QuestionType => {
     /\b(what .* (buy|choose|get) for)\b/i,
     
     // Questions avec contexte spécifique mais pas de comparaison
-    /\b(pour .* quel|pour .* quelle|for .* what|for .* which)\b/i
+    /\b(pour .* quel|pour .* quelle|for .* what|for .* which)\b/i,
+    
+    // Questions de destination et voyage
+    /\b(où (partir|aller|voyager)|where to (go|travel|visit))\b/i,
+    /\b(que faire|what to do)\b/i
   ];
   
   // Patterns pour questions comparatives (vraie comparaison)
@@ -60,16 +80,12 @@ export const detectQuestionType = (dilemma: string): QuestionType => {
     /\b(budget.*besoins|besoins.*budget|needs.*budget|budget.*needs)\b/i,
     /\b(critères|criteria|requirements|specifications)\b/i,
     
-    // Questions ouvertes de conseil avec options multiples implicites
-    /\b(où (partir|aller|voyager)|where to (go|travel|visit))\b/i,
-    /\b(que faire|what to do|how to)\b/i,
-    
     // Questions d'achat avec contexte comparatif
     /\b(quel.*acheter.*selon|quelle.*acheter.*selon|what.*buy.*based)\b/i,
     /\b(choisir.*pour.*et|choose.*for.*and)\b/i
   ];
   
-  // Vérifier d'abord les patterns factuels
+  // Vérifier d'abord les patterns factuels (priorité haute)
   const isFactual = factualPatterns.some(pattern => pattern.test(dilemma));
   if (isFactual) {
     console.log(`✅ Detected as FACTUAL: factual pattern matched`);
@@ -100,10 +116,10 @@ export const detectQuestionType = (dilemma: string): QuestionType => {
   
   if (hasPurchaseIntent) {
     // Si pas de spécificité factuelle et pas de comparaison explicite -> simple choice
-    const hasFactualSpecificity = /\b(dernier|dernière|nouveau|nouvelle|récent|récente|latest|newest|new)\b/i.test(dilemma);
+    const hasFactualSpecificity = /\b(dernier|dernière|nouveau|nouvelle|récent|récente|latest|newest|new|champion|record)\b/i.test(dilemma);
     
     if (!hasFactualSpecificity) {
-      console.log(`✅ Detected as SIMPLE-CHOICE: purchase intent without comparison`);
+      console.log(`✅ Detected as SIMPLE-CHOICE: purchase intent without factual specificity`);
       return 'simple-choice';
     }
   }
