@@ -55,9 +55,18 @@ export const detectQuestionType = (dilemma: string): QuestionType => {
     /\b(ou|or)\b/,
     /,.*,/,
     
+    // Questions avec critères multiples (budget, besoins, etc.)
+    /\b(selon.*et|en fonction.*et|based on.*and|considering.*and)\b/i,
+    /\b(budget.*besoins|besoins.*budget|needs.*budget|budget.*needs)\b/i,
+    /\b(critères|criteria|requirements|specifications)\b/i,
+    
     // Questions ouvertes de conseil avec options multiples implicites
     /\b(où (partir|aller|voyager)|where to (go|travel|visit))\b/i,
-    /\b(que faire|what to do|how to)\b/i
+    /\b(que faire|what to do|how to)\b/i,
+    
+    // Questions d'achat avec contexte comparatif
+    /\b(quel.*acheter.*selon|quelle.*acheter.*selon|what.*buy.*based)\b/i,
+    /\b(choisir.*pour.*et|choose.*for.*and)\b/i
   ];
   
   // Vérifier d'abord les patterns factuels
