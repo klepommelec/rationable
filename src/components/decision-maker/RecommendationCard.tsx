@@ -73,46 +73,25 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   return (
     <Card className={`border-2 ${config.borderColor} ${config.bgGradient}`}>
       <CardHeader className="pb-4">
-        <div className="flex items-start justify-between">
+        <div className="flex items-center justify-end gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={clearSession}
+            className="flex items-center gap-2"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Nouvelle analyse
+          </Button>
           
-          {/* Indicateurs de qualité - Sources temporairement supprimées */}
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <DataFreshnessIndicator 
-              hasRealTimeData={result.realTimeData?.hasRealTimeData || false}
-              timestamp={result.realTimeData?.timestamp}
-              sourcesCount={result.realTimeData?.sourcesCount}
-              dataFreshness={result.dataFreshness || 'moderate'}
-            />
-            
-            {result.workspaceData && (
-              <WorkspaceDocumentIndicator 
-                workspaceData={{
-                  documentsUsed: result.workspaceData.documentsUsed,
-                  documentSources: result.workspaceData.documentSources || []
-                }}
-              />
-            )}
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={clearSession}
-              className="flex items-center gap-2"
-            >
-              <RotateCcw className="h-4 w-4" />
-              Nouvelle analyse
-            </Button>
-            
-            {import.meta.env.DEV && (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4" />
-                    Dashboard AI
-                  </Button>
-                </DialogTrigger>
+          {import.meta.env.DEV && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Dashboard AI
+                </Button>
+              </DialogTrigger>
               <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Dashboard AI Providers</DialogTitle>
@@ -137,8 +116,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 </Tabs>
               </DialogContent>
             </Dialog>
-            )}
-          </div>
+          )}
         </div>
       </CardHeader>
 
