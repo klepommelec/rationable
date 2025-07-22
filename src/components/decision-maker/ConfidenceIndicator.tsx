@@ -85,24 +85,6 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
         </div>
       </div>
 
-      {/* Confidence Level */}
-      <div className="flex items-center gap-2">
-        <Badge 
-          className={`${intelligentConfidence.color} border-0 text-xs sm:text-sm transition-all duration-200 hover:scale-105 flex-shrink-0`}
-          role="status"
-          aria-label={`Niveau de confiance: ${intelligentConfidence.level}`}
-          title={intelligentConfidence.recommendationText}
-        >
-          <ConfidenceIcon className="h-3 w-3 mr-1 flex-shrink-0" aria-hidden="true" />
-          <span className="hidden sm:inline">Confiance: </span>
-          {intelligentConfidence.level}
-        </Badge>
-      </div>
-
-      {/* Recommendation Text */}
-      <p className="text-xs text-muted-foreground italic">
-        {intelligentConfidence.recommendationText}
-      </p>
     </div>
   );
 };
