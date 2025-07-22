@@ -12,23 +12,44 @@ export const generateCriteriaOnly = async (
   emoji: string;
 }> => {
   try {
-    // Pour l'instant, on génère des critères basiques côté client
-    // TODO: Implémenter une vraie génération via IA si nécessaire
-    const basicCriteria: ICriterion[] = [
-      { id: "prix", name: "Prix" },
-      { id: "qualite", name: "Qualité" },
-      { id: "facilite", name: "Facilité d'utilisation" },
-      { id: "durabilite", name: "Durabilité" }
-    ];
+    // Utiliser l'IA pour générer des critères pertinents
+    const { callOpenAiApi } = await import('./openai');
+    
+    const prompt = `Analyse cette question et génère des critères d'évaluation pertinents.
 
+Question: ${dilemma}
+
+Réponds au format JSON avec:
+- criteria: array d'objets avec {id, name} - 4 à 6 critères spécifiques et pertinents pour cette question
+- suggestedCategory: catégorie suggérée (Technologie, Voyages, Carrière, etc.)
+- emoji: emoji approprié pour cette question
+
+Exemple de format:
+{
+  "criteria": [
+    {"id": "performance", "name": "Performance"},
+    {"id": "prix", "name": "Prix"},
+    {"id": "design", "name": "Design"}
+  ],
+  "suggestedCategory": "Technologie",
+  "emoji": "💻"
+}`;
+
+    const result = await callOpenAiApi(prompt, uploadedFiles);
+    return result;
+  } catch (error) {
+    console.error('Error generating criteria:', error);
+    // Fallback en cas d'erreur
     return {
-      criteria: basicCriteria,
+      criteria: [
+        { id: "prix", name: "Prix" },
+        { id: "qualite", name: "Qualité" },
+        { id: "facilite", name: "Facilité d'utilisation" },
+        { id: "durabilite", name: "Durabilité" }
+      ],
       suggestedCategory: "Général",
       emoji: "🤔"
     };
-  } catch (error) {
-    console.error('Error generating criteria:', error);
-    throw error;
   }
 };
 
@@ -41,25 +62,26 @@ export const generateOptions = async (
   console.log("📡 Starting generateOptions with enhanced links");
   
   try {
-    // Appel à l'API existante (Claude ou OpenAI)
-    const response = await fetch('/api/decision-maker', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        dilemma,
-        criteria,
-        uploadedFiles,
-        workspaceId
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result: IResult = await response.json();
+    // Utiliser directement l'Edge Function OpenAI
+    const { callOpenAiApi } = await import('./openai');
     
-    // 🔗 NOUVEAU : Enrichir automatiquement avec les liens Google
+    // Construire le prompt pour l'analyse
+    const prompt = `Analyse cette question et fournis une recommandation détaillée avec des options.
+
+Question: ${dilemma}
+
+Critères d'évaluation:
+${criteria.map(c => `- ${c.name}`).join('\n')}
+
+Réponds au format JSON avec:
+- recommendation: la meilleure option recommandée
+- description: explication détaillée de pourquoi cette option est recommandée
+- breakdown: array d'objets avec {option, pros, cons, score} pour chaque option évaluée
+- imageQuery: terme de recherche pour une image représentative`;
+
+    const result = await callOpenAiApi(prompt, uploadedFiles);
+    
+    // 🔗 Enrichir automatiquement avec les liens Google
     console.log("🔍 Enriching result with Google search links...");
     
     try {
