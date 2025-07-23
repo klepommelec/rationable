@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { TrendingUp, Target, BarChart3, Award, AlertTriangle, CheckCircle, XCircle, Zap } from 'lucide-react';
 import { IBreakdownItem } from '@/types/decision';
 import { ComparisonTable } from './ComparisonTable';
+import { useContextualMetrics } from '@/hooks/useContextualMetrics';
 interface MetricsVisualProps {
   data: IBreakdownItem[];
   dilemma?: string;
@@ -13,31 +14,7 @@ export const MetricsVisual: React.FC<MetricsVisualProps> = ({
   dilemma
 }) => {
   const sortedData = [...data].sort((a, b) => b.score - a.score);
-  const averageScore = Math.round(data.reduce((acc, item) => acc + item.score, 0) / data.length);
-  const maxScore = Math.max(...data.map(item => item.score));
-  const minScore = Math.min(...data.map(item => item.score));
-  const scoreRange = maxScore - minScore;
-  const metrics = [{
-    title: 'Meilleur Score',
-    value: maxScore,
-    icon: <Award className="h-5 w-5 text-gray-600" />,
-    description: sortedData[0]?.option.replace(/^Option\s+\d+:\s*/i, '').trim()
-  }, {
-    title: 'Score Moyen',
-    value: averageScore,
-    icon: <Target className="h-5 w-5 text-gray-600" />,
-    description: 'Moyenne générale'
-  }, {
-    title: 'Écart de Scores',
-    value: scoreRange,
-    icon: <BarChart3 className="h-5 w-5 text-gray-600" />,
-    description: `${minScore} - ${maxScore} points`
-  }, {
-    title: 'Options Analysées',
-    value: data.length,
-    icon: <TrendingUp className="h-5 w-5 text-gray-600" />,
-    description: 'Alternatives évaluées'
-  }];
+  const { metrics, context, isContextual } = useContextualMetrics(dilemma || '', data);
   const getScoreQuality = (score: number) => {
     if (score >= 90) return {
       label: 'Exceptionnel',
@@ -69,26 +46,40 @@ export const MetricsVisual: React.FC<MetricsVisualProps> = ({
       {/* Métriques principales */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Métriques importantes</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            {isContextual && context && (
+              <context.icon className="h-5 w-5" />
+            )}
+            {isContextual ? `Métriques ${context?.name}` : 'Métriques importantes'}
+            {isContextual && (
+              <Badge variant="secondary" className="text-xs">
+                Contextuelles
+              </Badge>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {metrics.map((metric, index) => <div key={metric.title} style={{
-            animationDelay: `${index * 100}ms`
-          }} className="p-4 rounded-lg border bg-background border animate-fade-in transition-all hover:scale-105">
+            {metrics.map((metric, index) => (
+              <div 
+                key={metric.title} 
+                style={{ animationDelay: `${index * 100}ms` }} 
+                className="p-4 rounded-lg border bg-background border animate-fade-in transition-all hover:scale-105"
+              >
                 <div className="flex items-center justify-between mb-2">
-                  {metric.icon}
-                  <span className="text-2xl font-bold text-gray-900">
+                  <metric.icon className={`h-5 w-5 ${metric.color}`} />
+                  <span className="text-2xl font-bold text-foreground">
                     {metric.value}
                   </span>
                 </div>
-                <div className="text-sm font-medium text-gray-900 mb-1">
+                <div className="text-sm font-medium text-foreground mb-1">
                   {metric.title}
                 </div>
-                <div className="text-xs text-gray-600">
+                <div className="text-xs text-muted-foreground">
                   {metric.description}
                 </div>
-              </div>)}
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
