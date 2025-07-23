@@ -34,47 +34,55 @@ export const detectContext = (dilemma: string, options: IBreakdownItem[]): Conte
 
 // Fonctions utilitaires pour calculer des métriques contextuelles
 const calculateQualityPriceRatio = (data: IBreakdownItem[]) => {
-  const totalScore = data.reduce((sum, item) => sum + item.score, 0);
+  const avgScore = data.reduce((sum, item) => sum + item.score, 0) / data.length;
   const priceWords = ['cher', 'coût', 'prix', 'budget', 'économique', 'gratuit', 'payant'];
-  const priceReferences = data.reduce((count, item) => {
-    const text = (item.pros.join(' ') + ' ' + item.cons.join(' ')).toLowerCase();
-    return count + priceWords.filter(word => text.includes(word)).length;
-  }, 0);
   
-  return Math.round((totalScore / data.length) * (1 + Math.min(priceReferences / 10, 0.3)));
+  let priceBonus = 0;
+  data.forEach(item => {
+    const text = (item.pros.join(' ') + ' ' + item.cons.join(' ')).toLowerCase();
+    const hasPriceAdvantage = priceWords.some(word => 
+      item.pros.some(pro => pro.toLowerCase().includes(word))
+    );
+    if (hasPriceAdvantage) priceBonus += 5;
+  });
+  
+  return Math.min(Math.round(avgScore + priceBonus), 100);
 };
 
 const calculateInnovationScore = (data: IBreakdownItem[]) => {
   const innovationWords = ['nouveau', 'innovant', 'révolutionnaire', 'moderne', 'récent', 'avancé', 'technologie'];
-  let innovationTotal = 0;
+  const baseScore = data.reduce((sum, item) => sum + item.score, 0) / data.length;
   
+  let innovationBonus = 0;
   data.forEach(item => {
     const prosText = item.pros.join(' ').toLowerCase();
-    const innovationCount = innovationWords.filter(word => prosText.includes(word)).length;
-    innovationTotal += innovationCount * item.score;
+    const hasInnovation = innovationWords.some(word => prosText.includes(word));
+    if (hasInnovation) innovationBonus += 8;
   });
   
-  return Math.min(Math.round(innovationTotal / data.length), 100);
+  return Math.min(Math.round(baseScore + innovationBonus), 100);
 };
 
 const calculateExperienceScore = (data: IBreakdownItem[]) => {
   const experienceWords = ['expérience', 'qualité', 'service', 'ambiance', 'atmosphère', 'accueil'];
-  let experienceTotal = 0;
+  const baseScore = data.reduce((sum, item) => sum + item.score, 0) / data.length;
   
+  let experienceBonus = 0;
   data.forEach(item => {
     const prosText = item.pros.join(' ').toLowerCase();
-    const experienceCount = experienceWords.filter(word => prosText.includes(word)).length;
-    experienceTotal += experienceCount * item.score;
+    const hasExperience = experienceWords.some(word => prosText.includes(word));
+    if (hasExperience) experienceBonus += 6;
   });
   
-  return Math.min(Math.round(experienceTotal / data.length), 100);
+  return Math.min(Math.round(baseScore + experienceBonus), 100);
 };
 
 const calculateDiversityIndex = (data: IBreakdownItem[]) => {
-  const avgProsCount = data.reduce((sum, item) => sum + item.pros.length, 0) / data.length;
-  const scoreVariance = data.reduce((sum, item) => sum + Math.pow(item.score - (data.reduce((s, i) => s + i.score, 0) / data.length), 2), 0) / data.length;
+  const avgScore = data.reduce((sum, item) => sum + item.score, 0) / data.length;
+  const prosVariety = Math.max(...data.map(item => item.pros.length)) - Math.min(...data.map(item => item.pros.length));
+  const diversityBonus = Math.min(prosVariety * 3, 20);
   
-  return Math.round(avgProsCount * 15 + Math.sqrt(scoreVariance) * 2);
+  return Math.min(Math.round(avgScore + diversityBonus), 100);
 };
 
 // Définition des domaines contextuels
