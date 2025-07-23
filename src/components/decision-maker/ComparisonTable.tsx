@@ -47,7 +47,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
           </TableHeader>
           <TableBody>
             {sortedOptions.map((option, index) => <TableRow key={index} className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''}>
-                <TableCell className="font-medium">
+                <TableCell className="font-medium align-top">
                   <div className="flex flex-col gap-2">
                     {index === 0 && <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 w-fit">
                         Recommandé
@@ -60,7 +60,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                     </Badge>
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="align-top">
                   <div className="space-y-1">
                     {option.pros?.slice(0, 3).map((pro, proIndex) => <div key={proIndex} className="flex items-start gap-2 text-sm">
                         <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
@@ -71,7 +71,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                       </p>}
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="align-top">
                   <div className="space-y-1">
                     {option.cons?.slice(0, 3).map((con, conIndex) => <div key={conIndex} className="flex items-start gap-2 text-sm">
                         <XCircle className="h-3 w-3 text-red-500 mt-0.5 flex-shrink-0" />
