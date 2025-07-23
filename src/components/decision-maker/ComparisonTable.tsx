@@ -60,7 +60,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                     </Badge>
                   </div>
                 </TableCell>
-                <TableCell className="align-top">
+                <TableCell className="align-top vertical-align-top">
                   <div className="space-y-1">
                     {option.pros?.slice(0, 3).map((pro, proIndex) => <div key={proIndex} className="flex items-start gap-2 text-sm">
                         <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
@@ -71,7 +71,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                       </p>}
                   </div>
                 </TableCell>
-                <TableCell className="align-top">
+                <TableCell className="align-top vertical-align-top">
                   <div className="space-y-1">
                     {option.cons?.slice(0, 3).map((con, conIndex) => <div key={conIndex} className="flex items-start gap-2 text-sm">
                         <XCircle className="h-3 w-3 text-red-500 mt-0.5 flex-shrink-0" />
