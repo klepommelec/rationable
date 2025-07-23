@@ -41,7 +41,6 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
           <TableHeader>
             <TableRow>
               <TableHead className="w-[200px]">Option</TableHead>
-              <TableHead className="w-[100px] text-center">Score</TableHead>
               <TableHead>Avantages</TableHead>
               <TableHead>Inconvénients</TableHead>
             </TableRow>
@@ -49,19 +48,17 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
           <TableBody>
             {sortedOptions.map((option, index) => <TableRow key={index} className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''}>
                 <TableCell className="font-medium">
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-2">
                     {index === 0 && <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 w-fit">
                         Recommandé
                       </Badge>}
                     <span className="text-sm">
                       {option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
                     </span>
+                    <Badge variant="outline" className={`font-mono w-fit ${option.score >= 80 ? 'border-green-500 text-green-700 dark:text-green-300' : option.score >= 60 ? 'border-yellow-500 text-yellow-700 dark:text-yellow-300' : 'border-red-500 text-red-700 dark:text-red-300'}`}>
+                      {option.score}/100
+                    </Badge>
                   </div>
-                </TableCell>
-                <TableCell className="text-center">
-                  <Badge variant="outline" className={`font-mono ${option.score >= 80 ? 'border-green-500 text-green-700 dark:text-green-300' : option.score >= 60 ? 'border-yellow-500 text-yellow-700 dark:text-yellow-300' : 'border-red-500 text-red-700 dark:text-red-300'}`}>
-                    {option.score}/100
-                  </Badge>
                 </TableCell>
                 <TableCell>
                   <div className="space-y-1">
