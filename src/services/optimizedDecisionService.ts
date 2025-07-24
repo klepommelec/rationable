@@ -63,19 +63,21 @@ export const generateFactualAnswerWithPerplexity = async (
   try {
     console.log('🔍 Génération de réponse factuelle avec Perplexity');
     
-    const prompt = `Vous devez répondre à cette question avec une réponse factuelle DIRECTE et PRÉCISE :
+    const prompt = `Répondez DIRECTEMENT à cette question en français simple et clair :
 
 "${dilemma}"
 
 INSTRUCTIONS CRITIQUES :
-- Donnez la réponse factuelle exacte sans introduire d'options ou d'alternatives
-- Répondez par le nom, le fait, la date, le chiffre ou l'information demandée
-- Utilisez des sources fiables et récentes
-- Si c'est une question sur une personne : donnez son nom complet et sa fonction
-- Si c'est une question sur un événement récent : donnez la date et les détails précis
-- Ne proposez PAS plusieurs options - une seule réponse factuelle
+- Réponse DIRECTE en français courant (sans références [1][2][3])
+- Maximum 2-3 phrases courtes et claires
+- Informations essentielles seulement
+- Pas de références bibliographiques dans le texte
+- Style conversationnel et accessible
 
-Format attendu : Réponse directe suivie des détails et sources.`;
+Exemple pour "Qui est le président de la France ?" :
+"Emmanuel Macron est le président de la République française depuis 2017. Il a été réélu en 2022 pour un second mandat de cinq ans."
+
+Répondez maintenant :`;
 
     const result = await searchWithPerplexity(prompt);
     
@@ -122,7 +124,6 @@ Répondez avec un JSON dans ce format exact :
   "options": [
     {
       "name": "iPhone 15 Pro Max",
-      "scores": [85, 78, 92, 88],
       "pros": ["Avantage détaillé 1", "Avantage détaillé 2"],
       "cons": ["Inconvénient détaillé 1", "Inconvénient détaillé 2"],
       "description": "Description complète de l'option"
@@ -132,10 +133,9 @@ Répondez avec un JSON dans ce format exact :
 
 INSTRUCTIONS CRITIQUES:
 - Le nom de l'option doit être direct sans préfixe "Option 1:" ou "Option 2:"
-- Les scores doivent être sur 100 (0-100) pour chaque critère (total ${criteria.length} scores)
-- Visez des scores réalistes entre 70-95 pour des bonnes options
+- Ne plus inclure de scores - supprimez la propriété "scores" complètement
 - Soyez précis et détaillé dans les avantages/inconvénients
-- Chaque option doit avoir exactement ${criteria.length} scores`;
+- Concentrez-vous sur la qualité des pros/cons plutôt que sur les scores`;
 
     // Essayer OpenAI en premier, puis Claude en fallback
     let apiResult;
@@ -176,17 +176,16 @@ INSTRUCTIONS CRITIQUES:
     
     const parsedResponse = JSON.parse(jsonMatch[0]);
     
-    // Convertir les options au format breakdown
+    // Convertir les options au format breakdown (sans scores)
     const breakdown = parsedResponse.options.map((option: any, index: number) => ({
       option: option.name,
       pros: option.pros,
       cons: option.cons,
-      score: option.scores.reduce((sum: number, score: number) => sum + score, 0)
+      score: 0 // Plus de calcul de score
     }));
     
-    const winner = breakdown.reduce((max: any, option: any) => 
-      option.score > max.score ? option : max
-    );
+    // Le premier option est considéré comme la recommandation
+    const winner = breakdown[0] || breakdown[0];
 
     return {
       recommendation: winner.option,

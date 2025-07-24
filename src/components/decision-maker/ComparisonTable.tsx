@@ -25,8 +25,8 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
     return null;
   }
 
-  // Pour les questions de choix, trier par score décroissant
-  const sortedOptions = [...breakdown].sort((a, b) => b.score - a.score);
+  // Garder l'ordre original des options (plus de tri par score)
+  const sortedOptions = [...breakdown];
 
   // Vérifier qu'on a bien plusieurs options pour justifier un tableau
   if (sortedOptions.length < 2) {
@@ -55,9 +55,6 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                     <span className="text-sm">
                       {option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
                     </span>
-                    <Badge variant="outline" className={`font-mono w-fit ${option.score >= 80 ? 'border-green-500 text-green-700 dark:text-green-300' : option.score >= 60 ? 'border-yellow-500 text-yellow-700 dark:text-yellow-300' : 'border-red-500 text-red-700 dark:text-red-300'}`}>
-                      {option.score}/100
-                    </Badge>
                   </div>
                 </TableCell>
                 <TableCell className="align-top vertical-align-top">

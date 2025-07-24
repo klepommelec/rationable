@@ -16,75 +16,9 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
   topOption,
   result
 }) => {
-  const realTimeData = result?.realTimeData;
-  const intelligentConfidence = useIntelligentConfidence(
-    breakdown,
-    realTimeData?.hasRealTimeData || false,
-    realTimeData?.timestamp,
-    realTimeData?.sourcesCount || 0,
-    result?.resultType // Nouveau paramètre
-  );
-  
-  const getIcon = () => {
-    switch (intelligentConfidence.icon) {
-      case 'TrendingUp':
-        return TrendingUp;
-      case 'Target':
-        return Target;
-      default:
-        return AlertTriangle;
-    }
-  };
-
-  const ConfidenceIcon = getIcon();
-
-  // Pour les questions factuelles, afficher différemment
+  // Pour les questions factuelles, ne plus afficher de score
   const isFactual = result?.resultType === 'factual';
 
-  return (
-    <div 
-      className="flex flex-col gap-3 mb-4"
-      role="region"
-      aria-labelledby="confidence-heading"
-    >
-      {/* Score Progress Bar */}
-      <div className="flex items-center gap-2">
-        <span 
-          id="confidence-heading"
-          className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 flex-shrink-0"
-        >
-          {isFactual ? 'Fiabilité :' : 'Score :'}
-        </span>
-        <div className="flex items-center gap-2 flex-1 min-w-0 max-w-[240px]">
-          <div 
-            className="flex-1 h-2 sm:h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden transition-all duration-300"
-            role="progressbar"
-            aria-valuenow={topOption?.score || 0}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label={`${isFactual ? 'Fiabilité' : 'Score'} de l'option: ${topOption?.score || 0} sur 100`}
-          >
-            <div 
-              className={`h-full rounded-full transition-all duration-1000 ease-out transform origin-left ${
-                isFactual 
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
-                  : 'bg-gradient-to-r from-blue-500 to-purple-500'
-              }`}
-              style={{ 
-                width: `${topOption?.score || 0}%`,
-                animation: 'scale-x 1s ease-out'
-              }}
-            />
-          </div>
-          <span 
-            className="font-mono text-gray-500 dark:text-gray-400 text-xs sm:text-sm flex-shrink-0"
-            aria-live="polite"
-          >
-            {topOption?.score || 0}/100
-          </span>
-        </div>
-      </div>
-
-    </div>
-  );
+  // Ne plus afficher de score du tout
+  return null;
 };
