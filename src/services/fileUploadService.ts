@@ -11,6 +11,49 @@ export interface UploadedFileInfo {
   extractedText?: string;
 }
 
+// Enhanced file validation and sanitization
+const validateFile = (file: UploadedFile): void => {
+  // Size validation (50MB max)
+  const maxSize = 50 * 1024 * 1024;
+  if (file.file.size > maxSize) {
+    throw new Error(`Le fichier "${file.file.name}" est trop volumineux. Taille maximale : 50MB.`);
+  }
+
+  // Allowed file types
+  const allowedTypes = [
+    'application/pdf',
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'text/plain',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ];
+
+  if (!allowedTypes.includes(file.file.type)) {
+    throw new Error(`Type de fichier "${file.file.type}" non autorisé.`);
+  }
+
+  // Validate file extension matches MIME type
+  const extension = file.file.name.toLowerCase().split('.').pop();
+  const mimeToExtension: Record<string, string[]> = {
+    'application/pdf': ['pdf'],
+    'image/jpeg': ['jpg', 'jpeg'],
+    'image/png': ['png'],
+    'image/gif': ['gif'],
+    'image/webp': ['webp'],
+    'text/plain': ['txt'],
+    'application/msword': ['doc'],
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['docx']
+  };
+
+  const validExtensions = mimeToExtension[file.file.type] || [];
+  if (extension && !validExtensions.includes(extension)) {
+    throw new Error(`L'extension "${extension}" ne correspond pas au type de fichier.`);
+  }
+};
+
 // Fonction pour nettoyer et sanitiser les noms de fichiers
 const sanitizeFileName = (fileName: string): string => {
   // Séparer le nom et l'extension
@@ -41,6 +84,9 @@ export const uploadFilesToStorage = async (files: UploadedFile[]): Promise<Uploa
   
   for (const file of files) {
     try {
+      // Validate file before processing
+      validateFile(file);
+      
       // Nettoyer le nom de fichier
       const sanitizedFileName = sanitizeFileName(file.file.name);
       
@@ -51,12 +97,13 @@ export const uploadFilesToStorage = async (files: UploadedFile[]): Promise<Uploa
       
       console.log(`📤 Uploading file: ${file.file.name} -> ${fileName}`);
       
-      // Upload vers Supabase Storage
+      // Upload vers Supabase Storage with security headers
       const { data, error } = await supabase.storage
         .from('decision-files')
         .upload(filePath, file.file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          contentType: file.file.type // Explicitly set content type
         });
       
       if (error) {

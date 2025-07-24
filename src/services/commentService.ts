@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { IComment, ICommentCreate } from '@/types/comment';
+import { sanitizeComment } from '@/utils/inputSanitization';
 
 export const commentService = {
   async getComments(decisionId: string): Promise<IComment[]> {
@@ -22,9 +23,15 @@ export const commentService = {
   },
 
   async createComment(comment: ICommentCreate): Promise<IComment | null> {
+    // Sanitize content before inserting
+    const sanitizedComment = {
+      ...comment,
+      content: sanitizeComment(comment.content)
+    };
+
     const { data, error } = await supabase
       .from('decision_comments')
-      .insert(comment)
+      .insert(sanitizedComment)
       .select()
       .single();
 
@@ -40,9 +47,12 @@ export const commentService = {
   },
 
   async updateComment(commentId: string, content: string): Promise<IComment | null> {
+    // Sanitize content before updating
+    const sanitizedContent = sanitizeComment(content);
+
     const { data, error } = await supabase
       .from('decision_comments')
-      .update({ content, updated_at: new Date().toISOString() })
+      .update({ content: sanitizedContent, updated_at: new Date().toISOString() })
       .eq('id', commentId)
       .select()
       .single();

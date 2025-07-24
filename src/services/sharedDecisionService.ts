@@ -13,6 +13,21 @@ export interface SharedDecision {
 }
 
 export const shareDecision = async (decision: IDecision): Promise<string> => {
+  // Check rate limit before proceeding
+  const { data: rateLimitOk, error: rateLimitError } = await supabase
+    .rpc('check_rate_limit', {
+      resource: 'shared_decisions',
+      identifier: 'global', // Could be user-specific if auth is implemented
+      max_actions: 10,
+      window_minutes: 60
+    });
+
+  if (rateLimitError) {
+    console.warn('Rate limit check failed:', rateLimitError);
+  } else if (!rateLimitOk) {
+    throw new Error('Trop de partages créés récemment. Veuillez réessayer plus tard.');
+  }
+
   // Generate a unique public ID
   const { data: publicIdData, error: publicIdError } = await supabase
     .rpc('generate_public_id');

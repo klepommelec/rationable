@@ -160,6 +160,33 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          action_count: number
+          created_at: string
+          id: string
+          identifier: string
+          resource_type: string
+          window_start: string
+        }
+        Insert: {
+          action_count?: number
+          created_at?: string
+          id?: string
+          identifier: string
+          resource_type: string
+          window_start?: string
+        }
+        Update: {
+          action_count?: number
+          created_at?: string
+          id?: string
+          identifier?: string
+          resource_type?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       shared_decisions: {
         Row: {
           created_at: string
@@ -319,6 +346,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_rate_limit: {
+        Args: {
+          resource: string
+          identifier: string
+          max_actions?: number
+          window_minutes?: number
+        }
+        Returns: boolean
+      }
       cleanup_expired_shared_decisions: {
         Args: Record<PropertyKey, never>
         Returns: number
