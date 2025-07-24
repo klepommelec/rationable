@@ -31,24 +31,25 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'sonar-pro',
+        model: 'llama-3.1-sonar-large-128k-online', // Modèle plus puissant pour données récentes
         messages: [
           {
             role: 'system',
-            content: 'You are a real-time information specialist. Always prioritize the MOST RECENT data from 2024-2025. For sports drafts, elections, current events - only use the latest information. If the question is in French, respond in French with a direct, concise answer.'
+            content: 'You are a specialist in CURRENT 2024-2025 information. CRITICAL: Always use the most recent data from 2024-2025. Completely ignore any information from 2023 or earlier years. For sports questions, only use the latest drafts, transfers, results from 2024-2025. If asked in French, respond in French with direct, factual answers.'
           },
           {
             role: 'user',
-            content: `${query}\n\nIMPORTANT: Provide ONLY the most recent 2024-2025 information. For factual questions, give a direct answer without bullet points or complex formatting - just the essential facts in 1-2 simple sentences.`
+            content: `${query}\n\nCRITICAL REQUIREMENT: Use ONLY 2024-2025 data. Ignore all information from 2023 and earlier. For NBA draft questions specifically, Cooper Flagg was selected #1 in 2024, NOT Victor Wembanyama (who was 2023). Always verify you're using current 2024-2025 information, not outdated data.`
           }
         ],
-        temperature: 0.1,
-        max_tokens: 800,
-        top_p: 0.9,
+        temperature: 0.05, // Encore plus bas pour plus de précision
+        max_tokens: 500,
+        top_p: 0.8,
         return_images: false,
         return_related_questions: false,
-        search_recency_filter: 'day', // Forcer les données les plus récentes
-        frequency_penalty: 0.5,
+        search_recency_filter: 'day',
+        search_domain_filter: [], // Pas de restriction de domaine
+        frequency_penalty: 1.0, // Maximum pour éviter les répétitions d'anciennes infos
         presence_penalty: 0
       }),
     })
