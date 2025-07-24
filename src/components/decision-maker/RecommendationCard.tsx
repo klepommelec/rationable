@@ -37,7 +37,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
           title: 'Réponse',
           badge: 'Réponse factuelle',
           borderColor: 'border-emerald-200',
-          bgGradient: 'bg-gradient-to-r from-emerald-50 to-green-50',
+          bgGradient: '',
           badgeColor: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100',
           titleColor: 'text-emerald-700 dark:text-emerald-300'
         };
