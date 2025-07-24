@@ -14,20 +14,32 @@ export interface PerplexitySearchResult {
 const cleanPerplexityResponse = (content: string): string => {
   if (!content) return content;
   
-  // Supprimer les artefacts numériques parasites
+  // Supprimer tous les artefacts et références
   let cleaned = content
-    // Supprimer les séquences numériques en fin de texte (123, 1234, 12345, etc.)
+    // Supprimer toutes les références de citation [1], [2], [3], etc.
+    .replace(/\[\d+\]/g, '')
+    // Supprimer les références multiples [1][2][3]
+    .replace(/(\[\d+\])+/g, '')
+    // Supprimer les séquences numériques parasites en fin
     .replace(/\s*\d{3,6}\s*$/g, '')
     // Supprimer les numéros isolés en fin de phrase
     .replace(/\s+\d{1,3}\s*$/g, '')
-    // Supprimer les références de citation malformées
-    .replace(/\[\d+\]\s*$/g, '')
-    // Supprimer les patterns numériques en milieu de phrase aussi
+    // Supprimer les patterns numériques en milieu de phrase
     .replace(/\s+\d{3,6}(?=\s|$)/g, '')
     // Supprimer les espaces multiples
     .replace(/\s+/g, ' ')
     // Supprimer les espaces en début et fin
     .trim();
+  
+  // Pour les réponses factuelles, garder seulement la première phrase si elle est complète
+  const sentences = cleaned.split(/[.!?]+/);
+  if (sentences.length > 1 && sentences[0].length > 10) {
+    // Garder la première phrase si elle semble complète et informative
+    const firstSentence = sentences[0].trim();
+    if (firstSentence.length > 20) {
+      return firstSentence + '.';
+    }
+  }
   
   return cleaned;
 };

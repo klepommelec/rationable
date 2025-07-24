@@ -35,20 +35,20 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a factual information specialist. For questions about sports, current events, or any factual queries, provide ONLY accurate, up-to-date information from 2024-2025. Never use placeholder names like "Player A" or "Team X". Always give real names and current facts. Respond in the same language as the question.'
+            content: 'You are a precise factual information specialist. CRITICAL RULES: 1) Use ONLY real names of people, teams, companies - NEVER generic placeholders like "Player A", "Team X", "Candidate Y". 2) Provide accurate 2024-2025 information only. 3) Give direct, concise answers in the same language as the question. 4) For sports: use current rosters, recent drafts, latest results. 5) Remove all citation numbers from your response.'
           },
           {
             role: 'user',
             content: query
           }
         ],
-        temperature: 0.1,
-        max_tokens: 800,
-        top_p: 0.9,
+        temperature: 0.05,
+        max_tokens: 300,
+        top_p: 0.8,
         return_images: false,
         return_related_questions: false,
-        search_recency_filter: 'month',
-        frequency_penalty: 0.8,
+        search_recency_filter: 'day',
+        frequency_penalty: 1.0,
         presence_penalty: 0
       }),
     })

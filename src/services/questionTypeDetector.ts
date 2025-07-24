@@ -29,24 +29,41 @@ export const detectQuestionType = (dilemma: string): QuestionType => {
     /\b(qui détient|qui possède|qui a)\b.*\b(record|titre|championnat)\b/i,
     /\b(who is|who holds|who has)\b.*\b(champion|record|title|medal)\b/i,
     
-    // Questions sportives spécifiques
+    // Questions sportives spécifiques - Améliorées
     /\b(qui est champion|qui est championne)\b.*\b(olympique|du monde|mondial|mondiale)\b/i,
     /\b(champion olympique|championne olympique|médaille d'or|record du monde|record olympique)\b/i,
     /\b(olympic champion|world champion|gold medal|world record|olympic record)\b/i,
     /\b(qui a gagné|qui a remporté|vainqueur de|gagnant de)\b.*\b(championnat|compétition|tournoi|jeux)\b/i,
     /\b(who won|winner of|champion of)\b.*\b(championship|competition|tournament|games)\b/i,
     
+    // Questions sportives récentes - Nouvelles améliorations
+    /\b(draft\s*(2024|2025)|repêchage\s*(2024|2025))\b/i,
+    /\b(ballon d'or|golden ball|mvp|player of the year)\b.*\b(2024|2025)\b/i,
+    /\b(transfert|transfer|signature|signing)\b.*\b(2024|2025)\b/i,
+    /\b(saison\s*(2024|2025)|season\s*(2024|2025))\b/i,
+    /\b(playoffs|séries éliminatoires|finale|final)\b.*\b(2024|2025)\b/i,
+    /\b(nouvelle équipe|new team|rejoindre|joining)\b/i,
+    
     // Questions spécifiques à réponse unique
     /\b(qui a été.*choix|who was.*pick|who was.*selected)\b/i,
     /\b(quel.*premier choix|what.*first pick|which.*first choice)\b/i,
     /\b(1er choix|premier choix|first pick|first choice)\b/i,
+    
+    // Questions événements actuels
+    /\b(qui est|who is)\b.*\b(usa|états-unis|america|united states)\b/i,
+    /\b(élection|election|élu|elected)\b.*\b(2024|2025)\b/i,
+    /\b(nouvellement|newly|récemment|recently)\b.*\b(élu|elected|nommé|appointed)\b/i,
     
     // Questions avec réponse unique évidente
     /\b(prix de|price of|cost of)\b/i,
     
     // Questions de classement et palmarès
     /\b(classement|ranking|palmarès|meilleur temps|best time)\b/i,
-    /\b(numéro un|number one|premier au monde|world number one)\b/i
+    /\b(numéro un|number one|premier au monde|world number one)\b/i,
+    
+    // Questions technologie et actualité
+    /\b(sortie|release|lancement|launch)\b.*\b(2024|2025)\b/i,
+    /\b(mise à jour|update|version)\b.*\b(récente|latest|nouvelle|new)\b/i
   ];
   
   // Patterns pour questions de recommandation (maintenant comparatives)

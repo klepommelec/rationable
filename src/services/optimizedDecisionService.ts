@@ -8,7 +8,29 @@ import { generateContextualEmoji } from './contextualEmojiService';
 
 const cleanAIResponse = (text: string): string => {
   if (!text) return text;
-  return text.replace(/\s+/g, ' ').trim();
+  
+  // Nettoyer et valider la réponse
+  let cleaned = text
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  // Vérifier s'il y a des noms génériques interdits
+  const genericNames = [
+    /\b(équipe\s*[a-z]|team\s*[a-z])\b/gi,
+    /\b(joueur\s*[a-z]|player\s*[a-z])\b/gi,
+    /\b(candidat\s*[a-z]|candidate\s*[a-z])\b/gi,
+    /\b(option\s*[a-z]|choice\s*[a-z])\b/gi
+  ];
+  
+  const hasGenericNames = genericNames.some(pattern => pattern.test(cleaned));
+  
+  if (hasGenericNames) {
+    console.warn('⚠️ Réponse contient des noms génériques:', cleaned);
+    // Marquer la réponse comme nécessitant une amélioration
+    cleaned = `[RÉPONSE À AMÉLIORER] ${cleaned}`;
+  }
+  
+  return cleaned;
 };
 
 // Génération des critères avec Perplexity
@@ -63,13 +85,26 @@ export const generateFactualAnswerWithPerplexity = async (
   try {
     console.log('🔍 Génération de réponse factuelle avec Perplexity');
     
-    const prompt = `${dilemma}
+    // Optimiser le prompt selon le type de question
+    let optimizedPrompt = dilemma;
+    
+    // Détecter le contexte pour adapter le prompt
+    if (/\b(draft|repêchage|premier choix|first pick)\b/i.test(dilemma)) {
+      optimizedPrompt += `\n\nCONTEXTE SPORT 2024-2025 - Utilisez uniquement des données récentes et des noms réels de joueurs/équipes`;
+    } else if (/\b(président|election|usa|états-unis)\b/i.test(dilemma)) {
+      optimizedPrompt += `\n\nCONTEXTE POLITIQUE 2024-2025 - Informations électorales et gouvernementales actuelles`;
+    } else if (/\b(champion|record|médaille)\b/i.test(dilemma)) {
+      optimizedPrompt += `\n\nCONTEXTE SPORT 2024-2025 - Champions et records actuels uniquement`;
+    }
+    
+    const prompt = `${optimizedPrompt}
 
 IMPÉRATIF - Répondez avec des NOMS RÉELS et des FAITS PRÉCIS :
 - AUCUN nom générique comme "Équipe A", "Joueur A", "Candidat X"
 - Seulement des noms réels de personnes, équipes, entreprises
 - Informations factuelles 2024-2025 uniquement
-- Réponse directe en 1-2 phrases maximum`;
+- Réponse directe en 1-2 phrases maximum
+- Pas de références numériques [1][2][3]`;
 
     const result = await searchWithPerplexity(prompt);
     
