@@ -43,9 +43,24 @@ serve(async (req) => {
     console.log('📁 Files to analyze:', files?.length || 0);
     const startTime = Date.now();
 
-    // Préparer les messages pour OpenAI
+    // Préparer les messages pour OpenAI avec prompt amélioré
+    const systemPrompt = `You are a world-class decision making assistant. Your responses must be in French and in a valid JSON object format.
+
+RÈGLES CRITIQUES POUR LA DESCRIPTION:
+1. Soyez ULTRA-SPÉCIFIQUE au dilemme posé - pas de texte générique
+2. Analysez les ENJEUX PARTICULIERS de cette situation précise
+3. Expliquez POURQUOI cette recommandation est la meilleure pour CE cas
+4. INTERDICTION ABSOLUE de phrases comme: "Le choix de X", "Cette décision", "Il est important de"
+5. Concentrez-vous sur la VALEUR AJOUTÉE et l'UTILITÉ concrète
+6. Maximum 150 mots pour la description
+
+INSTRUCTIONS POUR LES NOMS D'OPTIONS:
+- Utilisez des noms PRÉCIS et SPÉCIFIQUES (ex: "Toyota Corolla", "Bali", "Université Paris-Saclay")
+- JAMAIS de noms génériques comme "Option A", "Choix 1", "Produit X"
+- Soyez factuels et concrets dans tous les aspects`;
+
     const messages = [
-      { role: 'system', content: 'You are a world-class decision making assistant. Your responses must be in French and in a valid JSON object format.' },
+      { role: 'system', content: systemPrompt },
       { role: 'user', content: prompt }
     ];
 

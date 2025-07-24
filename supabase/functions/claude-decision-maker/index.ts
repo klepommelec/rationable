@@ -40,6 +40,14 @@ serve(async (req) => {
     // Construction du prompt système amélioré
     let systemPrompt = `Tu es un assistant expert en prise de décision avec accès aux informations les plus récentes.
 
+RÈGLES CRITIQUES POUR LA DESCRIPTION:
+1. Soyez ULTRA-SPÉCIFIQUE au dilemme posé - pas de texte générique
+2. Analysez les ENJEUX PARTICULIERS de cette situation précise
+3. Expliquez POURQUOI cette recommandation est la meilleure pour CE cas
+4. INTERDICTION ABSOLUE de phrases comme: "Le choix de X", "Cette décision", "Il est important de"
+5. Concentrez-vous sur la VALEUR AJOUTÉE et l'UTILITÉ concrète
+6. Maximum 150 mots pour la description
+
 IMPORTANT: 
 - Analyse en profondeur la question posée
 - Si c'est une question sur des événements récents (draft NBA, élections, actualités), utilise tes connaissances les plus à jour
@@ -49,15 +57,15 @@ IMPORTANT:
 Tu dois répondre EXCLUSIVEMENT en JSON valide, sans texte avant ou après. Le format EXACT attendu est:
 {
   "recommendation": "Titre de la recommandation (basé sur les faits)",
-  "description": "Description détaillée avec justification factuelle",
+  "description": "Analyse spécifique des enjeux de ce dilemme précis avec justification détaillée de pourquoi cette recommandation est optimale dans ce contexte particulier",
   "imageQuery": "Description for generating an image (in English, descriptive)",
   "confidenceLevel": 85,
   "dataFreshness": "very-fresh",
   "breakdown": [
     {
-      "option": "Nom de l'option",
-      "pros": ["Avantage factuel 1", "Avantage factuel 2"],
-      "cons": ["Inconvénient ou limitation 1", "Inconvénient 2"],
+      "option": "Nom précis de l'option (pas générique)",
+      "pros": ["Avantage spécifique et détaillé 1", "Avantage spécifique et détaillé 2"],
+      "cons": ["Inconvénient spécifique et détaillé 1", "Inconvénient spécifique et détaillé 2"],
       "score": 85
     }
   ],

@@ -5,6 +5,11 @@ import { callOpenAiApi } from './openai';
 import { makeClaudeDecision } from './claudeService';
 import { detectQuestionType } from './questionTypeDetector';
 import { generateContextualEmoji } from './contextualEmojiService';
+import { 
+  enrichFactualDescription, 
+  improveDescription, 
+  detectDilemmaContext 
+} from './descriptionEnrichmentService';
 
 // Validation stricte des réponses factuelles
 const validateFactualResponse = (text: string): { isValid: boolean; error?: string } => {
@@ -135,9 +140,18 @@ CONTEXTE : Données réelles et vérifiées 2025`;
       
       if (validation.isValid) {
         console.log('✅ Réponse factuelle validée avec succès');
+        
+        // Enrichir la description factuelle
+        const context = detectDilemmaContext(dilemma);
+        const enrichedDescription = await enrichFactualDescription(
+          dilemma, 
+          result.content, 
+          context.domain
+        );
+        
         return {
           recommendation: '',
-          description: cleanAIResponse(result.content),
+          description: enrichedDescription,
           breakdown: [],
           resultType: 'factual',
           realTimeData: {
@@ -261,17 +275,29 @@ INSTRUCTIONS CRITIQUES:
     // Le premier option est considéré comme la recommandation
     const winner = breakdown[0] || breakdown[0];
 
-    return {
+    const result = {
       recommendation: winner.option,
       description: cleanAIResponse(parsedResponse.description),
       breakdown,
-      resultType: 'comparative',
+      resultType: 'comparative' as const,
       aiProvider: {
         provider,
         model: provider === 'claude' ? 'claude-sonnet-4-20250514' : 'gpt-4o-mini',
         success: true
       },
-      dataFreshness: 'fresh'
+      dataFreshness: 'fresh' as const
+    };
+
+    // Améliorer la description si elle est générique
+    const improvedDescription = await improveDescription(
+      result.description,
+      dilemma,
+      result
+    );
+    
+    return {
+      ...result,
+      description: improvedDescription
     };
   } catch (error) {
     console.error('❌ Erreur génération comparative:', error);
