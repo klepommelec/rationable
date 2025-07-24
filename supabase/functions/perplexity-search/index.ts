@@ -35,19 +35,19 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a real-time information specialist. Provide accurate, up-to-date information with specific names, dates, and facts. Always include the most recent data available. Avoid generic responses like "Player A" or "Team X". Give precise, factual answers with real names and current information. If the question is in French, respond in French.'
+            content: 'You are a real-time information specialist. Always prioritize the MOST RECENT data from 2024-2025. For sports drafts, elections, current events - only use the latest information. If the question is in French, respond in French with a direct, concise answer.'
           },
           {
             role: 'user',
-            content: `Question: ${query}\n\nContexte: ${context || 'Recherche d\'informations actuelles et précises'}\n\nFournissez une réponse précise avec des noms réels, des dates exactes, et les informations les plus récentes disponibles. Évitez les réponses génériques.`
+            content: `${query}\n\nIMPORTANT: Provide ONLY the most recent 2024-2025 information. For factual questions, give a direct answer without bullet points or complex formatting - just the essential facts in 1-2 simple sentences.`
           }
         ],
-        temperature: 0.1, // Très bas pour des réponses factuelles
-        max_tokens: 1200,
+        temperature: 0.1,
+        max_tokens: 800,
         top_p: 0.9,
         return_images: false,
         return_related_questions: false,
-        search_recency_filter: 'month', // Prioriser les données récentes
+        search_recency_filter: 'day', // Forcer les données les plus récentes
         frequency_penalty: 0.5,
         presence_penalty: 0
       }),

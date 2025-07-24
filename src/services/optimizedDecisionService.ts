@@ -63,21 +63,13 @@ export const generateFactualAnswerWithPerplexity = async (
   try {
     console.log('🔍 Génération de réponse factuelle avec Perplexity');
     
-    const prompt = `Répondez DIRECTEMENT à cette question en français simple et clair :
+    const prompt = `${dilemma}
 
-"${dilemma}"
-
-INSTRUCTIONS CRITIQUES :
-- Réponse DIRECTE en français courant (sans références [1][2][3])
-- Maximum 2-3 phrases courtes et claires
-- Informations essentielles seulement
-- Pas de références bibliographiques dans le texte
-- Style conversationnel et accessible
-
-Exemple pour "Qui est le président de la France ?" :
-"Emmanuel Macron est le président de la République française depuis 2017. Il a été réélu en 2022 pour un second mandat de cinq ans."
-
-Répondez maintenant :`;
+RÉPONSE DIRECTE REQUISE :
+- 1-2 phrases maximum en français
+- Informations 2024-2025 UNIQUEMENT
+- Pas de puces, pas de formatage complexe
+- Réponse factuelle directe`;
 
     const result = await searchWithPerplexity(prompt);
     
