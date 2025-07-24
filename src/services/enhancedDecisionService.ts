@@ -13,15 +13,7 @@ const cleanAIResponse = (text: string): string => {
   if (!text) return text;
   
   return text
-    // Supprimer les séquences numériques en fin de texte (123, 1234, 12345, etc.)
-    .replace(/\s*\d{3,6}\s*$/g, '')
-    // Supprimer les numéros isolés en fin de phrase
-    .replace(/\s+\d{1,3}\s*$/g, '')
-    // Supprimer les références malformées
-    .replace(/\[\d+\]\s*$/g, '')
-    // Supprimer les patterns numériques en milieu de phrase aussi
-    .replace(/\s+\d{3,6}(?=\s|$)/g, '')
-    // Nettoyer les espaces
+    // Nettoyer seulement les espaces multiples sans supprimer de contenu important
     .replace(/\s+/g, ' ')
     .trim();
 };
@@ -397,31 +389,19 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
       result.recommendation = cleanAIResponse(result.recommendation);
     }
     
-    // Résumer la description automatiquement
-    if (result.description && result.recommendation) {
-      console.log('📝 Summarizing description...');
-      try {
-        const summarizedDescription = await summarizeDecisionDescription(
-          result.description,
-          result.recommendation,
-          dilemma
-        );
-        result.description = summarizedDescription;
-        console.log('✅ Description summarized successfully');
-      } catch (summaryError) {
-        console.warn('⚠️ Failed to summarize description, keeping original:', summaryError);
-        // Garder la description originale mais la nettoyer
-        result.description = cleanAIResponse(result.description);
-      }
+    // Garder la description complète - pas de résumé automatique
+    if (result.description) {
+      // Nettoyer légèrement la description sans la raccourcir
+      result.description = result.description.trim();
     }
     
-    // Nettoyer les breakdown items
+    // Conserver les breakdown items avec un nettoyage minimal
     if (result.breakdown && Array.isArray(result.breakdown)) {
       result.breakdown = result.breakdown.map(item => ({
         ...item,
-        option: cleanAIResponse(item.option || ''),
-        pros: item.pros?.map(pro => cleanAIResponse(pro)) || [],
-        cons: item.cons?.map(con => cleanAIResponse(con)) || []
+        option: item.option || '',
+        pros: item.pros || [],
+        cons: item.cons || []
       }));
     }
     

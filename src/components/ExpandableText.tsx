@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useExpandableText } from '@/hooks/useExpandableText';
@@ -16,18 +16,30 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
   className = ""
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [shouldTruncate, setShouldTruncate] = useState(false);
+  const textRef = useRef<HTMLParagraphElement>(null);
   
-  // Estimate if text would exceed 3 lines (roughly 50-60 chars per line)
-  const shouldTruncate = text.length > 150; // ~3 lines of text
+  // Check if text actually exceeds 3 lines after render
+  useEffect(() => {
+    if (textRef.current) {
+      const lineHeight = parseInt(getComputedStyle(textRef.current).lineHeight);
+      const maxHeight = lineHeight * 3; // 3 lines
+      setShouldTruncate(textRef.current.scrollHeight > maxHeight);
+    }
+  }, [text]);
+  
   const toggleExpanded = () => setIsExpanded(!isExpanded);
 
   return (
     <div className={className}>
-      <p className={`text-muted-foreground leading-relaxed break-words ${
-        !isExpanded && shouldTruncate 
-          ? 'line-clamp-3' 
-          : ''
-      }`}>
+      <p 
+        ref={textRef}
+        className={`text-muted-foreground leading-relaxed break-words ${
+          !isExpanded && shouldTruncate 
+            ? 'line-clamp-3' 
+            : ''
+        }`}
+      >
         {text}
       </p>
       {shouldTruncate && (
