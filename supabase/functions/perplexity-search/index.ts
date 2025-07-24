@@ -31,25 +31,24 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-sonar-large-128k-online', // Modèle plus puissant pour données récentes
+        model: 'sonar-pro',
         messages: [
           {
             role: 'system',
-            content: 'You are a specialist in CURRENT 2024-2025 information. CRITICAL: Always use the most recent data from 2024-2025. Completely ignore any information from 2023 or earlier years. For sports questions, only use the latest drafts, transfers, results from 2024-2025. If asked in French, respond in French with direct, factual answers.'
+            content: 'You are a factual information specialist. For questions about sports, current events, or any factual queries, provide ONLY accurate, up-to-date information from 2024-2025. Never use placeholder names like "Player A" or "Team X". Always give real names and current facts. Respond in the same language as the question.'
           },
           {
             role: 'user',
-            content: `${query}\n\nCRITICAL REQUIREMENT: Use ONLY 2024-2025 data. Ignore all information from 2023 and earlier. For NBA draft questions specifically, Cooper Flagg was selected #1 in 2024, NOT Victor Wembanyama (who was 2023). Always verify you're using current 2024-2025 information, not outdated data.`
+            content: query
           }
         ],
-        temperature: 0.05, // Encore plus bas pour plus de précision
-        max_tokens: 500,
-        top_p: 0.8,
+        temperature: 0.1,
+        max_tokens: 800,
+        top_p: 0.9,
         return_images: false,
         return_related_questions: false,
-        search_recency_filter: 'day',
-        search_domain_filter: [], // Pas de restriction de domaine
-        frequency_penalty: 1.0, // Maximum pour éviter les répétitions d'anciennes infos
+        search_recency_filter: 'month',
+        frequency_penalty: 0.8,
         presence_penalty: 0
       }),
     })

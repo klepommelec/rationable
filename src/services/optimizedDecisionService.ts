@@ -65,11 +65,11 @@ export const generateFactualAnswerWithPerplexity = async (
     
     const prompt = `${dilemma}
 
-RÉPONSE DIRECTE REQUISE :
-- 1-2 phrases maximum en français
-- Informations 2024-2025 UNIQUEMENT
-- Pas de puces, pas de formatage complexe
-- Réponse factuelle directe`;
+IMPÉRATIF - Répondez avec des NOMS RÉELS et des FAITS PRÉCIS :
+- AUCUN nom générique comme "Équipe A", "Joueur A", "Candidat X"
+- Seulement des noms réels de personnes, équipes, entreprises
+- Informations factuelles 2024-2025 uniquement
+- Réponse directe en 1-2 phrases maximum`;
 
     const result = await searchWithPerplexity(prompt);
     
