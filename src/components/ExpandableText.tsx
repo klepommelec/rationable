@@ -17,8 +17,8 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
-  // Simple check if text is long enough to potentially need expansion
-  const shouldTruncate = text.length > 150; // Rough estimate for 3 lines
+  // Check if text is actually long enough when rendered (more precise check)
+  const shouldTruncate = text.length > 200; // More conservative estimate
   const toggleExpanded = () => setIsExpanded(!isExpanded);
 
   return (

@@ -65,7 +65,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     }
   };
   const config = getResultConfig();
-  return <Card className={`border-2 ${config.borderColor} ${config.bgGradient}`}>
+  return <Card className={`border-2 ${config.borderColor} ${config.bgGradient} ${resultType === 'factual' ? 'mx-0' : ''}`}>
       <CardContent className="space-y-6 pt-6">
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-1 space-y-4">

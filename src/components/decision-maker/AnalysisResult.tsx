@@ -80,13 +80,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </Card>
         )}
         
-        {result.breakdown && result.breakdown.length > 0 && (
-          <AnalysisInsights 
-            breakdown={result.breakdown}
-            topOption={result.breakdown[0]}
-            cleanOptionName={result.breakdown[0]?.option || result.recommendation}
-          />
-        )}
       </div>
     );
   }
