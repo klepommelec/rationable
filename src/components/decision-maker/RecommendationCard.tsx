@@ -75,7 +75,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   {config.badge}
                 </Badge>
                 <h3 className={`text-lg font-semibold mb-2 ${config.titleColor}`}>
-                  {result.recommendation}
+                  {result.recommendation?.replace(/^Option\s+\d+:\s*/i, '').trim()}
                 </h3>
                 <ConfidenceIndicator breakdown={result.breakdown} topOption={topOption} result={result} />
               </div>

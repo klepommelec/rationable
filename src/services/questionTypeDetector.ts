@@ -18,6 +18,11 @@ export const detectQuestionType = (dilemma: string): QuestionType => {
     /\b(combien coûte|combien mesure|how much|how tall|how long)\b/i,
     /\b(quand sort|quand sortira|date de sortie|when will|release date)\b/i,
     
+    // Questions "qui est" pour dirigeants politiques et personnalités
+    /\b(qui est)\b.*\b(président|présidente|premier ministre|roi|reine|empereur|impératrice)\b/i,
+    /\b(qui est)\b.*\b(directeur|directrice|pdg|ceo|ministre|gouverneur|maire)\b/i,
+    /\b(who is)\b.*\b(president|prime minister|king|queen|emperor|ceo|director|minister|governor|mayor)\b/i,
+    
     // Questions "qui est" améliorées pour les champions et records
     /\b(qui est)\b.*\b(champion|championne|vainqueur|gagnant|détenteur|détentrice)\b/i,
     /\b(qui est)\b.*\b(record|titre|médaille|prix|trophée)\b/i,

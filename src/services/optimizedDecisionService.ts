@@ -63,11 +63,19 @@ export const generateFactualAnswerWithPerplexity = async (
   try {
     console.log('🔍 Génération de réponse factuelle avec Perplexity');
     
-    const prompt = `Répondez directement et factuellement à cette question :
+    const prompt = `Vous devez répondre à cette question avec une réponse factuelle DIRECTE et PRÉCISE :
 
 "${dilemma}"
 
-Donnez une réponse précise, factuelle et complète avec des sources fiables. Ne proposez pas d'options ou d'analyses, juste la réponse directe à la question.`;
+INSTRUCTIONS CRITIQUES :
+- Donnez la réponse factuelle exacte sans introduire d'options ou d'alternatives
+- Répondez par le nom, le fait, la date, le chiffre ou l'information demandée
+- Utilisez des sources fiables et récentes
+- Si c'est une question sur une personne : donnez son nom complet et sa fonction
+- Si c'est une question sur un événement récent : donnez la date et les détails précis
+- Ne proposez PAS plusieurs options - une seule réponse factuelle
+
+Format attendu : Réponse directe suivie des détails et sources.`;
 
     const result = await searchWithPerplexity(prompt);
     
@@ -113,8 +121,8 @@ Répondez avec un JSON dans ce format exact :
   "description": "Description détaillée de 3-5 lignes expliquant le contexte et les enjeux",
   "options": [
     {
-      "name": "Option 1",
-      "scores": [8, 7, 6, 5, 4, 3],
+      "name": "iPhone 15 Pro Max",
+      "scores": [85, 78, 92, 88],
       "pros": ["Avantage détaillé 1", "Avantage détaillé 2"],
       "cons": ["Inconvénient détaillé 1", "Inconvénient détaillé 2"],
       "description": "Description complète de l'option"
@@ -122,7 +130,12 @@ Répondez avec un JSON dans ce format exact :
   ]
 }
 
-IMPORTANT: Le nombre de scores doit correspondre exactement au nombre de critères (${criteria.length}). Soyez précis et détaillé dans les avantages/inconvénients.`;
+INSTRUCTIONS CRITIQUES:
+- Le nom de l'option doit être direct sans préfixe "Option 1:" ou "Option 2:"
+- Les scores doivent être sur 100 (0-100) pour chaque critère (total ${criteria.length} scores)
+- Visez des scores réalistes entre 70-95 pour des bonnes options
+- Soyez précis et détaillé dans les avantages/inconvénients
+- Chaque option doit avoir exactement ${criteria.length} scores`;
 
     // Essayer OpenAI en premier, puis Claude en fallback
     let apiResult;
