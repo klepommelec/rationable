@@ -104,27 +104,33 @@ export const generateFactualAnswerWithPerplexity = async (
   workspaceId?: string
 ): Promise<IResult> => {
   let attempt = 0;
-  const maxAttempts = 2;
+  const maxAttempts = 3; // Augmenter à 3 tentatives
   
   while (attempt < maxAttempts) {
     try {
       attempt++;
       console.log(`🔍 Génération factuelle avec Perplexity (tentative ${attempt}/${maxAttempts})`);
       
-      // Prompt optimisé et renforcé
+      // Prompt ultra-strict selon la tentative
+      const strictnessLevel = attempt === 1 ? 'NORMAL' : attempt === 2 ? 'STRICT' : 'ULTRA-STRICT';
+      
       const enhancedPrompt = `${dilemma}
 
-RÈGLES CRITIQUES - OBLIGATOIRE :
-1. Utilisez UNIQUEMENT des noms RÉELS et spécifiques (jamais "Joueur A", "Équipe X", "Candidat Y")
-2. Si vous ne connaissez pas la réponse exacte, écrivez exactement : "Information non disponible"
-3. Vérifiez bien l'année mentionnée dans la question (2024 ≠ 2025 ≠ 2026)
-4. Réponse courte et directe (1-2 phrases maximum)
-5. Pas de références numériques [1][2][3]
-6. Exemples de bonnes réponses : "Victor Wembanyama", "Golden State Warriors", "Joe Biden"
+RÈGLES ${strictnessLevel} - ABSOLUMENT OBLIGATOIRE :
+1. INTERDICTION TOTALE des noms génériques : JAMAIS "Joueur A", "Équipe X", "Candidat Y", "Option 1", etc.
+2. SEULS des noms RÉELS et PRÉCIS sont acceptés : "Zaccharie Risacher", "Cooper Flagg", "Victor Wembanyama"
+3. Si vous ne trouvez PAS le nom exact, écrivez EXACTEMENT : "Information non disponible"
+4. Vérifiez l'année de la question : 2025 a eu lieu, 2026 est dans le futur
+5. Réponse en 1 phrase maximum avec UNIQUEMENT le nom réel
+6. Supprimez toutes les références [1][2][3]
 
-CONTEXTE : Données réelles et actuelles 2024-2025`;
+${attempt > 1 ? 'ATTENTION : Tentative ' + attempt + ' - Soyez encore plus précis !' : ''}
+
+CONTEXTE : Données réelles et vérifiées 2025`;
 
       const result = await searchWithPerplexity(enhancedPrompt);
+      console.log(`📝 Réponse brute tentative ${attempt}:`, result.content);
+      
       const validation = validateFactualResponse(result.content);
       
       if (validation.isValid) {
@@ -144,12 +150,12 @@ CONTEXTE : Données réelles et actuelles 2024-2025`;
           dataFreshness: 'very-fresh'
         };
       } else {
-        console.warn(`⚠️ Tentative ${attempt} échouée - ${validation.error}: ${result.content}`);
+        console.warn(`⚠️ Tentative ${attempt} échouée - ${validation.error}`);
+        console.warn(`📄 Contenu rejeté: "${result.content}"`);
         
         if (attempt === maxAttempts) {
-          // Fallback vers comparative après échec des tentatives factuelles
-          console.log('🔄 Fallback vers mode comparatif');
-          const comparativeQuestion = `Quelles sont les principales options concernant : ${dilemma}`;
+          console.log('🔄 Échec de toutes les tentatives factuelles → Fallback vers comparative');
+          const comparativeQuestion = `Analysez les candidats potentiels pour : ${dilemma}`;
           return await generateComparativeWithOpenAI(comparativeQuestion, [], files, workspaceId);
         }
       }
@@ -157,7 +163,6 @@ CONTEXTE : Données réelles et actuelles 2024-2025`;
       console.error(`❌ Erreur tentative ${attempt}:`, error);
       
       if (attempt === maxAttempts) {
-        // Fallback final vers comparative
         console.log('🔄 Fallback final vers mode comparatif après erreur');
         const comparativeQuestion = `Analysez les options pour : ${dilemma}`;
         return await generateComparativeWithOpenAI(comparativeQuestion, [], files, workspaceId);
@@ -187,22 +192,24 @@ ${criteria.map((c, i) => `${i + 1}. ${c.name}`).join('\n')}
 
 Répondez avec un JSON dans ce format exact :
 {
-  "description": "Description détaillée de 3-5 lignes expliquant le contexte et les enjeux",
+  "description": "Analyse contextuelle spécifique à cette situation précise avec les enjeux particuliers de ce dilemme",
   "options": [
     {
-      "name": "iPhone 15 Pro Max",
-      "pros": ["Avantage détaillé 1", "Avantage détaillé 2"],
-      "cons": ["Inconvénient détaillé 1", "Inconvénient détaillé 2"],
-      "description": "Description complète de l'option"
+      "name": "Option spécifique 1",
+      "pros": ["Avantage détaillé et précis 1", "Avantage détaillé et précis 2"],
+      "cons": ["Inconvénient détaillé et précis 1", "Inconvénient détaillé et précis 2"],
+      "description": "Description unique et spécifique de cette option précise"
     }
   ]
 }
 
 INSTRUCTIONS CRITIQUES:
-- Le nom de l'option doit être direct sans préfixe "Option 1:" ou "Option 2:"
-- Ne plus inclure de scores - supprimez la propriété "scores" complètement
-- Soyez précis et détaillé dans les avantages/inconvénients
-- Concentrez-vous sur la qualité des pros/cons plutôt que sur les scores`;
+- Description générale : Soyez SPÉCIFIQUE au dilemme posé, pas de texte générique
+- Noms d'options : Précis et directs (ex: "Toyota Corolla", "Bali", "Université Paris-Saclay")
+- Pros/cons : Détaillés et factuels, pas de généralités
+- Description par option : Unique et personnalisée pour chaque option
+- INTERDICTION de phrases génériques comme "Le choix de X est une décision cruciale..."
+- Concentrez-vous sur la SPÉCIFICITÉ et l'UTILITÉ de chaque information`;
 
     // Essayer OpenAI en premier, puis Claude en fallback
     let apiResult;
