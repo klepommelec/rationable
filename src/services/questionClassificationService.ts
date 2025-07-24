@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export type QuestionType = 'factual' | 'comparative' | 'simple-choice';
+export type QuestionType = 'factual' | 'comparative';
 
 export interface QuestionClassification {
   type: QuestionType;
@@ -18,28 +18,24 @@ export const classifyQuestionWithAI = async (question: string): Promise<Question
 
 **FACTUAL** - Questions avec une réponse objective unique et vérifiable :
 - Questions sur des résultats sportifs précis ("Qui a gagné...", "Qui est champion...")
-- Questions sur des records, palmarès, classements
-- Questions sur des faits historiques, dates, prix
-- Questions "Qu'est-ce que...", "Combien...", "Quand..."
-- Questions avec une seule réponse correcte et factuelle
+- Questions sur des records, palmarès, classements spécifiques
+- Questions sur des faits historiques, dates, prix exacts
+- Questions "Qu'est-ce que...", "Combien...", "Quand..." avec réponse unique
+- Questions avec une seule réponse correcte et factuelle vérifiable
 
-**COMPARATIVE** - Questions nécessitant une comparaison explicite :
+**COMPARATIVE** - Questions nécessitant une comparaison ou recommandation :
 - Questions avec "ou", "vs", "versus", "choisir entre"
 - Questions avec plusieurs options listées
 - Questions demandant une comparaison directe entre éléments
-- Questions avec critères multiples explicites
-
-**SIMPLE-CHOICE** - Questions demandant une recommandation :
 - Questions "Quel est le meilleur...", "Que recommandez-vous..."
-- Questions d'achat sans comparaison explicite
-- Questions de conseil général
-- Questions ouvertes nécessitant une recommandation principale
+- Questions d'achat ou de conseil nécessitant plusieurs options
+- Questions ouvertes nécessitant une recommandation avec alternatives
 
 Question à analyser : "${question}"
 
 Réponds UNIQUEMENT avec un JSON valide dans ce format exact :
 {
-  "type": "factual|comparative|simple-choice",
+  "type": "factual|comparative",
   "confidence": 85,
   "reasoning": "Explication claire du choix",
   "suggestedApproach": "Comment traiter cette question"
@@ -99,8 +95,8 @@ const fallbackToRegexClassification = (question: string): QuestionClassification
     /\b(différence|difference|lequel|which one|plutôt|rather)\b/i
   ];
   
-  // Patterns de choix simple
-  const simpleChoicePatterns = [
+  // Patterns de recommandation/conseil (maintenant comparatifs)
+  const recommendationPatterns = [
     /\b(meilleur|best|recommand|recommend|conseil|advice)\b/i,
     /\b(acheter|buy|choisir|choose)\b/i
   ];
@@ -114,20 +110,20 @@ const fallbackToRegexClassification = (question: string): QuestionClassification
     };
   }
   
-  if (comparativePatterns.some(p => p.test(question))) {
+  if (comparativePatterns.some(p => p.test(question)) || recommendationPatterns.some(p => p.test(question))) {
     return {
       type: 'comparative',
       confidence: 70,
-      reasoning: 'Détecté comme comparatif par pattern regex',
+      reasoning: 'Détecté comme comparatif/recommandation par pattern regex',
       suggestedApproach: 'Génération de critères et comparaison d\'options'
     };
   }
   
   return {
-    type: 'simple-choice',
+    type: 'comparative',
     confidence: 60,
-    reasoning: 'Classification par défaut - choix simple',
-    suggestedApproach: 'Génération de recommandation principale avec alternatives'
+    reasoning: 'Classification par défaut - comparatif',
+    suggestedApproach: 'Génération de recommandation avec alternatives'
   };
 };
 

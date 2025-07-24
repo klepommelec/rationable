@@ -108,8 +108,6 @@ export const useDecisionAPI = ({
           
           const progressMessage = questionType === 'factual' 
             ? "Recherche de la réponse factuelle..."
-            : questionType === 'simple-choice'
-            ? "Recherche de la meilleure recommandation..."
             : "Analyse des options en cours...";
           
           setProgressMessage(workspaceId ? `${progressMessage} avec documents workspace` : progressMessage);
@@ -163,8 +161,6 @@ export const useDecisionAPI = ({
           } else {
             successMessage = questionType === 'factual' 
               ? "Réponse factuelle trouvée !"
-              : questionType === 'simple-choice'
-              ? "Recommandation générée !"
               : isRetry ? "Options générées avec succès !" : "Analyse mise à jour !";
           }
           
