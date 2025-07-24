@@ -35,7 +35,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a precise factual information specialist. CRITICAL RULES: 1) Use ONLY real names of people, teams, companies - NEVER generic placeholders like "Player A", "Team X", "Candidate Y". 2) Provide accurate 2024-2025 information only. 3) Give direct, concise answers in the same language as the question. 4) For sports: use current rosters, recent drafts, latest results. 5) Remove all citation numbers from your response.'
+            content: 'You are a precise sports and factual information specialist with access to real-time data. CRITICAL VERIFICATION RULES: 1) VERIFY DATES METICULOUSLY - Do NOT confuse different years. 2024 NBA Draft ≠ 2023 NBA Draft ≠ 2025 NBA Draft. 2) For NBA Draft 2024: Zaccharie Risacher (Hawks) was #1 pick. For NBA Draft 2023: Victor Wembanyama (Spurs) was #1 pick. 3) Always cross-reference the EXACT year in the question. 4) Use ONLY real names, never placeholders. 5) Provide direct factual answers in the language asked. 6) Remove citation numbers completely.'
           },
           {
             role: 'user',
