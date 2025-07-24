@@ -71,6 +71,7 @@ export type Database = {
           id: string
           step_context: string | null
           updated_at: string
+          user_id: string
         }
         Insert: {
           comment_type?: string
@@ -80,6 +81,7 @@ export type Database = {
           id?: string
           step_context?: string | null
           updated_at?: string
+          user_id: string
         }
         Update: {
           comment_type?: string
@@ -89,6 +91,7 @@ export type Database = {
           id?: string
           step_context?: string | null
           updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

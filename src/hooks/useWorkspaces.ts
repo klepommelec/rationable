@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Workspace, WorkspaceWithMembers } from '@/types/workspace';
 import { toast } from '@/hooks/use-toast';
+import { sanitizeWorkspaceName, sanitizeWorkspaceDescription } from '@/utils/inputSanitization';
 
 const CURRENT_WORKSPACE_KEY = 'currentWorkspaceId';
 const DEFAULT_WORKSPACE_COLOR = '#3b82f6';
@@ -108,11 +109,15 @@ export const useWorkspaces = () => {
     if (!user) return null;
 
     try {
+      // Sanitize inputs
+      const sanitizedName = sanitizeWorkspaceName(name);
+      const sanitizedDescription = description ? sanitizeWorkspaceDescription(description) : undefined;
+
       const { data, error } = await supabase
         .from('workspaces')
         .insert({
-          name,
-          description,
+          name: sanitizedName,
+          description: sanitizedDescription,
           color,
           user_id: user.id,
           is_default: false,
@@ -149,9 +154,18 @@ export const useWorkspaces = () => {
   // Update workspace
   const updateWorkspace = async (id: string, updates: Partial<Workspace>) => {
     try {
+      // Sanitize inputs if they exist
+      const sanitizedUpdates = { ...updates };
+      if (updates.name) {
+        sanitizedUpdates.name = sanitizeWorkspaceName(updates.name);
+      }
+      if (updates.description) {
+        sanitizedUpdates.description = sanitizeWorkspaceDescription(updates.description);
+      }
+
       const { data, error } = await supabase
         .from('workspaces')
-        .update(updates)
+        .update(sanitizedUpdates)
         .eq('id', id)
         .eq('user_id', user?.id)
         .select()

@@ -79,3 +79,35 @@ export const sanitizeFileName = (fileName: string): string => {
     .replace(/^[._-]+|[._-]+$/g, '') // Remove leading/trailing special chars
     .substring(0, 255) || 'unnamed_file';
 };
+
+/**
+ * Validate workspace name
+ */
+export const sanitizeWorkspaceName = (name: string): string => {
+  if (!name) return '';
+  
+  const trimmed = name.trim();
+  if (trimmed.length === 0) {
+    throw new Error('Workspace name cannot be empty');
+  }
+  
+  if (trimmed.length > 100) {
+    throw new Error('Workspace name is too long (maximum 100 characters)');
+  }
+  
+  return sanitizeText(trimmed);
+};
+
+/**
+ * Validate workspace description
+ */
+export const sanitizeWorkspaceDescription = (description: string): string => {
+  if (!description) return '';
+  
+  const trimmed = description.trim();
+  if (trimmed.length > 500) {
+    throw new Error('Workspace description is too long (maximum 500 characters)');
+  }
+  
+  return sanitizeText(trimmed);
+};
