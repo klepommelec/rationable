@@ -16,20 +16,20 @@ export const classifyQuestionWithAI = async (question: string): Promise<Question
     
     const classificationPrompt = `Analyse cette question et détermine son type selon ces critères précis :
 
-**FACTUAL** - Questions avec une réponse objective unique et vérifiable :
-- Questions sur des résultats sportifs précis ("Qui a gagné...", "Qui est champion...")
-- Questions sur des records, palmarès, classements spécifiques
-- Questions sur des faits historiques, dates, prix exacts
-- Questions "Qu'est-ce que...", "Combien...", "Quand..." avec réponse unique
-- Questions avec une seule réponse correcte et factuelle vérifiable
+**FACTUAL** - Questions avec UNE seule réponse factuelle précise :
+- Questions sur des résultats sportifs précis avec réponse unique ("Qui a été drafté #1 en 2025?")
+- Questions sur des dirigeants actuels ("Qui est le président de...")
+- Questions sur des records, champions actuels avec nom spécifique
+- Questions factuelles avec une seule réponse correcte et vérifiable
+- Questions "Qui est...", "Qu'est-ce que..." avec réponse factuelle unique
 
-**COMPARATIVE** - Questions nécessitant une comparaison ou recommandation :
+**COMPARATIVE** - Questions nécessitant analyse et options multiples :
 - Questions avec "ou", "vs", "versus", "choisir entre"
-- Questions avec plusieurs options listées
-- Questions demandant une comparaison directe entre éléments
-- Questions "Quel est le meilleur...", "Que recommandez-vous..."
-- Questions d'achat ou de conseil nécessitant plusieurs options
-- Questions ouvertes nécessitant une recommandation avec alternatives
+- Questions "Qui pourrait être...", "Quelles sont les options..."
+- Questions demandant prédictions ou projections futures
+- Questions "Quel est le meilleur...", conseils et recommandations
+- Questions d'achat, voyages, décisions personnelles
+- Questions nécessitant comparaison entre plusieurs alternatives
 
 Question à analyser : "${question}"
 

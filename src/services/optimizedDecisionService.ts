@@ -6,6 +6,43 @@ import { makeClaudeDecision } from './claudeService';
 import { detectQuestionType } from './questionTypeDetector';
 import { generateContextualEmoji } from './contextualEmojiService';
 
+// Validation stricte des réponses factuelles
+const validateFactualResponse = (text: string): { isValid: boolean; error?: string } => {
+  if (!text) return { isValid: false, error: 'Réponse vide' };
+  
+  // Vérifier les noms génériques interdits (plus strict)
+  const genericPatterns = [
+    /\b(équipe\s*[a-z]|team\s*[a-z])\b/gi,
+    /\b(joueur\s*[a-z]|player\s*[a-z])\b/gi,
+    /\b(candidat\s*[a-z]|candidate\s*[a-z])\b/gi,
+    /\b(option\s*[a-z]|choice\s*[a-z])\b/gi,
+    /\b(personne\s*[a-z]|person\s*[a-z])\b/gi,
+    /\b(entreprise\s*[a-z]|company\s*[a-z])\b/gi
+  ];
+  
+  const hasGenericNames = genericPatterns.some(pattern => pattern.test(text));
+  if (hasGenericNames) {
+    return { isValid: false, error: 'Contient des noms génériques' };
+  }
+  
+  // Vérifier si la réponse indique une incapacité à répondre
+  const uncertaintyPatterns = [
+    /je ne sais pas/i,
+    /impossible de/i,
+    /données non disponibles/i,
+    /information non trouvée/i,
+    /uncertain/i,
+    /cannot determine/i
+  ];
+  
+  const hasUncertainty = uncertaintyPatterns.some(pattern => pattern.test(text));
+  if (hasUncertainty) {
+    return { isValid: false, error: 'Réponse incertaine' };
+  }
+  
+  return { isValid: true };
+};
+
 const cleanAIResponse = (text: string): string => {
   if (!text) return text;
   
@@ -13,22 +50,6 @@ const cleanAIResponse = (text: string): string => {
   let cleaned = text
     .replace(/\s+/g, ' ')
     .trim();
-  
-  // Vérifier s'il y a des noms génériques interdits
-  const genericNames = [
-    /\b(équipe\s*[a-z]|team\s*[a-z])\b/gi,
-    /\b(joueur\s*[a-z]|player\s*[a-z])\b/gi,
-    /\b(candidat\s*[a-z]|candidate\s*[a-z])\b/gi,
-    /\b(option\s*[a-z]|choice\s*[a-z])\b/gi
-  ];
-  
-  const hasGenericNames = genericNames.some(pattern => pattern.test(cleaned));
-  
-  if (hasGenericNames) {
-    console.warn('⚠️ Réponse contient des noms génériques:', cleaned);
-    // Marquer la réponse comme nécessitant une amélioration
-    cleaned = `[RÉPONSE À AMÉLIORER] ${cleaned}`;
-  }
   
   return cleaned;
 };
@@ -76,56 +97,75 @@ Répondez UNIQUEMENT avec un JSON dans ce format exact :
   }
 };
 
-// Génération de réponse factuelle avec Perplexity
+// Génération de réponse factuelle avec Perplexity et système de retry/fallback
 export const generateFactualAnswerWithPerplexity = async (
   dilemma: string,
   files?: UploadedFileInfo[],
   workspaceId?: string
 ): Promise<IResult> => {
-  try {
-    console.log('🔍 Génération de réponse factuelle avec Perplexity');
-    
-    // Optimiser le prompt selon le type de question
-    let optimizedPrompt = dilemma;
-    
-    // Détecter le contexte pour adapter le prompt
-    if (/\b(draft|repêchage|premier choix|first pick)\b/i.test(dilemma)) {
-      optimizedPrompt += `\n\nCONTEXTE SPORT 2024-2025 - Utilisez uniquement des données récentes et des noms réels de joueurs/équipes`;
-    } else if (/\b(président|election|usa|états-unis)\b/i.test(dilemma)) {
-      optimizedPrompt += `\n\nCONTEXTE POLITIQUE 2024-2025 - Informations électorales et gouvernementales actuelles`;
-    } else if (/\b(champion|record|médaille)\b/i.test(dilemma)) {
-      optimizedPrompt += `\n\nCONTEXTE SPORT 2024-2025 - Champions et records actuels uniquement`;
+  let attempt = 0;
+  const maxAttempts = 2;
+  
+  while (attempt < maxAttempts) {
+    try {
+      attempt++;
+      console.log(`🔍 Génération factuelle avec Perplexity (tentative ${attempt}/${maxAttempts})`);
+      
+      // Prompt optimisé et renforcé
+      const enhancedPrompt = `${dilemma}
+
+RÈGLES CRITIQUES - OBLIGATOIRE :
+1. Utilisez UNIQUEMENT des noms RÉELS et spécifiques (jamais "Joueur A", "Équipe X", "Candidat Y")
+2. Si vous ne connaissez pas la réponse exacte, écrivez exactement : "Information non disponible"
+3. Vérifiez bien l'année mentionnée dans la question (2024 ≠ 2025 ≠ 2026)
+4. Réponse courte et directe (1-2 phrases maximum)
+5. Pas de références numériques [1][2][3]
+6. Exemples de bonnes réponses : "Victor Wembanyama", "Golden State Warriors", "Joe Biden"
+
+CONTEXTE : Données réelles et actuelles 2024-2025`;
+
+      const result = await searchWithPerplexity(enhancedPrompt);
+      const validation = validateFactualResponse(result.content);
+      
+      if (validation.isValid) {
+        console.log('✅ Réponse factuelle validée avec succès');
+        return {
+          recommendation: '',
+          description: cleanAIResponse(result.content),
+          breakdown: [],
+          resultType: 'factual',
+          realTimeData: {
+            hasRealTimeData: true,
+            timestamp: new Date().toISOString(),
+            sourcesCount: result.sources.length,
+            provider: 'perplexity',
+            sources: result.sources
+          },
+          dataFreshness: 'very-fresh'
+        };
+      } else {
+        console.warn(`⚠️ Tentative ${attempt} échouée - ${validation.error}: ${result.content}`);
+        
+        if (attempt === maxAttempts) {
+          // Fallback vers comparative après échec des tentatives factuelles
+          console.log('🔄 Fallback vers mode comparatif');
+          const comparativeQuestion = `Quelles sont les principales options concernant : ${dilemma}`;
+          return await generateComparativeWithOpenAI(comparativeQuestion, [], files, workspaceId);
+        }
+      }
+    } catch (error) {
+      console.error(`❌ Erreur tentative ${attempt}:`, error);
+      
+      if (attempt === maxAttempts) {
+        // Fallback final vers comparative
+        console.log('🔄 Fallback final vers mode comparatif après erreur');
+        const comparativeQuestion = `Analysez les options pour : ${dilemma}`;
+        return await generateComparativeWithOpenAI(comparativeQuestion, [], files, workspaceId);
+      }
     }
-    
-    const prompt = `${optimizedPrompt}
-
-IMPÉRATIF - Répondez avec des NOMS RÉELS et des FAITS PRÉCIS :
-- AUCUN nom générique comme "Équipe A", "Joueur A", "Candidat X"
-- Seulement des noms réels de personnes, équipes, entreprises
-- Informations factuelles 2024-2025 uniquement
-- Réponse directe en 1-2 phrases maximum
-- Pas de références numériques [1][2][3]`;
-
-    const result = await searchWithPerplexity(prompt);
-    
-    return {
-      recommendation: '',
-      description: cleanAIResponse(result.content),
-      breakdown: [],
-      resultType: 'factual',
-      realTimeData: {
-        hasRealTimeData: true,
-        timestamp: new Date().toISOString(),
-        sourcesCount: result.sources.length,
-        provider: 'perplexity',
-        sources: result.sources
-      },
-      dataFreshness: 'very-fresh'
-    };
-  } catch (error) {
-    console.error('❌ Erreur génération réponse factuelle:', error);
-    throw error;
   }
+  
+  throw new Error('Échec après toutes les tentatives');
 };
 
 // Génération d'options comparatives avec OpenAI/Claude
