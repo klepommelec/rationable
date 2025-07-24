@@ -63,11 +63,11 @@ export const generateFactualAnswerWithPerplexity = async (
   try {
     console.log('🔍 Génération de réponse factuelle avec Perplexity');
     
-    const prompt = `Répondez à cette question de manière factuelle et précise :
+    const prompt = `Répondez directement et factuellement à cette question :
 
 "${dilemma}"
 
-Donnez une réponse complète avec des sources fiables et des informations à jour.`;
+Donnez une réponse précise, factuelle et complète avec des sources fiables. Ne proposez pas d'options ou d'analyses, juste la réponse directe à la question.`;
 
     const result = await searchWithPerplexity(prompt);
     
@@ -114,7 +114,7 @@ Répondez avec un JSON dans ce format exact :
   "options": [
     {
       "name": "Option 1",
-      "scores": [8, 7, 6, 5],
+      "scores": [8, 7, 6, 5, 4, 3],
       "pros": ["Avantage détaillé 1", "Avantage détaillé 2"],
       "cons": ["Inconvénient détaillé 1", "Inconvénient détaillé 2"],
       "description": "Description complète de l'option"
@@ -122,7 +122,7 @@ Répondez avec un JSON dans ce format exact :
   ]
 }
 
-Soyez précis et détaillé dans les avantages/inconvénients.`;
+IMPORTANT: Le nombre de scores doit correspondre exactement au nombre de critères (${criteria.length}). Soyez précis et détaillé dans les avantages/inconvénients.`;
 
     // Essayer OpenAI en premier, puis Claude en fallback
     let apiResult;
