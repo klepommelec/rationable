@@ -158,23 +158,29 @@ export const improveDescription = async (
 
   const context = detectDilemmaContext(dilemma);
 
-  const prompt = `Améliore cette description en la centrant sur la recommandation spécifique:
+  const prompt = `Créé une description spécifique et utile pour cette recommandation:
 
 DILEMME: "${dilemma}"
-RECOMMANDATION SPÉCIFIQUE: "${result.recommendation}"
-DESCRIPTION À AMÉLIORER: "${description}"
+RECOMMANDATION: "${result.recommendation}"
+CONTEXTE: ${context.domain}
+DESCRIPTION ACTUELLE: "${description}"
 
-INSTRUCTIONS STRICTES:
-1. DOIT commencer par ou mentionner explicitement "${result.recommendation}"
-2. Explique pourquoi CETTE option spécifique est la meilleure
-3. Utilise des éléments concrets du dilemme
-4. Évite les phrases génériques comme "Le choix de", "Cette décision"
-5. Maximum 120 mots
+CONSIGNES CRITIQUES:
+1. Commence OBLIGATOIREMENT par "${result.recommendation}"
+2. Explique les bénéfices CONCRETS et SPÉCIFIQUES de cette option
+3. Utilise le vocabulaire du domaine ${context.domain}
+4. INTERDICTION d'utiliser: "Cette décision", "Le choix de", "Il est important", "En conclusion"
+5. Maximum 100 mots, style direct et informatif
+6. Intègre des éléments du contexte "${dilemma}"
 
-EXEMPLE ATTENDU:
-"${result.recommendation} est la meilleure option car [raisons spécifiques]. Cette solution offre [avantages concrets] pour votre situation de [contexte du dilemme]."
+MODÈLE OBLIGATOIRE:
+"${result.recommendation} [bénéfice principal spécifique] grâce à [caractéristique concrète]. Cette option [avantage pratique] pour [situation du dilemma]. [Détail technique/pratique précis]."
 
-Réponds uniquement avec la description focalisée sur la recommandation.`;
+EXEMPLES:
+- Pour un restaurant: "Restaurant XYZ offre la meilleure expérience culinaire grâce à sa cuisine française authentique et son service personnalisé. Cette option garantit un repas mémorable pour votre anniversaire de mariage avec un cadre romantique et une cave à vins exceptionnelle."
+- Pour un produit tech: "iPhone 15 Pro combine puissance et efficacité énergétique grâce à sa puce A17 Pro et son autonomie de 23h. Cette option répond parfaitement à vos besoins de photographe mobile avec son système de caméras avancé et sa résistance professionnelle."
+
+Réponds UNIQUEMENT avec la nouvelle description focalisée.`;
 
   try {
     const response = await callOpenAiApi(prompt);

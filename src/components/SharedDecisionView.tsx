@@ -162,9 +162,21 @@ const SharedDecisionView: React.FC = () => {
                 <div key={index} className="border rounded-lg p-4">
                   <div className="flex justify-between items-center mb-3">
                     <h4 className="font-semibold">{item.option}</h4>
-                    <Badge variant={item.score >= 7 ? "default" : item.score >= 5 ? "secondary" : "outline"}>
-                      {item.score}/10
-                    </Badge>
+                    <div className="flex items-center gap-3">
+                      <Badge variant={item.score >= 7 ? "default" : item.score >= 5 ? "secondary" : "outline"}>
+                        {item.score}/10
+                      </Badge>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-muted-foreground">En savoir plus</span>
+                        <ValidatedLink
+                          link={{
+                            title: `Rechercher ${item.option}`,
+                            url: `https://www.google.fr/search?q=${encodeURIComponent(`${item.option} ${decision.dilemma}`)}`
+                          }}
+                          className="text-xs bg-muted hover:bg-muted/80 px-2 py-1 rounded-md flex items-center gap-1 transition-colors"
+                        />
+                      </div>
+                    </div>
                   </div>
                   
                   <div className="grid md:grid-cols-2 gap-4">
