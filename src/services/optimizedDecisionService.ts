@@ -1,4 +1,4 @@
-import { ICriterion, IResult } from '@/types/decision';
+import { ICriterion, IResult, IBreakdownItem } from '@/types/decision';
 import { UploadedFileInfo } from './fileUploadService';
 import { searchWithPerplexity } from './perplexityService';
 import { callOpenAiApi } from './openai';
@@ -10,6 +10,41 @@ import {
   improveDescription, 
   detectDilemmaContext 
 } from './descriptionEnrichmentService';
+
+// Fonction pour générer une description spécifique à la recommandation
+const generateRecommendationDescription = async (
+  winner: IBreakdownItem,
+  allOptions: IBreakdownItem[],
+  dilemma: string
+): Promise<string> => {
+  const otherOptions = allOptions.filter(opt => opt.option !== winner.option);
+  
+  const prompt = `Créez une description de recommandation pour cette décision:
+
+DILEMME: "${dilemma}"
+OPTION RECOMMANDÉE: "${winner.option}"
+AVANTAGES: ${winner.pros.join(', ')}
+INCONVÉNIENTS: ${winner.cons?.join(', ') || 'Aucun'}
+SCORE: ${winner.score}
+
+${otherOptions.length > 0 ? `AUTRES OPTIONS:
+${otherOptions.map(opt => `- ${opt.option} (score: ${opt.score})`).join('\n')}` : ''}
+
+Créez une description en 2-3 phrases qui:
+1. Commence par "${winner.option} est recommandé car..."
+2. Explique pourquoi cette option surpasse les autres
+3. Mentionne les avantages clés spécifiques
+
+Format: Description concise et factuelle.`;
+
+  try {
+    const response = await callOpenAiApi(prompt);
+    return response.trim();
+  } catch (error) {
+    console.error('Erreur génération description recommandation:', error);
+    return `${winner.option} est recommandé en raison de ses avantages significatifs: ${winner.pros.slice(0, 2).join(' et ')}.`;
+  }
+};
 
 // Validation stricte des réponses factuelles
 const validateFactualResponse = (text: string): { isValid: boolean; error?: string } => {
@@ -207,6 +242,7 @@ ${criteria.map((c, i) => `${i + 1}. ${c.name}`).join('\n')}
 Répondez avec un JSON dans ce format exact :
 {
   "description": "Analyse contextuelle spécifique à cette situation précise avec les enjeux particuliers de ce dilemme",
+  "recommendationDescription": "Description spécifique expliquant pourquoi la première option est recommandée",
   "options": [
     {
       "name": "Option spécifique 1",
@@ -275,9 +311,16 @@ INSTRUCTIONS CRITIQUES:
     // Le premier option est considéré comme la recommandation
     const winner = breakdown[0] || breakdown[0];
 
+    // Utiliser la description de recommandation ou la générer
+    let finalDescription = parsedResponse.recommendationDescription;
+    
+    if (!finalDescription) {
+      finalDescription = await generateRecommendationDescription(winner, breakdown, dilemma);
+    }
+
     const result = {
       recommendation: winner.option,
-      description: cleanAIResponse(parsedResponse.description),
+      description: finalDescription,
       breakdown,
       resultType: 'comparative' as const,
       aiProvider: {
@@ -288,7 +331,7 @@ INSTRUCTIONS CRITIQUES:
       dataFreshness: 'fresh' as const
     };
 
-    // Améliorer la description si elle est générique
+    // Améliorer la description si elle est toujours générique
     const improvedDescription = await improveDescription(
       result.description,
       dilemma,

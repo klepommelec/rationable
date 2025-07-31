@@ -144,50 +144,61 @@ export const improveDescription = async (
   dilemma: string,
   result: IResult
 ): Promise<string> => {
-  const validation = validateDescriptionQuality(description, dilemma);
+  // Vérifier si la description mentionne déjà la recommandation
+  const mentionsRecommendation = description.toLowerCase().includes(result.recommendation.toLowerCase());
   
-  if (validation.isValid) {
-    return description;
+  if (mentionsRecommendation) {
+    const validation = validateDescriptionQuality(description, dilemma);
+    if (validation.isValid) {
+      return description;
+    }
   }
 
-  console.log('🔧 Description générique détectée, amélioration en cours...', validation.issues);
+  console.log('🔧 Description nécessite une amélioration focalisée sur la recommandation...');
 
   const context = detectDilemmaContext(dilemma);
-  const recommendation = result.recommendation;
 
-  const prompt = `Améliore cette description générique pour la rendre spécifique et pertinente.
+  const prompt = `Améliore cette description en la centrant sur la recommandation spécifique:
 
 DILEMME: "${dilemma}"
-DESCRIPTION ACTUELLE: "${description}"
-RECOMMANDATION: "${recommendation}"
-DOMAINE: ${context.domain}
-PROBLÈMES DÉTECTÉS: ${validation.issues.join(', ')}
+RECOMMANDATION SPÉCIFIQUE: "${result.recommendation}"
+DESCRIPTION À AMÉLIORER: "${description}"
 
-INSTRUCTIONS:
-1. Rends la description SPÉCIFIQUE au dilemme posé
-2. Explique POURQUOI cette recommandation est la meilleure
+INSTRUCTIONS STRICTES:
+1. DOIT commencer par ou mentionner explicitement "${result.recommendation}"
+2. Explique pourquoi CETTE option spécifique est la meilleure
 3. Utilise des éléments concrets du dilemme
-4. Évite toute phrase générique
-5. Sois ${context.tone === 'professional' ? 'professionnel' : context.tone === 'technical' ? 'technique' : 'accessible'}
-6. Maximum 150 mots
+4. Évite les phrases génériques comme "Le choix de", "Cette décision"
+5. Maximum 120 mots
 
-Réponds uniquement avec la description améliorée.`;
+EXEMPLE ATTENDU:
+"${result.recommendation} est la meilleure option car [raisons spécifiques]. Cette solution offre [avantages concrets] pour votre situation de [contexte du dilemme]."
+
+Réponds uniquement avec la description focalisée sur la recommandation.`;
 
   try {
     const response = await callOpenAiApi(prompt);
     const improvedDescription = response.generatedText || description;
     
-    // Validation de la description améliorée
-    const newValidation = validateDescriptionQuality(improvedDescription, dilemma);
-    if (newValidation.isValid) {
+    // Validation stricte : doit mentionner la recommandation
+    const mentionsRecommendationAfter = improvedDescription.toLowerCase().includes(result.recommendation.toLowerCase());
+    
+    if (!mentionsRecommendationAfter) {
+      console.log('⚠️ Forçage de la mention de la recommandation');
+      return `${result.recommendation} est recommandé. ${improvedDescription.replace(/^[A-Z]/, (char) => char.toLowerCase())}`;
+    }
+    
+    const validation = validateDescriptionQuality(improvedDescription, dilemma);
+    
+    if (validation.isValid) {
       console.log('✅ Description améliorée avec succès');
       return improvedDescription;
     } else {
-      console.log('⚠️ Description toujours générique après amélioration');
-      return description; // Retourner l'originale si l'amélioration a échoué
+      console.log('⚠️ Description toujours générique, utilisation du fallback');
+      return `${result.recommendation} est la solution recommandée en raison de ses avantages pour votre situation.`;
     }
   } catch (error) {
     console.error('Erreur lors de l\'amélioration de la description:', error);
-    return description;
+    return `${result.recommendation} est recommandé pour cette situation.`;
   }
 };
