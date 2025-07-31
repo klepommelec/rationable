@@ -1,15 +1,12 @@
 
-import React, { Suspense } from 'react';
+import React from 'react';
 import { IResult, IDecision } from '@/types/decision';
 import { RecommendationCard } from './RecommendationCard';
 import { ComparisonTable } from './ComparisonTable';
-import { AnalysisCharts } from './AnalysisCharts';
 import { UsefulLinks } from './UsefulLinks';
-import { AnalysisInsights } from './AnalysisInsights';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BarChart3, Table2, ExternalLink, Lightbulb } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table2, ExternalLink } from 'lucide-react';
 import YouTubeVideoCard from '@/components/YouTubeVideoCard';
 
 interface AnalysisResultProps {
@@ -103,61 +100,26 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
       />
       
       {hasMultipleOptions && (
-        <Tabs defaultValue="comparison" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="comparison" className="flex items-center gap-2">
-              <Table2 className="h-4 w-4" />
-              Comparaison
-            </TabsTrigger>
-            <TabsTrigger value="analysis" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Analyse
-            </TabsTrigger>
-            <TabsTrigger value="insights" className="flex items-center gap-2">
-              <Lightbulb className="h-4 w-4" />
-              Insights
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="comparison" className="mt-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <Table2 className="h-5 w-5" />
-                    Tableau comparatif
-                  </CardTitle>
-                  <Badge variant="outline">
-                    {result.breakdown?.length || 0} options
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ComparisonTable 
-                  breakdown={result.breakdown || []} 
-                  dilemma={dilemma}
-                  resultType={resultType}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="analysis" className="mt-6">
-            <Suspense fallback={<div>Chargement des graphiques...</div>}>
-              <AnalysisCharts breakdown={result.breakdown || []} />
-            </Suspense>
-          </TabsContent>
-          
-          <TabsContent value="insights" className="mt-6">
-            {result.breakdown && result.breakdown.length > 0 && (
-              <AnalysisInsights 
-                breakdown={result.breakdown}
-                topOption={result.breakdown[0]}
-                cleanOptionName={result.breakdown[0]?.option || result.recommendation}
-              />
-            )}
-          </TabsContent>
-        </Tabs>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Table2 className="h-5 w-5" />
+                Tableau comparatif
+              </CardTitle>
+              <Badge variant="outline">
+                {result.breakdown?.length || 0} options
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ComparisonTable 
+              breakdown={result.breakdown || []} 
+              dilemma={dilemma}
+              resultType={resultType}
+            />
+          </CardContent>
+        </Card>
       )}
       
       {hasYouTubeVideos && (
