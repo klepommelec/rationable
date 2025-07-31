@@ -150,7 +150,7 @@ CONTEXTE : Données réelles et vérifiées 2025`;
         );
         
         return {
-          recommendation: '',
+          recommendation: result.content.trim(),
           description: enrichedDescription,
           breakdown: [],
           resultType: 'factual',

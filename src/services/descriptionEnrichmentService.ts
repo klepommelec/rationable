@@ -69,27 +69,23 @@ export const enrichFactualDescription = async (
   rawResponse: string,
   domain?: string
 ): Promise<string> => {
-  const prompt = `Enrichis cette réponse factuelle brute en créant une description structurée et contextualisée.
+  const prompt = `Enrichissez cette réponse factuelle en gardant la cohérence totale avec la réponse originale:
 
-DILEMME ORIGINAL: "${dilemma}"
-RÉPONSE BRUTE: "${rawResponse}"
-DOMAINE: ${domain || 'général'}
+DILEMME: "${dilemma}"
+RÉPONSE FACTUELLE: "${rawResponse}"
 
-INSTRUCTIONS STRICTES:
-1. Structure la réponse en 3 parties:
-   - Réponse factuelle directe (1-2 phrases)
-   - Contexte explicatif (pourquoi cette réponse)
-   - Implication pratique (pourquoi c'est important)
+Créez une description enrichie qui:
+1. RESPECTE EXACTEMENT la réponse factuelle originale "${rawResponse}"
+2. Ajoute du contexte explicatif pertinent au domaine ${domain || 'général'}
+3. Explique pourquoi c'est la bonne réponse
+4. Reste factuelle et précise
 
-2. Utilise des éléments spécifiques du dilemme
-3. Évite ABSOLUMENT ces phrases: "Le choix de", "Cette décision", "Il est important de"
-4. Sois concret et spécifique, pas générique
-5. Maximum 200 mots
+INTERDICTIONS ABSOLUES:
+- Ne changez PAS la réponse originale "${rawResponse}"
+- Pas de phrases génériques comme "Le choix de...", "Cette décision..."
+- Pas d'informations contradictoires
 
-EXEMPLE DE STRUCTURE:
-"[Réponse factuelle précise]. [Contexte explicatif avec données/raisons]. [Implication concrète pour l'utilisateur]."
-
-Répondez uniquement avec la description enrichie, sans préambule.`;
+Format: Description enrichie en 2-3 phrases maximum.`;
 
   try {
     const response = await callOpenAiApi(prompt);
