@@ -13,6 +13,7 @@ import { IDecision } from '@/types/decision';
 import { shareDecision } from '@/services/sharedDecisionService';
 import { toast } from "sonner";
 import ShareAsTemplateDialog from './ShareAsTemplateDialog';
+import CollaborationDialog from './CollaborationDialog';
 
 interface ShareButtonProps {
   decision: IDecision;
@@ -58,8 +59,14 @@ const ShareButton: React.FC<ShareButtonProps> = ({ decision }) => {
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={handleShareAsLink}>
             <Link className="h-4 w-4 mr-2" />
-            Partager comme lien
+            Partage simple
           </DropdownMenuItem>
+          <CollaborationDialog decision={decision}>
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              <Users className="h-4 w-4 mr-2" />
+              Collaborer
+            </DropdownMenuItem>
+          </CollaborationDialog>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleShareAsTemplate}>
             <Users className="h-4 w-4 mr-2" />
