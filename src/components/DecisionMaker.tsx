@@ -166,7 +166,12 @@ const DecisionMaker = () => {
               clearSession={clearSession} 
               analysisStep={analysisStep} 
               currentDecision={getCurrentDecision()} 
-              dilemma={dilemma} 
+              dilemma={dilemma}
+              onUpdateDecision={(updatedDecision) => {
+                // Mettre à jour la décision dans l'état global
+                // Cette logique devrait être dans useDecisionMaker
+                console.log('Decision updated:', updatedDecision);
+              }}
             />
           </React.Suspense>
         )}

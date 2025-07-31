@@ -20,8 +20,13 @@ serve(async (req) => {
 
   try {
     console.log('🚀 Edge Function called');
-    const { prompt, files } = await req.json()
+    const { prompt, files, requestType, ...otherPayload } = await req.json()
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
+
+    // Gérer les requêtes d'expansion d'options
+    if (requestType === 'expand-options') {
+      return await handleExpandOptions(otherPayload, openAIApiKey);
+    }
 
     if (!prompt) {
         console.error('❌ Missing prompt in request');
@@ -228,3 +233,116 @@ INSTRUCTIONS POUR LES NOMS D'OPTIONS:
     })
   }
 })
+
+// Handler pour l'expansion d'options
+async function handleExpandOptions(payload: any, openAIApiKey: string) {
+  const { dilemma, criteria, currentOptions, category, maxNewOptions = 5 } = payload;
+  
+  if (!openAIApiKey) {
+    return new Response(JSON.stringify({ error: "La clé API OpenAI n'est pas configurée côté serveur." }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500,
+    });
+  }
+
+  const systemPrompt = `Tu es un expert en génération d'alternatives créatives pour des décisions.
+Ta mission est de générer ${maxNewOptions} nouvelles options viables qui n'ont PAS déjà été considérées.
+
+RÈGLES STRICTES :
+1. NE PAS répéter les options existantes : ${currentOptions.join(', ')}
+2. Générer EXACTEMENT ${maxNewOptions} nouvelles options uniques
+3. Chaque option doit être viable et réaliste pour le contexte donné
+4. Inclure 2-4 avantages et 2-4 inconvénients par option
+5. Attribuer un score entre 0.1 et 0.9 basé sur la viabilité
+
+FORMAT REQUIS (JSON uniquement) :
+{
+  "newOptions": [
+    {
+      "option": "Nom de l'option",
+      "pros": ["avantage 1", "avantage 2", "avantage 3"],
+      "cons": ["inconvénient 1", "inconvénient 2"],
+      "score": 0.75
+    }
+  ]
+}`;
+
+  const userPrompt = `DILEMME : ${dilemma}
+CATÉGORIE : ${category || 'Non spécifiée'}
+CRITÈRES IMPORTANTS : ${criteria.map((c: any) => c.name).join(', ')}
+
+OPTIONS DÉJÀ CONSIDÉRÉES (à éviter) :
+${currentOptions.map((opt: string, i: number) => `${i + 1}. ${opt}`).join('\n')}
+
+Génère ${maxNewOptions} nouvelles options créatives et viables qui n'ont pas encore été explorées.`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        temperature: 0.8,
+        max_tokens: 2000,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices[0]?.message?.content?.trim();
+    
+    if (!content) {
+      throw new Error('Réponse vide de l\'API');
+    }
+
+    // Parser la réponse JSON
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('Format de réponse invalide');
+    }
+
+    const result = JSON.parse(jsonMatch[0]);
+    
+    if (!result.newOptions || !Array.isArray(result.newOptions)) {
+      throw new Error('Structure de réponse invalide');
+    }
+
+    // Valider et nettoyer les nouvelles options
+    const validatedOptions = result.newOptions
+      .filter((opt: any) => opt.option && opt.pros && opt.cons)
+      .slice(0, maxNewOptions)
+      .map((opt: any) => ({
+        option: opt.option.trim(),
+        pros: Array.isArray(opt.pros) ? opt.pros.slice(0, 4) : [],
+        cons: Array.isArray(opt.cons) ? opt.cons.slice(0, 4) : [],
+        score: typeof opt.score === 'number' ? Math.max(0.1, Math.min(0.9, opt.score)) : 0.5
+      }));
+
+    return new Response(JSON.stringify({
+      newOptions: validatedOptions,
+      success: true
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('❌ Error generating more options:', error);
+    return new Response(JSON.stringify({ 
+      error: `Erreur lors de la génération d'options : ${error.message}`,
+      newOptions: []
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500,
+    });
+  }
+}

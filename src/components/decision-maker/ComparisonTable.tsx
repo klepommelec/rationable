@@ -2,7 +2,9 @@ import React from 'react';
 import { IBreakdownItem } from '@/types/decision';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { generateOptionSearchLinks } from '@/services/expandOptionsService';
 interface ComparisonTableProps {
   breakdown: IBreakdownItem[];
   dilemma?: string;
@@ -43,43 +45,68 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
               <TableHead className="w-[200px]">Option</TableHead>
               <TableHead>Avantages</TableHead>
               <TableHead>Inconvénients</TableHead>
+              <TableHead className="w-[180px]">En savoir plus</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedOptions.map((option, index) => <TableRow key={index} className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''}>
-                <TableCell className="font-medium align-top">
-                  <div className="flex flex-col gap-2">
-                    {index === 0 && <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 w-fit">
-                        Recommandé
-                      </Badge>}
-                    <span className="text-sm">
-                      {option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell className="align-top vertical-align-top">
-                  <div className="space-y-1">
-                    {option.pros?.slice(0, 3).map((pro, proIndex) => <div key={proIndex} className="flex items-start gap-2 text-sm">
-                        <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-muted-foreground">{pro}</span>
-                      </div>)}
-                    {option.pros?.length > 3 && <p className="text-xs text-muted-foreground italic">
-                        +{option.pros.length - 3} autres avantages
-                      </p>}
-                  </div>
-                </TableCell>
-                <TableCell className="align-top vertical-align-top">
-                  <div className="space-y-1">
-                    {option.cons?.slice(0, 3).map((con, conIndex) => <div key={conIndex} className="flex items-start gap-2 text-sm">
-                        <XCircle className="h-3 w-3 text-red-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-muted-foreground">{con}</span>
-                      </div>)}
-                    {option.cons?.length > 3 && <p className="text-xs text-muted-foreground italic">
-                        +{option.cons.length - 3} autres inconvénients
-                      </p>}
-                  </div>
-                </TableCell>
-              </TableRow>)}
+            {sortedOptions.map((option, index) => {
+              const searchLinks = generateOptionSearchLinks(option.option, dilemma || '');
+              
+              return (
+                <TableRow key={index} className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''}>
+                  <TableCell className="font-medium align-top">
+                    <div className="flex flex-col gap-2">
+                      {index === 0 && <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 w-fit">
+                          Recommandé
+                        </Badge>}
+                      <span className="text-sm">
+                        {option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="align-top vertical-align-top">
+                    <div className="space-y-1">
+                      {option.pros?.slice(0, 3).map((pro, proIndex) => <div key={proIndex} className="flex items-start gap-2 text-sm">
+                          <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-muted-foreground">{pro}</span>
+                        </div>)}
+                      {option.pros?.length > 3 && <p className="text-xs text-muted-foreground italic">
+                          +{option.pros.length - 3} autres avantages
+                        </p>}
+                    </div>
+                  </TableCell>
+                  <TableCell className="align-top vertical-align-top">
+                    <div className="space-y-1">
+                      {option.cons?.slice(0, 3).map((con, conIndex) => <div key={conIndex} className="flex items-start gap-2 text-sm">
+                          <XCircle className="h-3 w-3 text-red-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-muted-foreground">{con}</span>
+                        </div>)}
+                      {option.cons?.length > 3 && <p className="text-xs text-muted-foreground italic">
+                          +{option.cons.length - 3} autres inconvénients
+                        </p>}
+                    </div>
+                  </TableCell>
+                  <TableCell className="align-top">
+                    <div className="space-y-1">
+                      {searchLinks.slice(0, 2).map((link, i) => (
+                        <a
+                          key={i}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block"
+                        >
+                          <Button variant="outline" size="sm" className="w-full text-xs">
+                            <ExternalLink className="h-3 w-3 mr-1" />
+                            {link.title.replace(`"${option.option}"`, '').trim() || 'Rechercher'}
+                          </Button>
+                        </a>
+                      ))}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>

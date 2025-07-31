@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { getSharedDecision, SharedDecision } from '@/services/sharedDecisionService';
 import { CategoryBadge } from './CategorySelector';
 import ValidatedLink from './ValidatedLink';
+import { CommentSection } from './comments/CommentSection';
 
 const SharedDecisionView: React.FC = () => {
   const { publicId } = useParams<{ publicId: string }>();
@@ -236,6 +237,17 @@ const SharedDecisionView: React.FC = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Section des commentaires */}
+      <div className="mt-8">
+        <Separator className="my-6" />
+        <CommentSection 
+          decisionId={sharedDecision.decision_data.id} 
+          commentType="general"
+          title="Commentaires sur cette décision"
+          placeholder="Partagez vos réflexions sur cette décision..."
+        />
+      </div>
 
       {/* Footer */}
       <div className="mt-8 text-center">
