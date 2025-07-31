@@ -1,14 +1,14 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { IResult, IDecision, IBreakdownItem } from '@/types/decision';
 import { RecommendationCard } from './RecommendationCard';
 import { ComparisonTable } from './ComparisonTable';
 import { UsefulLinks } from './UsefulLinks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Table2, ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Table2, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
 import YouTubeVideoCard from '@/components/YouTubeVideoCard';
-import ExpandOptionsButton from './ExpandOptionsButton';
 
 interface AnalysisResultProps {
   result: IResult | null;
@@ -29,23 +29,10 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   dilemma,
   onUpdateDecision
 }) => {
-  const handleNewOptions = (newOptions: IBreakdownItem[]) => {
-    if (!currentDecision || !onUpdateDecision) return;
-    
-    // Ajouter les nouvelles options à la fin pour éviter la réorganisation
-    const updatedBreakdown = [...currentDecision.result.breakdown, ...newOptions]
-      .slice(0, 10); // Limite à 10 options sans retrier
-    
-    const updatedDecision = {
-      ...currentDecision,
-      result: {
-        ...currentDecision.result,
-        breakdown: updatedBreakdown
-      }
-    };
-    
-    onUpdateDecision(updatedDecision);
-  };
+  const [showAllOptions, setShowAllOptions] = useState(false);
+  
+  // Nombre d'options à afficher initialement (3-4)
+  const initialOptionsCount = 3;
   if (!result) {
     return (
       <div className="space-y-6 animate-fade-in">
@@ -59,6 +46,11 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   const resultType = result.resultType || 'comparative';
   const hasMultipleOptions = result.breakdown && result.breakdown.length > 1;
   const hasYouTubeVideos = result.socialContent?.youtubeVideos && result.socialContent.youtubeVideos.length > 0;
+  
+  // Gestion des options affichées
+  const allOptions = result.breakdown || [];
+  const displayedOptions = showAllOptions ? allOptions : allOptions.slice(0, initialOptionsCount);
+  const hasMoreOptions = allOptions.length > initialOptionsCount;
 
   // Pour les questions factuelles, on simplifie l'affichage
   if (resultType === 'factual') {
@@ -134,16 +126,30 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </CardHeader>
           <CardContent>
             <ComparisonTable 
-              breakdown={result.breakdown || []} 
+              breakdown={displayedOptions} 
               dilemma={dilemma}
               resultType={resultType}
             />
-            {currentDecision && onUpdateDecision && (
-              <ExpandOptionsButton
-                decision={currentDecision}
-                currentOptions={result.breakdown || []}
-                onNewOptions={handleNewOptions}
-              />
+            {hasMoreOptions && (
+              <div className="flex justify-center mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAllOptions(!showAllOptions)}
+                  className="flex items-center gap-2"
+                >
+                  {showAllOptions ? (
+                    <>
+                      <ChevronUp className="h-4 w-4" />
+                      Voir moins d'options
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-4 w-4" />
+                      Voir plus d'options ({allOptions.length - initialOptionsCount} autres)
+                    </>
+                  )}
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>

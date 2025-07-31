@@ -9,7 +9,8 @@ import { DataFreshnessIndicator } from './DataFreshnessIndicator';
 import { WorkspaceDocumentIndicator } from './WorkspaceDocumentIndicator';
 import { AIProviderIndicator } from './AIProviderIndicator';
 import ValidatedLink from '@/components/ValidatedLink';
-import { ExternalLink, RotateCcw, Lightbulb, BarChart3, Activity, CheckCircle, Target, Zap } from 'lucide-react';
+import { ExternalLink, RotateCcw, Lightbulb, BarChart3, Activity, CheckCircle, Target, Zap, Share2 } from 'lucide-react';
+import ShareButton from '@/components/ShareButton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIProviderDashboard } from './AIProviderDashboard';
@@ -81,6 +82,9 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               </div>
               
               <div className="flex items-center gap-2 flex-shrink-0">
+                {currentDecision && (
+                  <ShareButton decision={currentDecision} />
+                )}
                 <Button variant="outline" size="sm" onClick={clearSession} className="flex items-center gap-2">
                   <RotateCcw className="h-4 w-4" />
                   Nouvelle analyse
