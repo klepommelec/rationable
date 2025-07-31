@@ -32,9 +32,9 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   const handleNewOptions = (newOptions: IBreakdownItem[]) => {
     if (!currentDecision || !onUpdateDecision) return;
     
+    // Ajouter les nouvelles options à la fin pour éviter la réorganisation
     const updatedBreakdown = [...currentDecision.result.breakdown, ...newOptions]
-      .slice(0, 10) // Limite à 10 options
-      .sort((a, b) => b.score - a.score); // Re-trier par score
+      .slice(0, 10); // Limite à 10 options sans retrier
     
     const updatedDecision = {
       ...currentDecision,
