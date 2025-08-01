@@ -167,7 +167,7 @@ const SharedDecisionView: React.FC = () => {
                       <ValidatedLink
                         link={{
                           title: `Rechercher ${item.option}`,
-                          url: `https://www.google.fr/search?q=${encodeURIComponent(`${item.option} ${decision.dilemma}`)}`
+                          url: `https://www.google.fr/search?q=${encodeURIComponent(item.option)}`
                         }}
                         className="text-xs text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5"
                       />
