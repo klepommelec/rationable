@@ -3,7 +3,7 @@ import React from 'react';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Button } from '@/components/ui/button';
 import { LogIn } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import SharedDecisionView from '@/components/SharedDecisionView';
 
 const SharedDecision: React.FC = () => {
@@ -15,13 +15,10 @@ const SharedDecision: React.FC = () => {
         {/* Header avec logo et bouton de connexion */}
         <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">
           <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <img 
-                src="/lovable-uploads/d57ec78c-b0f4-4550-b788-f14ae7d44a12.png" 
-                alt="Rationable" 
-                className="h-8 w-auto"
-              />
-            </div>
+            <Link to="/" className="flex items-center gap-2 hover:underline transition-all duration-200">
+              <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-9 w-9 rounded-none" />
+              <span className="text-xl font-medium">Rationable</span>
+            </Link>
             
             <Button 
               onClick={() => navigate('/auth')} 

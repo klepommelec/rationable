@@ -256,15 +256,6 @@ const SharedDecisionView: React.FC = () => {
         />
       </div>
 
-      {/* Footer */}
-      <div className="mt-8 text-center">
-        <p className="text-sm text-muted-foreground mb-4">
-          Cette décision a été générée avec l'Assistant de Décision IA
-        </p>
-        <Button onClick={() => navigate('/')} variant="outline">
-          Créer ma propre analyse de décision
-        </Button>
-      </div>
     </div>
   );
 };
