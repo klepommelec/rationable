@@ -91,7 +91,23 @@ const SharedDecisionView: React.FC = () => {
           Retour à l'accueil
         </Button>
         
-        <div className="flex items-center gap-4 mb-4">
+        {/* Mobile layout - emoji above title */}
+        <div className="block sm:hidden mb-4">
+          <div className="text-center mb-3">
+            <span className="text-4xl">{decision.emoji}</span>
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-center">{decision.dilemma}</h1>
+            {decision.category && (
+              <div className="mt-3 flex justify-center">
+                <CategoryBadge categoryId={decision.category} />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Desktop/tablet layout - emoji next to title */}
+        <div className="hidden sm:flex items-center gap-4 mb-4">
           <span className="text-3xl">{decision.emoji}</span>
           <div className="flex-1">
             <h1 className="text-2xl sm:text-3xl font-bold">{decision.dilemma}</h1>
@@ -103,19 +119,21 @@ const SharedDecisionView: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1 justify-center sm:justify-start">
             <Calendar className="h-4 w-4" />
             Partagé le {new Date(sharedDecision.created_at).toLocaleDateString('fr-FR')}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 justify-center sm:justify-start">
             <Eye className="h-4 w-4" />
             {sharedDecision.view_count} {sharedDecision.view_count === 1 ? 'vue' : 'vues'}
           </div>
-          <Button onClick={copyShareLink} variant="ghost" size="sm">
-            <Share2 className="h-4 w-4 mr-2" />
-            Copier le lien
-          </Button>
+          <div className="flex justify-center sm:justify-start">
+            <Button onClick={copyShareLink} variant="ghost" size="sm" className="text-xs px-2 py-1">
+              <Share2 className="h-3 w-3 mr-1" />
+              Copier le lien
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -124,7 +142,7 @@ const SharedDecisionView: React.FC = () => {
       {/* Recommendation */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-xl text-green-600 dark:text-green-400">✅ Recommandation</CardTitle>
+          <CardTitle className="text-xl text-green-600 dark:text-green-400">✅ Recommandée</CardTitle>
         </CardHeader>
         <CardContent>
           <h3 className="text-lg font-semibold mb-2">{decision.result.recommendation}</h3>
@@ -160,17 +178,19 @@ const SharedDecisionView: React.FC = () => {
             <div className="space-y-4">
               {decision.result.breakdown.map((item, index) => (
                 <div key={index} className="border rounded-lg p-4">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
-                    <h4 className="font-semibold text-lg">{item.option}</h4>
-                    <div className="flex items-center gap-1 self-start sm:self-center">
-                      <span className="text-xs text-muted-foreground">En savoir plus</span>
-                      <ValidatedLink
-                        link={{
-                          title: `Rechercher ${item.option}`,
-                          url: `https://www.google.fr/search?q=${encodeURIComponent(item.option)}`
-                        }}
-                        className="text-xs text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5"
-                      />
+                  <div className="flex flex-col gap-3 mb-3">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                      <h4 className="font-semibold text-lg">{item.option}</h4>
+                      <div className="flex items-center gap-1 self-start sm:self-center">
+                        <span className="text-xs text-muted-foreground">En savoir plus</span>
+                        <ValidatedLink
+                          link={{
+                            title: `Rechercher ${item.option}`,
+                            url: `https://www.google.fr/search?q=${encodeURIComponent(item.option)}`
+                          }}
+                          className="text-xs text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5"
+                        />
+                      </div>
                     </div>
                   </div>
                   
