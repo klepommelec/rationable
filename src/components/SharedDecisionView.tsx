@@ -160,22 +160,17 @@ const SharedDecisionView: React.FC = () => {
             <div className="space-y-4">
               {decision.result.breakdown.map((item, index) => (
                 <div key={index} className="border rounded-lg p-4">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-semibold">{item.option}</h4>
-                    <div className="flex items-center gap-3">
-                      <Badge variant={item.score >= 7 ? "default" : item.score >= 5 ? "secondary" : "outline"}>
-                        {item.score}/10
-                      </Badge>
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs text-muted-foreground">En savoir plus</span>
-                        <ValidatedLink
-                          link={{
-                            title: `Rechercher ${item.option}`,
-                            url: `https://www.google.fr/search?q=${encodeURIComponent(`${item.option} ${decision.dilemma}`)}`
-                          }}
-                          className="text-xs bg-muted hover:bg-muted/80 px-2 py-1 rounded-md flex items-center gap-1 transition-colors"
-                        />
-                      </div>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
+                    <h4 className="font-semibold text-lg">{item.option}</h4>
+                    <div className="flex items-center gap-1 self-start sm:self-center">
+                      <span className="text-xs text-muted-foreground">En savoir plus</span>
+                      <ValidatedLink
+                        link={{
+                          title: `Rechercher ${item.option}`,
+                          url: `https://www.google.fr/search?q=${encodeURIComponent(`${item.option} ${decision.dilemma}`)}`
+                        }}
+                        className="text-xs text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5"
+                      />
                     </div>
                   </div>
                   
