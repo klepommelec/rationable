@@ -91,32 +91,18 @@ const SharedDecisionView: React.FC = () => {
           Retour à l'accueil
         </Button>
         
-        {/* Mobile layout - emoji above title */}
-        <div className="block sm:hidden mb-4">
-          <div className="text-center mb-3">
-            <span className="text-4xl">{decision.emoji}</span>
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-center leading-tight break-words">{decision.dilemma}</h1>
-            {decision.category && (
-              <div className="mt-3 flex justify-center">
-                <CategoryBadge categoryId={decision.category} />
-              </div>
-            )}
-          </div>
+        {/* Emoji above title for all screen sizes */}
+        <div className="text-center mb-4">
+          <span className="text-4xl">{decision.emoji}</span>
         </div>
-
-        {/* Desktop/tablet layout - emoji next to title */}
-        <div className="hidden sm:flex items-center gap-4 mb-4">
-          <span className="text-3xl">{decision.emoji}</span>
-          <div className="flex-1">
-            <h1 className="text-2xl sm:text-3xl font-bold">{decision.dilemma}</h1>
-            {decision.category && (
-              <div className="mt-2">
-                <CategoryBadge categoryId={decision.category} />
-              </div>
-            )}
-          </div>
+        
+        <div className="text-center mb-4">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight break-words">{decision.dilemma}</h1>
+          {decision.category && (
+            <div className="mt-3 flex justify-center">
+              <CategoryBadge categoryId={decision.category} />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 text-sm text-muted-foreground">

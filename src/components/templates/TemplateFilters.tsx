@@ -35,7 +35,7 @@ const TemplateFilters = ({
       </div>
       
       <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-        <SelectTrigger>
+        <SelectTrigger className="h-10">
           <Filter className="h-4 w-4 mr-2" />
           <SelectValue placeholder="Toutes les catégories" />
         </SelectTrigger>
@@ -50,7 +50,7 @@ const TemplateFilters = ({
       </Select>
       
       <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-        <SelectTrigger>
+        <SelectTrigger className="h-10">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

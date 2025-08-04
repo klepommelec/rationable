@@ -57,7 +57,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
         return {
           icon: <Lightbulb className="h-5 w-5 text-primary" />,
           title: 'Recommandation',
-          badge: 'Solution recommandée',
+          badge: 'Recommandé',
           borderColor: 'border-primary/20',
           bgGradient: 'bg-gradient-to-r from-primary/5 to-secondary/5',
           badgeColor: 'bg-primary/10 text-primary',
