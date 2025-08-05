@@ -33,7 +33,7 @@ export const CriterionRow = ({
     transform: CSS.Transform.toString(transform),
     transition
   };
-  return <div ref={setNodeRef} style={style} className="flex h-8 gap-1">
+  return <div ref={setNodeRef} style={style} className="flex h-8 gap-1 items-center ">
       <Button variant="ghost" size="icon" disabled={isDragDisabled} className="cursor-grab h-8 w-9">
         <GripVertical className="h-5 w-5 text-muted-foreground" />
       </Button>
