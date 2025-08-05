@@ -90,11 +90,14 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ emoji, setEmoji }) => 
         </div>
         
         <Tabs defaultValue="Populaires" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-muted/50 rounded-none border-b">
-            <TabsTrigger value="Populaires" className="text-xs">Populaires</TabsTrigger>
-            <TabsTrigger value="Émotions" className="text-xs">Émotions</TabsTrigger>
-            <TabsTrigger value="Activités" className="text-xs">Activités</TabsTrigger>
-            <TabsTrigger value="Objets" className="text-xs">Objets</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-7 bg-muted/50 rounded-none border-b h-auto p-1">
+            <TabsTrigger value="Populaires" className="text-xs py-2">Populaires</TabsTrigger>
+            <TabsTrigger value="Émotions" className="text-xs py-2">Émotions</TabsTrigger>
+            <TabsTrigger value="Activités" className="text-xs py-2">Activités</TabsTrigger>
+            <TabsTrigger value="Objets" className="text-xs py-2">Objets</TabsTrigger>
+            <TabsTrigger value="Nature" className="text-xs py-2">Nature</TabsTrigger>
+            <TabsTrigger value="Nourriture" className="text-xs py-2">Nourriture</TabsTrigger>
+            <TabsTrigger value="Symboles" className="text-xs py-2">Symboles</TabsTrigger>
           </TabsList>
           
           <div className="max-h-80 overflow-y-auto">
@@ -118,14 +121,6 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ emoji, setEmoji }) => 
                 </div>
               </TabsContent>
             ))}
-          </div>
-          
-          <div className="border-t border-border bg-muted/25 p-2">
-            <div className="flex gap-1 justify-center">
-              <TabsTrigger value="Nature" className="text-xs px-2 py-1">Nature</TabsTrigger>
-              <TabsTrigger value="Nourriture" className="text-xs px-2 py-1">Nourriture</TabsTrigger>
-              <TabsTrigger value="Symboles" className="text-xs px-2 py-1">Symboles</TabsTrigger>
-            </div>
           </div>
         </Tabs>
       </PopoverContent>
