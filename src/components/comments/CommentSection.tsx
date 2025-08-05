@@ -74,25 +74,38 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
         toast.success("Commentaire ajouté");
       }
     } catch (error) {
-      toast.error("Erreur lors de l'ajout du commentaire");
+      const errorMessage = error instanceof Error ? error.message : "Erreur lors de l'ajout du commentaire";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleUpdateComment = async (commentId: string, content: string) => {
-    const updatedComment = await commentService.updateComment(commentId, content);
-    if (updatedComment) {
-      setComments(prev => 
-        prev.map(c => c.id === commentId ? updatedComment : c)
-      );
+    try {
+      const updatedComment = await commentService.updateComment(commentId, content);
+      if (updatedComment) {
+        setComments(prev => 
+          prev.map(c => c.id === commentId ? updatedComment : c)
+        );
+        toast.success("Commentaire mis à jour");
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Erreur lors de la mise à jour";
+      toast.error(errorMessage);
     }
   };
 
   const handleDeleteComment = async (commentId: string) => {
-    const success = await commentService.deleteComment(commentId);
-    if (success) {
-      setComments(prev => prev.filter(c => c.id !== commentId));
+    try {
+      const success = await commentService.deleteComment(commentId);
+      if (success) {
+        setComments(prev => prev.filter(c => c.id !== commentId));
+        toast.success("Commentaire supprimé");
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Erreur lors de la suppression";
+      toast.error(errorMessage);
     }
   };
 

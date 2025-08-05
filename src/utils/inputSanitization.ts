@@ -9,8 +9,9 @@ export const sanitizeText = (input: string): string => {
   return input
     // Remove script tags and event handlers
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/javascript:/gi, '')
+    .replace(/(javascript|data|vbscript|mocha|livescript):/gi, '')
     .replace(/on\w+\s*=/gi, '')
+    .replace(/expression\s*\(/gi, '')
     // Remove potentially dangerous HTML tags
     .replace(/<iframe\b[^>]*>/gi, '')
     .replace(/<object\b[^>]*>/gi, '')
@@ -24,6 +25,11 @@ export const sanitizeText = (input: string): string => {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;')
     .replace(/\//g, '&#x2F;');
+};
+
+export const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email) && email.length <= 254;
 };
 
 /**

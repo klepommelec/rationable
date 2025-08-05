@@ -23,10 +23,10 @@ export const commentService = {
 
   async createComment(comment: ICommentCreate): Promise<IComment | null> {
     // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      console.error('User not authenticated');
-      return null;
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (!user || authError) {
+      console.error('User not authenticated:', authError?.message);
+      throw new Error('Authentication required to create comments');
     }
 
     // Sanitize content before inserting
@@ -55,10 +55,10 @@ export const commentService = {
 
   async updateComment(commentId: string, content: string): Promise<IComment | null> {
     // Get current user for security check
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      console.error('User not authenticated');
-      return null;
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (!user || authError) {
+      console.error('User not authenticated:', authError?.message);
+      throw new Error('Authentication required to update comments');
     }
 
     // Sanitize content before updating
@@ -85,10 +85,10 @@ export const commentService = {
 
   async deleteComment(commentId: string): Promise<boolean> {
     // Get current user for security check
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      console.error('User not authenticated');
-      return false;
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (!user || authError) {
+      console.error('User not authenticated:', authError?.message);
+      throw new Error('Authentication required to delete comments');
     }
 
     const { error } = await supabase
