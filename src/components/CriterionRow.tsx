@@ -34,11 +34,11 @@ export const CriterionRow = ({
     transition
   };
   return <div ref={setNodeRef} style={style} className="flex h-8 gap-1 items-center ">
-      <Button variant="ghost" size="icon" disabled={isDragDisabled} className="cursor-grab h-8 w-9">
+      <Button variant="ghost" size="icon" disabled={isDragDisabled} className="cursor-grab h-8 w-8 ">
         <GripVertical className="h-5 w-5 text-muted-foreground" />
       </Button>
       <Input placeholder={`Critère`} value={criterion.name} onChange={e => onNameChange(criterion.id, e.target.value)} disabled={isDragDisabled} className="flex-grow h-9 " />
-      <Button variant="ghost" size="icon" onClick={() => onRemove(criterion.id)} disabled={isRemoveDisabled || isDragDisabled} className="h-8 w-9">
+      <Button variant="ghost" size="icon" onClick={() => onRemove(criterion.id)} disabled={isRemoveDisabled || isDragDisabled} className="h-8 w-8">
         <Trash2 className="h-4 w-4 text-muted-foreground hover:text-red-500 transition-colors" />
       </Button>
     </div>;
