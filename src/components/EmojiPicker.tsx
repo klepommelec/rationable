@@ -76,33 +76,28 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ emoji, setEmoji }) => 
           {emoji}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0 bg-slate-800 border-slate-700" align="start">
-        <div className="p-3 border-b border-slate-700">
+      <PopoverContent className="w-96 p-0 bg-background border-border shadow-lg z-50" align="start">
+        <div className="p-3 border-b border-border">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Rechercher un emoji..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-slate-700 border-slate-600 text-white placeholder-slate-400"
+              className="pl-10"
             />
           </div>
         </div>
         
         <Tabs defaultValue="Populaires" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-slate-700/50">
-            {filteredEmojis.slice(0, 4).map((category) => (
-              <TabsTrigger 
-                key={category.name} 
-                value={category.name}
-                className="text-xs data-[state=active]:bg-slate-600"
-              >
-                {category.name}
-              </TabsTrigger>
-            ))}
+          <TabsList className="grid w-full grid-cols-4 bg-muted/50 rounded-none border-b">
+            <TabsTrigger value="Populaires" className="text-xs">Populaires</TabsTrigger>
+            <TabsTrigger value="Émotions" className="text-xs">Émotions</TabsTrigger>
+            <TabsTrigger value="Activités" className="text-xs">Activités</TabsTrigger>
+            <TabsTrigger value="Objets" className="text-xs">Objets</TabsTrigger>
           </TabsList>
           
-          <div className="max-h-64 overflow-y-auto">
+          <div className="max-h-80 overflow-y-auto">
             {filteredEmojis.map((category) => (
               <TabsContent key={category.name} value={category.name} className="mt-0">
                 <div className="p-3">
@@ -112,7 +107,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ emoji, setEmoji }) => 
                         key={`${e}-${index}`}
                         variant="ghost"
                         size="icon"
-                        className="text-2xl h-10 w-10 rounded-md hover:bg-slate-700 transition-colors"
+                        className="text-2xl h-10 w-10 rounded-md hover:bg-accent transition-colors"
                         onClick={() => handleEmojiSelect(e)}
                         title={e}
                       >
@@ -125,19 +120,13 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ emoji, setEmoji }) => 
             ))}
           </div>
           
-          {filteredEmojis.length > 4 && (
-            <TabsList className="grid w-full grid-cols-3 bg-slate-700/50 border-t border-slate-600">
-              {filteredEmojis.slice(4, 7).map((category) => (
-                <TabsTrigger 
-                  key={category.name} 
-                  value={category.name}
-                  className="text-xs data-[state=active]:bg-slate-600"
-                >
-                  {category.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          )}
+          <div className="border-t border-border bg-muted/25 p-2">
+            <div className="flex gap-1 justify-center">
+              <TabsTrigger value="Nature" className="text-xs px-2 py-1">Nature</TabsTrigger>
+              <TabsTrigger value="Nourriture" className="text-xs px-2 py-1">Nourriture</TabsTrigger>
+              <TabsTrigger value="Symboles" className="text-xs px-2 py-1">Symboles</TabsTrigger>
+            </div>
+          </div>
         </Tabs>
       </PopoverContent>
     </Popover>
