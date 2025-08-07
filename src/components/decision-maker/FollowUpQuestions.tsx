@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { IResult, IFollowUpQuestion } from '@/types/decision';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { IResult, IFollowUpQuestion } from '@/types/decision';
+import { generateFollowUpQuestions } from '@/services/followUpQuestionService';
+import { generateQuickAnswer } from '@/services/quickAnswerService';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { MessageCircleQuestion, ArrowRight, Sparkles } from 'lucide-react';
-import { generateFollowUpQuestions, handleFollowUpQuestion } from '@/services/followUpQuestionService';
+import { Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface FollowUpQuestionsProps {
   dilemma: string;
   result: IResult;
   category?: string;
-  onQuestionSelect: (enrichedDilemma: string) => void;
+  onQuestionSelect?: (enrichedDilemma: string) => void;
   isLoading?: boolean;
+}
+
+interface QuestionWithAnswer extends IFollowUpQuestion {
+  answer?: string;
+  isLoadingAnswer?: boolean;
+  isOpen?: boolean;
 }
 
 const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
@@ -21,19 +28,16 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
   onQuestionSelect,
   isLoading = false
 }) => {
-  const [questions, setQuestions] = useState<IFollowUpQuestion[]>([]);
+  const [questions, setQuestions] = useState<QuestionWithAnswer[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
-  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadQuestions = async () => {
-      // Vérifier s'il y a déjà des questions dans le résultat
       if (result.followUpQuestions && result.followUpQuestions.length > 0) {
-        setQuestions(result.followUpQuestions);
+        setQuestions(result.followUpQuestions.map(q => ({ ...q, isOpen: false })));
         return;
       }
 
-      // Générer de nouvelles questions
       setLoadingQuestions(true);
       try {
         const generatedQuestions = await generateFollowUpQuestions({
@@ -41,9 +45,10 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
           result,
           category
         });
-        setQuestions(generatedQuestions);
+        setQuestions(generatedQuestions.map(q => ({ ...q, isOpen: false })));
       } catch (error) {
-        console.error('Erreur lors du chargement des questions de suivi:', error);
+        console.error('Error loading follow-up questions:', error);
+        setQuestions([]);
       } finally {
         setLoadingQuestions(false);
       }
@@ -52,42 +57,62 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
     loadQuestions();
   }, [dilemma, result, category]);
 
-  const handleQuestionClick = async (question: IFollowUpQuestion) => {
-    setSelectedQuestionId(question.id);
-    
-    try {
-      const enrichedDilemma = await handleFollowUpQuestion(question, dilemma, result);
-      onQuestionSelect(enrichedDilemma);
-    } catch (error) {
-      console.error('Erreur lors du traitement de la question de suivi:', error);
-      setSelectedQuestionId(null);
+  const handleQuestionClick = async (questionId: string) => {
+    const question = questions.find(q => q.id === questionId);
+    if (!question) return;
+
+    // Toggle open state
+    setQuestions(prev => prev.map(q => 
+      q.id === questionId 
+        ? { ...q, isOpen: !q.isOpen, isLoadingAnswer: !q.isOpen && !q.answer }
+        : q
+    ));
+
+    // Generate answer if not already available and opening
+    if (!question.answer && !question.isOpen) {
+      try {
+        const answer = await generateQuickAnswer({
+          question,
+          originalDilemma: dilemma,
+          result
+        });
+        
+        setQuestions(prev => prev.map(q => 
+          q.id === questionId 
+            ? { ...q, answer, isLoadingAnswer: false }
+            : q
+        ));
+      } catch (error) {
+        console.error('Error generating quick answer:', error);
+        setQuestions(prev => prev.map(q => 
+          q.id === questionId 
+            ? { ...q, isLoadingAnswer: false, answer: "Désolé, impossible de générer une réponse pour cette question." }
+            : q
+        ));
+      }
     }
   };
 
   const getCategoryColor = (category: string): string => {
-    const colors = {
-      budget: 'bg-green-500/10 text-green-700 dark:text-green-300',
-      preferences: 'bg-purple-500/10 text-purple-700 dark:text-purple-300',
-      context: 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
-      requirements: 'bg-orange-500/10 text-orange-700 dark:text-orange-300',
-      timeline: 'bg-red-500/10 text-red-700 dark:text-red-300',
-      usage: 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300',
-      validation: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+    const colorMap: Record<string, string> = {
+      next_steps: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
+      practical_info: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
+      alternatives: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400',
+      optimization: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400',
+      preparation: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
     };
-    return colors[category as keyof typeof colors] || 'bg-gray-500/10 text-gray-700 dark:text-gray-300';
+    return colorMap[category] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
   };
 
   const getCategoryLabel = (category: string): string => {
-    const labels = {
-      budget: 'Budget',
-      preferences: 'Préférences',
-      context: 'Contexte',
-      requirements: 'Exigences',
-      timeline: 'Délais',
-      usage: 'Usage',
-      validation: 'Validation'
+    const labelMap: Record<string, string> = {
+      next_steps: 'Étapes suivantes',
+      practical_info: 'Infos pratiques',
+      alternatives: 'Alternatives',
+      optimization: 'Optimisation',
+      preparation: 'Préparation'
     };
-    return labels[category as keyof typeof labels] || 'Général';
+    return labelMap[category] || 'Autre';
   };
 
   if (loadingQuestions) {
@@ -95,14 +120,13 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
       <Card className="animate-fade-in">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <MessageCircleQuestion className="h-5 w-5" />
             Questions de suivi
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Sparkles className="h-4 w-4 animate-spin" />
-            Génération de questions personnalisées...
+          <div className="flex items-center space-x-2 text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-sm">Génération de questions personnalisées...</span>
           </div>
         </CardContent>
       </Card>
@@ -117,53 +141,54 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
     <Card className="animate-fade-in">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <MessageCircleQuestion className="h-5 w-5" />
           Questions de suivi
-          <Badge variant="outline" className="ml-auto">
-            {questions.length}
-          </Badge>
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Cliquez sur une question pour affiner votre analyse
+          Cliquez sur une question pour obtenir des conseils pratiques
         </p>
       </CardHeader>
-      <CardContent>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {questions.map((question, index) => (
-            <Button
-              key={question.id}
-              variant="outline"
-              className="h-auto p-4 justify-start text-left hover:bg-muted/50 transition-all duration-200 group"
-              onClick={() => handleQuestionClick(question)}
-              disabled={isLoading || selectedQuestionId === question.id}
-              style={{
-                animationDelay: `${index * 100}ms`
-              }}
-            >
-              <div className="flex flex-col items-start gap-2 w-full">
+      <CardContent className="space-y-3">
+        {questions.map((question) => (
+          <Collapsible key={question.id} open={question.isOpen}>
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-between text-left h-auto p-4 hover:bg-muted/50"
+                onClick={() => handleQuestionClick(question.id)}
+              >
                 <div className="flex items-center justify-between w-full">
-                  <Badge 
-                    variant="secondary" 
-                    className={`text-xs ${getCategoryColor(question.category)}`}
-                  >
-                    {getCategoryLabel(question.category)}
-                  </Badge>
-                  <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="flex items-center space-x-3">
+                    <span className="font-medium text-sm">
+                      {question.text}
+                    </span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(question.category)}`}>
+                      {getCategoryLabel(question.category)}
+                    </span>
+                  </div>
+                  {question.isOpen ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
                 </div>
-                <span className="text-sm font-medium text-foreground">
-                  {question.text}
-                </span>
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="animate-accordion-down">
+              <div className="px-4 py-3 bg-muted/30 rounded-lg mt-2">
+                {question.isLoadingAnswer ? (
+                  <div className="flex items-center space-x-2 text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm">Génération de la réponse...</span>
+                  </div>
+                ) : question.answer ? (
+                  <p className="text-sm text-muted-foreground">
+                    {question.answer}
+                  </p>
+                ) : null}
               </div>
-            </Button>
-          ))}
-        </div>
-        
-        {selectedQuestionId && (
-          <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-            <Sparkles className="h-4 w-4 animate-spin" />
-            Analyse en cours avec votre question...
-          </div>
-        )}
+            </CollapsibleContent>
+          </Collapsible>
+        ))}
       </CardContent>
     </Card>
   );

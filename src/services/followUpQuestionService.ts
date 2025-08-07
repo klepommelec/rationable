@@ -78,56 +78,51 @@ const detectQuestionContext = (dilemma: string, category?: string): string => {
 };
 
 const buildFollowUpPrompt = (dilemma: string, result: IResult, context: string): string => {
-  // Extraire l'option recommandée et ses détails
   const recommendedOption = result.recommendation;
-  const breakdown = result.breakdown || [];
-  const recommendedBreakdown = breakdown.find(item => 
+  const breakdown = result.breakdown.find(item => 
     item.option.toLowerCase().includes(recommendedOption.toLowerCase()) ||
     recommendedOption.toLowerCase().includes(item.option.toLowerCase())
   );
 
-  return `Tu es un assistant IA spécialisé dans l'aide à la prise de décision. 
+  return `
+Tu es un expert en prise de décision. Basé sur cette recommandation spécifique, génère 3-4 questions de suivi ACTIONABLES qui aident l'utilisateur à passer à l'action avec cette recommandation.
 
-CONTEXTE:
-- Dilemme initial: "${dilemma}"
-- Option RECOMMANDÉE: "${recommendedOption}"
-- Description: "${result.description}"
-- Domaine: ${context}
-
-${recommendedBreakdown ? `
-DÉTAILS DE LA RECOMMANDATION:
-- Option: ${recommendedBreakdown.option}
-- Score: ${recommendedBreakdown.score}/10
-- Avantages: ${recommendedBreakdown.pros.join(', ')}
-- Inconvénients: ${recommendedBreakdown.cons.join(', ')}
+DILEMME ORIGINAL: "${dilemma}"
+RECOMMANDATION: "${recommendedOption}"
+DESCRIPTION: "${result.description}"
+${breakdown ? `
+PROS DE CETTE OPTION: ${breakdown.pros.join(', ')}
+CONS DE CETTE OPTION: ${breakdown.cons.join(', ')}
+SCORE: ${breakdown.score}/5
 ` : ''}
 
-OBJECTIF:
-Génère 3-4 questions de suivi SPÉCIFIQUES à l'option recommandée "${recommendedOption}" pour aider l'utilisateur à valider, affiner ou mieux comprendre cette recommandation précise.
+CONTEXTE: ${context}
 
-RÈGLES CRITIQUES:
-1. Les questions doivent être SPÉCIFIQUES à "${recommendedOption}" (pas générales)
-2. Questions courtes et précises (max 60 caractères)
-3. Se concentrer sur les aspects non couverts ou à clarifier pour cette option
-4. Utiliser les inconvénients identifiés pour poser des questions de validation
-5. Proposer des questions qui aident à confirmer si cette option convient vraiment
+Instructions importantes:
+1. Les questions doivent être ACTIONABLES et aider l'utilisateur à PASSER À L'ACTION
+2. Focus sur les étapes suivantes, informations pratiques, et conseils concrets
+3. Évite les questions de validation - privilégie les questions qui aident à agir
+4. Sois spécifique à la recommandation "${recommendedOption}"
 
-TYPES DE QUESTIONS À PRIVILÉGIER:
-- Validation des caractéristiques de "${recommendedOption}"
-- Contexte d'usage spécifique de cette option
-- Contraintes ou limitations liées à "${recommendedOption}"
-- Aspects financiers spécifiques à cette recommandation
-- Comparaison avec des variantes proches
+Types de questions à privilégier:
+- Étapes suivantes: "Que faire après avoir choisi ${recommendedOption}?", "Comment procéder avec ${recommendedOption}?"
+- Informations pratiques: "Comment obtenir/accéder à ${recommendedOption}?", "Quand utiliser ${recommendedOption}?"
+- Optimisation: "Comment tirer le meilleur parti de ${recommendedOption}?", "Meilleur moment pour ${recommendedOption}?"
+- Plans B: "Des alternatives si ${recommendedOption} n'est pas disponible?", "Que faire si ${recommendedOption} ne convient pas?"
+- Préparation: "Que préparer avant d'utiliser ${recommendedOption}?", "Quels accessoires/compléments pour ${recommendedOption}?"
 
-EXEMPLES selon le domaine:
-${getSpecificExamplesByContext(context, recommendedOption)}
+EXEMPLES DE BONNES QUESTIONS:
+- Pour un restaurant: "Comment réserver chez [Restaurant]?", "Que commander comme spécialité?", "À quelle heure y aller?"
+- Pour un produit tech: "Où acheter [Produit] au meilleur prix?", "Quels accessoires prendre?", "Comment l'installer?"
+- Pour un voyage: "Comment aller à [Lieu]?", "Que faire après [Lieu]?", "Meilleures heures pour éviter la foule?"
 
-Réponds uniquement avec un objet JSON de ce format:
+Réponds uniquement avec un tableau JSON de questions:
 {
   "questions": [
-    {"text": "Question spécifique à ${recommendedOption}?", "category": "validation"},
-    {"text": "Autre question ciblée?", "category": "context"},
-    ...
+    {
+      "text": "Question actionnable spécifique...",
+      "category": "next_steps|practical_info|alternatives|optimization|preparation"
+    }
   ]
 }`;
 };
