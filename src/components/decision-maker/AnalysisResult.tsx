@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table2, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
 import YouTubeVideoCard from '@/components/YouTubeVideoCard';
+import FollowUpQuestions from './FollowUpQuestions';
 
 interface AnalysisResultProps {
   result: IResult | null;
@@ -18,6 +19,7 @@ interface AnalysisResultProps {
   currentDecision: IDecision | null;
   dilemma: string;
   onUpdateDecision?: (updatedDecision: IDecision) => void;
+  onFollowUpQuestion?: (enrichedDilemma: string) => void;
 }
 
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
@@ -27,7 +29,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   analysisStep,
   currentDecision,
   dilemma,
-  onUpdateDecision
+  onUpdateDecision,
+  onFollowUpQuestion
 }) => {
   const [showAllOptions, setShowAllOptions] = useState(false);
   
@@ -87,6 +90,16 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               </div>
             </CardContent>
           </Card>
+        )}
+        
+        {onFollowUpQuestion && (
+          <FollowUpQuestions
+            dilemma={dilemma}
+            result={result}
+            category={currentDecision?.category}
+            onQuestionSelect={onFollowUpQuestion}
+            isLoading={isUpdating}
+          />
         )}
         
       </div>
@@ -171,6 +184,16 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             </div>
           </CardContent>
         </Card>
+      )}
+      
+      {onFollowUpQuestion && (
+        <FollowUpQuestions
+          dilemma={dilemma}
+          result={result}
+          category={currentDecision?.category}
+          onQuestionSelect={onFollowUpQuestion}
+          isLoading={isUpdating}
+        />
       )}
     </div>
   );

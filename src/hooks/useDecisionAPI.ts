@@ -380,8 +380,22 @@ export const useDecisionAPI = ({
         }
     };
 
+    const handleFollowUpQuestion = async (enrichedDilemma: string) => {
+        console.log("🤔 [DEBUG] Processing follow-up question");
+        
+        // Réinitialiser l'état pour une nouvelle analyse
+        setResult(null);
+        setAnalysisStep('idle');
+        setCurrentDecisionId(null);
+        
+        // Mettre à jour le dilemme avec la question enrichie
+        // Note: Ce sera géré par le composant parent qui appellera handleStartAnalysis
+        return enrichedDilemma;
+    };
+
     return {
         handleGenerateOptions,
-        handleStartAnalysis
+        handleStartAnalysis,
+        handleFollowUpQuestion
     };
 };

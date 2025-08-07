@@ -30,6 +30,14 @@ export interface ISocialContent {
   youtubeVideos?: IYouTubeVideo[];
 }
 
+export interface IFollowUpQuestion {
+  id: string;
+  text: string;
+  category: FollowUpCategory;
+}
+
+export type FollowUpCategory = 'budget' | 'preferences' | 'context' | 'requirements' | 'timeline' | 'usage';
+
 export interface IResult {
   recommendation: string;
   description: string;
@@ -59,6 +67,7 @@ export interface IResult {
   };
   dataFreshness?: 'very-fresh' | 'fresh' | 'moderate' | 'stale';
   resultType?: 'factual' | 'comparative' | 'simple-choice'; // Nouveau champ
+  followUpQuestions?: IFollowUpQuestion[];
 }
 
 export interface IDecision {

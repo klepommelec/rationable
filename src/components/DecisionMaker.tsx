@@ -41,6 +41,15 @@ const DecisionMaker = () => {
     uploadedFiles,
     setUploadedFiles
   } = useDecisionMaker();
+
+  // Fonction pour gérer les questions de suivi
+  const handleFollowUpQuestion = (enrichedDilemma: string) => {
+    setDilemma(enrichedDilemma);
+    // Relancer l'analyse avec le dilemme enrichi
+    setTimeout(() => {
+      handleStartAnalysis();
+    }, 100);
+  };
   const currentDecision = getCurrentDecision();
 
   // État pour le type de question avec classification asynchrone
@@ -109,11 +118,19 @@ const DecisionMaker = () => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               <span className="sr-only">Chargement des résultats...</span>
             </div>}>
-            <AnalysisResult result={result} isUpdating={isUpdating} clearSession={clearSession} analysisStep={analysisStep} currentDecision={getCurrentDecision()} dilemma={dilemma} onUpdateDecision={updatedDecision => {
-          // Mettre à jour la décision dans l'état global
-          // Cette logique devrait être dans useDecisionMaker
-          console.log('Decision updated:', updatedDecision);
-        }} />
+            <AnalysisResult 
+              result={result} 
+              isUpdating={isUpdating} 
+              clearSession={clearSession} 
+              analysisStep={analysisStep} 
+              currentDecision={getCurrentDecision()} 
+              dilemma={dilemma} 
+              onUpdateDecision={updatedDecision => {
+                // Mettre à jour la décision dans l'état global
+                console.log('Decision updated:', updatedDecision);
+              }}
+              onFollowUpQuestion={handleFollowUpQuestion}
+            />
           </React.Suspense>}
 
         {/* Section commentaires généraux - uniquement en bas de page */}
