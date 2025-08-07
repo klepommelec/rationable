@@ -71,7 +71,8 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
       context: 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
       requirements: 'bg-orange-500/10 text-orange-700 dark:text-orange-300',
       timeline: 'bg-red-500/10 text-red-700 dark:text-red-300',
-      usage: 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300'
+      usage: 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300',
+      validation: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
     };
     return colors[category as keyof typeof colors] || 'bg-gray-500/10 text-gray-700 dark:text-gray-300';
   };
@@ -83,7 +84,8 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
       context: 'Contexte',
       requirements: 'Exigences',
       timeline: 'Délais',
-      usage: 'Usage'
+      usage: 'Usage',
+      validation: 'Validation'
     };
     return labels[category as keyof typeof labels] || 'Général';
   };

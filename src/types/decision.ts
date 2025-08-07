@@ -36,7 +36,7 @@ export interface IFollowUpQuestion {
   category: FollowUpCategory;
 }
 
-export type FollowUpCategory = 'budget' | 'preferences' | 'context' | 'requirements' | 'timeline' | 'usage';
+export type FollowUpCategory = 'budget' | 'preferences' | 'context' | 'requirements' | 'timeline' | 'usage' | 'validation';
 
 export interface IResult {
   recommendation: string;

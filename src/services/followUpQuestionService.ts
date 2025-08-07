@@ -78,43 +78,97 @@ const detectQuestionContext = (dilemma: string, category?: string): string => {
 };
 
 const buildFollowUpPrompt = (dilemma: string, result: IResult, context: string): string => {
+  // Extraire l'option recommandée et ses détails
+  const recommendedOption = result.recommendation;
+  const breakdown = result.breakdown || [];
+  const recommendedBreakdown = breakdown.find(item => 
+    item.option.toLowerCase().includes(recommendedOption.toLowerCase()) ||
+    recommendedOption.toLowerCase().includes(item.option.toLowerCase())
+  );
+
   return `Tu es un assistant IA spécialisé dans l'aide à la prise de décision. 
 
 CONTEXTE:
 - Dilemme initial: "${dilemma}"
-- Domaine détecté: ${context}
-- Recommandation actuelle: "${result.recommendation}"
-- Type de résultat: ${result.resultType || 'comparative'}
+- Option RECOMMANDÉE: "${recommendedOption}"
+- Description: "${result.description}"
+- Domaine: ${context}
+
+${recommendedBreakdown ? `
+DÉTAILS DE LA RECOMMANDATION:
+- Option: ${recommendedBreakdown.option}
+- Score: ${recommendedBreakdown.score}/10
+- Avantages: ${recommendedBreakdown.pros.join(', ')}
+- Inconvénients: ${recommendedBreakdown.cons.join(', ')}
+` : ''}
 
 OBJECTIF:
-Génère 3-4 questions de suivi pertinentes qui pourraient aider l'utilisateur à affiner sa décision ou à obtenir des informations complémentaires.
+Génère 3-4 questions de suivi SPÉCIFIQUES à l'option recommandée "${recommendedOption}" pour aider l'utilisateur à valider, affiner ou mieux comprendre cette recommandation précise.
 
-RÈGLES:
-1. Les questions doivent être courtes et précises (max 50 caractères)
-2. Adapter les questions au domaine détecté (${context})
-3. Éviter les questions déjà traitées dans l'analyse
-4. Proposer des angles différents : budget, préférences, contexte d'usage, timeline, etc.
-5. Utiliser un ton naturel et engageant
+RÈGLES CRITIQUES:
+1. Les questions doivent être SPÉCIFIQUES à "${recommendedOption}" (pas générales)
+2. Questions courtes et précises (max 60 caractères)
+3. Se concentrer sur les aspects non couverts ou à clarifier pour cette option
+4. Utiliser les inconvénients identifiés pour poser des questions de validation
+5. Proposer des questions qui aident à confirmer si cette option convient vraiment
 
-CATÉGORIES DISPONIBLES:
-- budget: Questions sur les contraintes financières
-- preferences: Questions sur les goûts et préférences
-- context: Questions sur le contexte d'utilisation  
-- requirements: Questions sur les exigences techniques
-- timeline: Questions sur les délais et la temporalité
-- usage: Questions sur l'usage prévu
+TYPES DE QUESTIONS À PRIVILÉGIER:
+- Validation des caractéristiques de "${recommendedOption}"
+- Contexte d'usage spécifique de cette option
+- Contraintes ou limitations liées à "${recommendedOption}"
+- Aspects financiers spécifiques à cette recommandation
+- Comparaison avec des variantes proches
 
 EXEMPLES selon le domaine:
-${getExampleQuestionsByContext(context)}
+${getSpecificExamplesByContext(context, recommendedOption)}
 
 Réponds uniquement avec un objet JSON de ce format:
 {
   "questions": [
-    {"text": "Question courte et engageante?", "category": "budget"},
-    {"text": "Autre question pertinente?", "category": "preferences"},
+    {"text": "Question spécifique à ${recommendedOption}?", "category": "validation"},
+    {"text": "Autre question ciblée?", "category": "context"},
     ...
   ]
 }`;
+};
+
+const getSpecificExamplesByContext = (context: string, recommendedOption: string): string => {
+  const examples = {
+    'technologie': `
+    - "${recommendedOption} dépasse-t-il votre budget ?" (budget)
+    - "Utiliserez-vous ${recommendedOption} pour du gaming ?" (usage)
+    - "La taille de ${recommendedOption} vous convient-elle ?" (requirements)`,
+    
+    'voyage': `
+    - "Avez-vous des contraintes de dates pour ${recommendedOption} ?" (timeline)
+    - "${recommendedOption} convient-il pour un voyage en famille ?" (context)
+    - "Le budget de ${recommendedOption} inclut-il tout ?" (budget)`,
+    
+    'finance': `
+    - "Êtes-vous à l'aise avec le risque de ${recommendedOption} ?" (preferences)
+    - "Pouvez-vous bloquer l'argent pour ${recommendedOption} ?" (timeline)
+    - "Le rendement de ${recommendedOption} vous suffit-il ?" (requirements)`,
+    
+    'carrière': `
+    - "Le salaire proposé pour ${recommendedOption} vous convient-il ?" (budget)
+    - "${recommendedOption} correspond-il à vos valeurs ?" (preferences)
+    - "Êtes-vous prêt à déménager pour ${recommendedOption} ?" (context)`,
+    
+    'santé': `
+    - "Avez-vous des contre-indications pour ${recommendedOption} ?" (requirements)
+    - "Combien de temps consacrer à ${recommendedOption} ?" (timeline)
+    - "${recommendedOption} convient-il à votre niveau ?" (context)`,
+    
+    'style de vie': `
+    - "Le style de ${recommendedOption} vous plaît-il ?" (preferences)
+    - "${recommendedOption} s'adapte-t-il à votre espace ?" (context)
+    - "Le prix de ${recommendedOption} est-il justifié ?" (budget)`
+  };
+  
+  return examples[context as keyof typeof examples] || `
+    - "${recommendedOption} répond-il à vos attentes ?" (preferences)
+    - "Le coût de ${recommendedOption} est-il acceptable ?" (budget)
+    - "Quand commencer avec ${recommendedOption} ?" (timeline)`;
 };
 
 const getExampleQuestionsByContext = (context: string): string => {
