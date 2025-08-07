@@ -55,11 +55,14 @@ const DecisionMaker = () => {
   } = useMultiAnalysis();
 
   // Fonction pour gérer les questions de suivi
-  const handleFollowUpQuestion = (enrichedDilemma: string) => {
+  const handleFollowUpQuestion = (enrichedDilemma: string, questionText?: string) => {
+    // Utiliser la question seule pour l'affichage, ou le dilemme enrichi si pas de question spécifique
+    const displayDilemma = questionText || enrichedDilemma;
+    
     // Créer une nouvelle analyse
     const newAnalysis = {
       id: crypto.randomUUID(),
-      dilemma: enrichedDilemma,
+      dilemma: displayDilemma,
       emoji: '🤔',
       result: null,
       analysisStep: 'idle' as const,
@@ -69,12 +72,17 @@ const DecisionMaker = () => {
 
     addAnalysis(newAnalysis);
     
-    // Mettre à jour l'état principal pour la nouvelle analyse
-    setDilemma(enrichedDilemma);
+    // Mettre à jour l'état principal pour la nouvelle analyse (avec le dilemme d'affichage)
+    setDilemma(displayDilemma);
     
-    // Relancer l'analyse avec le dilemme enrichi
+    // Relancer l'analyse avec le dilemme enrichi (pour l'IA, on garde le contexte complet)
     setTimeout(() => {
+      // Temporairement changer le dilemma pour l'IA avec le contexte complet
+      const originalDilemma = dilemma;
+      setDilemma(enrichedDilemma);
       handleStartAnalysis();
+      // Remettre le dilemma d'affichage après un court délai
+      setTimeout(() => setDilemma(displayDilemma), 500);
     }, 100);
   };
   const currentDecision = getCurrentDecision();

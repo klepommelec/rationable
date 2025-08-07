@@ -9,7 +9,7 @@ interface FollowUpQuestionsProps {
   dilemma: string;
   result: IResult;
   category?: string;
-  onQuestionSelect?: (enrichedDilemma: string) => void;
+  onQuestionSelect?: (enrichedDilemma: string, questionText?: string) => void;
   isLoading?: boolean;
 }
 
@@ -63,8 +63,8 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
 
 Question de suivi: ${question.text}`;
 
-    // Déclencher une nouvelle analyse complète
-    onQuestionSelect(enrichedDilemma);
+    // Déclencher une nouvelle analyse complète en passant aussi la question seule pour l'affichage
+    onQuestionSelect(enrichedDilemma, question.text);
   };
 
   const getCategoryColor = (category: string): string => {
