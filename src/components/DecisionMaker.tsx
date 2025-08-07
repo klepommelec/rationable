@@ -1,11 +1,13 @@
 import * as React from 'react';
 import { useDecisionMaker } from '@/hooks/useDecisionMaker';
+import { useMultiAnalysis } from '@/hooks/useMultiAnalysis';
 import { detectQuestionType } from '@/services/questionClassificationService';
 import { EmojiPicker } from './EmojiPicker';
 import { CriteriaManager } from './CriteriaManager';
 import { OptionsLoadingSkeleton } from './OptionsLoadingSkeleton';
 import { CommentSection } from './comments/CommentSection';
 import ManualOptionsGenerator from './ManualOptionsGenerator';
+import AnalysisNavigation from './decision-maker/AnalysisNavigation';
 
 // Lazy load components for better performance
 const DilemmaSetup = React.lazy(() => import('./decision-maker/DilemmaSetup'));
@@ -42,15 +44,41 @@ const DecisionMaker = () => {
     setUploadedFiles
   } = useDecisionMaker();
 
+  const {
+    analyses,
+    currentAnalysisIndex,
+    getCurrentAnalysis,
+    addAnalysis,
+    updateCurrentAnalysis,
+    navigateToAnalysis,
+    clearAnalyses
+  } = useMultiAnalysis();
+
   // Fonction pour gérer les questions de suivi
   const handleFollowUpQuestion = (enrichedDilemma: string) => {
+    // Créer une nouvelle analyse
+    const newAnalysis = {
+      id: crypto.randomUUID(),
+      dilemma: enrichedDilemma,
+      emoji: '🤔',
+      result: null,
+      analysisStep: 'idle' as const,
+      criteria: [],
+      category: undefined
+    };
+
+    addAnalysis(newAnalysis);
+    
+    // Mettre à jour l'état principal pour la nouvelle analyse
     setDilemma(enrichedDilemma);
+    
     // Relancer l'analyse avec le dilemme enrichi
     setTimeout(() => {
       handleStartAnalysis();
     }, 100);
   };
   const currentDecision = getCurrentDecision();
+  const currentAnalysis = getCurrentAnalysis();
 
   // État pour le type de question avec classification asynchrone
   const [questionType, setQuestionType] = React.useState<'factual' | 'comparative' | 'simple-choice'>('comparative');
@@ -75,6 +103,30 @@ const DecisionMaker = () => {
     const timeoutId = setTimeout(classifyQuestion, 500);
     return () => clearTimeout(timeoutId);
   }, [dilemma]);
+
+  // Mettre à jour l'analyse actuelle quand les états changent
+  React.useEffect(() => {
+    if (currentAnalysis) {
+      updateCurrentAnalysis({
+        dilemma,
+        emoji,
+        result,
+        analysisStep,
+        criteria,
+        category: selectedCategory
+      });
+    }
+  }, [dilemma, emoji, result, analysisStep, criteria, selectedCategory]);
+
+  // Synchroniser les états quand on navigue entre analyses
+  React.useEffect(() => {
+    if (currentAnalysis) {
+      setDilemma(currentAnalysis.dilemma);
+      setEmoji(currentAnalysis.emoji);
+      // Note: On ne synchronise pas result et analysisStep pour éviter les conflits
+    }
+  }, [currentAnalysisIndex]);
+
   const shouldShowCriteria = questionType === 'comparative' || questionType === 'simple-choice';
   return <div className="w-full mx-auto px-4 sm:px-6 lg:px-[80px]">
       {/* Skip to main content link for screen readers */}
@@ -83,6 +135,13 @@ const DecisionMaker = () => {
       </a>
 
       <main id="main-content" role="main" aria-label="Assistant de décision">
+        {/* Navigation entre analyses */}
+        <AnalysisNavigation 
+          analyses={analyses}
+          currentAnalysisIndex={currentAnalysisIndex}
+          onNavigate={navigateToAnalysis}
+        />
+
         {(analysisStep === 'criteria-loaded' || analysisStep === 'loading-options' || analysisStep === 'done') && <>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 animate-fade-in">
               <div className="flex items-baseline gap-4 w-full ">

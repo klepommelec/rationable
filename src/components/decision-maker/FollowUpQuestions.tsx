@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { IResult, IFollowUpQuestion } from '@/types/decision';
 import { generateFollowUpQuestions } from '@/services/followUpQuestionService';
-import { generateQuickAnswer } from '@/services/quickAnswerService';
 import { Button } from '@/components/ui/button';
-import { Loader2, ChevronDown, ChevronUp } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Loader2 } from 'lucide-react';
 
 interface FollowUpQuestionsProps {
   dilemma: string;
@@ -15,10 +13,9 @@ interface FollowUpQuestionsProps {
   isLoading?: boolean;
 }
 
-interface QuestionWithAnswer extends IFollowUpQuestion {
-  answer?: string;
-  isLoadingAnswer?: boolean;
-  isOpen?: boolean;
+// Interface simplifiée pour les questions
+interface QuestionItem extends IFollowUpQuestion {
+  // Plus besoin de answer, isLoadingAnswer, isOpen
 }
 
 const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
@@ -28,13 +25,13 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
   onQuestionSelect,
   isLoading = false
 }) => {
-  const [questions, setQuestions] = useState<QuestionWithAnswer[]>([]);
+  const [questions, setQuestions] = useState<QuestionItem[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
 
   useEffect(() => {
     const loadQuestions = async () => {
       if (result.followUpQuestions && result.followUpQuestions.length > 0) {
-        setQuestions(result.followUpQuestions.map(q => ({ ...q, isOpen: false })));
+        setQuestions(result.followUpQuestions);
         return;
       }
 
@@ -45,7 +42,7 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
           result,
           category
         });
-        setQuestions(generatedQuestions.map(q => ({ ...q, isOpen: false })));
+        setQuestions(generatedQuestions);
       } catch (error) {
         console.error('Error loading follow-up questions:', error);
         setQuestions([]);
@@ -57,40 +54,17 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
     loadQuestions();
   }, [dilemma, result, category]);
 
-  const handleQuestionClick = async (questionId: string) => {
+  const handleQuestionClick = (questionId: string) => {
     const question = questions.find(q => q.id === questionId);
-    if (!question) return;
+    if (!question || !onQuestionSelect) return;
 
-    // Toggle open state
-    setQuestions(prev => prev.map(q => 
-      q.id === questionId 
-        ? { ...q, isOpen: !q.isOpen, isLoadingAnswer: !q.isOpen && !q.answer }
-        : q
-    ));
+    // Créer un dilemme enrichi pour la nouvelle analyse
+    const enrichedDilemma = `${dilemma}
 
-    // Generate answer if not already available and opening
-    if (!question.answer && !question.isOpen) {
-      try {
-        const answer = await generateQuickAnswer({
-          question,
-          originalDilemma: dilemma,
-          result
-        });
-        
-        setQuestions(prev => prev.map(q => 
-          q.id === questionId 
-            ? { ...q, answer, isLoadingAnswer: false }
-            : q
-        ));
-      } catch (error) {
-        console.error('Error generating quick answer:', error);
-        setQuestions(prev => prev.map(q => 
-          q.id === questionId 
-            ? { ...q, isLoadingAnswer: false, answer: "Désolé, impossible de générer une réponse pour cette question." }
-            : q
-        ));
-      }
-    }
+Question de suivi: ${question.text}`;
+
+    // Déclencher une nouvelle analyse complète
+    onQuestionSelect(enrichedDilemma);
   };
 
   const getCategoryColor = (category: string): string => {
@@ -144,50 +118,26 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
           Questions de suivi
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Cliquez sur une question pour obtenir des conseils pratiques
+          Cliquez sur une question pour lancer une nouvelle analyse complète
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
         {questions.map((question) => (
-          <Collapsible key={question.id} open={question.isOpen}>
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full justify-between text-left h-auto p-4 hover:bg-muted/50"
-                onClick={() => handleQuestionClick(question.id)}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center space-x-3">
-                    <span className="font-medium text-sm">
-                      {question.text}
-                    </span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(question.category)}`}>
-                      {getCategoryLabel(question.category)}
-                    </span>
-                  </div>
-                  {question.isOpen ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </div>
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="animate-accordion-down">
-              <div className="px-4 py-3 bg-muted/30 rounded-lg mt-2">
-                {question.isLoadingAnswer ? (
-                  <div className="flex items-center space-x-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-sm">Génération de la réponse...</span>
-                  </div>
-                ) : question.answer ? (
-                  <p className="text-sm text-muted-foreground">
-                    {question.answer}
-                  </p>
-                ) : null}
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+          <Button
+            key={question.id}
+            variant="outline"
+            className="w-full justify-start text-left h-auto p-4 hover:bg-muted/50 transition-colors"
+            onClick={() => handleQuestionClick(question.id)}
+          >
+            <div className="flex items-center space-x-3 w-full">
+              <span className="font-medium text-sm flex-1">
+                {question.text}
+              </span>
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(question.category)}`}>
+                {getCategoryLabel(question.category)}
+              </span>
+            </div>
+          </Button>
         ))}
       </CardContent>
     </Card>
