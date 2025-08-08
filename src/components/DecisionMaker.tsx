@@ -8,6 +8,7 @@ import { OptionsLoadingSkeleton } from './OptionsLoadingSkeleton';
 import { CommentSection } from './comments/CommentSection';
 import ManualOptionsGenerator from './ManualOptionsGenerator';
 import AnalysisNavigation from './decision-maker/AnalysisNavigation';
+import { toast } from "sonner";
 
 // Lazy load components for better performance
 const DilemmaSetup = React.lazy(() => import('./decision-maker/DilemmaSetup'));
@@ -57,12 +58,12 @@ const DecisionMaker = () => {
     clearAnalyses
   } = useMultiAnalysis();
 
-  // Fonction SIMPLIFIÉE pour gérer les questions de suivi
-  const handleFollowUpQuestion = (questionDilemma: string, questionText?: string) => {
+  // Fonction DIRECTE pour gérer les questions de suivi - SANS double analyse
+  const handleFollowUpQuestion = async (questionDilemma: string, questionText?: string) => {
     console.log('🔄 Follow-up question triggered:', questionText || questionDilemma);
     
-    // RESET COMPLET SYNCHRONE avec React.startTransition pour batch les updates
-    React.startTransition(() => {
+    try {
+      // RESET COMPLET IMMÉDIAT - Tout en synchrone
       console.log('🧹 Complete state reset...');
       setResult(null);
       setCriteria([]);
@@ -87,13 +88,15 @@ const DecisionMaker = () => {
       
       // Mettre à jour l'état principal
       setDilemma(questionDilemma);
-    });
-    
-    // Utiliser un micro-délai pour s'assurer que les états sont propagés
-    setTimeout(() => {
-      console.log('🚀 Starting follow-up analysis...');
-      handleStartAnalysis();
-    }, 10); // Micro-délai minimal pour la propagation d'état
+      
+      // Démarrer DIRECTEMENT l'analyse complète ici
+      console.log('🚀 Starting integrated follow-up analysis...');
+      await handleStartAnalysis();
+      
+    } catch (error) {
+      console.error('❌ Error in follow-up question:', error);
+      toast.error('Erreur lors du traitement de la question de suivi');
+    }
   };
 
   // Fonction pour gérer la navigation entre analyses

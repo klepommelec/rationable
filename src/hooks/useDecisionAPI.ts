@@ -307,62 +307,60 @@ export const useDecisionAPI = ({
           setSelectedCategory(response.suggestedCategory);
           setAnalysisStep('criteria-loaded');
           
-          // Phase 2: Générer automatiquement les options
-          setTimeout(async () => {
-            console.log("📡 [DEBUG] Phase 2: Auto-generating options for comparative question");
-            setAnalysisStep('loading-options');
-            setProgressMessage(workspaceId ? "Génération des options avec documents workspace..." : "Génération des options comparatives...");
+          // Phase 2: Générer automatiquement les options - SANS setTimeout pour éviter les race conditions
+          console.log("📡 [DEBUG] Phase 2: Auto-generating options for comparative question");
+          setAnalysisStep('loading-options');
+          setProgressMessage(workspaceId ? "Génération des options avec documents workspace..." : "Génération des options comparatives...");
+          
+          try {
+            const optionsResult = await generateOptimizedDecision(dilemma, newCriteria, uploadedFileInfos, workspaceId);
+            optionsResult.resultType = questionType;
             
-            try {
-              const optionsResult = await generateOptimizedDecision(dilemma, newCriteria, uploadedFileInfos, workspaceId);
-              optionsResult.resultType = questionType;
-              
-              console.log("✅ [DEBUG] Auto-options generated successfully");
-              setResult(optionsResult);
-              
-              // Définir les critères de référence
-              initialCriteriaRef.current = newCriteria;
-              
-              const newDecision: IDecision = {
-                id: crypto.randomUUID(),
-                timestamp: Date.now(),
-                dilemma,
-                emoji: contextualEmoji,
-                criteria: newCriteria,
-                result: optionsResult,
-                category: response.suggestedCategory
-              };
-              addDecision(newDecision);
-              setCurrentDecisionId(newDecision.id);
-              
-              setAnalysisStep('done');
-              
-              const successMessage = optionsResult.workspaceData?.documentsUsed 
-                ? `Analyse comparative générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
-                : "Analyse comparative générée !";
-              
-              toast.success(successMessage);
-            } catch (error) {
-              console.error("❌ [DEBUG] Error in auto-options generation:", error);
-              const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
-              toast.error(`Erreur lors de la génération automatique : ${errorMessage}`);
-              setAnalysisStep('criteria-loaded');
-              
-              // Nettoyer les fichiers en cas d'erreur
-              if (uploadedFileInfos.length > 0) {
-                console.log("🧹 [DEBUG] Cleaning up uploaded files due to error...");
-                for (const fileInfo of uploadedFileInfos) {
-                  try {
-                    await deleteFileFromStorage(fileInfo.filePath);
-                  } catch (cleanupError) {
-                    console.error("❌ [DEBUG] Error cleaning up file:", cleanupError);
-                  }
+            console.log("✅ [DEBUG] Auto-options generated successfully");
+            setResult(optionsResult);
+            
+            // Définir les critères de référence
+            initialCriteriaRef.current = newCriteria;
+            
+            const newDecision: IDecision = {
+              id: crypto.randomUUID(),
+              timestamp: Date.now(),
+              dilemma,
+              emoji: contextualEmoji,
+              criteria: newCriteria,
+              result: optionsResult,
+              category: response.suggestedCategory
+            };
+            addDecision(newDecision);
+            setCurrentDecisionId(newDecision.id);
+            
+            setAnalysisStep('done');
+            
+            const successMessage = optionsResult.workspaceData?.documentsUsed 
+              ? `Analyse comparative générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
+              : "Analyse comparative générée !";
+            
+            toast.success(successMessage);
+          } catch (error) {
+            console.error("❌ [DEBUG] Error in auto-options generation:", error);
+            const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
+            toast.error(`Erreur lors de la génération automatique : ${errorMessage}`);
+            setAnalysisStep('criteria-loaded');
+            
+            // Nettoyer les fichiers en cas d'erreur
+            if (uploadedFileInfos.length > 0) {
+              console.log("🧹 [DEBUG] Cleaning up uploaded files due to error...");
+              for (const fileInfo of uploadedFileInfos) {
+                try {
+                  await deleteFileFromStorage(fileInfo.filePath);
+                } catch (cleanupError) {
+                  console.error("❌ [DEBUG] Error cleaning up file:", cleanupError);
                 }
               }
-            } finally {
-              setProgressMessage('');
             }
-          }, 800);
+          } finally {
+            setProgressMessage('');
+          }
           
         } catch (error) {
           console.error("❌ [DEBUG] Error in analysis start:", error);
@@ -385,22 +383,8 @@ export const useDecisionAPI = ({
         }
     };
 
-    const handleFollowUpQuestion = async (enrichedDilemma: string) => {
-        console.log("🤔 [DEBUG] Processing follow-up question");
-        
-        // Réinitialiser l'état pour une nouvelle analyse
-        setResult(null);
-        setAnalysisStep('idle');
-        setCurrentDecisionId(null);
-        
-        // Mettre à jour le dilemme avec la question enrichie
-        // Note: Ce sera géré par le composant parent qui appellera handleStartAnalysis
-        return enrichedDilemma;
-    };
-
     return {
         handleGenerateOptions,
-        handleStartAnalysis,
-        handleFollowUpQuestion
+        handleStartAnalysis
     };
 };
