@@ -57,49 +57,43 @@ const DecisionMaker = () => {
     clearAnalyses
   } = useMultiAnalysis();
 
-  // Fonction pour gérer les questions de suivi
+  // Fonction SIMPLIFIÉE pour gérer les questions de suivi
   const handleFollowUpQuestion = (questionDilemma: string, questionText?: string) => {
     console.log('🔄 Follow-up question triggered:', questionText || questionDilemma);
     
-    // RESET COMPLET ET FORCÉ de tous les états
-    console.log('🧹 Forcing complete state reset...');
-    
-    // Synchrone: Effacer immédiatement tous les états critiques
-    setResult(null);
-    setCriteria([]);
-    setAnalysisStep('idle');
-    setEmoji('🤔');
-    setSelectedCategory(undefined);
-    
-    // Délai supplémentaire pour s'assurer que React a traité tous les changements
-    setTimeout(() => {
-      console.log('🧹 Secondary state cleanup...');
-      setCriteria([]); // Double vérification
+    // RESET COMPLET SYNCHRONE avec React.startTransition pour batch les updates
+    React.startTransition(() => {
+      console.log('🧹 Complete state reset...');
+      setResult(null);
+      setCriteria([]);
+      setAnalysisStep('idle');
+      setEmoji('🤔');
+      setSelectedCategory(undefined);
       
-      // Ajouter la nouvelle analyse avec un dilemme propre
+      // Créer et ajouter la nouvelle analyse
       const newAnalysis = {
         id: crypto.randomUUID(),
-        dilemma: questionDilemma, // Utiliser directement la question
+        dilemma: questionDilemma,
         displayTitle: questionText,
         emoji: '🤔',
         result: null,
         analysisStep: 'idle' as const,
-        criteria: [], // Critères vides garantis
+        criteria: [],
         category: undefined,
       };
       
       console.log('➕ Adding new follow-up analysis:', newAnalysis);
       addAnalysis(newAnalysis);
       
-      // Mettre à jour l'état principal avec la nouvelle question
+      // Mettre à jour l'état principal
       setDilemma(questionDilemma);
-      
-      // Relancer l'analyse avec un délai pour garantir la cohérence
-      setTimeout(() => {
-        console.log('🚀 Starting follow-up analysis...');
-        handleStartAnalysis();
-      }, 100);
-    }, 150); // Délai légèrement plus long pour garantir la synchronisation
+    });
+    
+    // Utiliser un micro-délai pour s'assurer que les états sont propagés
+    setTimeout(() => {
+      console.log('🚀 Starting follow-up analysis...');
+      handleStartAnalysis();
+    }, 10); // Micro-délai minimal pour la propagation d'état
   };
 
   // Fonction pour gérer la navigation entre analyses

@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export type QuestionType = 'factual' | 'comparative';
+export type QuestionType = 'factual' | 'comparative' | 'simple-choice';
 
 export interface QuestionClassification {
   type: QuestionType;
@@ -30,12 +30,18 @@ export const classifyQuestionWithAI = async (question: string): Promise<Question
 - Questions "Quel est le meilleur...", conseils et recommandations
 - Questions d'achat, voyages, décisions personnelles
 - Questions nécessitant comparaison entre plusieurs alternatives
+- TOUTES les questions de suivi sont automatiquement comparatives
+
+**SIMPLE-CHOICE** - Questions de recommandation directe :
+- Questions "Quel quartier choisir", "Quelle ville visiter"  
+- Questions nécessitant une recommandation personnalisée
+- Questions ouvertes nécessitant des critères d'évaluation
 
 Question à analyser : "${question}"
 
 Réponds UNIQUEMENT avec un JSON valide dans ce format exact :
 {
-  "type": "factual|comparative",
+  "type": "factual|comparative|simple-choice",
   "confidence": 85,
   "reasoning": "Explication claire du choix",
   "suggestedApproach": "Comment traiter cette question"
@@ -95,10 +101,11 @@ const fallbackToRegexClassification = (question: string): QuestionClassification
     /\b(différence|difference|lequel|which one|plutôt|rather)\b/i
   ];
   
-  // Patterns de recommandation/conseil (maintenant comparatifs)
+  // Patterns de recommandation/conseil -> simple-choice
   const recommendationPatterns = [
     /\b(meilleur|best|recommand|recommend|conseil|advice)\b/i,
-    /\b(acheter|buy|choisir|choose)\b/i
+    /\b(acheter|buy|choisir|choose)\b/i,
+    /\b(quel|quelle|which|where|où)\b.*\b(quartier|ville|city|neighborhood|endroit|place)\b/i
   ];
   
   if (factualPatterns.some(p => p.test(question))) {
@@ -110,19 +117,28 @@ const fallbackToRegexClassification = (question: string): QuestionClassification
     };
   }
   
-  if (comparativePatterns.some(p => p.test(question)) || recommendationPatterns.some(p => p.test(question))) {
+  if (recommendationPatterns.some(p => p.test(question))) {
+    return {
+      type: 'simple-choice',
+      confidence: 75,
+      reasoning: 'Détecté comme simple-choice/recommandation par pattern regex',
+      suggestedApproach: 'Génération de critères et recommandation personnalisée'
+    };
+  }
+  
+  if (comparativePatterns.some(p => p.test(question))) {
     return {
       type: 'comparative',
       confidence: 70,
-      reasoning: 'Détecté comme comparatif/recommandation par pattern regex',
+      reasoning: 'Détecté comme comparatif par pattern regex',
       suggestedApproach: 'Génération de critères et comparaison d\'options'
     };
   }
   
   return {
-    type: 'comparative',
+    type: 'simple-choice',
     confidence: 60,
-    reasoning: 'Classification par défaut - comparatif',
+    reasoning: 'Classification par défaut - simple-choice',
     suggestedApproach: 'Génération de recommandation avec alternatives'
   };
 };
