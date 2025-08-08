@@ -58,35 +58,48 @@ const DecisionMaker = () => {
   } = useMultiAnalysis();
 
   // Fonction pour gérer les questions de suivi
-  const handleFollowUpQuestion = (enrichedDilemma: string, questionText?: string) => {
-    // FORCE un reset complet de tous les états avant la nouvelle analyse
+  const handleFollowUpQuestion = (questionDilemma: string, questionText?: string) => {
+    console.log('🔄 Follow-up question triggered:', questionText || questionDilemma);
+    
+    // RESET COMPLET ET FORCÉ de tous les états
+    console.log('🧹 Forcing complete state reset...');
+    
+    // Synchrone: Effacer immédiatement tous les états critiques
     setResult(null);
     setCriteria([]);
-    setEmoji('🤔');
     setAnalysisStep('idle');
+    setEmoji('🤔');
     setSelectedCategory(undefined);
     
-    // Créer une nouvelle analyse avec le dilemme enrichi complet pour l'IA
-    const newAnalysis = {
-      id: crypto.randomUUID(),
-      dilemma: enrichedDilemma, // Dilemme complet pour l'IA
-      displayTitle: questionText, // Titre simplifié pour l'affichage
-      emoji: '🤔',
-      result: null,
-      analysisStep: 'idle' as const,
-      criteria: [],
-      category: undefined
-    };
-
-    addAnalysis(newAnalysis);
-    
-    // Mettre à jour l'état principal avec le dilemme enrichi pour l'analyse
-    setDilemma(enrichedDilemma);
-    
-    // Relancer l'analyse avec un délai plus court pour éviter les interférences
+    // Délai supplémentaire pour s'assurer que React a traité tous les changements
     setTimeout(() => {
-      handleStartAnalysis();
-    }, 50);
+      console.log('🧹 Secondary state cleanup...');
+      setCriteria([]); // Double vérification
+      
+      // Ajouter la nouvelle analyse avec un dilemme propre
+      const newAnalysis = {
+        id: crypto.randomUUID(),
+        dilemma: questionDilemma, // Utiliser directement la question
+        displayTitle: questionText,
+        emoji: '🤔',
+        result: null,
+        analysisStep: 'idle' as const,
+        criteria: [], // Critères vides garantis
+        category: undefined,
+      };
+      
+      console.log('➕ Adding new follow-up analysis:', newAnalysis);
+      addAnalysis(newAnalysis);
+      
+      // Mettre à jour l'état principal avec la nouvelle question
+      setDilemma(questionDilemma);
+      
+      // Relancer l'analyse avec un délai pour garantir la cohérence
+      setTimeout(() => {
+        console.log('🚀 Starting follow-up analysis...');
+        handleStartAnalysis();
+      }, 100);
+    }, 150); // Délai légèrement plus long pour garantir la synchronisation
   };
 
   // Fonction pour gérer la navigation entre analyses

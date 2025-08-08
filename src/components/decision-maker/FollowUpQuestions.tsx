@@ -58,13 +58,11 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
     const question = questions.find(q => q.id === questionId);
     if (!question || !onQuestionSelect) return;
 
-    // Créer un dilemme enrichi pour la nouvelle analyse
-    const enrichedDilemma = `${dilemma}
-
-Question de suivi: ${question.text}`;
-
-    // Déclencher une nouvelle analyse complète en passant aussi la question seule pour l'affichage
-    onQuestionSelect(enrichedDilemma, question.text);
+    console.log('🔄 Follow-up question clicked:', question.text);
+    
+    // Utiliser directement le texte de la question sans enrichissement 
+    // pour éviter la confusion de routage
+    onQuestionSelect(question.text, question.text);
   };
 
   const getCategoryColor = (category: string): string => {
