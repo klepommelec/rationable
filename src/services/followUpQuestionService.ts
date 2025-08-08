@@ -211,10 +211,6 @@ export const handleFollowUpQuestion = async (
   originalDilemma: string,
   currentResult: IResult
 ): Promise<string> => {
-  // Retourner un dilemme enrichi pour relancer l'analyse
-  return `${originalDilemma}
-
-Question de suivi: ${question.text}
-
-Contexte précédent: ${currentResult.recommendation}`;
+  // Retourner directement le texte de la question de suivi comme nouveau dilemme autonome
+  return question.text;
 };
