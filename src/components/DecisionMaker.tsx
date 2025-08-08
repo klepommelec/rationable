@@ -59,6 +59,13 @@ const DecisionMaker = () => {
 
   // Fonction pour gérer les questions de suivi
   const handleFollowUpQuestion = (enrichedDilemma: string, questionText?: string) => {
+    // FORCE un reset complet de tous les états avant la nouvelle analyse
+    setResult(null);
+    setCriteria([]);
+    setEmoji('🤔');
+    setAnalysisStep('idle');
+    setSelectedCategory(undefined);
+    
     // Créer une nouvelle analyse avec le dilemme enrichi complet pour l'IA
     const newAnalysis = {
       id: crypto.randomUUID(),
@@ -76,10 +83,10 @@ const DecisionMaker = () => {
     // Mettre à jour l'état principal avec le dilemme enrichi pour l'analyse
     setDilemma(enrichedDilemma);
     
-    // Relancer l'analyse
+    // Relancer l'analyse avec un délai plus court pour éviter les interférences
     setTimeout(() => {
       handleStartAnalysis();
-    }, 100);
+    }, 50);
   };
 
   // Fonction pour gérer la navigation entre analyses

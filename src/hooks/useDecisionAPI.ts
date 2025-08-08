@@ -222,12 +222,17 @@ export const useDecisionAPI = ({
         // Générer un emoji contextuel
         const contextualEmoji = generateContextualEmoji(dilemma);
         
+        // FORCE un reset complet pour éviter la réutilisation d'anciens états
         setResult(null);
         setCriteria([]);
         setEmoji(contextualEmoji);
         setCurrentDecisionId(null);
         setHasChanges(false);
+        setSelectedCategory(undefined);
         resetRetry();
+        
+        // Effacer la référence aux anciens critères
+        initialCriteriaRef.current = [];
 
         let uploadedFileInfos: UploadedFileInfo[] = [];
 
