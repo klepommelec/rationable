@@ -5,6 +5,7 @@ import { AnalysisStep } from './useDecisionState';
 export interface Analysis {
   id: string;
   dilemma: string;
+  displayTitle?: string; // Titre d'affichage pour les questions de suivi
   emoji: string;
   result: IResult | null;
   analysisStep: AnalysisStep;

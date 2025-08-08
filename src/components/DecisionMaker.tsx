@@ -19,11 +19,13 @@ const DecisionMaker = () => {
     emoji,
     setEmoji,
     analysisStep,
+    setAnalysisStep,
     progress,
     progressMessage,
     criteria,
     setCriteria,
     result,
+    setResult,
     history,
     isUpdating,
     isLoading,
@@ -37,6 +39,7 @@ const DecisionMaker = () => {
     hasChanges,
     handleManualUpdate,
     selectedCategory,
+    setSelectedCategory,
     handleCategoryChange,
     handleUpdateCategory,
     getCurrentDecision,
@@ -56,13 +59,11 @@ const DecisionMaker = () => {
 
   // Fonction pour gérer les questions de suivi
   const handleFollowUpQuestion = (enrichedDilemma: string, questionText?: string) => {
-    // Utiliser la question seule pour l'affichage, ou le dilemme enrichi si pas de question spécifique
-    const displayDilemma = questionText || enrichedDilemma;
-    
-    // Créer une nouvelle analyse
+    // Créer une nouvelle analyse avec le dilemme enrichi complet pour l'IA
     const newAnalysis = {
       id: crypto.randomUUID(),
-      dilemma: displayDilemma,
+      dilemma: enrichedDilemma, // Dilemme complet pour l'IA
+      displayTitle: questionText, // Titre simplifié pour l'affichage
       emoji: '🤔',
       result: null,
       analysisStep: 'idle' as const,
@@ -72,18 +73,28 @@ const DecisionMaker = () => {
 
     addAnalysis(newAnalysis);
     
-    // Mettre à jour l'état principal pour la nouvelle analyse (avec le dilemme d'affichage)
-    setDilemma(displayDilemma);
+    // Mettre à jour l'état principal avec le dilemme enrichi pour l'analyse
+    setDilemma(enrichedDilemma);
     
-    // Relancer l'analyse avec le dilemme enrichi (pour l'IA, on garde le contexte complet)
+    // Relancer l'analyse
     setTimeout(() => {
-      // Temporairement changer le dilemma pour l'IA avec le contexte complet
-      const originalDilemma = dilemma;
-      setDilemma(enrichedDilemma);
       handleStartAnalysis();
-      // Remettre le dilemma d'affichage après un court délai
-      setTimeout(() => setDilemma(displayDilemma), 500);
     }, 100);
+  };
+
+  // Fonction pour gérer la navigation entre analyses
+  const handleAnalysisNavigation = (analysisIndex: number) => {
+    navigateToAnalysis(analysisIndex);
+    const analysis = analyses[analysisIndex];
+    if (analysis) {
+      // Synchroniser l'état principal avec l'analyse sélectionnée
+      setDilemma(analysis.dilemma);
+      setEmoji(analysis.emoji);
+      setResult(analysis.result);
+      setCriteria(analysis.criteria);
+      setSelectedCategory(analysis.category);
+      setAnalysisStep(analysis.analysisStep);
+    }
   };
   const currentDecision = getCurrentDecision();
   const currentAnalysis = getCurrentAnalysis();
@@ -112,6 +123,22 @@ const DecisionMaker = () => {
     return () => clearTimeout(timeoutId);
   }, [dilemma]);
 
+  // Ajouter la première analyse dès qu'elle démarre
+  React.useEffect(() => {
+    if (dilemma && (analysisStep === 'criteria-loaded' || analysisStep === 'loading-options' || analysisStep === 'done') && analyses.length === 0) {
+      const initialAnalysis = {
+        id: crypto.randomUUID(),
+        dilemma,
+        emoji,
+        result,
+        analysisStep,
+        criteria,
+        category: selectedCategory
+      };
+      addAnalysis(initialAnalysis);
+    }
+  }, [dilemma, analysisStep, analyses.length]);
+
   // Mettre à jour l'analyse actuelle quand les états changent
   React.useEffect(() => {
     if (currentAnalysis) {
@@ -126,14 +153,7 @@ const DecisionMaker = () => {
     }
   }, [dilemma, emoji, result, analysisStep, criteria, selectedCategory]);
 
-  // Synchroniser les états quand on navigue entre analyses
-  React.useEffect(() => {
-    if (currentAnalysis) {
-      setDilemma(currentAnalysis.dilemma);
-      setEmoji(currentAnalysis.emoji);
-      // Note: On ne synchronise pas result et analysisStep pour éviter les conflits
-    }
-  }, [currentAnalysisIndex]);
+  // Note: La synchronisation des états lors de la navigation est gérée par handleAnalysisNavigation
 
   const shouldShowCriteria = questionType === 'comparative' || questionType === 'simple-choice';
   return <div className="w-full mx-auto px-4 sm:px-6 lg:px-[80px]">
@@ -147,7 +167,7 @@ const DecisionMaker = () => {
         <AnalysisNavigation 
           analyses={analyses}
           currentAnalysisIndex={currentAnalysisIndex}
-          onNavigate={navigateToAnalysis}
+          onNavigate={handleAnalysisNavigation}
         />
 
         {(analysisStep === 'criteria-loaded' || analysisStep === 'loading-options' || analysisStep === 'done') && <>
@@ -155,7 +175,7 @@ const DecisionMaker = () => {
               <div className="flex items-baseline gap-4 w-full ">
                 <EmojiPicker emoji={emoji} setEmoji={setEmoji} />
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-left break-words flex-1 min-w-0">
-                  {dilemma}
+                  {getCurrentAnalysis()?.displayTitle || dilemma}
                 </h1>
               </div>
             </div>

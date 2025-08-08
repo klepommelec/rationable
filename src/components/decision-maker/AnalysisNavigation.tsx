@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 interface Analysis {
   id: string;
   dilemma: string;
+  displayTitle?: string;
   result: any;
   emoji: string;
   analysisStep: string;
@@ -48,8 +49,8 @@ const AnalysisNavigation: React.FC<AnalysisNavigationProps> = ({
             className="flex items-center gap-2 whitespace-nowrap min-w-fit"
           >
             <span>{analysis.emoji}</span>
-            <span className="hidden sm:inline">
-              Question {index + 1}
+            <span className="hidden sm:inline text-xs truncate max-w-[100px]">
+              {analysis.displayTitle ? analysis.displayTitle : `Question ${index + 1}`}
             </span>
             <span className="sm:hidden">
               {index + 1}
