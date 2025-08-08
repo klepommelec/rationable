@@ -94,13 +94,25 @@ const DecisionMaker = () => {
     navigateToAnalysis(analysisIndex);
     const analysis = analyses[analysisIndex];
     if (analysis) {
-      // Synchroniser l'état principal avec l'analyse sélectionnée
-      setDilemma(analysis.dilemma);
-      setEmoji(analysis.emoji);
-      setResult(analysis.result);
-      setCriteria(analysis.criteria);
-      setSelectedCategory(analysis.category);
-      setAnalysisStep(analysis.analysisStep);
+      // SYNCHRONISATION BATCH de tous les états pour éviter les incohérences
+      // Utiliser React.startTransition pour grouper toutes les mises à jour
+      React.startTransition(() => {
+        setDilemma(analysis.dilemma);
+        setEmoji(analysis.emoji);
+        setResult(analysis.result);
+        setCriteria(analysis.criteria);
+        setSelectedCategory(analysis.category);
+        setAnalysisStep(analysis.analysisStep);
+        
+        // Forcer la reclassification du type de question pour la nouvelle analyse
+        detectQuestionType(analysis.dilemma).then(type => {
+          setQuestionType(type);
+          console.log(`🔄 Navigation - Question reclassified as: ${type}`);
+        }).catch(error => {
+          console.error('❌ Error reclassifying question during navigation:', error);
+          setQuestionType('comparative');
+        });
+      });
     }
   };
   const currentDecision = getCurrentDecision();
