@@ -223,22 +223,27 @@ const DecisionMaker = () => {
 
   // Mettre à jour l'analyse actuelle quand les états changent
   React.useEffect(() => {
-    if (currentAnalysis) {
-      const targetId = pendingWriteAnalysisIdRef.current ?? currentAnalysis.id;
-      // Appliquer la mise à jour à l'analyse ciblée
-      updateAnalysisById(targetId, {
-        dilemma,
-        emoji,
-        result,
-        analysisStep,
-        criteria,
-        category: selectedCategory
-      });
+    if (!currentAnalysis) return;
 
-      if (analysisStep === 'done') {
-        // Libérer le verrou après finalisation
-        pendingWriteAnalysisIdRef.current = null;
-      }
+    const lockId = pendingWriteAnalysisIdRef.current;
+    // Si un verrou est actif pour une autre analyse, ne pas synchroniser pour éviter les décalages visuels
+    if (lockId && lockId !== currentAnalysis.id) {
+      return;
+    }
+
+    // Toujours mettre à jour uniquement l'analyse actuellement affichée
+    updateAnalysisById(currentAnalysis.id, {
+      dilemma,
+      emoji,
+      result,
+      analysisStep,
+      criteria,
+      category: selectedCategory
+    });
+
+    // Libérer le verrou uniquement si la finalisation concerne l'analyse verrouillée
+    if (analysisStep === 'done' && lockId === currentAnalysis.id) {
+      pendingWriteAnalysisIdRef.current = null;
     }
   }, [dilemma, emoji, result, analysisStep, criteria, selectedCategory, currentAnalysisIndex]);
 
@@ -266,7 +271,7 @@ const DecisionMaker = () => {
               <div className="flex items-baseline gap-4 w-full ">
                 <EmojiPicker emoji={emoji} setEmoji={setEmoji} />
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-left break-words flex-1 min-w-0">
-                  {getCurrentAnalysis()?.displayTitle || dilemma}
+                  {getCurrentAnalysis()?.displayTitle || getCurrentAnalysis()?.dilemma || dilemma}
                 </h1>
               </div>
             </div>

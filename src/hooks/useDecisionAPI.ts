@@ -224,7 +224,7 @@ export const useDecisionAPI = ({
         
         // FORCE un reset complet pour éviter la réutilisation d'anciens états
         setResult(null);
-        setCriteria([]);
+        
         setEmoji(contextualEmoji);
         // keep currentDecisionId for threading context
         setHasChanges(false);
