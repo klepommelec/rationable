@@ -55,12 +55,18 @@ export const useMultiAnalysis = () => {
     setCurrentAnalysisIndex(safeIndex);
   };
 
+  // Met à jour une analyse par son ID (évite les décalages d'index)
+  const updateAnalysisById = (id: string, updates: Partial<Analysis>) => {
+    setAnalyses(prev => prev.map(a => (a.id === id ? { ...a, ...updates } : a)));
+  };
+
   return {
     analyses,
     currentAnalysisIndex,
     getCurrentAnalysis,
     addAnalysis,
     updateCurrentAnalysis,
+    updateAnalysisById,
     navigateToAnalysis,
     clearAnalyses,
     setAnalysesWithIndex

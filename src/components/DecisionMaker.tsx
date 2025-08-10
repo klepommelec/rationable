@@ -54,13 +54,14 @@ const DecisionMaker = () => {
     getCurrentAnalysis,
     addAnalysis,
     updateCurrentAnalysis,
+    updateAnalysisById,
     navigateToAnalysis,
     clearAnalyses,
     setAnalysesWithIndex
   } = useMultiAnalysis();
 
-  // Lock index for safe writes during follow-ups
-  const pendingWriteIndexRef = React.useRef<number | null>(null);
+  // Lock analysis by id for safe writes during follow-ups
+  const pendingWriteAnalysisIdRef = React.useRef<string | null>(null);
 
   // Réinitialiser complètement l'état (analyses + session)
   const clearAll = React.useCallback(() => {
@@ -72,7 +73,7 @@ const DecisionMaker = () => {
   // Charger une décision depuis l'historique ET remplir le fil complet pour le breadcrumb
   const loadDecisionWithThread = (decisionId: string) => {
     try {
-      pendingWriteIndexRef.current = null;
+      pendingWriteAnalysisIdRef.current = null;
       const selected = history.find(d => d.id === decisionId);
       if (selected) {
         const key = selected.threadId || selected.id;
@@ -111,13 +112,10 @@ const DecisionMaker = () => {
     }
     
     try {
-      // Déterminer l'index où écrire AVANT d'ajouter
-      const targetIndex = analyses.length;
-      pendingWriteIndexRef.current = targetIndex;
-      console.log('🧭 Locked write index for follow-up:', targetIndex);
-
       // Mettre immédiatement l'état en chargement pour une UX fluide
       setAnalysisStep('loading-options');
+      // Définir un type provisoire pour éviter le clignotement des critères
+      setQuestionType('comparative');
 
       // Créer et ajouter la nouvelle analyse
       const newId = crypto.randomUUID();
@@ -131,12 +129,14 @@ const DecisionMaker = () => {
         criteria: [],
         category: undefined,
       };
-      console.log('➕ Adding new follow-up analysis at index', targetIndex, newAnalysis);
+      // Verrouiller les écritures sur cette analyse par ID
+      pendingWriteAnalysisIdRef.current = newId;
+      console.log('➕ Adding new follow-up analysis', newAnalysis);
       addAnalysis(newAnalysis);
 
       // Mettre à jour l'état principal
       setResult(null);
-      setCriteria([]);
+      // Ne pas vider les critères immédiatement pour éviter les disparitions visuelles
       setEmoji('🤔');
       setSelectedCategory(undefined);
       setDilemma(questionDilemma);
@@ -148,14 +148,12 @@ const DecisionMaker = () => {
       console.error('❌ Error in follow-up question:', error);
       toast.error('Erreur lors du traitement de la question de suivi');
       // Libérer le verrou en cas d'erreur
-      pendingWriteIndexRef.current = null;
+      pendingWriteAnalysisIdRef.current = null;
     }
   };
 
   // Fonction pour gérer la navigation entre analyses
   const handleAnalysisNavigation = (analysisIndex: number) => {
-    // Clear pending write lock when navigating
-    pendingWriteIndexRef.current = null;
     navigateToAnalysis(analysisIndex);
     const analysis = analyses[analysisIndex];
     if (analysis) {
@@ -226,19 +224,20 @@ const DecisionMaker = () => {
   // Mettre à jour l'analyse actuelle quand les états changent
   React.useEffect(() => {
     if (currentAnalysis) {
-      const target = pendingWriteIndexRef.current ?? currentAnalysisIndex;
-      updateCurrentAnalysis({
+      const targetId = pendingWriteAnalysisIdRef.current ?? currentAnalysis.id;
+      // Appliquer la mise à jour à l'analyse ciblée
+      updateAnalysisById(targetId, {
         dilemma,
         emoji,
         result,
         analysisStep,
         criteria,
         category: selectedCategory
-      }, target);
+      });
 
       if (analysisStep === 'done') {
         // Libérer le verrou après finalisation
-        pendingWriteIndexRef.current = null;
+        pendingWriteAnalysisIdRef.current = null;
       }
     }
   }, [dilemma, emoji, result, analysisStep, criteria, selectedCategory, currentAnalysisIndex]);
