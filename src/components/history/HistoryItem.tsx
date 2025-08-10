@@ -9,6 +9,9 @@ interface HistoryItemProps {
   decision: IDecision;
   onLoad: (id: string) => void;
   onDelete: (id: string) => void;
+  loadId?: string;
+  followUpCount?: number;
+  titleOverride?: string;
 }
 
 export const HistoryItem: React.FC<HistoryItemProps> = ({

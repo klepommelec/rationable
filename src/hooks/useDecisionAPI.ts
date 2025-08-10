@@ -206,7 +206,7 @@ export const useDecisionAPI = ({
         }
     };
 
-    const handleStartAnalysis = async (forcedType?: 'factual' | 'comparative' | 'simple-choice') => {
+    const handleStartAnalysis = async (forcedType?: 'factual' | 'comparative' | 'simple-choice', options?: { threadFromId?: string }) => {
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
         
         // Utiliser le type forcé si fourni, sinon classifier
@@ -226,7 +226,7 @@ export const useDecisionAPI = ({
         setResult(null);
         setCriteria([]);
         setEmoji(contextualEmoji);
-        setCurrentDecisionId(null);
+        // keep currentDecisionId for threading context
         setHasChanges(false);
         setSelectedCategory(undefined);
         resetRetry();
@@ -262,14 +262,21 @@ export const useDecisionAPI = ({
             console.log(`✅ [DEBUG] ${questionType} answer generated successfully`);
             setResult(optionsResult);
             
+            // Threading: link to parent if provided
+            const parentDecision = options?.threadFromId ? history.find(d => d.id === options.threadFromId) : undefined;
+            const newId = crypto.randomUUID();
+            const threadId = parentDecision ? (parentDecision.threadId || parentDecision.id) : newId;
+
             const newDecision: IDecision = {
-              id: crypto.randomUUID(),
+              id: newId,
               timestamp: Date.now(),
               dilemma,
               emoji: contextualEmoji,
               criteria: [],
               result: optionsResult,
-              category: 'other'
+              category: 'other',
+              threadId,
+              parentId: parentDecision?.id
             };
             addDecision(newDecision);
             setCurrentDecisionId(newDecision.id);
@@ -325,14 +332,21 @@ export const useDecisionAPI = ({
             // Définir les critères de référence
             initialCriteriaRef.current = newCriteria;
             
+            // Threading: link to parent if provided
+            const parentDecision = options?.threadFromId ? history.find(d => d.id === options.threadFromId) : undefined;
+            const newId = crypto.randomUUID();
+            const threadId = parentDecision ? (parentDecision.threadId || parentDecision.id) : newId;
+
             const newDecision: IDecision = {
-              id: crypto.randomUUID(),
+              id: newId,
               timestamp: Date.now(),
               dilemma,
               emoji: contextualEmoji,
               criteria: newCriteria,
               result: optionsResult,
-              category: response.suggestedCategory
+              category: response.suggestedCategory,
+              threadId,
+              parentId: parentDecision?.id
             };
             addDecision(newDecision);
             setCurrentDecisionId(newDecision.id);
@@ -369,7 +383,7 @@ export const useDecisionAPI = ({
           console.error("❌ [DEBUG] Error in analysis start:", error);
           const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
           toast.error(`Erreur lors de l'analyse : ${errorMessage}`);
-          setAnalysisStep('idle');
+          setAnalysisStep('loading-options');
           setProgressMessage('');
           
           // Nettoyer les fichiers en cas d'erreur

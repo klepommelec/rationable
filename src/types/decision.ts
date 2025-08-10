@@ -79,6 +79,8 @@ export interface IDecision {
   result: IResult;
   category?: string;
   tags?: string[];
+  threadId?: string;
+  parentId?: string;
 }
 
 export interface IDecisionCategory {

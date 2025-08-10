@@ -58,6 +58,9 @@ const DecisionMaker = () => {
     clearAnalyses
   } = useMultiAnalysis();
 
+  // Lock index for safe writes during follow-ups
+  const pendingWriteIndexRef = React.useRef<number | null>(null);
+
   // Réinitialiser complètement l'état (analyses + session)
   const clearAll = React.useCallback(() => {
     clearAnalyses();
@@ -70,15 +73,14 @@ const DecisionMaker = () => {
     console.log('🔄 Follow-up question triggered:', questionText || questionDilemma);
     
     try {
-      // RESET COMPLET IMMÉDIAT - Tout en synchrone
-      console.log('🧹 Complete state reset...');
-      setResult(null);
-      setCriteria([]);
+      // Déterminer l'index où écrire AVANT d'ajouter
+      const targetIndex = analyses.length;
+      pendingWriteIndexRef.current = targetIndex;
+      console.log('🧭 Locked write index for follow-up:', targetIndex);
+
       // Mettre immédiatement l'état en chargement pour une UX fluide
       setAnalysisStep('loading-options');
-      setEmoji('🤔');
-      setSelectedCategory(undefined);
-      
+
       // Créer et ajouter la nouvelle analyse
       const newAnalysis = {
         id: crypto.randomUUID(),
@@ -90,17 +92,19 @@ const DecisionMaker = () => {
         criteria: [],
         category: undefined,
       };
-      
-      console.log('➕ Adding new follow-up analysis:', newAnalysis);
+      console.log('➕ Adding new follow-up analysis at index', targetIndex, newAnalysis);
       addAnalysis(newAnalysis);
-      
+
       // Mettre à jour l'état principal
+      setResult(null);
+      setCriteria([]);
+      setEmoji('🤔');
+      setSelectedCategory(undefined);
       setDilemma(questionDilemma);
       
-      // Démarrer DIRECTEMENT l'analyse complète ici
+      // Démarrer DIRECTEMENT l'analyse complète ici (laisser la classification décider)
       console.log('🚀 Starting integrated follow-up analysis...');
-      await handleStartAnalysis('comparative');
-      
+      await handleStartAnalysis(undefined, { threadFromId: getCurrentDecision()?.id });
     } catch (error) {
       console.error('❌ Error in follow-up question:', error);
       toast.error('Erreur lors du traitement de la question de suivi');
@@ -109,6 +113,8 @@ const DecisionMaker = () => {
 
   // Fonction pour gérer la navigation entre analyses
   const handleAnalysisNavigation = (analysisIndex: number) => {
+    // Clear pending write lock when navigating
+    pendingWriteIndexRef.current = null;
     navigateToAnalysis(analysisIndex);
     const analysis = analyses[analysisIndex];
     if (analysis) {
@@ -179,6 +185,7 @@ const DecisionMaker = () => {
   // Mettre à jour l'analyse actuelle quand les états changent
   React.useEffect(() => {
     if (currentAnalysis) {
+      const target = pendingWriteIndexRef.current ?? currentAnalysisIndex;
       updateCurrentAnalysis({
         dilemma,
         emoji,
@@ -186,7 +193,12 @@ const DecisionMaker = () => {
         analysisStep,
         criteria,
         category: selectedCategory
-      }, currentAnalysisIndex);
+      }, target);
+
+      if (analysisStep === 'done') {
+        // Libérer le verrou après finalisation
+        pendingWriteIndexRef.current = null;
+      }
     }
   }, [dilemma, emoji, result, analysisStep, criteria, selectedCategory, currentAnalysisIndex]);
 
