@@ -58,6 +58,13 @@ const DecisionMaker = () => {
     clearAnalyses
   } = useMultiAnalysis();
 
+  // Réinitialiser complètement l'état (analyses + session)
+  const clearAll = React.useCallback(() => {
+    clearAnalyses();
+    clearSession();
+    setAnalysisStep('idle');
+  }, [clearAnalyses, clearSession, setAnalysisStep]);
+
   // Fonction DIRECTE pour gérer les questions de suivi - SANS double analyse
   const handleFollowUpQuestion = async (questionDilemma: string, questionText?: string) => {
     console.log('🔄 Follow-up question triggered:', questionText || questionDilemma);
@@ -67,7 +74,8 @@ const DecisionMaker = () => {
       console.log('🧹 Complete state reset...');
       setResult(null);
       setCriteria([]);
-      setAnalysisStep('idle');
+      // Mettre immédiatement l'état en chargement pour une UX fluide
+      setAnalysisStep('loading-options');
       setEmoji('🤔');
       setSelectedCategory(undefined);
       
@@ -78,7 +86,7 @@ const DecisionMaker = () => {
         displayTitle: questionText,
         emoji: '🤔',
         result: null,
-        analysisStep: 'idle' as const,
+        analysisStep: 'loading-options' as const,
         criteria: [],
         category: undefined,
       };
@@ -193,11 +201,13 @@ const DecisionMaker = () => {
 
       <main id="main-content" role="main" aria-label="Assistant de décision">
         {/* Navigation entre analyses */}
-        <AnalysisNavigation 
-          analyses={analyses}
-          currentAnalysisIndex={currentAnalysisIndex}
-          onNavigate={handleAnalysisNavigation}
-        />
+        {analysisStep !== 'idle' && (
+          <AnalysisNavigation 
+            analyses={analyses}
+            currentAnalysisIndex={currentAnalysisIndex}
+            onNavigate={handleAnalysisNavigation}
+          />
+        )}
 
         {(analysisStep === 'criteria-loaded' || analysisStep === 'loading-options' || analysisStep === 'done') && <>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 animate-fade-in">
@@ -220,7 +230,7 @@ const DecisionMaker = () => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               <span className="sr-only">Chargement...</span>
             </div>}>
-            <DilemmaSetup dilemma={dilemma} setDilemma={setDilemma} analysisStep={analysisStep} isLoading={isLoading} isUpdating={isUpdating} applyTemplate={applyTemplate} clearSession={clearSession} history={history} loadDecision={loadDecision} deleteDecision={deleteDecision} clearHistory={clearHistory} handleStartAnalysis={handleStartAnalysis} progress={progress} progressMessage={progressMessage} templates={templates} selectedCategory={selectedCategory} onCategoryChange={handleCategoryChange} onUpdateCategory={handleUpdateCategory} uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} />
+            <DilemmaSetup dilemma={dilemma} setDilemma={setDilemma} analysisStep={analysisStep} isLoading={isLoading} isUpdating={isUpdating} applyTemplate={applyTemplate} clearSession={clearAll} history={history} loadDecision={loadDecision} deleteDecision={deleteDecision} clearHistory={clearHistory} handleStartAnalysis={handleStartAnalysis} progress={progress} progressMessage={progressMessage} templates={templates} selectedCategory={selectedCategory} onCategoryChange={handleCategoryChange} onUpdateCategory={handleUpdateCategory} uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} />
           </React.Suspense>}
         
         {/* Bouton de génération manuelle uniquement pour les questions comparatives */}
@@ -237,7 +247,7 @@ const DecisionMaker = () => {
             <AnalysisResult 
               result={result} 
               isUpdating={isUpdating} 
-              clearSession={clearSession} 
+              clearSession={clearAll} 
               analysisStep={analysisStep} 
               currentDecision={getCurrentDecision()} 
               dilemma={dilemma} 

@@ -353,12 +353,13 @@ export const generateOptimizedDecision = async (
   dilemma: string,
   criteria: ICriterion[],
   files?: UploadedFileInfo[],
-  workspaceId?: string
+  workspaceId?: string,
+  forcedType?: 'factual' | 'comparative' | 'simple-choice'
 ): Promise<IResult> => {
   try {
-    const questionType = detectQuestionType(dilemma);
+    const questionType = forcedType ?? detectQuestionType(dilemma);
     
-    console.log(`🎯 Type de question détecté: ${questionType}`);
+    console.log(`🎯 Type de question utilisé: ${questionType}${forcedType ? ' (forcé)' : ''}`);
     
     if (questionType === 'factual') {
       return await generateFactualAnswerWithPerplexity(dilemma, files, workspaceId);

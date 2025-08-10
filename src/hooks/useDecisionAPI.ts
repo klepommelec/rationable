@@ -114,7 +114,7 @@ export const useDecisionAPI = ({
           console.log("📡 [DEBUG] Calling generateOptions API...");
           const startTime = Date.now();
           
-          const apiResult = await generateOptimizedDecision(dilemma, currentCriteria, uploadedFileInfos, workspaceId);
+          const apiResult = await generateOptimizedDecision(dilemma, currentCriteria, uploadedFileInfos, workspaceId, questionType);
           
           const endTime = Date.now();
           console.log("✅ [DEBUG] API call successful", {
@@ -234,6 +234,9 @@ export const useDecisionAPI = ({
         // Effacer la référence aux anciens critères
         initialCriteriaRef.current = [];
 
+        // Afficher immédiatement un état de chargement pour une UX fluide
+        setAnalysisStep('loading-options');
+
         let uploadedFileInfos: UploadedFileInfo[] = [];
 
         try {
@@ -253,7 +256,7 @@ export const useDecisionAPI = ({
             setProgressMessage(workspaceId ? `${progressMsg} avec documents workspace` : progressMsg);
             setAnalysisStep('loading-options');
             
-            const optionsResult = await generateOptimizedDecision(dilemma, [], uploadedFileInfos, workspaceId);
+            const optionsResult = await generateOptimizedDecision(dilemma, [], uploadedFileInfos, workspaceId, questionType);
             optionsResult.resultType = questionType;
             
             console.log(`✅ [DEBUG] ${questionType} answer generated successfully`);
@@ -313,7 +316,7 @@ export const useDecisionAPI = ({
           setProgressMessage(workspaceId ? "Génération des options avec documents workspace..." : "Génération des options comparatives...");
           
           try {
-            const optionsResult = await generateOptimizedDecision(dilemma, newCriteria, uploadedFileInfos, workspaceId);
+            const optionsResult = await generateOptimizedDecision(dilemma, newCriteria, uploadedFileInfos, workspaceId, questionType);
             optionsResult.resultType = questionType;
             
             console.log("✅ [DEBUG] Auto-options generated successfully");

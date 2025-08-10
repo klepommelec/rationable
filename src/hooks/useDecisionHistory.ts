@@ -71,6 +71,28 @@ export const useDecisionHistory = () => {
         }
     }, [currentWorkspace, allHistory]);
 
+    // Migration one-shot: si l'espace courant est vide mais 'default' a de l'historique
+    useEffect(() => {
+        try {
+            const workspaceId = currentWorkspace?.id || 'default';
+            const migrationFlag = localStorage.getItem('historyMigratedToWorkspace');
+            if (!migrationFlag && workspaceId !== 'default') {
+                const defaultHistory = allHistory['default'] || [];
+                const workspaceHistory = allHistory[workspaceId] || [];
+                if (workspaceHistory.length === 0 && defaultHistory.length > 0) {
+                    setAllHistory(prev => ({
+                        ...prev,
+                        [workspaceId]: [...defaultHistory]
+                    }));
+                    localStorage.setItem('historyMigratedToWorkspace', '1');
+                    console.log('🗂️ Historique migré depuis "default" vers workspace', workspaceId);
+                }
+            }
+        } catch (e) {
+            console.error('Migration history error', e);
+        }
+    }, [currentWorkspace, allHistory]);
+
     useEffect(() => {
         // Debounce saving to localStorage
         const timer = setTimeout(() => {
