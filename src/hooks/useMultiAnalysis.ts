@@ -48,6 +48,13 @@ export const useMultiAnalysis = () => {
     setCurrentAnalysisIndex(0);
   };
 
+  // Remplace toutes les analyses et positionne l'index courant
+  const setAnalysesWithIndex = (list: Analysis[], index: number = 0) => {
+    setAnalyses(list);
+    const safeIndex = Math.min(Math.max(0, index), Math.max(0, list.length - 1));
+    setCurrentAnalysisIndex(safeIndex);
+  };
+
   return {
     analyses,
     currentAnalysisIndex,
@@ -55,6 +62,7 @@ export const useMultiAnalysis = () => {
     addAnalysis,
     updateCurrentAnalysis,
     navigateToAnalysis,
-    clearAnalyses
+    clearAnalyses,
+    setAnalysesWithIndex
   };
 };

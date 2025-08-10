@@ -55,7 +55,8 @@ const DecisionMaker = () => {
     addAnalysis,
     updateCurrentAnalysis,
     navigateToAnalysis,
-    clearAnalyses
+    clearAnalyses,
+    setAnalysesWithIndex
   } = useMultiAnalysis();
 
   // Lock index for safe writes during follow-ups
@@ -67,6 +68,37 @@ const DecisionMaker = () => {
     clearSession();
     setAnalysisStep('idle');
   }, [clearAnalyses, clearSession, setAnalysisStep]);
+
+  // Charger une décision depuis l'historique ET remplir le fil complet pour le breadcrumb
+  const loadDecisionWithThread = (decisionId: string) => {
+    try {
+      pendingWriteIndexRef.current = null;
+      const selected = history.find(d => d.id === decisionId);
+      if (selected) {
+        const key = selected.threadId || selected.id;
+        const thread = history
+          .filter(d => (d.threadId || d.id) === key)
+          .sort((a, b) => a.timestamp - b.timestamp);
+        const list = thread.map(d => ({
+          id: d.id,
+          dilemma: d.dilemma,
+          displayTitle: undefined,
+          emoji: d.emoji || '🤔',
+          result: d.result,
+          analysisStep: 'done' as const,
+          criteria: d.criteria,
+          category: d.category,
+        }));
+        const idx = thread.findIndex(d => d.id === decisionId);
+        setAnalysesWithIndex(list, idx === -1 ? list.length - 1 : idx);
+        console.log(`🧵 Fil chargé pour breadcrumb: ${key} (${list.length} analyses)`);
+      }
+    } catch (e) {
+      console.error('Erreur lors du préchargement du fil pour breadcrumb:', e);
+    }
+    // Charger l'état principal comme avant
+    loadDecision(decisionId);
+  };
 
   // Fonction DIRECTE pour gérer les questions de suivi - SANS double analyse
   const handleFollowUpQuestion = async (questionDilemma: string, questionText?: string) => {
@@ -251,7 +283,7 @@ const DecisionMaker = () => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               <span className="sr-only">Chargement...</span>
             </div>}>
-            <DilemmaSetup dilemma={dilemma} setDilemma={setDilemma} analysisStep={analysisStep} isLoading={isLoading} isUpdating={isUpdating} applyTemplate={applyTemplate} clearSession={clearAll} history={history} loadDecision={loadDecision} deleteDecision={deleteDecision} clearHistory={clearHistory} handleStartAnalysis={handleStartAnalysis} progress={progress} progressMessage={progressMessage} templates={templates} selectedCategory={selectedCategory} onCategoryChange={handleCategoryChange} onUpdateCategory={handleUpdateCategory} uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} />
+            <DilemmaSetup dilemma={dilemma} setDilemma={setDilemma} analysisStep={analysisStep} isLoading={isLoading} isUpdating={isUpdating} applyTemplate={applyTemplate} clearSession={clearAll} history={history} loadDecision={loadDecisionWithThread} deleteDecision={deleteDecision} clearHistory={clearHistory} handleStartAnalysis={handleStartAnalysis} progress={progress} progressMessage={progressMessage} templates={templates} selectedCategory={selectedCategory} onCategoryChange={handleCategoryChange} onUpdateCategory={handleUpdateCategory} uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} />
           </React.Suspense>}
         
         {/* Bouton de génération manuelle uniquement pour les questions comparatives */}
