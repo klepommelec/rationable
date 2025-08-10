@@ -55,13 +55,14 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
   }, [dilemma, result, category]);
 
   const handleQuestionClick = (questionId: string) => {
+    if (isLoading || loadingQuestions) {
+      console.log('⏳ Click ignored: analysis in progress');
+      return;
+    }
     const question = questions.find(q => q.id === questionId);
     if (!question || !onQuestionSelect) return;
 
     console.log('🔄 Follow-up question clicked:', question.text);
-    
-    // Utiliser directement le texte de la question sans enrichissement 
-    // pour éviter la confusion de routage
     onQuestionSelect(question.text, question.text);
   };
 
@@ -126,6 +127,8 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
             variant="outline"
             className="w-full justify-start text-left h-auto p-4 hover:bg-muted/50 transition-colors"
             onClick={() => handleQuestionClick(question.id)}
+            disabled={isLoading || loadingQuestions}
+            aria-disabled={isLoading || loadingQuestions}
           >
             <div className="flex items-center space-x-3 w-full">
               <span className="font-medium text-sm flex-1">

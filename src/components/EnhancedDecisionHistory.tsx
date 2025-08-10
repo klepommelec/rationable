@@ -57,12 +57,38 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
     return counts;
   }, [history]);
 
+  // Regrouper l'historique par threadId (ou par id si absent)
+  const groupedThreads = useMemo(() => {
+    const groups = new Map<string, IDecision[]>();
+    for (const d of filteredAndSortedHistory) {
+      const key = d.threadId || d.id;
+      const arr = groups.get(key) || [];
+      arr.push(d);
+      groups.set(key, arr);
+    }
+
+    const items = Array.from(groups.entries()).map(([key, decisions]) => {
+      const sorted = [...decisions].sort((a, b) => a.timestamp - b.timestamp);
+      const root = sorted.find(d => (d.threadId || d.id) === key) || sorted[0];
+      const last = sorted[sorted.length - 1];
+      return {
+        key,
+        root,
+        last,
+        followUpCount: sorted.length - 1
+      };
+    });
+
+    // Trier par date de la dernière activité (desc)
+    items.sort((a, b) => b.last.timestamp - a.last.timestamp);
+    return items;
+  }, [filteredAndSortedHistory]);
+
   const handleLoad = (id: string) => {
     console.log('EnhancedDecisionHistory - handleLoad called with id:', id);
     onLoad(id);
     onClose();
   };
-
   if (history.length === 0) {
     return <EmptyHistoryState />;
   }
@@ -94,12 +120,14 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
               <p>Aucune décision ne correspond à vos critères de recherche.</p>
             </div>
           ) : (
-            filteredAndSortedHistory.map(decision => (
+            groupedThreads.map(item => (
               <HistoryItem 
-                key={decision.id} 
-                decision={decision} 
+                key={item.last.id} 
+                decision={item.last} 
                 onLoad={handleLoad} 
                 onDelete={onDelete} 
+                followUpCount={item.followUpCount}
+                titleOverride={item.root.dilemma}
               />
             ))
           )}

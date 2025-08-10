@@ -17,7 +17,10 @@ interface HistoryItemProps {
 export const HistoryItem: React.FC<HistoryItemProps> = ({
   decision,
   onLoad,
-  onDelete
+  onDelete,
+  loadId,
+  followUpCount,
+  titleOverride
 }) => {
   const handleLoad = () => {
     console.log('Loading decision:', decision.id);
@@ -39,7 +42,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-lg">{decision.emoji}</span>
-            <p className="font-semibold text-foreground truncate flex-1">{decision.dilemma}</p>
+            <p className="font-semibold text-foreground truncate flex-1">{titleOverride || decision.dilemma}</p>
           </div>
           {decision.category && (
             <div className="mb-1">
@@ -49,6 +52,9 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
           <p className="text-xs text-muted-foreground">
             {new Date(decision.timestamp).toLocaleString('fr-FR')}
           </p>
+          {typeof followUpCount === 'number' && followUpCount > 0 && (
+            <p className="text-xs text-muted-foreground mt-1">+{followUpCount} question(s) de suivi</p>
+          )}
           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
             {decision.result.recommendation}
           </p>

@@ -71,6 +71,12 @@ const DecisionMaker = () => {
   // Fonction DIRECTE pour gérer les questions de suivi - SANS double analyse
   const handleFollowUpQuestion = async (questionDilemma: string, questionText?: string) => {
     console.log('🔄 Follow-up question triggered:', questionText || questionDilemma);
+
+    // Empêcher les multi-clics pendant une analyse en cours
+    if (analysisStep === 'loading-options' || isUpdating) {
+      toast.info('Une analyse est déjà en cours, veuillez patienter...');
+      return;
+    }
     
     try {
       // Déterminer l'index où écrire AVANT d'ajouter
@@ -82,8 +88,9 @@ const DecisionMaker = () => {
       setAnalysisStep('loading-options');
 
       // Créer et ajouter la nouvelle analyse
+      const newId = crypto.randomUUID();
       const newAnalysis = {
-        id: crypto.randomUUID(),
+        id: newId,
         dilemma: questionDilemma,
         displayTitle: questionText,
         emoji: '🤔',
@@ -108,6 +115,8 @@ const DecisionMaker = () => {
     } catch (error) {
       console.error('❌ Error in follow-up question:', error);
       toast.error('Erreur lors du traitement de la question de suivi');
+      // Libérer le verrou en cas d'erreur
+      pendingWriteIndexRef.current = null;
     }
   };
 
