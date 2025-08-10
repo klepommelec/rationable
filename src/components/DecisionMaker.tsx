@@ -99,7 +99,7 @@ const DecisionMaker = () => {
       
       // Démarrer DIRECTEMENT l'analyse complète ici
       console.log('🚀 Starting integrated follow-up analysis...');
-      await handleStartAnalysis();
+      await handleStartAnalysis('comparative');
       
     } catch (error) {
       console.error('❌ Error in follow-up question:', error);
@@ -186,9 +186,9 @@ const DecisionMaker = () => {
         analysisStep,
         criteria,
         category: selectedCategory
-      });
+      }, currentAnalysisIndex);
     }
-  }, [dilemma, emoji, result, analysisStep, criteria, selectedCategory]);
+  }, [dilemma, emoji, result, analysisStep, criteria, selectedCategory, currentAnalysisIndex]);
 
   // Note: La synchronisation des états lors de la navigation est gérée par handleAnalysisNavigation
 

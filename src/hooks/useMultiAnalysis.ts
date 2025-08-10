@@ -18,13 +18,16 @@ export const useMultiAnalysis = () => {
   const [currentAnalysisIndex, setCurrentAnalysisIndex] = useState(0);
 
   const addAnalysis = (analysis: Analysis) => {
-    setAnalyses(prev => [...prev, analysis]);
-    setCurrentAnalysisIndex(analyses.length); // Pointer vers la nouvelle analyse
+    setAnalyses(prev => {
+      const next = [...prev, analysis];
+      setCurrentAnalysisIndex(next.length - 1); // Pointer vers la nouvelle analyse de façon sûre
+      return next;
+    });
   };
 
-  const updateCurrentAnalysis = (updates: Partial<Analysis>) => {
+  const updateCurrentAnalysis = (updates: Partial<Analysis>, targetIndex?: number) => {
     setAnalyses(prev => prev.map((analysis, index) => 
-      index === currentAnalysisIndex 
+      index === (targetIndex ?? currentAnalysisIndex)
         ? { ...analysis, ...updates }
         : analysis
     ));

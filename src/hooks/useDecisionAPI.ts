@@ -56,12 +56,12 @@ export const useDecisionAPI = ({
 }: UseDecisionAPIProps) => {
     const { getCurrentWorkspaceId, shouldUseWorkspaceDocuments } = useWorkspaceContext();
 
-    const handleGenerateOptions = async (isRetry = false) => {
+    const handleGenerateOptions = async (isRetry = false, forcedType?: 'factual' | 'comparative' | 'simple-choice') => {
         const currentCriteria = criteria;
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
         
-        // Utiliser la nouvelle classification IA
-        const questionType = await detectQuestionType(dilemma);
+        // Utiliser le type forcé si fourni, sinon classifier
+        const questionType = forcedType ?? await detectQuestionType(dilemma);
         
         console.log("🔄 [DEBUG] Starting options generation", {
             isRetry,
@@ -193,7 +193,7 @@ export const useDecisionAPI = ({
           if (retryCount < 2) {
             console.log(`🔄 [DEBUG] Will retry in 1.5s (attempt ${retryCount + 1}/3)`);
             toast.error(`${errorMessage} - Nouvelle tentative...`);
-            setTimeout(() => handleGenerateOptions(true), 1500);
+            setTimeout(() => handleGenerateOptions(true, questionType), 1500);
           } else {
             console.log("💀 [DEBUG] Max retries reached, giving up");
             toast.error(`Impossible de générer les options après ${retryCount + 1} tentatives. ${errorMessage}`);
@@ -206,11 +206,11 @@ export const useDecisionAPI = ({
         }
     };
 
-    const handleStartAnalysis = async () => {
+    const handleStartAnalysis = async (forcedType?: 'factual' | 'comparative' | 'simple-choice') => {
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
         
-        // Utiliser la nouvelle classification IA
-        const questionType = await detectQuestionType(dilemma);
+        // Utiliser le type forcé si fourni, sinon classifier
+        const questionType = forcedType ?? await detectQuestionType(dilemma);
         
         console.log("🚀 [DEBUG] Starting full analysis", { 
           dilemma: dilemma.substring(0, 50) + "...",
