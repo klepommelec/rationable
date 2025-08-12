@@ -143,7 +143,7 @@ const DecisionMaker = () => {
       
       // Démarrer DIRECTEMENT l'analyse complète ici (laisser la classification décider)
       console.log('🚀 Starting integrated follow-up analysis...');
-      await handleStartAnalysis(undefined, { threadFromId: getCurrentDecision()?.id });
+      await handleStartAnalysis(undefined, { threadFromId: getCurrentDecision()?.id, dilemmaOverride: questionDilemma });
     } catch (error) {
       console.error('❌ Error in follow-up question:', error);
       toast.error('Erreur lors du traitement de la question de suivi');
@@ -180,6 +180,17 @@ const DecisionMaker = () => {
   };
   const currentDecision = getCurrentDecision();
   const currentAnalysis = getCurrentAnalysis();
+
+  // Etats d'affichage gelés pour éviter les décalages lorsque l'analyse en cours concerne un autre onglet
+  const lockId = pendingWriteAnalysisIdRef.current;
+  const isLockedToOther = Boolean(lockId && currentAnalysis && lockId !== currentAnalysis.id);
+
+  const displayDilemma = isLockedToOther ? (currentAnalysis?.dilemma ?? dilemma) : dilemma;
+  const displayEmoji = isLockedToOther ? (currentAnalysis?.emoji ?? emoji) : emoji;
+  const displayResult = isLockedToOther ? (currentAnalysis?.result ?? result) : result;
+  const displayStep = isLockedToOther ? (currentAnalysis?.analysisStep ?? analysisStep) : analysisStep;
+  const displayCriteria = isLockedToOther ? (currentAnalysis?.criteria ?? criteria) : criteria;
+  const displayCategory = isLockedToOther ? (currentAnalysis?.category ?? selectedCategory) : selectedCategory;
 
   // État pour le type de question avec classification asynchrone
   const [questionType, setQuestionType] = React.useState<'factual' | 'comparative' | 'simple-choice'>('comparative');
@@ -248,8 +259,9 @@ const DecisionMaker = () => {
   }, [dilemma, emoji, result, analysisStep, criteria, selectedCategory, currentAnalysisIndex]);
 
   // Note: La synchronisation des états lors de la navigation est gérée par handleAnalysisNavigation
-
-  const shouldShowCriteria = questionType === 'comparative' || questionType === 'simple-choice';
+  
+  const displayQuestionType = (displayResult?.resultType ?? questionType);
+  const shouldShowCriteria = displayQuestionType === 'comparative' || displayQuestionType === 'simple-choice';
   return <div className="w-full mx-auto px-4 sm:px-6 lg:px-[80px]">
       {/* Skip to main content link for screen readers */}
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50" aria-label="Aller au contenu principal">
@@ -258,7 +270,7 @@ const DecisionMaker = () => {
 
       <main id="main-content" role="main" aria-label="Assistant de décision">
         {/* Navigation entre analyses */}
-        {analysisStep !== 'idle' && (
+        {displayStep !== 'idle' && (
           <AnalysisNavigation 
             analyses={analyses}
             currentAnalysisIndex={currentAnalysisIndex}
@@ -266,12 +278,12 @@ const DecisionMaker = () => {
           />
         )}
 
-        {(analysisStep === 'criteria-loaded' || analysisStep === 'loading-options' || analysisStep === 'done') && <>
+        {(displayStep === 'criteria-loaded' || displayStep === 'loading-options' || displayStep === 'done') && <>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 animate-fade-in">
               <div className="flex items-baseline gap-4 w-full ">
-                <EmojiPicker emoji={emoji} setEmoji={setEmoji} />
+                <EmojiPicker emoji={displayEmoji} setEmoji={setEmoji} />
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-left break-words flex-1 min-w-0">
-                  {getCurrentAnalysis()?.displayTitle || getCurrentAnalysis()?.dilemma || dilemma}
+                  {getCurrentAnalysis()?.displayTitle || getCurrentAnalysis()?.dilemma || displayDilemma}
                 </h1>
               </div>
             </div>
@@ -279,11 +291,11 @@ const DecisionMaker = () => {
             
             {/* Afficher les critères uniquement pour les questions comparatives */}
             {shouldShowCriteria && <div className="w-full mb-6 px-0">
-                <CriteriaManager criteria={criteria} setCriteria={setCriteria} isInteractionDisabled={analysisStep === 'loading-options' || isLoading || isUpdating} onUpdateAnalysis={handleManualUpdate} hasChanges={hasChanges} currentDecisionId={currentDecision?.id} />
+                <CriteriaManager criteria={displayCriteria} setCriteria={setCriteria} isInteractionDisabled={displayStep === 'loading-options' || isLoading || isUpdating || Boolean(isLockedToOther)} onUpdateAnalysis={handleManualUpdate} hasChanges={hasChanges} currentDecisionId={currentDecision?.id} />
               </div>}
           </>}
 
-        {analysisStep === 'idle' && <React.Suspense fallback={<div className="flex items-center justify-center p-8" role="status" aria-label="Chargement en cours">
+        {displayStep === 'idle' && <React.Suspense fallback={<div className="flex items-center justify-center p-8" role="status" aria-label="Chargement en cours">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               <span className="sr-only">Chargement...</span>
             </div>}>
@@ -291,23 +303,23 @@ const DecisionMaker = () => {
           </React.Suspense>}
         
         {/* Bouton de génération manuelle uniquement pour les questions comparatives */}
-        {analysisStep === 'criteria-loaded' && shouldShowCriteria && <div className="mb-6">
+        {displayStep === 'criteria-loaded' && shouldShowCriteria && <div className="mb-6">
             <ManualOptionsGenerator onGenerateOptions={handleManualUpdate} isLoading={isUpdating} hasChanges={hasChanges} />
           </div>}
         
-        {analysisStep === 'loading-options' && <OptionsLoadingSkeleton />}
+        {displayStep === 'loading-options' && <OptionsLoadingSkeleton />}
         
-        {analysisStep === 'done' && <React.Suspense fallback={<div className="flex items-center justify-center p-8" role="status" aria-label="Chargement des résultats">
+        {displayStep === 'done' && <React.Suspense fallback={<div className="flex items-center justify-center p-8" role="status" aria-label="Chargement des résultats">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               <span className="sr-only">Chargement des résultats...</span>
             </div>}>
             <AnalysisResult 
-              result={result} 
+              result={displayResult} 
               isUpdating={isUpdating} 
               clearSession={clearAll} 
-              analysisStep={analysisStep} 
+              analysisStep={displayStep} 
               currentDecision={getCurrentDecision()} 
-              dilemma={dilemma} 
+              dilemma={displayDilemma} 
               onUpdateDecision={updatedDecision => {
                 // Mettre à jour la décision dans l'état global
                 console.log('Decision updated:', updatedDecision);
@@ -317,7 +329,7 @@ const DecisionMaker = () => {
           </React.Suspense>}
 
         {/* Section commentaires généraux - uniquement en bas de page */}
-        {currentDecision && analysisStep !== 'idle' && <div className="mt-12 mb-8 border-t pt-8">
+        {currentDecision && displayStep !== 'idle' && <div className="mt-12 mb-8 border-t pt-8">
             <CommentSection decisionId={currentDecision.id} commentType="general" title="Commentaires sur cette décision" placeholder="Ajoutez vos réflexions, notes ou commentaires sur cette décision..." />
           </div>}
       </main>

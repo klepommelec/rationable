@@ -206,21 +206,22 @@ export const useDecisionAPI = ({
         }
     };
 
-    const handleStartAnalysis = async (forcedType?: 'factual' | 'comparative' | 'simple-choice', options?: { threadFromId?: string }) => {
+    const handleStartAnalysis = async (forcedType?: 'factual' | 'comparative' | 'simple-choice', options?: { threadFromId?: string; dilemmaOverride?: string }) => {
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
         
         // Utiliser le type forcé si fourni, sinon classifier
-        const questionType = forcedType ?? await detectQuestionType(dilemma);
+        const effectiveDilemma = options?.dilemmaOverride ?? dilemma;
+        const questionType = forcedType ?? await detectQuestionType(effectiveDilemma);
         
         console.log("🚀 [DEBUG] Starting full analysis", { 
-          dilemma: dilemma.substring(0, 50) + "...",
+          dilemma: effectiveDilemma.substring(0, 50) + "...",
           questionType,
           filesCount: uploadedFiles.length,
           workspaceId: workspaceId || 'none'
         });
         
         // Générer un emoji contextuel
-        const contextualEmoji = generateContextualEmoji(dilemma);
+        const contextualEmoji = generateContextualEmoji(effectiveDilemma);
         
         // FORCE un reset complet pour éviter la réutilisation d'anciens états
         setResult(null);
@@ -256,7 +257,7 @@ export const useDecisionAPI = ({
             setProgressMessage(workspaceId ? `${progressMsg} avec documents workspace` : progressMsg);
             setAnalysisStep('loading-options');
             
-            const optionsResult = await generateOptimizedDecision(dilemma, [], uploadedFileInfos, workspaceId, questionType);
+            const optionsResult = await generateOptimizedDecision(effectiveDilemma, [], uploadedFileInfos, workspaceId, questionType);
             optionsResult.resultType = questionType;
             
             console.log(`✅ [DEBUG] ${questionType} answer generated successfully`);
@@ -270,7 +271,7 @@ export const useDecisionAPI = ({
             const newDecision: IDecision = {
               id: newId,
               timestamp: Date.now(),
-              dilemma,
+              dilemma: effectiveDilemma,
               emoji: contextualEmoji,
               criteria: [],
               result: optionsResult,
@@ -296,7 +297,7 @@ export const useDecisionAPI = ({
           console.log("📡 [DEBUG] Phase 1: Generating criteria for question");
           setProgressMessage(workspaceId ? "Analyse du contexte avec documents workspace..." : "Analyse du contexte et génération des critères...");
           
-          const response = await generateCriteriaWithPerplexity(dilemma, uploadedFileInfos, workspaceId);
+          const response = await generateCriteriaWithPerplexity(effectiveDilemma, uploadedFileInfos, workspaceId);
           console.log("✅ [DEBUG] Criteria and category generated:", {
             emoji: response.emoji,
             criteriaCount: response.criteria?.length || 0,
@@ -323,7 +324,7 @@ export const useDecisionAPI = ({
           setProgressMessage(workspaceId ? "Génération des options avec documents workspace..." : "Génération des options comparatives...");
           
           try {
-            const optionsResult = await generateOptimizedDecision(dilemma, newCriteria, uploadedFileInfos, workspaceId, questionType);
+            const optionsResult = await generateOptimizedDecision(effectiveDilemma, newCriteria, uploadedFileInfos, workspaceId, questionType);
             optionsResult.resultType = questionType;
             
             console.log("✅ [DEBUG] Auto-options generated successfully");
@@ -340,7 +341,7 @@ export const useDecisionAPI = ({
             const newDecision: IDecision = {
               id: newId,
               timestamp: Date.now(),
-              dilemma,
+              dilemma: effectiveDilemma,
               emoji: contextualEmoji,
               criteria: newCriteria,
               result: optionsResult,
