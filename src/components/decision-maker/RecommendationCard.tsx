@@ -40,10 +40,10 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     badgeColor: 'bg-primary/10 text-primary',
     titleColor: 'text-primary'
   };
-  return <Card className={`border-2 ${config.borderColor} ${config.bgGradient}`}>
+  return <Card className={`border-2 ${config.borderColor} ${config.bgGradient} w-full`}>
       <CardContent className="space-y-6 pt-6">
-        <div className="flex flex-col lg:flex-row gap-6">
-          <div className="flex-1 space-y-4">
+        <div className="flex flex-col gap-6">
+          <div className="w-full space-y-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <Badge variant="secondary" className={`mb-2 ${config.badgeColor}`}>
@@ -98,11 +98,18 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               </div>
             </div>
             
-            <div>
-              <ExpandableText text={result.description} />
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="flex-1">
+                <ExpandableText text={result.description} />
+              </div>
+              {result.imageQuery && (
+                <div className="hidden lg:block lg:w-60 flex-shrink-0">
+                  <DecisionImage imageQuery={result.imageQuery || result.recommendation} alt={`Illustration pour ${result.recommendation}`} />
+                </div>
+              )}
             </div>
 
-            {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && <div className="grid md:grid-cols-2 gap-4">
+            {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && <div className="grid md:grid-cols-2 gap-4 w-full">
                 {topOption.pros?.length > 0 && <div className="space-y-2">
                     <h4 className="font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
                       <CheckCircle className="h-4 w-4" />
@@ -129,13 +136,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     </ul>
                   </div>}
               </div>}
-
-            {/* Section Liens utiles sera gérée par le composant UsefulLinks dans AnalysisResult */}
           </div>
-
-          {result.imageQuery && <div className="hidden lg:flex lg:w-80 justify-center">
-              <DecisionImage imageQuery={result.imageQuery || result.recommendation} alt={`Illustration pour ${result.recommendation}`} />
-            </div>}
         </div>
       </CardContent>
     </Card>;
