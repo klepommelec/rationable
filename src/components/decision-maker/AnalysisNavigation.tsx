@@ -49,8 +49,8 @@ const AnalysisNavigation: React.FC<AnalysisNavigationProps> = ({
             className="flex items-center gap-2 whitespace-nowrap min-w-fit"
           >
             <span>{analysis.emoji}</span>
-            <span className="hidden sm:inline text-xs truncate max-w-[100px]">
-              {analysis.displayTitle ? analysis.displayTitle : `Question ${index + 1}`}
+            <span className="hidden sm:inline text-xs truncate max-w-[120px]">
+              {analysis.displayTitle || analysis.dilemma || `Question ${index + 1}`}
             </span>
             <span className="sm:hidden">
               {index + 1}

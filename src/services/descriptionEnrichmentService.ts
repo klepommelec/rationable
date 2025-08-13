@@ -158,29 +158,25 @@ export const improveDescription = async (
 
   const context = detectDilemmaContext(dilemma);
 
-  const prompt = `Créé une description spécifique et utile pour cette recommandation:
+  const prompt = `Crée une description ultra-spécifique de 2-3 lignes pour cette recommandation :
 
 DILEMME: "${dilemma}"
 RECOMMANDATION: "${result.recommendation}"
 CONTEXTE: ${context.domain}
-DESCRIPTION ACTUELLE: "${description}"
 
-CONSIGNES CRITIQUES:
-1. Commence OBLIGATOIREMENT par "${result.recommendation}"
-2. Explique les bénéfices CONCRETS et SPÉCIFIQUES de cette option
-3. Utilise le vocabulaire du domaine ${context.domain}
-4. INTERDICTION d'utiliser: "Cette décision", "Le choix de", "Il est important", "En conclusion"
-5. Maximum 100 mots, style direct et informatif
-6. Intègre des éléments du contexte "${dilemma}"
+CONSIGNES ABSOLUES:
+1. Exactement 2-3 lignes courtes (maximum 200 caractères)  
+2. Commence par "${result.recommendation}" + ses avantages CONCRETS
+3. Explique pourquoi c'est LA meilleure option pour ce dilemme spécifique
+4. INTERDICTION: "Cette décision", "Le choix de", "Il est important", "En conclusion"
+5. Focus sur les caractéristiques UNIQUES qui la différencient
+6. Intègre le contexte "${dilemma}"
 
-MODÈLE OBLIGATOIRE:
-"${result.recommendation} [bénéfice principal spécifique] grâce à [caractéristique concrète]. Cette option [avantage pratique] pour [situation du dilemma]. [Détail technique/pratique précis]."
+EXEMPLES PARFAITS:
+- "Chamonix-Mont-Blanc offre un domaine skiable exceptionnel avec accès facile en train depuis Genève. L'ambiance alpine authentique et les activités après-ski variées en font une destination hivernale complète."
+- "MacBook Pro M3 combine puissance créative et autonomie 18h grâce à sa puce M3. Parfait pour le montage vidéo professionnel avec écran Retina et connectivité Thunderbolt 4."
 
-EXEMPLES:
-- Pour un restaurant: "Restaurant XYZ offre la meilleure expérience culinaire grâce à sa cuisine française authentique et son service personnalisé. Cette option garantit un repas mémorable pour votre anniversaire de mariage avec un cadre romantique et une cave à vins exceptionnelle."
-- Pour un produit tech: "iPhone 15 Pro combine puissance et efficacité énergétique grâce à sa puce A17 Pro et son autonomie de 23h. Cette option répond parfaitement à vos besoins de photographe mobile avec son système de caméras avancé et sa résistance professionnelle."
-
-Réponds UNIQUEMENT avec la nouvelle description focalisée.`;
+Réponds UNIQUEMENT avec la description de 2-3 lignes.`;
 
   try {
     const response = await callOpenAiApi(prompt);

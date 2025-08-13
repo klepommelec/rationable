@@ -32,23 +32,21 @@ export const summarizeDescription = async (
   try {
     const { data, error } = await supabase.functions.invoke('openai-decision-maker', {
       body: {
-        prompt: `Tu es un expert en rédaction concise. Ta tâche est de résumer cette description longue et répétitive en exactement ${options.maxLines} lignes maximum.
+        prompt: `Crée une description spécifique de 2-3 lignes maximum pour cette recommandation :
 
-DESCRIPTION ORIGINALE À RÉSUMER :
-"${originalDescription}"
+RECOMMANDATION : "${recommendation}"
+DESCRIPTION ORIGINALE : "${originalDescription}"
 
-RECOMMANDATION PRINCIPALE : "${recommendation}"
+CONSIGNES STRICTES :
+- Exactement 2-3 lignes courtes (maximum 200 caractères)
+- Commence par "${recommendation}" + ses avantages CONCRETS
+- Supprime tout le générique : "Cette décision", "Il est important", etc.
+- Focus sur ce qui rend cette option UNIQUE et PRATIQUE
+- Style direct et informatif, pas de bla-bla
 
-INSTRUCTIONS STRICTES :
-- Maximum ${options.maxLines} lignes courtes
-- Préserver UNIQUEMENT les informations essentielles
-- Supprimer toutes les répétitions et redondances
-- Style clair, direct et actionnable
-- Commencer par expliquer pourquoi cette recommandation est la meilleure
-- Éviter les phrases inutiles comme "En conclusion", "Il est important de noter"
-- Utiliser des phrases courtes et percutantes
+EXEMPLE : "Chamonix-Mont-Blanc offre un domaine skiable exceptionnel avec un accès facile en train depuis Genève. L'ambiance alpine authentique et les nombreuses activités après-ski en font une destination complète pour les sports d'hiver."
 
-Retourne UNIQUEMENT le résumé concis, sans introduction ni explication.`,
+Réponds UNIQUEMENT avec la description spécifique, sans introduction.`,
         model: 'gpt-4o-mini' // Modèle rapide pour les résumés
       }
     });
@@ -111,8 +109,8 @@ export const summarizeDecisionDescription = async (
   dilemma?: string
 ): Promise<string> => {
   return summarizeDescription(originalDescription, recommendation, {
-    maxLines: 5,
-    maxLength: 450,
+    maxLines: 3,
+    maxLength: 200,
     style: 'concise'
   });
 };
