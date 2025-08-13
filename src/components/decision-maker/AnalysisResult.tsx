@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Table2, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
 import YouTubeVideoCard from '@/components/YouTubeVideoCard';
 import FollowUpQuestions from './FollowUpQuestions';
+import { DataAccuracyIndicator } from './DataAccuracyIndicator';
 
 interface AnalysisResultProps {
   result: IResult | null;
@@ -57,6 +58,9 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   // Affichage unifié pour tous les types de questions
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Indicateur de fraîcheur des données */}
+      <DataAccuracyIndicator result={result} />
+      
       <RecommendationCard 
         result={result}
         dilemma={dilemma}

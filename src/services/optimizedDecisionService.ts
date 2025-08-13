@@ -75,124 +75,164 @@ const cleanAIResponse = (text: string): string => {
   return cleaned;
 };
 
-// Fonction pour parser une réponse Perplexity et extraire des options multiples
+// Fonction améliorée pour parser une réponse Perplexity structurée
 const parseMultipleItemsFromPerplexity = (content: string, dilemma: string): { recommendation: string; breakdown: IBreakdownItem[] } => {
-  console.log('🔍 Contenu à parser:', content.substring(0, 300));
+  console.log('🔍 Parsing contenu structuré:', content.substring(0, 300));
   
-  let items: string[] = [];
+  let items: Array<{title: string, description: string, details: string}> = [];
   
-  // Pattern spécifique pour les expositions (détecte les titres entre guillemets ou tirets)
-  const expositionPattern = /[-–—]\s*([^-–—\n]{10,100})(?:\s*\([^)]+\))?/g;
-  let matches = Array.from(content.matchAll(expositionPattern));
+  // Pattern principal pour format numéroté : "1. [TITRE] - [Description] - [Détails]"
+  const structuredPattern = /(\d+)\.\s*\[([^\]]+)\]\s*-\s*([^-\n]+)(?:\s*-\s*([^-\n]+))?/g;
+  let matches = Array.from(content.matchAll(structuredPattern));
   
   if (matches.length >= 2) {
-    items = matches.map(match => match[1].trim()).filter(item => item.length > 5);
-    console.log('📋 Expositions trouvées via pattern:', items.length);
+    items = matches.map(match => ({
+      title: match[2].trim(),
+      description: match[3].trim(),
+      details: match[4]?.trim() || ''
+    }));
+    console.log('✅ Format structuré détecté:', items.length, 'items');
   }
   
-  // Si pas d'expositions, essayer de détecter par parenthèses et dates
+  // Pattern alternatif : lignes avec numéros
   if (items.length < 2) {
-    const eventPattern = /([A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ][^()\n]{5,80})\s*\([^)]*(?:202[4-5]|janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)[^)]*\)/g;
-    matches = Array.from(content.matchAll(eventPattern));
+    const numberedPattern = /(\d+)\.\s*([^\n]{10,100})/g;
+    matches = Array.from(content.matchAll(numberedPattern));
     
     if (matches.length >= 2) {
-      items = matches.map(match => match[1].trim()).filter(item => item.length > 5);
-      console.log('📅 Événements trouvés via dates:', items.length);
+      items = matches.map(match => {
+        const fullText = match[2].trim();
+        const parts = fullText.split(' - ');
+        return {
+          title: parts[0]?.trim() || fullText.substring(0, 50),
+          description: parts[1]?.trim() || '',
+          details: parts[2]?.trim() || ''
+        };
+      });
+      console.log('📋 Format numéroté simple:', items.length, 'items');
     }
   }
   
-  // Pattern pour détecter les noms d'expositions avec des mots clés
+  // Validation des données extraites
+  items = items.filter(item => 
+    item.title.length > 3 && 
+    item.title.length < 80 &&
+    !item.title.toLowerCase().includes('exposition') // Éviter les doublons de mots-clés
+  );
+  
+  // Si échec du parsing structuré, essayer extraction simple mais robuste
   if (items.length < 2) {
-    const titlePattern = /(?:exposition|événement|atelier|visite|installation|parcours)[\s:]*([^.\n]{10,80})(?=\s*[-–—(]|\s*$)/gi;
-    matches = Array.from(content.matchAll(titlePattern));
+    console.log('⚠️ Fallback vers extraction simple');
+    const lines = content.split('\n').filter(line => line.trim().length > 20);
     
-    if (matches.length >= 2) {
-      items = matches.map(match => match[1].trim()).filter(item => item.length > 5);
-      console.log('🎨 Événements trouvés via mots-clés:', items.length);
-    }
+    items = lines.slice(0, 5).map(line => {
+      const cleanLine = line.replace(/^[-•\d.\s]+/, '').trim();
+      const parts = cleanLine.split(/\s*[-–—]\s*/);
+      
+      return {
+        title: parts[0]?.trim() || cleanLine.substring(0, 50),
+        description: parts[1]?.trim() || 'Information disponible',
+        details: parts[2]?.trim() || ''
+      };
+    }).filter(item => item.title.length > 5);
   }
   
-  // Dernière tentative: diviser par segments logiques avec des indices forts
-  if (items.length < 2) {
-    // Chercher des segments séparés par des tirets ou des points
-    const segments = content.split(/[-–—]\s+/).filter(s => s.trim().length > 20);
-    if (segments.length >= 3) { // Au moins 3 segments (intro + 2 expositions)
-      items = segments.slice(1, 6).map(s => s.split('(')[0].trim()); // Prendre les titres avant parenthèses
-      console.log('📄 Segments trouvés:', items.length);
-    }
-  }
-  
-  // Si toujours pas d'éléments multiples, formater proprement le contenu unique
-  if (items.length < 2) {
-    console.log('⚠️ Pas d\'éléments multiples détectés');
-    // Nettoyer le contenu pour une meilleure présentation
-    const cleanedContent = content
-      .replace(/\s+/g, ' ')
-      .replace(/[-–—]\s*/g, '\n• ')
-      .trim();
+  // Validation finale et nettoyage
+  const validatedItems = items.slice(0, 6).filter(item => {
+    const isValid = item.title.length >= 5 && 
+                   item.title.length <= 80 &&
+                   !item.title.match(/^\d+$/) && // Pas que des chiffres
+                   item.title.split(' ').length >= 2; // Au moins 2 mots
     
+    if (!isValid) {
+      console.log('❌ Item rejeté:', item.title);
+    }
+    return isValid;
+  });
+  
+  if (validatedItems.length < 2) {
+    console.log('⚠️ Données insuffisantes après validation');
     return {
-      recommendation: cleanedContent,
+      recommendation: content.trim(),
       breakdown: []
     };
   }
   
-  // Créer des IBreakdownItem pour chaque élément trouvé
-  const breakdown: IBreakdownItem[] = items.slice(0, 5).map((item, index) => ({
-    option: extractTitle(item),
-    pros: extractPositives(item, content), // Passer le contenu complet pour plus de contexte
+  // Créer des IBreakdownItem avec données validées
+  const breakdown: IBreakdownItem[] = validatedItems.map((item, index) => ({
+    option: item.title,
+    pros: [
+      item.description || 'Information disponible',
+      item.details || 'Détails sur site officiel'
+    ].filter(Boolean),
     cons: [], 
-    score: 90 - (index * 5)
+    score: 95 - (index * 3) // Scores plus proches pour refléter la qualité réelle
   }));
   
-  // Créer une recommandation formatée proprement
-  const recommendation = `Voici les principales expositions actuellement disponibles :\n\n• ${breakdown[0].option}\n\nRecommandation : ${breakdown[0].option} semble être l'exposition phare du moment.`;
+  // Recommandation basée sur les vraies données
+  const recommendation = `${breakdown.length} options actuellement disponibles. ${breakdown[0].option} ${breakdown[0].pros[0] ? '- ' + breakdown[0].pros[0] : ''}.`;
   
-  console.log(`✅ Parser terminé: ${breakdown.length} options créées`);
+  console.log(`✅ Parsing validé: ${breakdown.length} options, qualité: ${(breakdown.length/validatedItems.length*100).toFixed(0)}%`);
   
   return { recommendation, breakdown };
 };
 
-// Extraire le titre/nom principal d'un élément
-const extractTitle = (item: string): string => {
-  // Chercher un titre entre guillemets ou en début de phrase
-  const titleMatch = item.match(/^["\']?([^"'\n(]{3,50})["\']?/);
-  if (titleMatch) {
-    return titleMatch[1].trim();
+// Validation des données extraites
+const validateParsedData = (items: Array<{title: string, description: string}>): boolean => {
+  if (items.length < 2) return false;
+  
+  // Vérifier que les titres ne sont pas trop similaires (éviter les doublons)
+  const titles = items.map(item => item.title.toLowerCase());
+  const uniqueTitles = new Set(titles);
+  
+  if (uniqueTitles.size < titles.length * 0.8) {
+    console.log('⚠️ Trop de titres similaires détectés');
+    return false;
   }
   
-  // Prendre les premiers mots jusqu'à une date ou parenthèse
-  const shortMatch = item.match(/^([^()\n]{3,50})(?:\s*\(|$)/);
-  if (shortMatch) {
-    return shortMatch[1].trim();
-  }
+  // Vérifier la qualité des titres
+  const validTitles = items.filter(item => {
+    const title = item.title;
+    return title.length >= 5 && 
+           title.length <= 100 &&
+           title.split(' ').length >= 2 &&
+           !title.match(/^\d+\.?\s*$/) &&
+           !title.toLowerCase().includes('exposition temporaire') // Éviter les généralités
+  });
   
-  // Fallback: premiers 50 caractères
-  return item.substring(0, 50).trim();
+  return validTitles.length >= 2;
 };
 
-// Extraire les aspects positifs d'un élément
-const extractPositives = (item: string, fullContent?: string): string[] => {
-  const positives: string[] = [];
+// Extraire des informations contextuelles (dates, lieux)
+const extractContextualInfo = (text: string): {dates: string[], locations: string[]} => {
+  const dates: string[] = [];
+  const locations: string[] = [];
   
-  // Chercher des dates
-  const dateMatch = item.match(/(\d{1,2}\/\d{1,2}\/\d{4}|\d{1,2}\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)|\d{4})/i);
-  if (dateMatch) {
-    positives.push(`Disponible ${dateMatch[1]}`);
-  }
+  // Dates plus précises
+  const datePatterns = [
+    /(\d{1,2}\/\d{1,2}\/202[4-5])/g,
+    /(\d{1,2}\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+202[4-5])/gi,
+    /(jusqu'au\s+\d{1,2}\s+\w+)/gi
+  ];
   
-  // Chercher des lieux
-  const locationMatch = item.match(/(musée|galerie|centre|salle|lieu|espace)\s+([A-Z][a-z\s]+)/i);
-  if (locationMatch) {
-    positives.push(`Lieu: ${locationMatch[2].trim()}`);
-  }
+  datePatterns.forEach(pattern => {
+    const matches = Array.from(text.matchAll(pattern));
+    dates.push(...matches.map(m => m[1]));
+  });
   
-  // Ajouter une description générique si pas d'éléments trouvés
-  if (positives.length === 0) {
-    positives.push("Option recommandée actuellement");
-  }
+  // Lieux officiels
+  const locationPatterns = [
+    /(Musée\s+[A-Z][a-zA-Zàâäéèêëïîôöùûüÿç\s-]+)/g,
+    /(Galerie\s+[A-Z][a-zA-Zàâäéèêëïîôöùûüÿç\s-]+)/g,
+    /(Centre\s+[A-Z][a-zA-Zàâäéèêëïîôöùûüÿç\s-]+)/g
+  ];
   
-  return positives;
+  locationPatterns.forEach(pattern => {
+    const matches = Array.from(text.matchAll(pattern));
+    locations.push(...matches.map(m => m[1].trim()));
+  });
+  
+  return { dates, locations };
 };
 
 // Génération des critères avec Perplexity
@@ -295,27 +335,36 @@ export const generateAdaptiveAnswerWithPerplexity = async (
     const isListQuestion = detectListQuestion(dilemma);
     console.log(`📋 Question de type liste détectée: ${isListQuestion}`);
     
-    // Prompt adaptatif selon le type de question
+    // Prompt adaptatif selon le type de question avec format plus structuré
     const adaptivePrompt = isListQuestion 
       ? `${dilemma}
 
-INSTRUCTIONS SPÉCIALES - LISTE COMPLÈTE :
-- Recherchez et listez TOUTES les options disponibles (expositions, événements, activités)
-- Incluez les dates, lieux et détails importants
-- Format: "Nom 1 (dates/détails), Nom 2 (dates/détails), etc."
-- Ne limitez pas votre réponse, soyez exhaustif
-- Vérifiez les sources officielles et récentes
+INSTRUCTIONS CRITIQUES - FORMAT STRUCTURE :
+- Listez EXACTEMENT les options avec ce format :
+  1. [NOM PRÉCIS] - [Description courte] - [Date/Lieu si applicable]
+  2. [NOM PRÉCIS] - [Description courte] - [Date/Lieu si applicable]
+  etc.
 
-CONTEXTE : Données actuelles et complètes 2025`
+- EXIGENCES STRICTES :
+  • Noms officiels UNIQUEMENT (pas de descriptions génériques)
+  • Dates réelles vérifiées (format DD/MM/YYYY ou mois YYYY)
+  • Lieux exacts et officiels
+  • Minimum 3 options, maximum 8
+
+- SOURCES : Utilisez uniquement sites officiels, musées, organismes publics
+- DATES : Données janvier 2025 minimum, vérifiez les fermetures/annulations
+
+CONTEXTE TEMPOREL : ${new Date().toLocaleDateString('fr-FR')}`
       : `${dilemma}
 
-INSTRUCTIONS - RÉPONSE PRÉCISE :
-- Utilisez UNIQUEMENT des noms réels et précis
-- Évitez les termes génériques
-- Réponse concise mais complète
-- Sources officielles et vérifiées
+INSTRUCTIONS PRÉCISES - RÉPONSE FACTUELLE :
+- Réponse DIRECTE avec noms officiels exacts
+- Pas de généralisation ou approximation
+- Format : Nom précis + détail essentiel
+- Sources gouvernementales/officielles UNIQUEMENT
+- Vérifiez l'actualité des informations
 
-CONTEXTE : Données réelles et vérifiées 2025`;
+CONTEXTE : Données vérifiées ${new Date().toLocaleDateString('fr-FR')}`;
 
     const result = await searchWithPerplexity(adaptivePrompt);
     console.log('📝 Réponse adaptative reçue:', result.content.substring(0, 200));
