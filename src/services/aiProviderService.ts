@@ -1,5 +1,5 @@
 
-export type AIProvider = 'perplexity';
+export type AIProvider = 'openai' | 'claude' | 'perplexity';
 
 export interface AIProviderConfig {
   provider: AIProvider;
@@ -31,15 +31,31 @@ export interface AIResponse {
   };
 }
 
-// Configuration simplifiée : UNIQUEMENT Perplexity pour les données récentes
+// Configuration hybride : OpenAI/Claude pour l'analyse, Perplexity pour la recherche
 export const AI_PROVIDERS_CONFIG: AIProviderConfig[] = [
+  {
+    provider: 'openai',
+    model: 'gpt-4.1-2025-04-14',
+    priority: 1,
+    maxRetries: 3,
+    costLevel: 'medium',
+    capabilities: ['text', 'criteria', 'options', 'structured-analysis']
+  },
+  {
+    provider: 'claude',
+    model: 'claude-sonnet-4-20250514',
+    priority: 2,
+    maxRetries: 3,
+    costLevel: 'medium',
+    capabilities: ['text', 'criteria', 'options', 'structured-analysis']
+  },
   {
     provider: 'perplexity',
     model: 'sonar-pro',
-    priority: 1,
+    priority: 3,
     maxRetries: 3,
     costLevel: 'low',
-    capabilities: ['text', 'search', 'real-time', 'criteria', 'options']
+    capabilities: ['search', 'real-time']
   }
 ];
 
@@ -64,43 +80,58 @@ export class AIProviderService {
 
   getAvailableProviders(requestType: string): AIProviderConfig[] {
     return AI_PROVIDERS_CONFIG.filter(config => {
-      return config.capabilities.includes(requestType) || 
-             config.capabilities.includes('text') ||
-             config.capabilities.includes('search');
-    });
+      // Pour la recherche, utiliser uniquement Perplexity
+      if (requestType === 'search' || requestType === 'real-time') {
+        return config.capabilities.includes('search') || config.capabilities.includes('real-time');
+      }
+      
+      // Pour l'analyse structurée (criteria, options), utiliser OpenAI/Claude
+      if (requestType === 'criteria' || requestType === 'options') {
+        return config.capabilities.includes('structured-analysis') || config.capabilities.includes(requestType);
+      }
+      
+      return config.capabilities.includes(requestType) || config.capabilities.includes('text');
+    }).sort((a, b) => a.priority - b.priority);
   }
 
   async executeWithFallback(request: AIRequest): Promise<AIResponse> {
     const providers = this.getAvailableProviders(request.type);
-    console.log(`🔄 Executing ${request.type} request with Perplexity only`);
+    console.log(`🔄 Executing ${request.type} request with ${providers.length} provider(s) available`);
 
-    const providerConfig = providers[0]; // Seul Perplexity disponible
-    
-    if (!providerConfig) {
-      throw new Error('No AI provider available');
+    if (providers.length === 0) {
+      throw new Error(`No AI provider available for type: ${request.type}`);
     }
 
-    console.log(`🚀 Using provider: ${providerConfig.provider} (${providerConfig.model})`);
-    
-    try {
-      const response = await this.callProvider(providerConfig, request);
+    let lastError: Error | null = null;
+
+    for (const providerConfig of providers) {
+      console.log(`🚀 Trying provider: ${providerConfig.provider} (${providerConfig.model})`);
       
-      if (response.success) {
-        this.updateSuccessRate(providerConfig.provider, true);
-        console.log(`✅ Success with ${providerConfig.provider}`);
-        return response;
-      } else {
-        throw new Error(response.error || 'Provider returned unsuccessful response');
+      try {
+        const response = await this.callProvider(providerConfig, request);
+        
+        if (response.success) {
+          this.updateSuccessRate(providerConfig.provider, true);
+          console.log(`✅ Success with ${providerConfig.provider}`);
+          return response;
+        } else {
+          throw new Error(response.error || 'Provider returned unsuccessful response');
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error(`❌ ${providerConfig.provider} failed:`, errorMessage);
+        
+        this.updateSuccessRate(providerConfig.provider, false);
+        this.lastFailure.set(providerConfig.provider, Date.now());
+        lastError = new Error(`${providerConfig.provider} failed: ${errorMessage}`);
+        
+        // Continue to next provider
+        continue;
       }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error(`❌ ${providerConfig.provider} failed:`, errorMessage);
-      
-      this.updateSuccessRate(providerConfig.provider, false);
-      this.lastFailure.set(providerConfig.provider, Date.now());
-      
-      throw new Error(`Perplexity failed: ${errorMessage}`);
     }
+
+    // All providers failed
+    throw lastError || new Error('All providers failed');
   }
 
   private async callProvider(config: AIProviderConfig, request: AIRequest): Promise<AIResponse> {
@@ -109,10 +140,18 @@ export class AIProviderService {
     try {
       let result: any;
 
-      if (config.provider === 'perplexity') {
-        result = await this.callPerplexity(config, request);
-      } else {
-        throw new Error(`Unknown provider: ${config.provider}`);
+      switch (config.provider) {
+        case 'openai':
+          result = await this.callOpenAI(config, request);
+          break;
+        case 'claude':
+          result = await this.callClaude(config, request);
+          break;
+        case 'perplexity':
+          result = await this.callPerplexity(config, request);
+          break;
+        default:
+          throw new Error(`Unknown provider: ${config.provider}`);
       }
 
       return {
@@ -136,6 +175,23 @@ export class AIProviderService {
         }
       };
     }
+  }
+
+  private async callOpenAI(config: AIProviderConfig, request: AIRequest): Promise<any> {
+    const { callOpenAiApi } = await import('./openai');
+    const result = await callOpenAiApi(request.prompt, request.files);
+    
+    return result;
+  }
+
+  private async callClaude(config: AIProviderConfig, request: AIRequest): Promise<any> {
+    const { makeQuickDecision } = await import('./claudeService');
+    
+    // Convertir le prompt en structure compatible Claude
+    const mockCriteria = [{ id: '1', name: 'Analysis' }];
+    const result = await makeQuickDecision(request.prompt, mockCriteria);
+    
+    return result;
   }
 
   private async callPerplexity(config: AIProviderConfig, request: AIRequest): Promise<any> {
