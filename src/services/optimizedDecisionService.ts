@@ -346,19 +346,34 @@ export const generateOptimizedDecision = async (
   workspaceId?: string,
   forcedType?: 'factual' | 'comparative' | 'simple-choice'
 ): Promise<IResult> => {
+  console.log('🎯 [generateOptimizedDecision] Starting with adaptive approach:', {
+    dilemma: dilemma.substring(0, 50) + '...',
+    criteriaCount: criteria.length,
+    filesCount: files?.length || 0,
+    workspaceId: workspaceId || 'none'
+  });
+
+  // Détecter si c'est une question nécessitant une réponse factuelle directe
+  const questionType = forcedType || await detectQuestionType(dilemma);
+  console.log('🔍 [generateOptimizedDecision] Question type detected:', questionType);
+
   try {
-    const questionType = forcedType ?? detectQuestionType(dilemma);
-    
-    console.log(`🎯 Type de question détecté: ${questionType}${forcedType ? ' (forcé)' : ''}`);
-    
-    // Approche unifiée : toujours commencer par Perplexity adaptatif
+    // Pour les questions factuelles, utiliser Perplexity avec approche adaptative
     if (questionType === 'factual') {
-      return await generateAdaptiveAnswerWithPerplexity(dilemma, files, workspaceId);
-    } else {
-      return await generateComparativeWithOpenAI(dilemma, criteria, files, workspaceId);
+      console.log('📋 [generateOptimizedDecision] Using adaptive factual approach with Perplexity');
+      const result = await generateAdaptiveAnswerWithPerplexity(dilemma, files, workspaceId);
+      // Forcer le type à 'comparative' pour unifier l'interface
+      result.resultType = 'comparative';
+      return result;
     }
+
+    // Pour les questions comparatives et de choix, utiliser l'analyse complète
+    console.log('⚖️ [generateOptimizedDecision] Using comparative analysis with OpenAI/Claude');
+    const result = await generateComparativeWithOpenAI(dilemma, criteria, files, workspaceId);
+    // Le type reste 'comparative' - pas de modification nécessaire
+    return result;
   } catch (error) {
-    console.error('❌ Erreur service optimisé:', error);
+    console.error('❌ [generateOptimizedDecision] Error:', error);
     throw error;
   }
 };

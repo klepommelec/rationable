@@ -60,26 +60,17 @@ export const useDecisionAPI = ({
         const currentCriteria = criteria;
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
         
-        // Utiliser le type forcé si fourni, sinon classifier
-        const questionType = forcedType ?? await detectQuestionType(dilemma);
-        
         console.log("🔄 [DEBUG] Starting options generation", {
             isRetry,
             retryCount,
-            questionType,
             criteriaCount: currentCriteria.length,
             filesCount: uploadedFiles.length,
             workspaceId: workspaceId || 'none',
             dilemma: dilemma.substring(0, 50) + "..."
         });
         
-        // Pour les questions comparatives seulement, vérifier les critères
-        if (questionType === 'comparative') {
-            if (currentCriteria.length < 2) {
-              console.log("❌ [DEBUG] Not enough criteria for comparative question");
-              toast.error("Veuillez définir au moins 2 critères.");
-              return;
-            }
+        // Vérifier les critères pour les questions nécessitant une analyse comparative
+        if (currentCriteria.length >= 2) {
             if (currentCriteria.some(c => c.name.trim() === '')) {
               console.log("❌ [DEBUG] Empty criteria names found");
               toast.error("Veuillez nommer tous les critères avant de continuer.");
@@ -106,22 +97,17 @@ export const useDecisionAPI = ({
             console.log("✅ [DEBUG] Files uploaded successfully");
           }
           
-          const progressMessage = questionType === 'factual' 
-            ? "Recherche de la réponse factuelle..."
-            : "Analyse des options en cours...";
-          
-          setProgressMessage(workspaceId ? `${progressMessage} avec documents workspace` : progressMessage);
+          setProgressMessage(workspaceId ? "Analyse en cours avec documents workspace..." : "Analyse en cours...");
           console.log("📡 [DEBUG] Calling generateOptions API...");
           const startTime = Date.now();
           
-          const apiResult = await generateOptimizedDecision(dilemma, currentCriteria, uploadedFileInfos, workspaceId, questionType);
+          const apiResult = await generateOptimizedDecision(dilemma, currentCriteria, uploadedFileInfos, workspaceId, forcedType);
           
           const endTime = Date.now();
           console.log("✅ [DEBUG] API call successful", {
             duration: `${endTime - startTime}ms`,
             filesAnalyzed: uploadedFileInfos.length,
             workspaceDocsUsed: apiResult.workspaceData?.documentsUsed || 0,
-            questionType,
             resultStructure: {
               hasRecommendation: !!apiResult.recommendation,
               hasDescription: !!apiResult.description,
@@ -130,9 +116,6 @@ export const useDecisionAPI = ({
               shoppingLinksCount: apiResult.shoppingLinks?.length || 0
             }
           });
-          
-          // Marquer le type de résultat
-          apiResult.resultType = questionType;
           
           setResult(apiResult);
           setAnalysisStep('done');
@@ -159,9 +142,7 @@ export const useDecisionAPI = ({
           if (apiResult.workspaceData?.documentsUsed) {
             successMessage = `Analyse générée avec ${apiResult.workspaceData.documentsUsed} document(s) de votre workspace !`;
           } else {
-            successMessage = questionType === 'factual' 
-              ? "Réponse factuelle trouvée !"
-              : isRetry ? "Options générées avec succès !" : "Analyse mise à jour !";
+            successMessage = isRetry ? "Analyse générée avec succès !" : "Analyse mise à jour !";
           }
           
           toast.success(successMessage);
@@ -172,8 +153,7 @@ export const useDecisionAPI = ({
             stack: error instanceof Error ? error.stack : undefined,
             retryCount,
             filesCount: uploadedFiles.length,
-            workspaceId,
-            questionType
+            workspaceId
           });
           
           // Nettoyer les fichiers uploadés en cas d'erreur
@@ -193,7 +173,7 @@ export const useDecisionAPI = ({
           if (retryCount < 2) {
             console.log(`🔄 [DEBUG] Will retry in 1.5s (attempt ${retryCount + 1}/3)`);
             toast.error(`${errorMessage} - Nouvelle tentative...`);
-            setTimeout(() => handleGenerateOptions(true, questionType), 1500);
+            setTimeout(() => handleGenerateOptions(true, forcedType), 1500);
           } else {
             console.log("💀 [DEBUG] Max retries reached, giving up");
             toast.error(`Impossible de générer les options après ${retryCount + 1} tentatives. ${errorMessage}`);
@@ -209,13 +189,10 @@ export const useDecisionAPI = ({
     const handleStartAnalysis = async (forcedType?: 'factual' | 'comparative' | 'simple-choice', options?: { threadFromId?: string; dilemmaOverride?: string }) => {
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
         
-        // Utiliser le type forcé si fourni, sinon classifier
         const effectiveDilemma = options?.dilemmaOverride ?? dilemma;
-        const questionType = forcedType ?? await detectQuestionType(effectiveDilemma);
         
         console.log("🚀 [DEBUG] Starting full analysis", { 
           dilemma: effectiveDilemma.substring(0, 50) + "...",
-          questionType,
           filesCount: uploadedFiles.length,
           workspaceId: workspaceId || 'none'
         });
@@ -249,18 +226,17 @@ export const useDecisionAPI = ({
             console.log("✅ [DEBUG] Files uploaded for analysis");
           }
           
-          // Pour les questions factuelles, pas besoin de critères complexes
+          // Détection si c'est une question qui nécessite une réponse directe
+          const questionType = forcedType ?? await detectQuestionType(effectiveDilemma);
+          
           if (questionType === 'factual') {
-            const progressMsg = "Recherche de la réponse factuelle...";
-              
-            console.log(`🎯 [DEBUG] ${questionType} question detected - generating direct answer`);
-            setProgressMessage(workspaceId ? `${progressMsg} avec documents workspace` : progressMsg);
+            console.log("🎯 [DEBUG] Direct answer question detected");
+            setProgressMessage(workspaceId ? "Recherche de la réponse avec documents workspace..." : "Recherche de la réponse...");
             setAnalysisStep('loading-options');
             
             const optionsResult = await generateOptimizedDecision(effectiveDilemma, [], uploadedFileInfos, workspaceId, questionType);
-            optionsResult.resultType = questionType;
             
-            console.log(`✅ [DEBUG] ${questionType} answer generated successfully`);
+            console.log("✅ [DEBUG] Direct answer generated successfully");
             setResult(optionsResult);
             
             // Threading: link to parent if provided
@@ -285,9 +261,8 @@ export const useDecisionAPI = ({
             setAnalysisStep('done');
             
             const successMessage = optionsResult.workspaceData?.documentsUsed 
-              ? `Réponse générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
-              : "Réponse factuelle trouvée !";
-            
+              ? `Analyse générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
+              : "Analyse générée avec succès !";
             
             toast.success(successMessage);
             return;
@@ -355,8 +330,8 @@ export const useDecisionAPI = ({
             setAnalysisStep('done');
             
             const successMessage = optionsResult.workspaceData?.documentsUsed 
-              ? `Analyse comparative générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
-              : "Analyse comparative générée !";
+              ? `Analyse générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
+              : "Analyse générée avec succès !";
             
             toast.success(successMessage);
           } catch (error) {

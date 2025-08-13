@@ -46,7 +46,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
     );
   }
 
-  const resultType = result.resultType || 'comparative';
   const hasMultipleOptions = result.breakdown && result.breakdown.length > 1;
   const hasYouTubeVideos = result.socialContent?.youtubeVideos && result.socialContent.youtubeVideos.length > 0;
   
@@ -55,58 +54,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   const displayedOptions = showAllOptions ? allOptions : allOptions.slice(0, initialOptionsCount);
   const hasMoreOptions = allOptions.length > initialOptionsCount;
 
-  // Pour les questions factuelles, on simplifie l'affichage
-  if (resultType === 'factual') {
-    return (
-      <div className="space-y-6 animate-fade-in">
-        <RecommendationCard 
-          result={result}
-          dilemma={dilemma}
-          currentDecision={currentDecision}
-          clearSession={clearSession}
-        />
-        
-        <UsefulLinks 
-          infoLinks={result.infoLinks}
-          shoppingLinks={result.shoppingLinks}
-          socialContent={result.socialContent}
-          dilemma={dilemma}
-          recommendation={result.recommendation}
-        />
-        
-        {hasYouTubeVideos && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ExternalLink className="h-5 w-5" />
-                Contenu vidéo recommandé
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {result.socialContent!.youtubeVideos!.slice(0, 6).map((video) => (
-                  <YouTubeVideoCard key={video.id} video={video} />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        
-        {onFollowUpQuestion && (
-          <FollowUpQuestions
-            dilemma={dilemma}
-            result={result}
-            category={currentDecision?.category}
-            onQuestionSelect={onFollowUpQuestion}
-            isLoading={isUpdating}
-          />
-        )}
-        
-      </div>
-    );
-  }
-
-  // Pour les questions de choix (comparative/simple-choice), affichage complet
+  // Affichage unifié pour tous les types de questions
   return (
     <div className="space-y-6 animate-fade-in">
       <RecommendationCard 
@@ -141,7 +89,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             <ComparisonTable 
               breakdown={displayedOptions} 
               dilemma={dilemma}
-              resultType={resultType}
+              resultType="comparative"
             />
             {hasMoreOptions && (
               <div className="flex justify-center mt-4">
