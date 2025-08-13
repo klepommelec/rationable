@@ -1,5 +1,6 @@
 
 import { toast } from "sonner";
+import { useCallback } from 'react';
 import { ICriterion, IResult, IDecision } from '@/types/decision';
 import { generateCriteriaWithFallback, generateOptionsWithFallback } from '@/services/enhancedDecisionService';
 import { uploadFilesToStorage, deleteFileFromStorage, UploadedFileInfo } from '@/services/fileUploadService';
@@ -186,152 +187,131 @@ export const useDecisionAPI = ({
         }
     };
 
-    const handleStartAnalysis = async (forcedType?: 'comparative', options?: { threadFromId?: string; dilemmaOverride?: string }) => {
+    // NOUVELLE VERSION OPTIMISÉE - Analyse parallélisée
+    const handleStartAnalysis = useCallback(async (forcedType?: 'comparative', options?: { threadFromId?: string; dilemmaOverride?: string }) => {
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
-        
         const effectiveDilemma = options?.dilemmaOverride ?? dilemma;
         
-        console.log("🚀 [DEBUG] Starting full analysis", { 
+        console.log("🚀 [OPTIMIZED] Starting PARALLEL analysis", { 
           dilemma: effectiveDilemma.substring(0, 50) + "...",
           filesCount: uploadedFiles.length,
           workspaceId: workspaceId || 'none'
         });
         
-        // Générer un emoji contextuel
-        const contextualEmoji = generateContextualEmoji(effectiveDilemma);
-        
-        // FORCE un reset complet pour éviter la réutilisation d'anciens états
+        resetRetry();
         setResult(null);
-        
-        setEmoji(contextualEmoji);
-        // keep currentDecisionId for threading context
         setHasChanges(false);
         setSelectedCategory(undefined);
-        resetRetry();
-        
-        // Effacer la référence aux anciens critères
         initialCriteriaRef.current = [];
 
-        // Afficher immédiatement un état de chargement pour une UX fluide
-        setAnalysisStep('loading-options');
-
-        let uploadedFileInfos: UploadedFileInfo[] = [];
-
         try {
-          // Upload des fichiers si présents
-          if (uploadedFiles.length > 0) {
-            setProgressMessage("Upload des documents en cours...");
-            console.log("📤 [DEBUG] Uploading files for analysis...");
-            uploadedFileInfos = await uploadFilesToStorage(uploadedFiles);
-            console.log("✅ [DEBUG] Files uploaded for analysis");
-          }
-          
-          // Phase 1: Générer les critères pour toutes les questions
-          console.log("📡 [DEBUG] Phase 1: Generating criteria for question");
-          setProgressMessage(workspaceId ? "Analyse du contexte avec documents workspace..." : "Analyse du contexte et génération des critères...");
-          
-          const response = await generateCriteriaWithFallback(effectiveDilemma, uploadedFileInfos, workspaceId);
-          console.log("✅ [DEBUG] Criteria and category generated:", {
-            emoji: response.emoji,
-            criteriaCount: response.criteria?.length || 0,
-            criteria: response.criteria,
-            suggestedCategory: response.suggestedCategory,
-            filesAnalyzed: uploadedFileInfos.length,
-            workspaceDocsUsed: 0
-          });
-          
-          const newCriteria = response.criteria.map((criterionName: string) => ({
-            id: crypto.randomUUID(),
-            name: criterionName,
-          }));
-          
-          setCriteria(newCriteria);
-          // Utiliser l'emoji contextuel plutôt que celui de l'API
-          setEmoji(contextualEmoji);
-          setSelectedCategory(response.suggestedCategory);
-          setAnalysisStep('criteria-loaded');
-          
-          // Phase 2: Générer automatiquement les options - SANS setTimeout pour éviter les race conditions
-          console.log("📡 [DEBUG] Phase 2: Auto-generating options for comparative question");
-          setAnalysisStep('loading-options');
-          setProgressMessage(workspaceId ? "Génération des options avec documents workspace..." : "Génération des options comparatives...");
-          
-          try {
+            // PHASE 1: Démarrage en parallèle de 3 tâches non-bloquantes
+            console.log("⚡ Starting 3 parallel tasks...");
+            
+            // Tâche 1: Upload fichiers (background, non-bloquant)
+            let uploadPromise: Promise<UploadedFileInfo[]> = Promise.resolve([]);
+            if (uploadedFiles.length > 0) {
+                console.log("📤 Starting background file upload...");
+                uploadPromise = uploadFilesToStorage(uploadedFiles).catch(error => {
+                    console.error("❌ File upload failed:", error);
+                    return [];
+                });
+            }
+            
+            // Tâche 2: Génération emoji (background, non-bloquant)  
+            const contextualEmoji = generateContextualEmoji(effectiveDilemma);
+            
+            // Tâche 3: Génération critères (bloquante pour la suite mais démarre immédiatement)
+            console.log("📡 Starting criteria generation...");
+            setAnalysisStep('loading-options');
+            setProgressMessage('Génération des critères...');
+            
+            const criteriaPromise = generateCriteriaWithFallback(effectiveDilemma, [], workspaceId);
+            
+            // Attendre seulement les critères (rapide)
+            const criteriaResponse = await criteriaPromise;
+            console.log("✅ Criteria generated quickly");
+            
+            // Mise à jour immédiate de l'interface avec les critères
+            const newCriteria = criteriaResponse.criteria.map((criterionName: string) => ({
+                id: crypto.randomUUID(),
+                name: criterionName,
+            }));
+            
+            setCriteria(newCriteria);
+            setSelectedCategory(criteriaResponse.suggestedCategory);
+            setAnalysisStep('done'); // Montrer immédiatement les critères
+            setProgressMessage('Critères générés ! Génération des options...');
+            
+            // Appliquer l'emoji immédiatement
+            setEmoji(contextualEmoji);
+            
+            // PHASE 2: Génération des options avec les fichiers uploadés en parallèle
+            setAnalysisStep('loading-options');
+            
+            // Attendre les fichiers uploadés maintenant
+            const uploadedFileInfos = await uploadPromise;
+            console.log(`✅ Files ready (${uploadedFileInfos.length} files)`);
+            
+            console.log("✅ Emoji ready:", contextualEmoji);
+            
+            // Générer les options avec tous les éléments prêts
+            console.log("📡 Generating options with all assets ready...");
             const optionsResult = await generateOptionsWithFallback(effectiveDilemma, newCriteria, uploadedFileInfos, workspaceId);
+            console.log("✅ Options generated successfully");
             
-            console.log("✅ [DEBUG] Auto-options generated successfully");
             setResult(optionsResult);
+            setAnalysisStep('done');
+            setProgressMessage('Analyse terminée !');
             
-            // Définir les critères de référence
-            initialCriteriaRef.current = newCriteria;
-            
-            // Threading: link to parent if provided
+            // Créer la nouvelle décision
             const parentDecision = options?.threadFromId ? history.find(d => d.id === options.threadFromId) : undefined;
             const newId = crypto.randomUUID();
             const threadId = parentDecision ? (parentDecision.threadId || parentDecision.id) : newId;
 
             const newDecision: IDecision = {
-              id: newId,
-              timestamp: Date.now(),
-              dilemma: effectiveDilemma,
-              emoji: contextualEmoji,
-              criteria: newCriteria,
-              result: optionsResult,
-              category: response.suggestedCategory,
-              threadId,
-              parentId: parentDecision?.id
+                id: newId,
+                timestamp: Date.now(),
+                dilemma: effectiveDilemma,
+                emoji: contextualEmoji,
+                criteria: newCriteria,
+                result: optionsResult,
+                category: criteriaResponse.suggestedCategory,
+                threadId,
+                parentId: parentDecision?.id
             };
             addDecision(newDecision);
             setCurrentDecisionId(newDecision.id);
-            
-            setAnalysisStep('done');
+            initialCriteriaRef.current = newCriteria;
             
             const successMessage = optionsResult.workspaceData?.documentsUsed 
-              ? `Analyse générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
-              : "Analyse générée avec succès !";
+                ? `Analyse générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
+                : "Analyse optimisée générée avec succès !";
             
             toast.success(successMessage);
-          } catch (error) {
-            console.error("❌ [DEBUG] Error in auto-options generation:", error);
-            const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
-            toast.error(`Erreur lors de la génération automatique : ${errorMessage}`);
-            setAnalysisStep('criteria-loaded');
             
-            // Nettoyer les fichiers en cas d'erreur
-            if (uploadedFileInfos.length > 0) {
-              console.log("🧹 [DEBUG] Cleaning up uploaded files due to error...");
-              for (const fileInfo of uploadedFileInfos) {
-                try {
-                  await deleteFileFromStorage(fileInfo.filePath);
-                } catch (cleanupError) {
-                  console.error("❌ [DEBUG] Error cleaning up file:", cleanupError);
-                }
-              }
-            }
-          } finally {
-            setProgressMessage('');
-          }
-          
         } catch (error) {
-          console.error("❌ [DEBUG] Error in analysis start:", error);
-          const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
-          toast.error(`Erreur lors de l'analyse : ${errorMessage}`);
-          setAnalysisStep('loading-options');
-          setProgressMessage('');
-          
-          // Nettoyer les fichiers en cas d'erreur
-          if (uploadedFileInfos.length > 0) {
-            console.log("🧹 [DEBUG] Cleaning up uploaded files due to error...");
-            for (const fileInfo of uploadedFileInfos) {
-              try {
-                await deleteFileFromStorage(fileInfo.filePath);
-              } catch (cleanupError) {
-                console.error("❌ [DEBUG] Error cleaning up file:", cleanupError);
-              }
+            console.error("❌ Optimized analysis failed:", error);
+            setAnalysisStep('idle');
+            
+            if (retryCount < 2) {
+                console.log('🔄 Retrying optimized analysis...');
+                incrementRetry();
+                setProgressMessage('Nouvelle tentative...');
+                setTimeout(() => handleStartAnalysis(forcedType, options), 1500);
+            } else {
+                const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
+                toast.error(`Erreur après ${retryCount + 1} tentatives: ${errorMessage}`);
+                setProgressMessage('');
+                resetRetry();
             }
-          }
         }
-    };
+    }, [
+        dilemma, uploadedFiles, resetRetry, setResult, setHasChanges, setSelectedCategory,
+        initialCriteriaRef, setCriteria, setEmoji, setAnalysisStep, setProgressMessage,
+        getCurrentWorkspaceId, shouldUseWorkspaceDocuments, history, addDecision,
+        setCurrentDecisionId, retryCount, incrementRetry
+    ]);
 
     return {
         handleGenerateOptions,

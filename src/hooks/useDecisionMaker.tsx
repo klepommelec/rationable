@@ -6,7 +6,6 @@ import { useDecisionProgress } from './useDecisionProgress';
 import { useDecisionAPI } from './useDecisionAPI';
 import { useDecisionActions } from './useDecisionActions';
 import { UploadedFile } from '@/components/FileUpload';
-
 export const useDecisionMaker = () => {
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
     

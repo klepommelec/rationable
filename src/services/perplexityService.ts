@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { I18nService, SupportedLanguage } from './i18nService';
+import { searchCacheService } from './searchCacheService';
 
 export interface PerplexitySearchResult {
   content: string;
@@ -50,6 +51,19 @@ export const searchWithPerplexity = async (
   try {
     console.log('🔍 Perplexity search - Query:', query);
     console.log('📝 Perplexity search - Context:', context);
+    
+    // Vérifier le cache d'abord
+    const cached = searchCacheService.get(query, context);
+    if (cached) {
+      console.log('⚡ Using cached search result');
+      return {
+        content: cached.content.content || cached.content,
+        sources: cached.content.sources || [],
+        timestamp: new Date(cached.timestamp).toISOString(),
+        searchQuery: query,
+        requiresRealTimeData: true
+      };
+    }
     
     // Detect language from query if not provided
     const detectedLanguage = language || I18nService.detectLanguage(query);
@@ -139,13 +153,21 @@ export const searchWithPerplexity = async (
     const cleanedContent = cleanPerplexityResponse(data.content);
     console.log('✅ Perplexity search successful - Content cleaned and ready');
     
-    return {
+    const result = {
       content: cleanedContent,
       sources: data.sources || [],
       timestamp: data.timestamp || new Date().toISOString(),
       searchQuery: query,
       requiresRealTimeData: true
     };
+
+    // Mettre en cache le résultat
+    searchCacheService.set(query, context, {
+      content: cleanedContent,
+      sources: data.sources || []
+    }, 'perplexity');
+    
+    return result;
   } catch (error) {
     console.error('❌ Perplexity service error:', error);
     throw error;

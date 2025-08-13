@@ -163,47 +163,53 @@ Exemple de format:
   }
 };
 
-// Fonction utilitaire pour détecter les requêtes nécessitant des données externes
+// Fonction utilitaire pour détecter les requêtes nécessitant des données externes (OPTIMISÉE)
 const detectExternalDataNeeded = (dilemma: string): boolean => {
   const lowerDilemma = dilemma.toLowerCase();
   
-  // Questions nécessitant des données factuelles récentes ou spécifiques
-  const factualKeywords = [
-    // Questions temporelles
-    'qui a gagné', 'qui a été', 'qui sera', 'vainqueur', 'gagnant', 'résultat',
-    'classement', 'podium', 'champion', 'finale',
-    
-    // Événements actuels
-    'exposition', 'expositions', 'du moment', 'actuellement', 'en cours',
-    'programme', 'programmation', 'horaires',
-    
-    // Informations spécifiques sur des lieux/organisations
-    'musée', 'théâtre', 'galerie', 'centre', 'établissement',
-    
-    // Données temporelles dynamiques
-    'maintenant', 'aujourd\'hui', 'cette année', 'ce mois', 'cette semaine',
-    'récent', 'dernière', 'nouveau', 'nouvelle', 'tendance', 'actualité',
-    
-    // Questions directes factuelles
-    'quel est', 'quels sont', 'quelles sont', 'où est', 'où sont',
-    'combien', 'comment', 'quand', 'pourquoi',
-    
-    // Sports et compétitions
-    'draft', 'NBA', 'football', 'sport', 'joueur', 'équipe', 'match', 
-    'championship', 'tournoi', 'compétition', 'ligue'
+  // Mots-clés négatifs - questions génériques qui n'ont PAS besoin de données externes
+  const negativeKeywords = [
+    'préférez-vous', 'choisir entre', 'que penses-tu', 'ton avis', 'votre opinion',
+    'recommandez-vous', 'suggestions', 'conseils', 'vaut-il mieux',
+    'devrais-je', 'dois-je', 'comment faire', 'lequel choisir',
+    'avantages et inconvénients', 'pros and cons', 'mieux', 'plutôt',
+    'ou bien', 'alternative', 'option', 'solution'
   ];
   
-  // Détection d'années (dynamique pour éviter le hardcoding)
+  // Si c'est une question générique/d'opinion, pas besoin de données externes
+  const isGenericQuestion = negativeKeywords.some(keyword => lowerDilemma.includes(keyword));
+  if (isGenericQuestion) {
+    console.log('🚫 Generic question detected - no external search needed');
+    return false;
+  }
+  
+  // Questions nécessitant des données factuelles récentes ou spécifiques (RÉDUITE)
+  const factualKeywords = [
+    // Questions temporelles critiques
+    'qui a gagné', 'vainqueur', 'gagnant', 'résultat', 'classement',
+    
+    // Événements actuels précis
+    'exposition actuellement', 'programme du moment', 'en cours maintenant',
+    
+    // Questions directes factuelles
+    'quel est le', 'où est', 'combien coûte actuellement',
+    
+    // Sports récents
+    'draft 202', 'saison 202', 'championnat 202'
+  ];
+  
+  // Détection d'années (plus restrictive - seulement année courante +/- 1)
   const currentYear = new Date().getFullYear();
-  const yearPattern = new RegExp(`(${currentYear - 1}|${currentYear}|${currentYear + 1}|${currentYear + 2})`, 'i');
+  const yearPattern = new RegExp(`(${currentYear - 1}|${currentYear}|${currentYear + 1})`, 'i');
   const hasRelevantYear = yearPattern.test(dilemma);
   
   const hasFactualKeyword = factualKeywords.some(keyword => lowerDilemma.includes(keyword));
   
   const needsExternalData = hasFactualKeyword || hasRelevantYear;
   
-  console.log('🔍 External data detection:', {
+  console.log('🔍 External data detection (optimized):', {
     dilemma: dilemma.substring(0, 50) + '...',
+    isGenericQuestion,
     hasFactualKeyword,
     hasRelevantYear,
     needsExternalData

@@ -43,10 +43,10 @@ export const AI_PROVIDERS_CONFIG: AIProviderConfig[] = [
   },
   {
     provider: 'claude',
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-3-5-haiku-20241022',
     priority: 2,
     maxRetries: 3,
-    costLevel: 'medium',
+    costLevel: 'low',
     capabilities: ['text', 'criteria', 'options', 'structured-analysis']
   },
   {

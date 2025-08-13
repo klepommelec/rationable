@@ -155,9 +155,9 @@ INSTRUCTIONS POUR LES NOMS D'OPTIONS:
       }
     }
 
-    // Utiliser GPT-4o pour supporter l'analyse d'images
-    const model = files && files.some(f => f.fileType.startsWith('image/')) ? 'gpt-4o' : 'gpt-4o-mini';
-    console.log(`🤖 Using model: ${model}`);
+    // Utiliser GPT-4.1 pour de meilleures performances
+    const model = 'gpt-4.1-2025-04-14';
+    console.log(`🤖 Using optimized model: ${model}`);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -168,7 +168,8 @@ INSTRUCTIONS POUR LES NOMS D'OPTIONS:
       body: JSON.stringify({
         model: model,
         messages: messages,
-        temperature: 0.5,
+        temperature: 0.1,
+        max_tokens: 3000,
         response_format: { type: "json_object" },
       }),
     });
