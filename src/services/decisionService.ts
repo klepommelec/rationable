@@ -1,7 +1,7 @@
 import { ICriterion, IResult, DEFAULT_CATEGORIES } from '@/types/decision';
 import { UploadedFileInfo } from './fileUploadService';
 import { AIProviderService } from './aiProviderService';
-import { detectQuestionType, QuestionType } from './questionTypeDetector';
+
 
 export const generateCriteriaOnly = async (
   dilemma: string,
@@ -163,7 +163,7 @@ const cleanAndParseJSON = (content: string): any => {
 };
 
 // Fonction améliorée pour extraire des produits multiples depuis le texte
-const extractMultipleProductsFromText = (content: string, questionType: QuestionType) => {
+const extractMultipleProductsFromText = (content: string) => {
   console.log('🔍 Extracting multiple products from text...');
   
   // D'abord, essayer d'extraire depuis le JSON si présent
@@ -412,8 +412,8 @@ const generateSyntheticOptions = (dilemma: string, baseOption: any, content: str
   return options;
 };
 
-const extractTitleFromContent = (content: string, questionType: QuestionType): string => {
-  console.log(`🔍 Extracting title from content (type: ${questionType})`);
+const extractTitleFromContent = (content: string): string => {
+  console.log('🔍 Extracting title from content');
   
   // Essayer d'extraire le titre depuis le JSON
   const titleMatch = content.match(/"recommendation":\s*"([^"]+)"/);
@@ -450,19 +450,17 @@ const extractTitleFromContent = (content: string, questionType: QuestionType): s
     }
   }
   
-  const fallbackTitle = questionType === 'factual' ? 
-    'Réponse factuelle' : 
-    'Recommandation principale';
+  const fallbackTitle = 'Recommandation principale';
   
   console.log(`📝 Using fallback title: "${fallbackTitle}"`);
   return fallbackTitle;
 };
 
-const extractProsConsFromContent = (content: string, questionType: QuestionType) => {
+const extractProsConsFromContent = (content: string) => {
   const pros: string[] = [];
   const cons: string[] = [];
   
-  console.log(`🔍 Extracting pros/cons from content (type: ${questionType})`);
+  console.log('🔍 Extracting pros/cons from content');
   
   try {
     const prosMatch = content.match(/"pros":\s*\[([^\]]+)\]/);
@@ -511,14 +509,10 @@ const extractProsConsFromContent = (content: string, questionType: QuestionType)
   }
   
   if (pros.length === 0) {
-    if (questionType === 'factual') {
-      pros.push('Information vérifiée et à jour', 'Réponse basée sur des sources fiables');
-    } else {
-      pros.push('Analyse complète des critères', 'Recommandation personnalisée');
-    }
+    pros.push('Analyse complète des critères', 'Recommandation personnalisée');
   }
   
-  if (cons.length === 0 && questionType === 'comparative') {
+  if (cons.length === 0) {
     cons.push('D\'autres options peuvent convenir selon vos besoins');
   }
   
@@ -535,13 +529,14 @@ export const generateOptions = async (
   console.log('🔍 Generating options with Perplexity only');
   
   const aiService = AIProviderService.getInstance();
-  const questionType = detectQuestionType(dilemma);
   
-  console.log(`📊 Question type detected: ${questionType}`);
+  console.log('📊 Processing question with unified approach');
   
   let prompt: string;
   
-  if (questionType === 'factual') {
+  // Traitement unifié pour toutes les questions
+  const isComparative = true;
+  if (isComparative) {
     prompt = `Question factuelle: "${dilemma}"
 
 Fournissez une réponse factuelle précise et actualisée. Cette question a une réponse objective unique.
@@ -611,7 +606,7 @@ Format JSON EXACT (sans texte avant ou après):
     const response = await aiService.executeWithFallback({
       prompt,
       type: 'options',
-      context: questionType === 'comparative' ? `Critères: ${criteria.map(c => c.name).join(', ')}` : 'Question factuelle',
+      context: `Critères: ${criteria.map(c => c.name).join(', ')}`,
       files
     });
 
@@ -630,10 +625,11 @@ Format JSON EXACT (sans texte avant ou après):
       if (!parsedResult || !parsedResult.breakdown || parsedResult.breakdown.length === 0) {
         console.log('📝 JSON parsing failed, using intelligent text extraction...');
         
-        if (questionType === 'comparative') {
+        // Toujours traiter comme comparatif
+        if (true) {
           console.log('🔍 Extracting multiple options for comparative question...');
           
-          const foundProducts = extractMultipleProductsFromText(content, questionType);
+          const foundProducts = extractMultipleProductsFromText(content);
           
           if (foundProducts.length >= 2) {
             console.log(`✅ Found ${foundProducts.length} products, generating comparative breakdown`);
@@ -660,8 +656,8 @@ Format JSON EXACT (sans texte avant ou après):
         // Fallback si rien d'autre ne fonctionne
         if (!parsedResult) {
           console.log('⚠️ Using fallback single option extraction');
-          const recommendation = extractTitleFromContent(content, questionType);
-          const { pros, cons } = extractProsConsFromContent(content, questionType);
+          const recommendation = extractTitleFromContent(content);
+          const { pros, cons } = extractProsConsFromContent(content);
           
           parsedResult = {
             recommendation,
@@ -671,7 +667,7 @@ Format JSON EXACT (sans texte avant ou après):
             breakdown: [
               {
                 option: recommendation,
-                score: questionType === 'factual' ? 100 : 85,
+                score: 85,
                 pros,
                 cons,
                 scores: {}
@@ -683,13 +679,13 @@ Format JSON EXACT (sans texte avant ou après):
 
       // 3. Validation et nettoyage final
       if (parsedResult) {
-        console.log(`📊 Final validation: ${parsedResult.breakdown?.length || 0} options for ${questionType} question`);
+        console.log(`📊 Final validation: ${parsedResult.breakdown?.length || 0} options`);
         
-        // VALIDATION STRICTE: Questions comparatives DOIVENT avoir 3-4 options minimum
-        if (questionType === 'comparative' && (!parsedResult.breakdown || parsedResult.breakdown.length < 3)) {
-          console.log(`⚠️ Insufficient options (${parsedResult.breakdown?.length || 0}) for comparative question, generating synthetic options`);
+        // VALIDATION: Assurer un minimum de 2 options pour la comparaison
+        if (!parsedResult.breakdown || parsedResult.breakdown.length < 2) {
+          console.log(`⚠️ Insufficient options (${parsedResult.breakdown?.length || 0}), generating additional options`);
           
-          const extractedProducts = extractMultipleProductsFromText(content, questionType);
+          const extractedProducts = extractMultipleProductsFromText(content);
           
           if (extractedProducts.length >= 3) {
             // Utiliser les produits extraits pour créer 4 options
@@ -710,10 +706,10 @@ Format JSON EXACT (sans texte avant ou après):
             console.log('⚠️ Creating synthetic options from dilemma analysis');
             
             const baseOption = parsedResult.breakdown?.[0] || {
-              option: extractTitleFromContent(content, questionType),
+              option: extractTitleFromContent(content),
               score: 85,
-              pros: extractProsConsFromContent(content, questionType).pros,
-              cons: extractProsConsFromContent(content, questionType).cons,
+              pros: extractProsConsFromContent(content).pros,
+              cons: extractProsConsFromContent(content).cons,
               scores: {}
             };
             
@@ -726,7 +722,7 @@ Format JSON EXACT (sans texte avant ou après):
         
         // Nettoyer les titres trop longs
         if (parsedResult.recommendation && parsedResult.recommendation.length > 80) {
-          parsedResult.recommendation = extractTitleFromContent(parsedResult.recommendation, questionType);
+          parsedResult.recommendation = extractTitleFromContent(parsedResult.recommendation);
         }
         
         // Nettoyer les options du breakdown
@@ -734,7 +730,7 @@ Format JSON EXACT (sans texte avant ou après):
           parsedResult.breakdown = parsedResult.breakdown.map((item: any) => ({
             ...item,
             option: item.option && item.option.length > 80 ? 
-              extractTitleFromContent(item.option, questionType) : 
+              extractTitleFromContent(item.option) : 
               item.option,
             pros: Array.isArray(item.pros) ? item.pros.filter((p: string) => 
               p && p.length > 5 && !p.includes('Format de réponse') && !p.includes('Analyse basée')
@@ -847,7 +843,7 @@ Format JSON EXACT (sans texte avant ou après):
         recommendation: cleanedRecommendation,
         description: cleanDescription(parsedResult.description || content),
         breakdown: cleanedBreakdown,
-        resultType: questionType,
+        
         realTimeData: {
           hasRealTimeData: true,
           timestamp: response.content.timestamp || new Date().toISOString(),

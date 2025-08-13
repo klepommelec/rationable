@@ -66,7 +66,6 @@ export interface IResult {
     error?: string;
   };
   dataFreshness?: 'very-fresh' | 'fresh' | 'moderate' | 'stale';
-  resultType?: 'factual' | 'comparative' | 'simple-choice'; // Nouveau champ
   followUpQuestions?: IFollowUpQuestion[];
 }
 

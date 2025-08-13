@@ -89,7 +89,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             <ComparisonTable 
               breakdown={displayedOptions} 
               dilemma={dilemma}
-              resultType="comparative"
             />
             {hasMoreOptions && (
               <div className="flex justify-center mt-4">

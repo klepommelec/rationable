@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export type QuestionType = 'factual' | 'comparative' | 'simple-choice';
+export type QuestionType = 'comparative';
 
 export interface QuestionClassification {
   type: QuestionType;
@@ -108,23 +108,7 @@ const fallbackToRegexClassification = (question: string): QuestionClassification
     /\b(quel|quelle|which|where|où)\b.*\b(quartier|ville|city|neighborhood|endroit|place)\b/i
   ];
   
-  if (factualPatterns.some(p => p.test(question))) {
-    return {
-      type: 'factual',
-      confidence: 70,
-      reasoning: 'Détecté comme factuel par pattern regex',
-      suggestedApproach: 'Recherche de réponse factuelle directe'
-    };
-  }
-  
-  if (recommendationPatterns.some(p => p.test(question))) {
-    return {
-      type: 'simple-choice',
-      confidence: 75,
-      reasoning: 'Détecté comme simple-choice/recommandation par pattern regex',
-      suggestedApproach: 'Génération de critères et recommandation personnalisée'
-    };
-  }
+  // Tous les types de questions sont maintenant traités de manière comparative
   
   if (comparativePatterns.some(p => p.test(question))) {
     return {
@@ -145,15 +129,8 @@ const fallbackToRegexClassification = (question: string): QuestionClassification
 
 // Fonction principale exportée qui remplace detectQuestionType
 export const detectQuestionType = async (dilemma: string): Promise<QuestionType> => {
-  try {
-    const classification = await classifyQuestionWithAI(dilemma);
-    console.log(`🎯 Final classification: ${classification.type} (confidence: ${classification.confidence}%)`);
-    return classification.type;
-  } catch (error) {
-    console.error('❌ Question classification failed, using fallback');
-    const fallback = fallbackToRegexClassification(dilemma);
-    return fallback.type;
-  }
+  console.log(`🎯 Unified classification: always comparative for "${dilemma.substring(0, 50)}..."`);
+  return 'comparative';
 };
 
 // Export de la fonction de classification complète pour usage avancé

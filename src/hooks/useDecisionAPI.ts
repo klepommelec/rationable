@@ -56,7 +56,7 @@ export const useDecisionAPI = ({
 }: UseDecisionAPIProps) => {
     const { getCurrentWorkspaceId, shouldUseWorkspaceDocuments } = useWorkspaceContext();
 
-    const handleGenerateOptions = async (isRetry = false, forcedType?: 'factual' | 'comparative' | 'simple-choice') => {
+    const handleGenerateOptions = async (isRetry = false, forcedType?: 'comparative') => {
         const currentCriteria = criteria;
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
         
@@ -186,7 +186,7 @@ export const useDecisionAPI = ({
         }
     };
 
-    const handleStartAnalysis = async (forcedType?: 'factual' | 'comparative' | 'simple-choice', options?: { threadFromId?: string; dilemmaOverride?: string }) => {
+    const handleStartAnalysis = async (forcedType?: 'comparative', options?: { threadFromId?: string; dilemmaOverride?: string }) => {
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
         
         const effectiveDilemma = options?.dilemmaOverride ?? dilemma;
@@ -226,49 +226,7 @@ export const useDecisionAPI = ({
             console.log("✅ [DEBUG] Files uploaded for analysis");
           }
           
-          // Détection si c'est une question qui nécessite une réponse directe
-          const questionType = forcedType ?? await detectQuestionType(effectiveDilemma);
-          
-          if (questionType === 'factual') {
-            console.log("🎯 [DEBUG] Direct answer question detected");
-            setProgressMessage(workspaceId ? "Recherche de la réponse avec documents workspace..." : "Recherche de la réponse...");
-            setAnalysisStep('loading-options');
-            
-            const optionsResult = await generateOptimizedDecision(effectiveDilemma, [], uploadedFileInfos, workspaceId, questionType);
-            
-            console.log("✅ [DEBUG] Direct answer generated successfully");
-            setResult(optionsResult);
-            
-            // Threading: link to parent if provided
-            const parentDecision = options?.threadFromId ? history.find(d => d.id === options.threadFromId) : undefined;
-            const newId = crypto.randomUUID();
-            const threadId = parentDecision ? (parentDecision.threadId || parentDecision.id) : newId;
-
-            const newDecision: IDecision = {
-              id: newId,
-              timestamp: Date.now(),
-              dilemma: effectiveDilemma,
-              emoji: contextualEmoji,
-              criteria: [],
-              result: optionsResult,
-              category: 'other',
-              threadId,
-              parentId: parentDecision?.id
-            };
-            addDecision(newDecision);
-            setCurrentDecisionId(newDecision.id);
-            
-            setAnalysisStep('done');
-            
-            const successMessage = optionsResult.workspaceData?.documentsUsed 
-              ? `Analyse générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
-              : "Analyse générée avec succès !";
-            
-            toast.success(successMessage);
-            return;
-          }
-          
-          // Phase 1: Générer les critères pour les questions comparatives et simple-choice
+          // Phase 1: Générer les critères pour toutes les questions
           console.log("📡 [DEBUG] Phase 1: Generating criteria for question");
           setProgressMessage(workspaceId ? "Analyse du contexte avec documents workspace..." : "Analyse du contexte et génération des critères...");
           
@@ -299,8 +257,7 @@ export const useDecisionAPI = ({
           setProgressMessage(workspaceId ? "Génération des options avec documents workspace..." : "Génération des options comparatives...");
           
           try {
-            const optionsResult = await generateOptimizedDecision(effectiveDilemma, newCriteria, uploadedFileInfos, workspaceId, questionType);
-            optionsResult.resultType = questionType;
+            const optionsResult = await generateOptimizedDecision(effectiveDilemma, newCriteria, uploadedFileInfos, workspaceId, 'comparative');
             
             console.log("✅ [DEBUG] Auto-options generated successfully");
             setResult(optionsResult);

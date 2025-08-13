@@ -8,12 +8,10 @@ import { generateOptionSearchLinks } from '@/services/expandOptionsService';
 interface ComparisonTableProps {
   breakdown: IBreakdownItem[];
   dilemma?: string;
-  resultType?: 'factual' | 'comparative' | 'simple-choice';
 }
 export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   breakdown,
-  dilemma,
-  resultType = 'comparative'
+  dilemma
 }) => {
   if (!breakdown || breakdown.length === 0) {
     return <div className="flex items-center justify-center p-8 text-muted-foreground">
@@ -21,20 +19,13 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
       </div>;
   }
 
-  // Pour les questions factuelles, ne pas afficher le tableau comparatif
-  // car il n'y a qu'une seule réponse
-  if (resultType === 'factual') {
-    return null;
-  }
-
   // Garder l'ordre original des options (plus de tri par score)
   const sortedOptions = [...breakdown];
 
-  // Vérifier qu'on a bien plusieurs options pour justifier un tableau
-  if (sortedOptions.length < 2) {
-    console.warn(`⚠️ Only ${sortedOptions.length} option(s) found for comparison table (expected 3-5 for ${resultType} questions)`);
+  // Afficher le tableau même avec une seule option
+  if (sortedOptions.length === 0) {
     return <div className="flex items-center justify-center p-8 text-muted-foreground">
-        <p>Pas assez d'options pour un tableau comparatif (attendu: 3-5 options)</p>
+        <p>Aucune donnée disponible pour le tableau comparatif</p>
       </div>;
   }
   return <div className="space-y-4">

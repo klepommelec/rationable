@@ -16,9 +16,6 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
   topOption,
   result
 }) => {
-  // Pour les questions factuelles, ne plus afficher de score
-  const isFactual = result?.resultType === 'factual';
-
   // Ne plus afficher de score du tout
   return null;
 };

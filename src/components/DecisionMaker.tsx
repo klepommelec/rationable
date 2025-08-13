@@ -260,8 +260,7 @@ const DecisionMaker = () => {
 
   // Note: La synchronisation des états lors de la navigation est gérée par handleAnalysisNavigation
   
-  const displayQuestionType = (displayResult?.resultType ?? questionType);
-  const shouldShowCriteria = displayQuestionType === 'comparative' || displayQuestionType === 'simple-choice';
+  const shouldShowCriteria = true;
   return <div className="w-full mx-auto px-4 sm:px-6 lg:px-[80px]">
       {/* Skip to main content link for screen readers */}
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50" aria-label="Aller au contenu principal">

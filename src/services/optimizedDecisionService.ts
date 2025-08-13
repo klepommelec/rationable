@@ -3,7 +3,7 @@ import { UploadedFileInfo } from './fileUploadService';
 import { searchWithPerplexity } from './perplexityService';
 import { callOpenAiApi } from './openai';
 import { makeClaudeDecision } from './claudeService';
-import { detectQuestionType } from './questionTypeDetector';
+
 import { generateContextualEmoji } from './contextualEmojiService';
 import { 
   enrichFactualDescription, 
@@ -311,7 +311,7 @@ CONTEXTE : Données réelles et vérifiées 2025`;
       recommendation,
       description: enrichedDescription,
       breakdown,
-      resultType: 'factual',
+      
       realTimeData: {
         hasRealTimeData: true,
         timestamp: new Date().toISOString(),
@@ -470,11 +470,11 @@ INSTRUCTIONS CRITIQUES:
 
 // Service principal unifié et adaptatif
 export const generateOptimizedDecision = async (
-  dilemma: string,
-  criteria: ICriterion[],
-  files?: UploadedFileInfo[],
-  workspaceId?: string,
-  forcedType?: 'factual' | 'comparative' | 'simple-choice'
+  dilemma: string, 
+  criteria: ICriterion[], 
+  files?: UploadedFileInfo[], 
+  workspaceId?: string, 
+  forcedType?: 'comparative'
 ): Promise<IResult> => {
   console.log('🎯 [generateOptimizedDecision] Starting with adaptive approach:', {
     dilemma: dilemma.substring(0, 50) + '...',
@@ -483,27 +483,6 @@ export const generateOptimizedDecision = async (
     workspaceId: workspaceId || 'none'
   });
 
-  // Détecter si c'est une question nécessitant une réponse factuelle directe
-  const questionType = forcedType || await detectQuestionType(dilemma);
-  console.log('🔍 [generateOptimizedDecision] Question type detected:', questionType);
-
-  try {
-    // Pour les questions factuelles, utiliser Perplexity avec approche adaptative
-    if (questionType === 'factual') {
-      console.log('📋 [generateOptimizedDecision] Using adaptive factual approach with Perplexity');
-      const result = await generateAdaptiveAnswerWithPerplexity(dilemma, files, workspaceId);
-      // Forcer le type à 'comparative' pour unifier l'interface
-      result.resultType = 'comparative';
-      return result;
-    }
-
-    // Pour les questions comparatives et de choix, utiliser l'analyse complète
-    console.log('⚖️ [generateOptimizedDecision] Using comparative analysis with OpenAI/Claude');
-    const result = await generateComparativeWithOpenAI(dilemma, criteria, files, workspaceId);
-    // Le type reste 'comparative' - pas de modification nécessaire
-    return result;
-  } catch (error) {
-    console.error('❌ [generateOptimizedDecision] Error:', error);
-    throw error;
-  }
+  console.log('⚖️ [generateOptimizedDecision] Using unified comparative analysis');
+  return await generateComparativeWithOpenAI(dilemma, criteria, files, workspaceId);
 };

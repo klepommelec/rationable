@@ -276,61 +276,23 @@ export const generateOptionsWithFallback = async (
   
   let prompt = '';
 
-  // Adapter le prompt selon le type de question
-  if (questionType === 'factual') {
-    // Pour les questions factuelles : demander UNE réponse directe
-    prompt = `
-Analysez cette question factuelle et donnez LA réponse précise et directe.
-
-Question: "${dilemma}"${realTimeContext}${workspaceContext}`;
-
-    if (files && files.length > 0) {
-      prompt += `
-
-Documents joints à analyser (${files.length} fichier(s)) :
-${files.map(f => `- ${f.fileName} (${f.fileType})`).join('\n')}
-
-Utilisez ces documents pour enrichir votre réponse factuelle.`;
-    }
-
-    prompt += `
-
-Retournez un objet JSON avec:
-1. "recommendation": LA réponse factuelle directe (texte court et précis)
-2. "description": Explication détaillée de cette réponse avec preuves et sources
-3. "imageQuery": Description pour générer une image (en anglais, très descriptive)
-4. "confidenceLevel": Niveau de confiance de la réponse (1-100)
-5. "dataFreshness": Fraîcheur des données utilisées ("very-fresh", "fresh", "moderate", "stale")
-6. "infoLinks": Tableau de 3-5 liens utiles avec "title" et "url" (obligatoire)
-7. "shoppingLinks": Tableau de 2-3 liens d'achat avec "title" et "url" (obligatoire)
-8. "breakdown": Tableau avec UN SEUL objet contenant:
-   - "option": La réponse factuelle
-   - "pros": Tableau des éléments factuels positifs/caractéristiques
-   - "cons": Tableau des limitations/précisions (si applicable)
-   - "score": 100 (réponse factuelle = score maximal)
-
-IMPORTANT: Pour une question factuelle, générez UN SEUL élément dans le breakdown avec score 100.
-
-Répondez UNIQUEMENT avec un objet JSON valide.`;
-
-  } else {
-    // Pour les questions de choix (comparative ou simple-choice) : forcer 3-5 options
-    prompt = `
-Analysez ce dilemme de choix et générez EXACTEMENT 3 à 5 options différentes avec évaluation détaillée.
+  // Approche unifiée pour tous les types de questions
+  prompt = `
+Analysez ce dilemme et générez EXACTEMENT 3 à 5 options différentes avec évaluation détaillée.
 
 Dilemma: "${dilemma}"
 Critères d'évaluation: ${criteriaList}${realTimeContext}${workspaceContext}`;
 
-    if (files && files.length > 0) {
-      prompt += `
+  if (files && files.length > 0) {
+    prompt += `
 
 Documents joints à analyser (${files.length} fichier(s)) :
 ${files.map(f => `- ${f.fileName} (${f.fileType})`).join('\n')}
 
 Analysez le contenu de ces documents pour enrichir votre analyse et vos recommandations.`;
-    }
+  }
 
-    prompt += `
+  prompt += `
 
 IMPORTANT: Vous DEVEZ générer entre 3 et 5 options distinctes avec des scores différents (pas tous identiques).
 
@@ -359,7 +321,6 @@ Exemple de breakdown attendu:
 Générez des options concrètes et pertinentes avec des scores réalistes et variés.
 
 Répondez UNIQUEMENT avec un objet JSON valide.`;
-  }
 
   const request: AIRequest = {
     prompt,
@@ -412,7 +373,7 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
     console.log(`📊 Data freshness calculated: ${calculatedFreshness}`);
     
     // Ajouter le type de résultat
-    result.resultType = questionType;
+    // Type unifié supprimé
     
     // Ajouter les métadonnées de données en temps réel (mais sans afficher les sources dans l'UI pour l'instant)
     if (realTimeData) {
@@ -475,33 +436,25 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
       description: "Tous les fournisseurs IA ont échoué. Une analyse manuelle est recommandée pour ce dilemme complexe.",
       imageQuery: "decision making analysis flowchart",
       dataFreshness: "stale" as const,
-      resultType: questionType,
       infoLinks: [],
       shoppingLinks: [],
-      breakdown: questionType === 'factual' ? [
+      breakdown: [
         {
           option: "Réponse non disponible",
           pros: ["Nécessite une recherche manuelle"],
           cons: ["Données insuffisantes"],
           score: 50
-        }
-      ] : [
+        },
         {
           option: "Option A",
           pros: ["À définir selon le contexte"],
           cons: ["Nécessite une analyse approfondie"],
-          score: 50
+          score: 45
         },
         {
           option: "Option B", 
           pros: ["À évaluer manuellement"],
           cons: ["Données insuffisantes"],
-          score: 45
-        },
-        {
-          option: "Option C", 
-          pros: ["Analyse manuelle requise"],
-          cons: ["Informations limitées"],
           score: 40
         }
       ],
