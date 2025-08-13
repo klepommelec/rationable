@@ -193,7 +193,7 @@ const DecisionMaker = () => {
   const displayCategory = isLockedToOther ? (currentAnalysis?.category ?? selectedCategory) : selectedCategory;
 
   // État pour le type de question avec classification asynchrone
-  const [questionType, setQuestionType] = React.useState<'factual' | 'comparative' | 'simple-choice'>('comparative');
+  const [questionType, setQuestionType] = React.useState<'comparative' | 'simple-choice'>('comparative');
 
   // Effet pour classifier la question quand elle change
   React.useEffect(() => {

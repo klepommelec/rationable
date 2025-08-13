@@ -3,7 +3,7 @@ import { callOpenAiApi } from './openai';
 
 export interface DescriptionEnrichmentOptions {
   dilemma: string;
-  questionType: 'factual' | 'comparative';
+  questionType: 'comparative';
   rawResponse?: string;
   domain?: string;
 }
@@ -62,7 +62,7 @@ export const validateDescriptionQuality = (description: string, dilemma: string)
 };
 
 /**
- * Enrichit une réponse factuelle brute de Perplexity
+ * Enrichit une réponse brute de Perplexity
  */
 export const enrichFactualDescription = async (
   dilemma: string,
