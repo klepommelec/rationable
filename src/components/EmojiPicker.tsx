@@ -71,17 +71,49 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ emoji, setEmoji }) => 
     if (!searchTerm) return EMOJI_CATEGORIES;
     
     const lowerSearchTerm = searchTerm.toLowerCase();
+    
+    // Créer un mapping des emojis vers leurs termes de recherche
+    const emojiSearchMap: Record<string, string[]> = {
+      '🤔': ['réfléchir', 'penser', 'hmm', 'question', 'doute'],
+      '💻': ['ordinateur', 'computer', 'travail', 'bureau', 'laptop', 'pc'],
+      '✈️': ['avion', 'voyage', 'vacances', 'vol', 'transport'],
+      '🏠': ['maison', 'home', 'habiter', 'domicile', 'logement'],
+      '🎉': ['fête', 'célébration', 'party', 'joie', 'succès'],
+      '💡': ['idée', 'lumière', 'innovation', 'créativité', 'solution'],
+      '💸': ['argent', 'money', 'dépense', 'coût', 'prix'],
+      '❤️': ['amour', 'love', 'coeur', 'romance', 'affection'],
+      '🍔': ['burger', 'nourriture', 'manger', 'fast food', 'restaurant'],
+      '📚': ['livre', 'étudier', 'école', 'lecture', 'apprendre'],
+      '🏆': ['trophée', 'gagner', 'victoire', 'champion', 'réussite'],
+      '🤷': ['hausser épaules', 'je sais pas', 'peu importe', 'indifférent'],
+      '😊': ['sourire', 'content', 'heureux', 'joie', 'satisfait'],
+      '👍': ['pouce', 'bien', 'ok', 'approuver', 'accord'],
+      '🔥': ['feu', 'chaud', 'excellent', 'populaire', 'tendance'],
+      '⭐': ['étoile', 'star', 'favori', 'excellent', 'top'],
+      '🚀': ['fusée', 'rapide', 'lancement', 'startup', 'croissance'],
+      '🎯': ['cible', 'objectif', 'but', 'précision', 'focus'],
+      '💪': ['force', 'muscle', 'pouvoir', 'détermination', 'fort'],
+      '🌟': ['brillant', 'star', 'succès', 'excellent', 'remarquable']
+    };
+    
     return EMOJI_CATEGORIES.map(category => ({
       ...category,
-      emojis: category.emojis.filter(e => {
+      emojis: category.emojis.filter(emoji => {
         // Recherche dans les termes de recherche de la catégorie
-        const matchesSearchTerms = category.searchTerms.some(term => 
+        const matchesCategoryTerms = category.searchTerms.some(term => 
           term.toLowerCase().includes(lowerSearchTerm)
         );
+        
         // Recherche dans le nom de la catégorie
         const matchesCategoryName = category.name.toLowerCase().includes(lowerSearchTerm);
         
-        return matchesSearchTerms || matchesCategoryName;
+        // Recherche dans les termes spécifiques à l'emoji
+        const emojiTerms = emojiSearchMap[emoji] || [];
+        const matchesEmojiTerms = emojiTerms.some(term => 
+          term.toLowerCase().includes(lowerSearchTerm)
+        );
+        
+        return matchesCategoryTerms || matchesCategoryName || matchesEmojiTerms;
       })
     })).filter(category => category.emojis.length > 0);
   }, [searchTerm]);
