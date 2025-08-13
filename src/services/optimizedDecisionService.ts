@@ -79,39 +79,62 @@ const cleanAIResponse = (text: string): string => {
 
 // Fonction pour parser une réponse Perplexity et extraire des options multiples
 const parseMultipleItemsFromPerplexity = (content: string, dilemma: string): { recommendation: string; breakdown: IBreakdownItem[] } => {
-  // Patrons de détection d'éléments multiples
-  const patterns = [
-    // Pattern pour listes numérotées: "1. Exposition A", "2. Exposition B"
-    /(?:^|\n)\d+\.\s*(.+?)(?=\n\d+\.|$)/gs,
-    // Pattern pour listes à puces: "- Exposition A", "• Exposition B"  
-    /(?:^|\n)[-•*]\s*(.+?)(?=\n[-•*]|$)/gs,
-    // Pattern pour noms propres répétés (expositions, musées, etc.)
-    /(?:^|\n)([A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ][^.\n]{20,}?)(?=\n[A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ]|$)/gs
-  ];
+  console.log('🔍 Contenu à parser:', content.substring(0, 300));
   
   let items: string[] = [];
   
-  // Essayer chaque pattern
-  for (const pattern of patterns) {
-    const matches = Array.from(content.matchAll(pattern));
-    if (matches.length >= 2) { // Au moins 2 éléments trouvés
-      items = matches.map(match => match[1].trim()).filter(item => item.length > 10);
-      break;
+  // Pattern spécifique pour les expositions (détecte les titres entre guillemets ou tirets)
+  const expositionPattern = /[-–—]\s*([^-–—\n]{10,100})(?:\s*\([^)]+\))?/g;
+  let matches = Array.from(content.matchAll(expositionPattern));
+  
+  if (matches.length >= 2) {
+    items = matches.map(match => match[1].trim()).filter(item => item.length > 5);
+    console.log('📋 Expositions trouvées via pattern:', items.length);
+  }
+  
+  // Si pas d'expositions, essayer de détecter par parenthèses et dates
+  if (items.length < 2) {
+    const eventPattern = /([A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ][^()\n]{5,80})\s*\([^)]*(?:202[4-5]|janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)[^)]*\)/g;
+    matches = Array.from(content.matchAll(eventPattern));
+    
+    if (matches.length >= 2) {
+      items = matches.map(match => match[1].trim()).filter(item => item.length > 5);
+      console.log('📅 Événements trouvés via dates:', items.length);
     }
   }
   
-  // Si aucun pattern ne fonctionne, essayer de diviser par phrases longues
+  // Pattern pour détecter les noms d'expositions avec des mots clés
   if (items.length < 2) {
-    const sentences = content.split(/[.!?]\s+/).filter(s => s.length > 30);
-    if (sentences.length >= 2) {
-      items = sentences.slice(0, 5); // Max 5 options
+    const titlePattern = /(?:exposition|événement|atelier|visite|installation|parcours)[\s:]*([^.\n]{10,80})(?=\s*[-–—(]|\s*$)/gi;
+    matches = Array.from(content.matchAll(titlePattern));
+    
+    if (matches.length >= 2) {
+      items = matches.map(match => match[1].trim()).filter(item => item.length > 5);
+      console.log('🎨 Événements trouvés via mots-clés:', items.length);
     }
   }
   
-  // Si toujours pas d'éléments multiples, retourner format simple
+  // Dernière tentative: diviser par segments logiques avec des indices forts
   if (items.length < 2) {
+    // Chercher des segments séparés par des tirets ou des points
+    const segments = content.split(/[-–—]\s+/).filter(s => s.trim().length > 20);
+    if (segments.length >= 3) { // Au moins 3 segments (intro + 2 expositions)
+      items = segments.slice(1, 6).map(s => s.split('(')[0].trim()); // Prendre les titres avant parenthèses
+      console.log('📄 Segments trouvés:', items.length);
+    }
+  }
+  
+  // Si toujours pas d'éléments multiples, formater proprement le contenu unique
+  if (items.length < 2) {
+    console.log('⚠️ Pas d\'éléments multiples détectés');
+    // Nettoyer le contenu pour une meilleure présentation
+    const cleanedContent = content
+      .replace(/\s+/g, ' ')
+      .replace(/[-–—]\s*/g, '\n• ')
+      .trim();
+    
     return {
-      recommendation: content,
+      recommendation: cleanedContent,
       breakdown: []
     };
   }
@@ -119,13 +142,15 @@ const parseMultipleItemsFromPerplexity = (content: string, dilemma: string): { r
   // Créer des IBreakdownItem pour chaque élément trouvé
   const breakdown: IBreakdownItem[] = items.slice(0, 5).map((item, index) => ({
     option: extractTitle(item),
-    pros: extractPositives(item),
-    cons: [], // Perplexity ne fournit généralement pas de cons pour les listes factuelles
-    score: 90 - (index * 5) // Score décroissant pour l'ordre
+    pros: extractPositives(item, content), // Passer le contenu complet pour plus de contexte
+    cons: [], 
+    score: 90 - (index * 5)
   }));
   
-  // La première option devient la recommandation
-  const recommendation = items[0];
+  // Créer une recommandation formatée proprement
+  const recommendation = `Voici les principales expositions actuellement disponibles :\n\n• ${breakdown[0].option}\n\nRecommandation : ${breakdown[0].option} semble être l'exposition phare du moment.`;
+  
+  console.log(`✅ Parser terminé: ${breakdown.length} options créées`);
   
   return { recommendation, breakdown };
 };
@@ -149,7 +174,7 @@ const extractTitle = (item: string): string => {
 };
 
 // Extraire les aspects positifs d'un élément
-const extractPositives = (item: string): string[] => {
+const extractPositives = (item: string, fullContent?: string): string[] => {
   const positives: string[] = [];
   
   // Chercher des dates
