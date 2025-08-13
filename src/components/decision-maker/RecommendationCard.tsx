@@ -44,15 +44,17 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
       <CardContent className="space-y-6 pt-6">
         <div className="flex flex-col gap-6">
           <div className="w-full space-y-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
+            <div className="flex items-start justify-between gap-4 w-full">
+              <div className="flex-1 min-w-0">
                 <Badge variant="secondary" className={`mb-2 ${config.badgeColor}`}>
                   {config.badge}
                 </Badge>
-                <h3 className={`text-lg font-semibold mb-2 ${config.titleColor}`}>
+                <h3 className={`text-lg font-semibold mb-2 ${config.titleColor} w-full`}>
                   {result.recommendation?.replace(/^Option\s+\d+:\s*/i, '').trim()}
                 </h3>
-                <ConfidenceIndicator breakdown={result.breakdown} topOption={topOption} result={result} />
+                <div className="w-full">
+                  <ConfidenceIndicator breakdown={result.breakdown} topOption={topOption} result={result} />
+                </div>
               </div>
               
               <div className="flex items-center gap-2 flex-shrink-0">
@@ -98,15 +100,17 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               </div>
             </div>
             
-            <div className="flex flex-col lg:flex-row gap-6">
-              <div className="flex-1">
-                <ExpandableText text={result.description} />
-              </div>
-              {result.imageQuery && (
-                <div className="hidden lg:block lg:w-60 flex-shrink-0">
-                  <DecisionImage imageQuery={result.imageQuery || result.recommendation} alt={`Illustration pour ${result.recommendation}`} />
+            <div className="w-full">
+              <div className="flex flex-col lg:flex-row gap-6 w-full">
+                <div className="flex-1 min-w-0 w-full">
+                  <ExpandableText text={result.description} />
                 </div>
-              )}
+                {result.imageQuery && (
+                  <div className="hidden lg:block lg:w-60 flex-shrink-0">
+                    <DecisionImage imageQuery={result.imageQuery || result.recommendation} alt={`Illustration pour ${result.recommendation}`} />
+                  </div>
+                )}
+              </div>
             </div>
 
             {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && <div className="grid md:grid-cols-2 gap-4 w-full">
