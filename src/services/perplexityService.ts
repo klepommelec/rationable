@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { I18nService, SupportedLanguage } from './i18nService';
 
 export interface PerplexitySearchResult {
   content: string;
@@ -41,48 +42,92 @@ const cleanPerplexityResponse = (content: string): string => {
   return cleaned;
 };
 
-export const searchWithPerplexity = async (query: string, context?: string): Promise<PerplexitySearchResult> => {
+export const searchWithPerplexity = async (
+  query: string, 
+  context?: string, 
+  language?: SupportedLanguage
+): Promise<PerplexitySearchResult> => {
   try {
     console.log('🔍 Perplexity search - Query:', query);
     console.log('📝 Perplexity search - Context:', context);
     
+    // Detect language from query if not provided
+    const detectedLanguage = language || I18nService.detectLanguage(query);
+    I18nService.setLanguage(detectedLanguage);
+    console.log('🌐 Language detected:', detectedLanguage);
+    
     // Détecter l'intention temporelle et adapter la requête
-    const temporalIntent = detectTemporalIntent(query);
+    const temporalIntent = detectTemporalIntent(query, detectedLanguage);
     console.log('⏰ Intention temporelle détectée:', temporalIntent.type);
+    
+    // Get localized context suffixes
+    const contextSuffixes = {
+      current: {
+        fr: 'informations actuelles et disponibles maintenant',
+        en: 'current information available now',
+        es: 'información actual disponible ahora',
+        it: 'informazioni attuali disponibili ora',
+        de: 'aktuelle verfügbare Informationen'
+      },
+      recent_past: {
+        fr: 'événements récemment terminés',
+        en: 'recently concluded events',
+        es: 'eventos recientemente concluidos',
+        it: 'eventi recentemente conclusi',
+        de: 'kürzlich abgeschlossene Ereignisse'
+      },
+      future: {
+        fr: 'événements programmés à venir',
+        en: 'scheduled upcoming events',
+        es: 'eventos programados próximos',
+        it: 'eventi programmati in arrivo',
+        de: 'geplante bevorstehende Ereignisse'
+      },
+      historical: {
+        fr: 'données historiques précises',
+        en: 'precise historical data',
+        es: 'datos históricos precisos',
+        it: 'dati storici precisi',
+        de: 'präzise historische Daten'
+      },
+      neutral: {
+        fr: 'informations vérifiées et précises',
+        en: 'verified and precise information',
+        es: 'información verificada y precisa',
+        it: 'informazioni verificate e precise',
+        de: 'verifizierte und präzise Informationen'
+      }
+    };
     
     // Adapter la requête selon l'intention temporelle
     let optimizedQuery = query;
-    
-    switch (temporalIntent.type) {
-      case 'current':
-        optimizedQuery = `${query} - informations actuelles et disponibles maintenant`;
-        break;
-      case 'recent_past':
-        optimizedQuery = `${query} - événements récemment terminés`;
-        break;
-      case 'future':
-        optimizedQuery = `${query} - événements programmés à venir`;
-        break;
-      case 'historical':
-        optimizedQuery = `${query} - données historiques précises`;
-        break;
-      case 'neutral':
-      default:
-        optimizedQuery = `${query} - informations vérifiées et précises`;
-        break;
+    const suffix = contextSuffixes[temporalIntent.type as keyof typeof contextSuffixes][detectedLanguage];
+    if (suffix) {
+      optimizedQuery = `${query} - ${suffix}`;
     }
+    
+    // Get localized default context
+    const defaultContexts = {
+      fr: 'Recherche d\'informations récentes et à jour',
+      en: 'Search for recent and up-to-date information',
+      es: 'Búsqueda de información reciente y actualizada',
+      it: 'Ricerca di informazioni recenti e aggiornate',
+      de: 'Suche nach aktuellen und up-to-date Informationen'
+    };
     
     const { data, error } = await supabase.functions.invoke('perplexity-search', {
       body: { 
         query: optimizedQuery, 
-        context: context || 'Recherche d\'informations récentes et à jour',
-        temporalIntent: temporalIntent.type
+        context: context || defaultContexts[detectedLanguage] || defaultContexts.fr,
+        temporalIntent: temporalIntent.type,
+        language: detectedLanguage
       },
     });
 
     if (error) {
       console.error('❌ Perplexity search error:', error);
-      throw new Error(`Perplexity API error: ${error.message}`);
+      const fallbackMessages = I18nService.getFallbackMessages(detectedLanguage);
+      throw new Error(`${fallbackMessages.perplexityError}: ${error.message}`);
     }
 
     if (!data || !data.content) {
@@ -112,81 +157,111 @@ export interface TemporalIntent {
   context: string;
 }
 
-export const detectTemporalIntent = (dilemma: string): TemporalIntent => {
+export const detectTemporalIntent = (dilemma: string, language?: SupportedLanguage): TemporalIntent => {
+  const detectedLanguage = language || I18nService.detectLanguage(dilemma);
+  const keywords = I18nService.getTemporalKeywords(detectedLanguage);
   const lowerDilemma = dilemma.toLowerCase();
-  const currentYear = new Date().getFullYear();
+  const currentYear = I18nService.getCurrentYear();
   
-  // Détection d'années avec regex
-  const yearMatches = dilemma.match(/\b(19|20)\d{2}\b/g);
-  const detectedYears = yearMatches ? yearMatches.map(y => parseInt(y)) : [];
+  // Use dynamic year detection from I18nService
+  const detectedYears = I18nService.detectYearsInText(dilemma);
   
   // Classification des années détectées
   const futureYears = detectedYears.filter(year => year > currentYear);
   const pastYears = detectedYears.filter(year => year < currentYear);
   const currentYearDetected = detectedYears.includes(currentYear);
   
-  // Détection des intentions temporelles spécifiques
-  const currentKeywords = [
-    'du moment', 'actuellement', 'en cours', 'maintenant', 'aujourd\'hui',
-    'cette semaine', 'ce mois', 'disponible', 'ouvert', 'accessible'
-  ];
-  
-  const recentPastKeywords = [
-    'dernières', 'récentes', 'terminées', 'passées', 'précédentes',
-    'qui viennent de', 'il y a peu', 'récemment fermé'
-  ];
-  
-  const historicalKeywords = [
-    'histoire de', 'ancien', 'ancienne', 'avant', 'historique', 'passé', 'auparavant'
-  ];
-  
-  const futureKeywords = [
-    'à venir', 'prochaine', 'prochain', 'futur', 'bientôt', 'prévu', 'programmé'
-  ];
+  // Get localized context messages
+  const contextMessages = {
+    future: {
+      fr: (years: number[]) => `événements programmés à venir${years.length > 0 ? ` (${years.join(', ')})` : ''}`,
+      en: (years: number[]) => `scheduled upcoming events${years.length > 0 ? ` (${years.join(', ')})` : ''}`,
+      es: (years: number[]) => `eventos programados próximos${years.length > 0 ? ` (${years.join(', ')})` : ''}`,
+      it: (years: number[]) => `eventi programmati in arrivo${years.length > 0 ? ` (${years.join(', ')})` : ''}`,
+      de: (years: number[]) => `geplante bevorstehende Ereignisse${years.length > 0 ? ` (${years.join(', ')})` : ''}`
+    },
+    current: {
+      fr: (year: number) => `événements actuellement en cours et disponibles (${year})`,
+      en: (year: number) => `events currently happening and available (${year})`,
+      es: (year: number) => `eventos que están ocurriendo actualmente y disponibles (${year})`,
+      it: (year: number) => `eventi attualmente in corso e disponibili (${year})`,
+      de: (year: number) => `derzeit stattfindende und verfügbare Ereignisse (${year})`
+    },
+    recentPast: {
+      fr: 'événements récemment terminés (derniers mois)',
+      en: 'recently concluded events (recent months)',
+      es: 'eventos recientemente concluidos (meses recientes)',
+      it: 'eventi recentemente conclusi (mesi recenti)',
+      de: 'kürzlich abgeschlossene Ereignisse (letzte Monate)'
+    },
+    historical: {
+      fr: (years: number[]) => `données historiques${years.length > 0 ? ` (${years.join(', ')})` : ''}`,
+      en: (years: number[]) => `historical data${years.length > 0 ? ` (${years.join(', ')})` : ''}`,
+      es: (years: number[]) => `datos históricos${years.length > 0 ? ` (${years.join(', ')})` : ''}`,
+      it: (years: number[]) => `dati storici${years.length > 0 ? ` (${years.join(', ')})` : ''}`,
+      de: (years: number[]) => `historische Daten${years.length > 0 ? ` (${years.join(', ')})` : ''}`
+    },
+    neutral: {
+      fr: 'informations les plus pertinentes selon le contexte',
+      en: 'most relevant information according to context',
+      es: 'información más relevante según el contexto',
+      it: 'informazioni più rilevanti secondo il contesto',
+      de: 'relevanteste Informationen je nach Kontext'
+    }
+  };
   
   // Classification par priorité avec logique dynamique des années
-  if (futureYears.length > 0 || futureKeywords.some(keyword => lowerDilemma.includes(keyword))) {
+  if (futureYears.length > 0 || keywords.future.some(keyword => lowerDilemma.includes(keyword))) {
     return {
       type: 'future',
-      context: `événements programmés à venir${futureYears.length > 0 ? ` (${futureYears.join(', ')})` : ''}`
+      context: contextMessages.future[detectedLanguage](futureYears)
     };
   }
   
-  if (currentKeywords.some(keyword => lowerDilemma.includes(keyword)) || currentYearDetected) {
+  if (keywords.current.some(keyword => lowerDilemma.includes(keyword)) || currentYearDetected) {
     return {
       type: 'current',
-      context: `événements actuellement en cours et disponibles (${currentYear})`
+      context: contextMessages.current[detectedLanguage](currentYear)
     };
   }
   
-  if (recentPastKeywords.some(keyword => lowerDilemma.includes(keyword))) {
+  if (keywords.recentPast.some(keyword => lowerDilemma.includes(keyword))) {
     return {
       type: 'recent_past',
-      context: 'événements récemment terminés (derniers mois)'
+      context: contextMessages.recentPast[detectedLanguage]
     };
   }
   
-  if (pastYears.length > 0 || historicalKeywords.some(keyword => lowerDilemma.includes(keyword))) {
+  if (pastYears.length > 0 || keywords.historical.some(keyword => lowerDilemma.includes(keyword))) {
     return {
       type: 'historical',
-      context: `données historiques${pastYears.length > 0 ? ` (${pastYears.join(', ')})` : ''}`
+      context: contextMessages.historical[detectedLanguage](pastYears)
     };
   }
   
   return {
     type: 'neutral',
-    context: 'informations les plus pertinentes selon le contexte'
+    context: contextMessages.neutral[detectedLanguage]
   };
 };
 
-export const detectRealTimeQuery = (dilemma: string): boolean => {
-  const realTimeKeywords = [
-    'draft', '2024', '2025', '2026', 'élection', 'prochain', 'futur', 'prochaine',
-    'récent', 'dernière', 'nouveau', 'nouvelle', 'tendance', 'actualité',
-    'maintenant', 'aujourd\'hui', 'cette année', 'ce mois', 'cette semaine',
-    'qui a été', 'qui est', 'résultats', 'gagnant', 'vainqueur'
-  ];
+export const detectRealTimeQuery = (dilemma: string, language?: SupportedLanguage): boolean => {
+  const detectedLanguage = language || I18nService.detectLanguage(dilemma);
+  const keywords = I18nService.getTemporalKeywords(detectedLanguage);
+  
+  // Use dynamic year detection instead of hardcoded years
+  const detectedYears = I18nService.detectYearsInText(dilemma);
+  const currentYear = I18nService.getCurrentYear();
+  
+  // Check for recent years (current year and next 2 years)
+  const relevantYears = detectedYears.some(year => 
+    year >= currentYear && year <= currentYear + 2
+  );
   
   const lowerDilemma = dilemma.toLowerCase();
-  return realTimeKeywords.some(keyword => lowerDilemma.includes(keyword));
+  
+  // Combine all real-time keywords from the language config
+  const allRealTimeKeywords = keywords.realTime;
+  
+  return relevantYears || allRealTimeKeywords.some(keyword => lowerDilemma.includes(keyword));
 };
