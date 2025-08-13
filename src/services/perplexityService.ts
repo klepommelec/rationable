@@ -14,31 +14,28 @@ export interface PerplexitySearchResult {
 const cleanPerplexityResponse = (content: string): string => {
   if (!content) return content;
   
-  // Supprimer tous les artefacts et références
+  // Nettoyage moins agressif pour préserver les informations contextuelles
   let cleaned = content
-    // Supprimer toutes les références de citation [1], [2], [3], etc.
-    .replace(/\[\d+\]/g, '')
-    // Supprimer les références multiples [1][2][3]
-    .replace(/(\[\d+\])+/g, '')
-    // Supprimer les séquences numériques parasites en fin
-    .replace(/\s*\d{3,6}\s*$/g, '')
-    // Supprimer les numéros isolés en fin de phrase
-    .replace(/\s+\d{1,3}\s*$/g, '')
-    // Supprimer les patterns numériques en milieu de phrase
-    .replace(/\s+\d{3,6}(?=\s|$)/g, '')
+    // Supprimer uniquement les références de citation en fin [1], [2], [3], etc.
+    .replace(/\[\d+\](?=\s|$)/g, '')
+    // Supprimer les références multiples seulement en fin
+    .replace(/(\[\d+\]\s*)+$/g, '')
     // Supprimer les espaces multiples
     .replace(/\s+/g, ' ')
     // Supprimer les espaces en début et fin
     .trim();
   
-  // Pour les réponses factuelles, garder seulement la première phrase si elle est complète
+  // Pour les questions de liste, préserver la structure complète
+  if (content.includes('1.') && content.includes('2.')) {
+    console.log('📋 Structure de liste détectée - préservation du contenu complet');
+    return cleaned;
+  }
+  
+  // Pour les réponses courtes, préserver la réponse complète
   const sentences = cleaned.split(/[.!?]+/);
-  if (sentences.length > 1 && sentences[0].length > 10) {
-    // Garder la première phrase si elle semble complète et informative
-    const firstSentence = sentences[0].trim();
-    if (firstSentence.length > 20) {
-      return firstSentence + '.';
-    }
+  if (sentences.length <= 3 || cleaned.length < 150) {
+    console.log('📝 Réponse courte détectée - préservation complète');
+    return cleaned;
   }
   
   return cleaned;
@@ -49,8 +46,31 @@ export const searchWithPerplexity = async (query: string, context?: string): Pro
     console.log('🔍 Perplexity search - Query:', query);
     console.log('📝 Perplexity search - Context:', context);
     
-    // Optimiser la requête pour obtenir des données plus récentes
-    const optimizedQuery = `${query} - Données récentes et actuelles 2024-2025`;
+    // Détecter l'intention temporelle et adapter la requête
+    const temporalIntent = detectTemporalIntent(query);
+    console.log('⏰ Intention temporelle détectée:', temporalIntent.type);
+    
+    // Adapter la requête selon l'intention temporelle
+    let optimizedQuery = query;
+    
+    switch (temporalIntent.type) {
+      case 'current':
+        optimizedQuery = `${query} - informations actuelles et disponibles maintenant`;
+        break;
+      case 'recent_past':
+        optimizedQuery = `${query} - événements récemment terminés`;
+        break;
+      case 'future':
+        optimizedQuery = `${query} - événements programmés à venir`;
+        break;
+      case 'historical':
+        optimizedQuery = `${query} - données historiques précises`;
+        break;
+      case 'neutral':
+      default:
+        optimizedQuery = `${query} - informations vérifiées et précises`;
+        break;
+    }
     
     const { data, error } = await supabase.functions.invoke('perplexity-search', {
       body: { 
@@ -84,6 +104,70 @@ export const searchWithPerplexity = async (query: string, context?: string): Pro
     console.error('❌ Perplexity service error:', error);
     throw error;
   }
+};
+
+export interface TemporalIntent {
+  type: 'current' | 'recent_past' | 'historical' | 'future' | 'neutral';
+  context: string;
+}
+
+export const detectTemporalIntent = (dilemma: string): TemporalIntent => {
+  const lowerDilemma = dilemma.toLowerCase();
+  
+  // Détection des intentions temporelles spécifiques
+  const currentKeywords = [
+    'du moment', 'actuellement', 'en cours', 'maintenant', 'aujourd\'hui',
+    'cette semaine', 'ce mois', 'disponible', 'ouvert', 'accessible'
+  ];
+  
+  const recentPastKeywords = [
+    'dernières', 'récentes', 'terminées', 'passées', 'précédentes',
+    'qui viennent de', 'il y a peu', 'récemment fermé'
+  ];
+  
+  const historicalKeywords = [
+    'histoire de', 'ancien', 'ancienne', '2020', '2021', '2022', '2023',
+    'avant', 'historique', 'passé', 'auparavant'
+  ];
+  
+  const futureKeywords = [
+    'à venir', 'prochaine', 'prochain', 'futur', 'bientôt',
+    '2026', '2027', 'prévu', 'programmé'
+  ];
+  
+  // Classification par priorité
+  if (currentKeywords.some(keyword => lowerDilemma.includes(keyword))) {
+    return {
+      type: 'current',
+      context: 'événements actuellement en cours et disponibles'
+    };
+  }
+  
+  if (recentPastKeywords.some(keyword => lowerDilemma.includes(keyword))) {
+    return {
+      type: 'recent_past',
+      context: 'événements récemment terminés (3-6 derniers mois)'
+    };
+  }
+  
+  if (futureKeywords.some(keyword => lowerDilemma.includes(keyword))) {
+    return {
+      type: 'future',
+      context: 'événements programmés à venir'
+    };
+  }
+  
+  if (historicalKeywords.some(keyword => lowerDilemma.includes(keyword))) {
+    return {
+      type: 'historical',
+      context: 'données historiques selon la période mentionnée'
+    };
+  }
+  
+  return {
+    type: 'neutral',
+    context: 'informations les plus pertinentes selon le contexte'
+  };
 };
 
 export const detectRealTimeQuery = (dilemma: string): boolean => {

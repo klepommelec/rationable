@@ -203,16 +203,20 @@ const validateParsedData = (items: Array<{title: string, description: string}>):
   return validTitles.length >= 2;
 };
 
-// Extraire des informations contextuelles (dates, lieux)
+// Extraire des informations contextuelles (dates, lieux) avec détection d'année dynamique
 const extractContextualInfo = (text: string): {dates: string[], locations: string[]} => {
   const dates: string[] = [];
   const locations: string[] = [];
   
-  // Dates plus précises
+  const currentYear = new Date().getFullYear();
+  const nextYear = currentYear + 1;
+  
+  // Dates plus précises avec années dynamiques
   const datePatterns = [
-    /(\d{1,2}\/\d{1,2}\/202[4-5])/g,
-    /(\d{1,2}\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+202[4-5])/gi,
-    /(jusqu'au\s+\d{1,2}\s+\w+)/gi
+    new RegExp(`(\\d{1,2}\\/\\d{1,2}\\/${currentYear}|\\d{1,2}\\/\\d{1,2}\\/${nextYear})`, 'g'),
+    new RegExp(`(\\d{1,2}\\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\\s+${currentYear}|\\d{1,2}\\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\\s+${nextYear})`, 'gi'),
+    /(jusqu'au\s+\d{1,2}\s+\w+)/gi,
+    /(du\s+\d{1,2}\s+\w+\s+au\s+\d{1,2}\s+\w+)/gi
   ];
   
   datePatterns.forEach(pattern => {
@@ -335,11 +339,16 @@ export const generateAdaptiveAnswerWithPerplexity = async (
     const isListQuestion = detectListQuestion(dilemma);
     console.log(`📋 Question de type liste détectée: ${isListQuestion}`);
     
-    // Prompt adaptatif selon le type de question avec format plus structuré
+    // Détecter l'intention temporelle pour adapter le prompt
+    const { detectTemporalIntent } = await import('./perplexityService');
+    const temporalIntent = detectTemporalIntent(dilemma);
+    console.log('⏰ Intention temporelle pour la question:', temporalIntent.type);
+    
+    // Prompt adaptatif selon le type de question ET l'intention temporelle
     const adaptivePrompt = isListQuestion 
       ? `${dilemma}
 
-INSTRUCTIONS CRITIQUES - FORMAT STRUCTURE :
+INSTRUCTIONS CRITIQUES - FORMAT STRUCTURÉ :
 - Listez EXACTEMENT les options avec ce format :
   1. [NOM PRÉCIS] - [Description courte] - [Date/Lieu si applicable]
   2. [NOM PRÉCIS] - [Description courte] - [Date/Lieu si applicable]
@@ -347,24 +356,24 @@ INSTRUCTIONS CRITIQUES - FORMAT STRUCTURE :
 
 - EXIGENCES STRICTES :
   • Noms officiels UNIQUEMENT (pas de descriptions génériques)
-  • Dates réelles vérifiées (format DD/MM/YYYY ou mois YYYY)
+  • Dates réelles vérifiées avec dates de début ET de fin
   • Lieux exacts et officiels
   • Minimum 3 options, maximum 8
 
+- INTENTION TEMPORELLE : ${temporalIntent.context}
 - SOURCES : Utilisez uniquement sites officiels, musées, organismes publics
-- DATES : Données janvier 2025 minimum, vérifiez les fermetures/annulations
 
-CONTEXTE TEMPOREL : ${new Date().toLocaleDateString('fr-FR')}`
+CONTEXTE TEMPOREL : Recherche pour ${temporalIntent.type} - ${new Date().toLocaleDateString('fr-FR')}`
       : `${dilemma}
 
 INSTRUCTIONS PRÉCISES - RÉPONSE FACTUELLE :
 - Réponse DIRECTE avec noms officiels exacts
-- Pas de généralisation ou approximation
+- Pas de généralisation ou approximation  
 - Format : Nom précis + détail essentiel
 - Sources gouvernementales/officielles UNIQUEMENT
-- Vérifiez l'actualité des informations
 
-CONTEXTE : Données vérifiées ${new Date().toLocaleDateString('fr-FR')}`;
+- INTENTION TEMPORELLE : ${temporalIntent.context}
+- CONTEXTE : ${temporalIntent.type} - ${new Date().toLocaleDateString('fr-FR')}`;
 
     const result = await searchWithPerplexity(adaptivePrompt);
     console.log('📝 Réponse adaptative reçue:', result.content.substring(0, 200));
