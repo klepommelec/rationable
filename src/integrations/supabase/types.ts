@@ -197,6 +197,7 @@ export type Database = {
           expires_at: string | null
           id: string
           public_id: string
+          sharing_token: string | null
           title: string
           view_count: number
         }
@@ -206,6 +207,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           public_id: string
+          sharing_token?: string | null
           title: string
           view_count?: number
         }
@@ -215,6 +217,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           public_id?: string
+          sharing_token?: string | null
           title?: string
           view_count?: number
         }

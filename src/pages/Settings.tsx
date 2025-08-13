@@ -9,6 +9,7 @@ import DataManagementSettings from '@/components/settings/DataManagementSettings
 import { WorkspacesSettings } from '@/components/settings/WorkspacesSettings';
 import DocumentsSettings from '@/components/workspace/DocumentsSettings';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
+import { SecurityNotice } from '@/components/SecurityNotice';
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState('profile');
@@ -61,6 +62,11 @@ const Settings = () => {
             <p className="text-muted-foreground">
               Gérez vos préférences et paramètres de compte
             </p>
+          </div>
+          
+          {/* Security notice for admin users */}
+          <div className="mb-6">
+            <SecurityNotice />
           </div>
           {renderActiveSection()}
         </div>

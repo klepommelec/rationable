@@ -13,12 +13,19 @@ export interface SharedDecision {
 }
 
 export const shareDecision = async (decision: IDecision): Promise<string> => {
-  // Check rate limit before proceeding
+  // Check if user is authenticated - now required for sharing
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('Vous devez être connecté pour partager une décision');
+  }
+
+  // Check rate limit with user-specific identifier for better security
   const { data: rateLimitOk, error: rateLimitError } = await supabase
     .rpc('check_rate_limit', {
       resource: 'shared_decisions',
-      identifier: 'global', // Could be user-specific if auth is implemented
-      max_actions: 10,
+      identifier: user.id,
+      max_actions: 5, // Reduced limit for better security
       window_minutes: 60
     });
 
