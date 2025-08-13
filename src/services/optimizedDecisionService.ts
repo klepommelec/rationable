@@ -77,6 +77,101 @@ const cleanAIResponse = (text: string): string => {
   return cleaned;
 };
 
+// Fonction pour parser une réponse Perplexity et extraire des options multiples
+const parseMultipleItemsFromPerplexity = (content: string, dilemma: string): { recommendation: string; breakdown: IBreakdownItem[] } => {
+  // Patrons de détection d'éléments multiples
+  const patterns = [
+    // Pattern pour listes numérotées: "1. Exposition A", "2. Exposition B"
+    /(?:^|\n)\d+\.\s*(.+?)(?=\n\d+\.|$)/gs,
+    // Pattern pour listes à puces: "- Exposition A", "• Exposition B"  
+    /(?:^|\n)[-•*]\s*(.+?)(?=\n[-•*]|$)/gs,
+    // Pattern pour noms propres répétés (expositions, musées, etc.)
+    /(?:^|\n)([A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ][^.\n]{20,}?)(?=\n[A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ]|$)/gs
+  ];
+  
+  let items: string[] = [];
+  
+  // Essayer chaque pattern
+  for (const pattern of patterns) {
+    const matches = Array.from(content.matchAll(pattern));
+    if (matches.length >= 2) { // Au moins 2 éléments trouvés
+      items = matches.map(match => match[1].trim()).filter(item => item.length > 10);
+      break;
+    }
+  }
+  
+  // Si aucun pattern ne fonctionne, essayer de diviser par phrases longues
+  if (items.length < 2) {
+    const sentences = content.split(/[.!?]\s+/).filter(s => s.length > 30);
+    if (sentences.length >= 2) {
+      items = sentences.slice(0, 5); // Max 5 options
+    }
+  }
+  
+  // Si toujours pas d'éléments multiples, retourner format simple
+  if (items.length < 2) {
+    return {
+      recommendation: content,
+      breakdown: []
+    };
+  }
+  
+  // Créer des IBreakdownItem pour chaque élément trouvé
+  const breakdown: IBreakdownItem[] = items.slice(0, 5).map((item, index) => ({
+    option: extractTitle(item),
+    pros: extractPositives(item),
+    cons: [], // Perplexity ne fournit généralement pas de cons pour les listes factuelles
+    score: 90 - (index * 5) // Score décroissant pour l'ordre
+  }));
+  
+  // La première option devient la recommandation
+  const recommendation = items[0];
+  
+  return { recommendation, breakdown };
+};
+
+// Extraire le titre/nom principal d'un élément
+const extractTitle = (item: string): string => {
+  // Chercher un titre entre guillemets ou en début de phrase
+  const titleMatch = item.match(/^["\']?([^"'\n(]{3,50})["\']?/);
+  if (titleMatch) {
+    return titleMatch[1].trim();
+  }
+  
+  // Prendre les premiers mots jusqu'à une date ou parenthèse
+  const shortMatch = item.match(/^([^()\n]{3,50})(?:\s*\(|$)/);
+  if (shortMatch) {
+    return shortMatch[1].trim();
+  }
+  
+  // Fallback: premiers 50 caractères
+  return item.substring(0, 50).trim();
+};
+
+// Extraire les aspects positifs d'un élément
+const extractPositives = (item: string): string[] => {
+  const positives: string[] = [];
+  
+  // Chercher des dates
+  const dateMatch = item.match(/(\d{1,2}\/\d{1,2}\/\d{4}|\d{1,2}\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)|\d{4})/i);
+  if (dateMatch) {
+    positives.push(`Disponible ${dateMatch[1]}`);
+  }
+  
+  // Chercher des lieux
+  const locationMatch = item.match(/(musée|galerie|centre|salle|lieu|espace)\s+([A-Z][a-z\s]+)/i);
+  if (locationMatch) {
+    positives.push(`Lieu: ${locationMatch[2].trim()}`);
+  }
+  
+  // Ajouter une description générique si pas d'éléments trouvés
+  if (positives.length === 0) {
+    positives.push("Option recommandée actuellement");
+  }
+  
+  return positives;
+};
+
 // Génération des critères avec Perplexity
 export const generateCriteriaWithPerplexity = async (
   dilemma: string, 
@@ -169,18 +264,28 @@ CONTEXTE : Données réelles et vérifiées 2025`;
     const result = await searchWithPerplexity(adaptivePrompt);
     console.log('📝 Réponse adaptative reçue:', result.content.substring(0, 200));
     
+    // Parser la réponse pour extraire des éléments multiples si c'est une question de liste
+    const { recommendation, breakdown } = isListQuestion 
+      ? parseMultipleItemsFromPerplexity(result.content, dilemma)
+      : { recommendation: result.content.trim(), breakdown: [] };
+    
+    console.log(`📊 Items extraits: ${breakdown.length} options trouvées`);
+    if (breakdown.length > 0) {
+      console.log(`📋 Options: ${breakdown.map(item => item.option).join(', ')}`);
+    }
+    
     // Enrichir la description 
     const context = detectDilemmaContext(dilemma);
     const enrichedDescription = await enrichFactualDescription(
       dilemma, 
-      result.content, 
+      recommendation, 
       context.domain
     );
     
     return {
-      recommendation: result.content.trim(),
+      recommendation,
       description: enrichedDescription,
-      breakdown: [],
+      breakdown,
       resultType: 'factual',
       realTimeData: {
         hasRealTimeData: true,
