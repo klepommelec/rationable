@@ -13,6 +13,7 @@ import { toast } from "sonner";
 // Lazy load components for better performance
 const DilemmaSetup = React.lazy(() => import('./decision-maker/DilemmaSetup'));
 const AnalysisResult = React.lazy(() => import('./decision-maker/AnalysisResult'));
+// Composant principal pour la prise de décision unifiée
 const DecisionMaker = () => {
   const {
     dilemma,
