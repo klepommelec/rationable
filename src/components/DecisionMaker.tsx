@@ -253,7 +253,7 @@ const DecisionMaker = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 animate-fade-in">
               <div className="flex items-baseline gap-4 w-full ">
                 <EmojiPicker emoji={displayEmoji} setEmoji={setEmoji} />
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-left break-words flex-1 min-w-0">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-left break-words flex-1 min-w-0">
                   {getCurrentAnalysis()?.displayTitle || getCurrentAnalysis()?.dilemma || displayDilemma}
                 </h1>
               </div>
