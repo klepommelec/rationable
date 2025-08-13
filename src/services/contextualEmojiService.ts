@@ -69,6 +69,11 @@ const EMOJI_CATEGORIES: EmojiCategory[] = [
     priority: 1
   },
   {
+    keywords: ['chaussures', 'sneakers', 'baskets', 'shoes', 'running', 'sport shoes', 'footwear', 'nike', 'adidas', 'pied'],
+    emojis: ['👟', '👠', '🥿', '👞', '🦶', '👡', '🩴'],
+    priority: 2
+  },
+  {
     keywords: ['entertainment', 'movie', 'film', 'game', 'jeu', 'music', 'musique', 'tv', 'cinéma', 'concert', 'spectacle'],
     emojis: ['🎬', '🎮', '🎵', '📺', '🎪', '🎭', '🎤', '🎸', '🎲'],
     priority: 1

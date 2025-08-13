@@ -158,25 +158,25 @@ export const improveDescription = async (
 
   const context = detectDilemmaContext(dilemma);
 
-  const prompt = `Crée une description ultra-spécifique de 2-3 lignes pour cette recommandation :
+  const prompt = `Crée une description factuelle et informative de 2 lignes MAXIMUM pour cette recommandation :
 
 DILEMME: "${dilemma}"
 RECOMMANDATION: "${result.recommendation}"
 CONTEXTE: ${context.domain}
 
 CONSIGNES ABSOLUES:
-1. Exactement 2-3 lignes courtes (maximum 200 caractères)  
-2. Commence par "${result.recommendation}" + ses avantages CONCRETS
-3. Explique pourquoi c'est LA meilleure option pour ce dilemme spécifique
-4. INTERDICTION: "Cette décision", "Le choix de", "Il est important", "En conclusion"
-5. Focus sur les caractéristiques UNIQUES qui la différencient
-6. Intègre le contexte "${dilemma}"
+1. EXACTEMENT 2 lignes courtes (maximum 180 caractères total)
+2. Première ligne: Commence par "${result.recommendation}" + ses caractéristiques FACTUELLES principales
+3. Deuxième ligne: Avantages CONCRETS et MESURABLES pour ce dilemme spécifique
+4. Style informatif et factuel comme un guide de voyage ou une fiche produit
+5. INTERDICTION: "Cette décision", "Le choix de", "Il est important", "En conclusion", "est recommandé"
+6. Éviter les généralités, donner des détails SPÉCIFIQUES
 
-EXEMPLES PARFAITS:
-- "Chamonix-Mont-Blanc offre un domaine skiable exceptionnel avec accès facile en train depuis Genève. L'ambiance alpine authentique et les activités après-ski variées en font une destination hivernale complète."
-- "MacBook Pro M3 combine puissance créative et autonomie 18h grâce à sa puce M3. Parfait pour le montage vidéo professionnel avec écran Retina et connectivité Thunderbolt 4."
+EXEMPLES PARFAITS (style Google/Wikipedia):
+- "Chamonix-Mont-Blanc offre un domaine skiable de 175km avec accès direct aux pistes depuis le centre-ville. L'ambiance alpine authentique et les liaisons vers l'Italie en font une destination hivernale complète."
+- "Nike Air Max 270 combine amorti Air Max visible au talon et mesh respirant sur l'avant-pied. Le design moderne et le confort optimal répondent parfaitement aux besoins quotidiens et sportifs."
 
-Réponds UNIQUEMENT avec la description de 2-3 lignes.`;
+Réponds UNIQUEMENT avec les 2 lignes de description factuelle.`;
 
   try {
     const response = await callOpenAiApi(prompt);
