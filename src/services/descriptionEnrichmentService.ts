@@ -64,7 +64,7 @@ export const validateDescriptionQuality = (description: string, dilemma: string)
 /**
  * Enrichit une réponse brute de Perplexity
  */
-export const enrichFactualDescription = async (
+export const enrichDescription = async (
   dilemma: string,
   rawResponse: string,
   domain?: string

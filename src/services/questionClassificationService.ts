@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export type QuestionType = 'comparative';
@@ -16,22 +15,19 @@ export const classifyQuestionWithAI = async (question: string): Promise<Question
     
     const classificationPrompt = `Analyse cette question et détermine son type selon ces critères précis :
 
-**COMPARATIVE** - Questions nécessitant la comparaison de plusieurs options :
+**COMPARATIVE** - Toutes les questions sont analysées de manière comparative :
 - Questions ouvertes sur les meilleures options ("Quelles sont les meilleures...", "Que choisir...")
 - Questions de conseil avec plusieurs alternatives possibles
 - Questions nécessitant une analyse de pros/cons
 - Questions avec critères de sélection multiples
-
-**SIMPLE-CHOICE** - Questions avec un ensemble limité d'options connues :
-- Questions binaires ("Oui ou non", "A ou B")
-- Questions avec options prédéfinies et limitées
-- Questions avec contexte très spécifique
+- Questions binaires transformées en analyse comparative
+- Questions avec options prédéfinies analysées comparativement
 
 Question à analyser : "${question}"
 
 Réponds UNIQUEMENT avec un JSON valide dans ce format exact :
 {
-  "type": "comparative|simple-choice",
+  "type": "comparative",
   "confidence": 85,
   "reasoning": "Explication claire du choix",
   "suggestedApproach": "Comment traiter cette question"
@@ -59,7 +55,7 @@ Réponds UNIQUEMENT avec un JSON valide dans ce format exact :
     });
 
     return {
-      type: data.type as QuestionType,
+      type: 'comparative' as QuestionType,
       confidence: data.confidence || 80,
       reasoning: data.reasoning || 'Classification par IA',
       suggestedApproach: data.suggestedApproach || 'Approche standard'

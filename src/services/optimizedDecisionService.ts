@@ -6,7 +6,7 @@ import { makeClaudeDecision } from './claudeService';
 
 import { generateContextualEmoji } from './contextualEmojiService';
 import { 
-  enrichFactualDescription, 
+  enrichDescription, 
   improveDescription, 
   detectDilemmaContext 
 } from './descriptionEnrichmentService';
@@ -332,7 +332,7 @@ CONTEXTE : Données réelles et vérifiées 2025`;
     
     // Enrichir la description 
     const context = detectDilemmaContext(dilemma);
-    const enrichedDescription = await enrichFactualDescription(
+    const enrichedDescription = await enrichDescription(
       dilemma, 
       recommendation, 
       context.domain

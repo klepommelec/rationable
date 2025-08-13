@@ -114,8 +114,6 @@ const DecisionMaker = () => {
     try {
       // Mettre immédiatement l'état en chargement pour une UX fluide
       setAnalysisStep('loading-options');
-      // Définir un type provisoire pour éviter le clignotement des critères
-      setQuestionType('comparative');
 
       // Créer et ajouter la nouvelle analyse
       const newId = crypto.randomUUID();
@@ -167,14 +165,8 @@ const DecisionMaker = () => {
         setSelectedCategory(analysis.category);
         setAnalysisStep(analysis.analysisStep);
         
-        // Forcer la reclassification du type de question pour la nouvelle analyse
-        detectQuestionType(analysis.dilemma).then(type => {
-          setQuestionType(type);
-          console.log(`🔄 Navigation - Question reclassified as: ${type}`);
-        }).catch(error => {
-          console.error('❌ Error reclassifying question during navigation:', error);
-          setQuestionType('comparative');
-        });
+        // Plus de reclassification nécessaire - toutes les questions sont comparatives
+        console.log('🔄 Navigation - Question type: comparative (unified)');
       });
     }
   };
@@ -192,29 +184,10 @@ const DecisionMaker = () => {
   const displayCriteria = isLockedToOther ? (currentAnalysis?.criteria ?? criteria) : criteria;
   const displayCategory = isLockedToOther ? (currentAnalysis?.category ?? selectedCategory) : selectedCategory;
 
-  // État pour le type de question avec classification asynchrone
-  const [questionType, setQuestionType] = React.useState<'comparative' | 'simple-choice'>('comparative');
+  // État unifié : toutes les questions sont traitées de manière comparative
+  const questionType = 'comparative';
 
-  // Effet pour classifier la question quand elle change
-  React.useEffect(() => {
-    const classifyQuestion = async () => {
-      if (dilemma && dilemma.trim()) {
-        try {
-          const type = await detectQuestionType(dilemma);
-          setQuestionType(type);
-          console.log(`🎯 Question classified as: ${type}`);
-        } catch (error) {
-          console.error('❌ Error classifying question:', error);
-          // Fallback par défaut
-          setQuestionType('comparative');
-        }
-      }
-    };
-
-    // Debounce pour éviter trop d'appels pendant que l'utilisateur tape
-    const timeoutId = setTimeout(classifyQuestion, 500);
-    return () => clearTimeout(timeoutId);
-  }, [dilemma]);
+  // Plus d'effet nécessaire - toutes les questions utilisent l'approche comparative unifiée
 
   // Ajouter la première analyse dès qu'elle démarre
   React.useEffect(() => {

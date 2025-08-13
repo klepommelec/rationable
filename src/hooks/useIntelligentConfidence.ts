@@ -14,8 +14,7 @@ export const useIntelligentConfidence = (
   breakdown: IBreakdownItem[],
   hasRealTimeData: boolean = false,
   dataTimestamp?: string,
-  sourcesCount: number = 0,
-  resultType?: 'comparative' | 'simple-choice'
+  sourcesCount: number = 0
 ): IntelligentConfidenceData => {
   
   return useMemo(() => {
@@ -29,23 +28,8 @@ export const useIntelligentConfidence = (
       };
     }
 
-    // Pour les choix simples : confiance automatiquement très élevée
-    if (resultType === 'simple-choice') {
-      const topOption = breakdown[0];
-      const hasGoodScore = topOption.score >= 90;
-      
-      return {
-        level: "Très Élevée",
-        color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100",
-        icon: "Target",
-        overallScore: hasGoodScore ? 95 : 90,
-        recommendationText: hasRealTimeData 
-          ? "Recommandation vérifiée avec données récentes"
-          : "Recommandation basée sur des sources fiables"
-      };
-    }
-
-    // Pour les questions comparatives : logique basée sur l'écart entre options
+    // Toutes les questions sont maintenant traitées de manière comparative
+    // Calcul de confiance basé sur l'écart entre les deux meilleures options
     const sortedOptions = [...breakdown].sort((a, b) => b.score - a.score);
     const topOption = sortedOptions[0];
     
@@ -122,5 +106,5 @@ export const useIntelligentConfidence = (
       overallScore: confidenceScore,
       recommendationText
     };
-  }, [breakdown, hasRealTimeData, dataTimestamp, sourcesCount, resultType]);
+  }, [breakdown, hasRealTimeData, dataTimestamp, sourcesCount]);
 };
