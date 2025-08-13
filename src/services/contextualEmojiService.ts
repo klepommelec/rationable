@@ -25,8 +25,18 @@ const EMOJI_CATEGORIES: EmojiCategory[] = [
   },
   {
     keywords: ['voyage', 'travel', 'vacation', 'hotel', 'avion', 'plane', 'destination', 'trip', 'partir', 'vacances', 'tourisme', 'étranger', 'pays', 'vol', 'aéroport'],
-    emojis: ['✈️', '🏖️', '🗺️', '🧳', '🌍', '🏝️', '🚢', '🗼', '🏛️', '🎒'],
+    emojis: ['✈️', '🗺️', '🧳', '🌍', '🚢', '🗼', '🏛️', '🎒'],
     priority: 1
+  },
+  {
+    keywords: ['hiver', 'winter', 'ski', 'neige', 'snow', 'montagne', 'alpes', 'station', 'froid', 'décembre', 'janvier', 'février'],
+    emojis: ['❄️', '🎿', '🏔️', '⛷️', '🏂', '🧣', '🧤', '🔥'],
+    priority: 2
+  },
+  {
+    keywords: ['été', 'summer', 'plage', 'beach', 'mer', 'ocean', 'soleil', 'juin', 'juillet', 'août', 'bronzer', 'baignade'],
+    emojis: ['🏖️', '🌊', '☀️', '🏝️', '🩱', '🕶️', '🏄‍♂️', '🌺'],
+    priority: 2
   },
   {
     keywords: ['maison', 'house', 'appartement', 'apartment', 'immobilier', 'real estate', 'logement', 'home', 'déménagement', 'loyer', 'achat', 'vente'],
@@ -124,7 +134,7 @@ export const generateContextualEmoji = (dilemma: string): string => {
   console.log(`🎭 Analyzing: "${dilemma}"`);
   console.log(`🔍 Keywords found: ${keywords.join(', ')}`);
   
-  // Scoring system pour trouver la meilleure correspondance
+  // Scoring system pour trouver la meilleure correspondance avec priorisation saisonnière
   let bestMatch = { category: null as EmojiCategory | null, score: 0, matchedKeyword: '' };
   
   for (const category of EMOJI_CATEGORIES) {
@@ -135,8 +145,14 @@ export const generateContextualEmoji = (dilemma: string): string => {
     for (const extractedKeyword of keywords) {
       for (const categoryKeyword of category.keywords) {
         if (extractedKeyword.includes(categoryKeyword) || categoryKeyword.includes(extractedKeyword)) {
-          // Score basé sur la longueur du mot (mots plus longs = plus spécifiques)
-          const score = Math.min(extractedKeyword.length, categoryKeyword.length) * (category.priority || 1);
+          // Score basé sur la longueur du mot et la priorité de la catégorie
+          let score = Math.min(extractedKeyword.length, categoryKeyword.length) * (category.priority || 1);
+          
+          // Bonus pour les correspondances exactes
+          if (extractedKeyword === categoryKeyword) {
+            score *= 1.5;
+          }
+          
           if (score > categoryScore) {
             categoryScore = score;
             matchedKeyword = extractedKeyword;
