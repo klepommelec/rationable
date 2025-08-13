@@ -7,8 +7,7 @@ import { UsefulLinks } from './UsefulLinks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Table2, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
-import YouTubeVideoCard from '@/components/YouTubeVideoCard';
+import { Table2, ChevronDown, ChevronUp } from 'lucide-react';
 import FollowUpQuestions from './FollowUpQuestions';
 import { DataAccuracyIndicator } from './DataAccuracyIndicator';
 
@@ -48,7 +47,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   }
 
   const hasMultipleOptions = result.breakdown && result.breakdown.length > 1;
-  const hasYouTubeVideos = result.socialContent?.youtubeVideos && result.socialContent.youtubeVideos.length > 0;
   
   // Gestion des options affichées
   const allOptions = result.breakdown || [];
@@ -115,24 +113,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 </Button>
               </div>
             )}
-          </CardContent>
-        </Card>
-      )}
-      
-      {hasYouTubeVideos && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ExternalLink className="h-5 w-5" />
-              Contenu vidéo recommandé
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {result.socialContent!.youtubeVideos!.slice(0, 6).map((video) => (
-                <YouTubeVideoCard key={video.id} video={video} />
-              ))}
-            </div>
           </CardContent>
         </Card>
       )}
