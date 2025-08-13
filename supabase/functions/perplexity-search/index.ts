@@ -35,19 +35,19 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a precise factual information specialist. CRITICAL RULES: 1) NEVER use generic names like "Player A", "Team X", "Candidate Y" - ONLY real, specific names. 2) If you do not know the exact answer, write EXACTLY "Information non disponible" 3) Verify dates carefully - distinguish 2024 vs 2025 vs 2026 events. 4) Answer in the same language as the question. 5) Be direct and concise (1-2 sentences max). 6) Remove all citation numbers. EXAMPLES of good answers: "Zaccharie Risacher", "Victor Wembanyama", "Sergio Mattarella", "Donald Trump".'
+            content: 'You are a knowledgeable information specialist. Search official websites, recent news, and reliable sources to find current information. RULES: 1) Use real, specific names - never generic terms. 2) For local events/exhibitions, search official institution websites (museums, venues, city sites). 3) Check multiple sources including: official sites, recent articles, social media, press releases. 4) If no current info exists, try similar recent events or suggest where to find info. 5) Answer in the same language as the question. 6) Be comprehensive but concise (2-4 sentences). 7) Remove citation numbers. For events like exhibitions, check: official venue sites, cultural calendars, tourism sites, recent announcements.'
           },
           {
             role: 'user',
             content: query
           }
         ],
-        temperature: 0.05,
-        max_tokens: 300,
-        top_p: 0.8,
+        temperature: 0.1,
+        max_tokens: 500,
+        top_p: 0.9,
         return_images: false,
         return_related_questions: false,
-        search_recency_filter: 'day',
+        search_recency_filter: 'month',
         frequency_penalty: 1.0,
         presence_penalty: 0
       }),

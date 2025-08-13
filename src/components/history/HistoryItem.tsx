@@ -44,7 +44,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
             <span className="text-lg">{decision.emoji}</span>
             <p className="font-semibold text-foreground truncate flex-1">{titleOverride || decision.dilemma}</p>
           </div>
-          {decision.category && (
+          {decision.category && decision.category !== 'other' && decision.category !== 'Autre' && (
             <div className="mb-1">
               <CategoryBadge categoryId={decision.category} />
             </div>

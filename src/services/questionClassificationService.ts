@@ -136,10 +136,10 @@ const fallbackToRegexClassification = (question: string): QuestionClassification
   }
   
   return {
-    type: 'simple-choice',
+    type: 'comparative',
     confidence: 60,
-    reasoning: 'Classification par défaut - simple-choice',
-    suggestedApproach: 'Génération de recommandation avec alternatives'
+    reasoning: 'Classification par défaut - comparative pour analyse approfondie',
+    suggestedApproach: 'Génération de critères et analyse comparative'
   };
 };
 
