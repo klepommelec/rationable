@@ -8,11 +8,9 @@ import { OptionsLoadingSkeleton } from './OptionsLoadingSkeleton';
 import { CommentSection } from './comments/CommentSection';
 import ManualOptionsGenerator from './ManualOptionsGenerator';
 import AnalysisNavigation from './decision-maker/AnalysisNavigation';
+import DilemmaSetup from './decision-maker/DilemmaSetup';
+import AnalysisResult from './decision-maker/AnalysisResult';
 import { toast } from "sonner";
-
-// Lazy load components for better performance
-const DilemmaSetup = React.lazy(() => import('./decision-maker/DilemmaSetup'));
-const AnalysisResult = React.lazy(() => import('./decision-maker/AnalysisResult'));
 // Composant principal pour la prise de décision unifiée
 const DecisionMaker = () => {
   const {
@@ -268,12 +266,7 @@ const DecisionMaker = () => {
               </div>}
           </>}
 
-        {displayStep === 'idle' && <React.Suspense fallback={<div className="flex items-center justify-center p-8" role="status" aria-label="Chargement en cours">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <span className="sr-only">Chargement...</span>
-            </div>}>
-            <DilemmaSetup dilemma={dilemma} setDilemma={setDilemma} analysisStep={analysisStep} isLoading={isLoading} isUpdating={isUpdating} applyTemplate={applyTemplate} clearSession={clearAll} history={history} loadDecision={loadDecisionWithThread} deleteDecision={deleteDecision} clearHistory={clearHistory} handleStartAnalysis={handleStartAnalysis} progress={progress} progressMessage={progressMessage} templates={templates} selectedCategory={selectedCategory} onCategoryChange={handleCategoryChange} onUpdateCategory={handleUpdateCategory} uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} />
-          </React.Suspense>}
+        {displayStep === 'idle' && <DilemmaSetup dilemma={dilemma} setDilemma={setDilemma} analysisStep={analysisStep} isLoading={isLoading} isUpdating={isUpdating} applyTemplate={applyTemplate} clearSession={clearAll} history={history} loadDecision={loadDecisionWithThread} deleteDecision={deleteDecision} clearHistory={clearHistory} handleStartAnalysis={handleStartAnalysis} progress={progress} progressMessage={progressMessage} templates={templates} selectedCategory={selectedCategory} onCategoryChange={handleCategoryChange} onUpdateCategory={handleUpdateCategory} uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} />}
         
         {/* Bouton de génération manuelle uniquement pour les questions comparatives */}
         {displayStep === 'criteria-loaded' && shouldShowCriteria && <div className="mb-6">
@@ -282,11 +275,7 @@ const DecisionMaker = () => {
         
         {displayStep === 'loading-options' && <OptionsLoadingSkeleton />}
         
-        {displayStep === 'done' && <React.Suspense fallback={<div className="flex items-center justify-center p-8" role="status" aria-label="Chargement des résultats">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <span className="sr-only">Chargement des résultats...</span>
-            </div>}>
-            <AnalysisResult 
+        {displayStep === 'done' && <AnalysisResult 
               result={displayResult} 
               isUpdating={isUpdating} 
               clearSession={clearAll} 
@@ -298,8 +287,7 @@ const DecisionMaker = () => {
                 console.log('Decision updated:', updatedDecision);
               }}
               onFollowUpQuestion={handleFollowUpQuestion}
-            />
-          </React.Suspense>}
+            />}
 
         {/* Section commentaires généraux - uniquement en bas de page */}
         {currentDecision && displayStep !== 'idle' && <div className="mt-12 mb-8 border-t pt-8">
