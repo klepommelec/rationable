@@ -46,41 +46,24 @@ Format: Description concise et factuelle.`;
   }
 };
 
-// Validation stricte des réponses factuelles
-const validateFactualResponse = (text: string): { isValid: boolean; error?: string } => {
-  if (!text) return { isValid: false, error: 'Réponse vide' };
-  
-  // Vérifier les noms génériques interdits (plus strict)
-  const genericPatterns = [
-    /\b(équipe\s*[a-z]|team\s*[a-z])\b/gi,
-    /\b(joueur\s*[a-z]|player\s*[a-z])\b/gi,
-    /\b(candidat\s*[a-z]|candidate\s*[a-z])\b/gi,
-    /\b(option\s*[a-z]|choice\s*[a-z])\b/gi,
-    /\b(personne\s*[a-z]|person\s*[a-z])\b/gi,
-    /\b(entreprise\s*[a-z]|company\s*[a-z])\b/gi
+// Détection de questions nécessitant des listes complètes
+const detectListQuestion = (dilemma: string): boolean => {
+  const listKeywords = [
+    'quelles expositions',
+    'quels événements', 
+    'que puis-je visiter',
+    'quelles options',
+    'que faire',
+    'où aller',
+    'quoi voir',
+    'expositions temporaires',
+    'événements en cours',
+    'activités disponibles'
   ];
   
-  const hasGenericNames = genericPatterns.some(pattern => pattern.test(text));
-  if (hasGenericNames) {
-    return { isValid: false, error: 'Contient des noms génériques' };
-  }
-  
-  // Vérifier si la réponse indique une incapacité à répondre
-  const uncertaintyPatterns = [
-    /je ne sais pas/i,
-    /impossible de/i,
-    /données non disponibles/i,
-    /information non trouvée/i,
-    /uncertain/i,
-    /cannot determine/i
-  ];
-  
-  const hasUncertainty = uncertaintyPatterns.some(pattern => pattern.test(text));
-  if (hasUncertainty) {
-    return { isValid: false, error: 'Réponse incertaine' };
-  }
-  
-  return { isValid: true };
+  return listKeywords.some(keyword => 
+    dilemma.toLowerCase().includes(keyword.toLowerCase())
+  );
 };
 
 const cleanAIResponse = (text: string): string => {
@@ -149,89 +132,72 @@ Répondez UNIQUEMENT avec un JSON dans ce format exact :
   }
 };
 
-// Génération de réponse factuelle avec Perplexity et système de retry/fallback
-export const generateFactualAnswerWithPerplexity = async (
+// Génération de réponse adaptative avec Perplexity
+export const generateAdaptiveAnswerWithPerplexity = async (
   dilemma: string,
   files?: UploadedFileInfo[],
   workspaceId?: string
 ): Promise<IResult> => {
-  let attempt = 0;
-  const maxAttempts = 3; // Augmenter à 3 tentatives
-  
-  while (attempt < maxAttempts) {
-    try {
-      attempt++;
-      console.log(`🔍 Génération factuelle avec Perplexity (tentative ${attempt}/${maxAttempts})`);
-      
-      // Prompt ultra-strict selon la tentative
-      const strictnessLevel = attempt === 1 ? 'NORMAL' : attempt === 2 ? 'STRICT' : 'ULTRA-STRICT';
-      
-      const enhancedPrompt = `${dilemma}
+  try {
+    console.log('🔍 Génération adaptative avec Perplexity');
+    
+    const isListQuestion = detectListQuestion(dilemma);
+    console.log(`📋 Question de type liste détectée: ${isListQuestion}`);
+    
+    // Prompt adaptatif selon le type de question
+    const adaptivePrompt = isListQuestion 
+      ? `${dilemma}
 
-RÈGLES ${strictnessLevel} - ABSOLUMENT OBLIGATOIRE :
-1. INTERDICTION TOTALE des noms génériques : JAMAIS "Joueur A", "Équipe X", "Candidat Y", "Option 1", etc.
-2. SEULS des noms RÉELS et PRÉCIS sont acceptés : "Zaccharie Risacher", "Cooper Flagg", "Victor Wembanyama"
-3. Si vous ne trouvez PAS le nom exact, écrivez EXACTEMENT : "Information non disponible"
-4. Vérifiez l'année de la question : 2025 a eu lieu, 2026 est dans le futur
-5. Réponse en 1 phrase maximum avec UNIQUEMENT le nom réel
-6. Supprimez toutes les références [1][2][3]
+INSTRUCTIONS SPÉCIALES - LISTE COMPLÈTE :
+- Recherchez et listez TOUTES les options disponibles (expositions, événements, activités)
+- Incluez les dates, lieux et détails importants
+- Format: "Nom 1 (dates/détails), Nom 2 (dates/détails), etc."
+- Ne limitez pas votre réponse, soyez exhaustif
+- Vérifiez les sources officielles et récentes
 
-${attempt > 1 ? 'ATTENTION : Tentative ' + attempt + ' - Soyez encore plus précis !' : ''}
+CONTEXTE : Données actuelles et complètes 2025`
+      : `${dilemma}
+
+INSTRUCTIONS - RÉPONSE PRÉCISE :
+- Utilisez UNIQUEMENT des noms réels et précis
+- Évitez les termes génériques
+- Réponse concise mais complète
+- Sources officielles et vérifiées
 
 CONTEXTE : Données réelles et vérifiées 2025`;
 
-      const result = await searchWithPerplexity(enhancedPrompt);
-      console.log(`📝 Réponse brute tentative ${attempt}:`, result.content);
-      
-      const validation = validateFactualResponse(result.content);
-      
-      if (validation.isValid) {
-        console.log('✅ Réponse factuelle validée avec succès');
-        
-        // Enrichir la description factuelle
-        const context = detectDilemmaContext(dilemma);
-        const enrichedDescription = await enrichFactualDescription(
-          dilemma, 
-          result.content, 
-          context.domain
-        );
-        
-        return {
-          recommendation: result.content.trim(),
-          description: enrichedDescription,
-          breakdown: [],
-          resultType: 'factual',
-          realTimeData: {
-            hasRealTimeData: true,
-            timestamp: new Date().toISOString(),
-            sourcesCount: result.sources.length,
-            provider: 'perplexity',
-            sources: result.sources
-          },
-          dataFreshness: 'very-fresh'
-        };
-      } else {
-        console.warn(`⚠️ Tentative ${attempt} échouée - ${validation.error}`);
-        console.warn(`📄 Contenu rejeté: "${result.content}"`);
-        
-        if (attempt === maxAttempts) {
-          console.log('🔄 Échec de toutes les tentatives factuelles → Fallback vers comparative');
-          const comparativeQuestion = `Analysez les candidats potentiels pour : ${dilemma}`;
-          return await generateComparativeWithOpenAI(comparativeQuestion, [], files, workspaceId);
-        }
-      }
-    } catch (error) {
-      console.error(`❌ Erreur tentative ${attempt}:`, error);
-      
-      if (attempt === maxAttempts) {
-        console.log('🔄 Fallback final vers mode comparatif après erreur');
-        const comparativeQuestion = `Analysez les options pour : ${dilemma}`;
-        return await generateComparativeWithOpenAI(comparativeQuestion, [], files, workspaceId);
-      }
-    }
+    const result = await searchWithPerplexity(adaptivePrompt);
+    console.log('📝 Réponse adaptative reçue:', result.content.substring(0, 200));
+    
+    // Enrichir la description 
+    const context = detectDilemmaContext(dilemma);
+    const enrichedDescription = await enrichFactualDescription(
+      dilemma, 
+      result.content, 
+      context.domain
+    );
+    
+    return {
+      recommendation: result.content.trim(),
+      description: enrichedDescription,
+      breakdown: [],
+      resultType: 'factual',
+      realTimeData: {
+        hasRealTimeData: true,
+        timestamp: new Date().toISOString(),
+        sourcesCount: result.sources.length,
+        provider: 'perplexity',
+        sources: result.sources
+      },
+      dataFreshness: 'very-fresh'
+    };
+  } catch (error) {
+    console.error('❌ Erreur génération adaptative:', error);
+    // Fallback vers mode comparatif
+    console.log('🔄 Fallback vers mode comparatif');
+    const comparativeQuestion = `Analysez les options pour : ${dilemma}`;
+    return await generateComparativeWithOpenAI(comparativeQuestion, [], files, workspaceId);
   }
-  
-  throw new Error('Échec après toutes les tentatives');
 };
 
 // Génération d'options comparatives avec OpenAI/Claude
@@ -372,7 +338,7 @@ INSTRUCTIONS CRITIQUES:
   }
 };
 
-// Service principal optimisé
+// Service principal unifié et adaptatif
 export const generateOptimizedDecision = async (
   dilemma: string,
   criteria: ICriterion[],
@@ -383,10 +349,11 @@ export const generateOptimizedDecision = async (
   try {
     const questionType = forcedType ?? detectQuestionType(dilemma);
     
-    console.log(`🎯 Type de question utilisé: ${questionType}${forcedType ? ' (forcé)' : ''}`);
+    console.log(`🎯 Type de question détecté: ${questionType}${forcedType ? ' (forcé)' : ''}`);
     
+    // Approche unifiée : toujours commencer par Perplexity adaptatif
     if (questionType === 'factual') {
-      return await generateFactualAnswerWithPerplexity(dilemma, files, workspaceId);
+      return await generateAdaptiveAnswerWithPerplexity(dilemma, files, workspaceId);
     } else {
       return await generateComparativeWithOpenAI(dilemma, criteria, files, workspaceId);
     }
