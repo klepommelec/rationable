@@ -75,7 +75,8 @@ export const searchWithPerplexity = async (query: string, context?: string): Pro
     const { data, error } = await supabase.functions.invoke('perplexity-search', {
       body: { 
         query: optimizedQuery, 
-        context: context || 'Recherche d\'informations récentes et à jour'
+        context: context || 'Recherche d\'informations récentes et à jour',
+        temporalIntent: temporalIntent.type
       },
     });
 
@@ -113,6 +114,16 @@ export interface TemporalIntent {
 
 export const detectTemporalIntent = (dilemma: string): TemporalIntent => {
   const lowerDilemma = dilemma.toLowerCase();
+  const currentYear = new Date().getFullYear();
+  
+  // Détection d'années avec regex
+  const yearMatches = dilemma.match(/\b(19|20)\d{2}\b/g);
+  const detectedYears = yearMatches ? yearMatches.map(y => parseInt(y)) : [];
+  
+  // Classification des années détectées
+  const futureYears = detectedYears.filter(year => year > currentYear);
+  const pastYears = detectedYears.filter(year => year < currentYear);
+  const currentYearDetected = detectedYears.includes(currentYear);
   
   // Détection des intentions temporelles spécifiques
   const currentKeywords = [
@@ -126,41 +137,39 @@ export const detectTemporalIntent = (dilemma: string): TemporalIntent => {
   ];
   
   const historicalKeywords = [
-    'histoire de', 'ancien', 'ancienne', '2020', '2021', '2022', '2023',
-    'avant', 'historique', 'passé', 'auparavant'
+    'histoire de', 'ancien', 'ancienne', 'avant', 'historique', 'passé', 'auparavant'
   ];
   
   const futureKeywords = [
-    'à venir', 'prochaine', 'prochain', 'futur', 'bientôt',
-    '2026', '2027', 'prévu', 'programmé'
+    'à venir', 'prochaine', 'prochain', 'futur', 'bientôt', 'prévu', 'programmé'
   ];
   
-  // Classification par priorité
-  if (currentKeywords.some(keyword => lowerDilemma.includes(keyword))) {
+  // Classification par priorité avec logique dynamique des années
+  if (futureYears.length > 0 || futureKeywords.some(keyword => lowerDilemma.includes(keyword))) {
+    return {
+      type: 'future',
+      context: `événements programmés à venir${futureYears.length > 0 ? ` (${futureYears.join(', ')})` : ''}`
+    };
+  }
+  
+  if (currentKeywords.some(keyword => lowerDilemma.includes(keyword)) || currentYearDetected) {
     return {
       type: 'current',
-      context: 'événements actuellement en cours et disponibles'
+      context: `événements actuellement en cours et disponibles (${currentYear})`
     };
   }
   
   if (recentPastKeywords.some(keyword => lowerDilemma.includes(keyword))) {
     return {
       type: 'recent_past',
-      context: 'événements récemment terminés (3-6 derniers mois)'
+      context: 'événements récemment terminés (derniers mois)'
     };
   }
   
-  if (futureKeywords.some(keyword => lowerDilemma.includes(keyword))) {
-    return {
-      type: 'future',
-      context: 'événements programmés à venir'
-    };
-  }
-  
-  if (historicalKeywords.some(keyword => lowerDilemma.includes(keyword))) {
+  if (pastYears.length > 0 || historicalKeywords.some(keyword => lowerDilemma.includes(keyword))) {
     return {
       type: 'historical',
-      context: 'données historiques selon la période mentionnée'
+      context: `données historiques${pastYears.length > 0 ? ` (${pastYears.join(', ')})` : ''}`
     };
   }
   

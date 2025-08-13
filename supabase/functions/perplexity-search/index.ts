@@ -12,8 +12,47 @@ serve(async (req) => {
   }
 
   try {
-    const { query, context } = await req.json()
+    const { query, context, temporalIntent } = await req.json()
     const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY')
+    
+    // Adaptateur dynamique pour le filtre de récence
+    const getRecencyFilter = (intent: string) => {
+      switch (intent) {
+        case 'current': return 'week'
+        case 'recent_past': return 'month'
+        case 'future': return 'year' // Pour trouver les annonces et prévisions
+        case 'historical': return 'all'
+        default: return 'month'
+      }
+    }
+    
+    const recencyFilter = getRecencyFilter(temporalIntent || 'neutral')
+    const currentDate = new Date().toLocaleDateString('fr-FR', { 
+      month: 'long', 
+      year: 'numeric' 
+    })
+    
+    // Prompt système adaptatif selon l'intention temporelle
+    let systemPrompt = `You are a knowledgeable information specialist. Current date: ${currentDate}. `
+    
+    switch (temporalIntent) {
+      case 'future':
+        systemPrompt += 'Search for future events, official announcements, planned schedules, and upcoming information. Look for the latest available forecasts, qualifications, and official calendars.'
+        break
+      case 'current':
+        systemPrompt += 'Search ONLY for events currently happening, exhibitions currently open, and information available right now.'
+        break
+      case 'recent_past':
+        systemPrompt += 'Search for recently concluded events, latest results, and information from recent months.'
+        break
+      case 'historical':
+        systemPrompt += 'Search historical archives and past information according to the mentioned timeframe.'
+        break
+      default:
+        systemPrompt += 'Search official websites, recent news, and reliable sources to find current information.'
+    }
+    
+    systemPrompt += ' RESPONSE RULES: 1) For lists, provide ALL available items with complete details. 2) For single questions, be concise but precise. 3) Use real, specific names - never generic terms. 4) Remove citation numbers. 5) Answer in the same language as the question.'
 
     if (!perplexityApiKey) {
       console.error('❌ PERPLEXITY_API_KEY not found in environment')
@@ -35,7 +74,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a knowledgeable information specialist. Search official websites, recent news, and reliable sources to find current information. ADAPTIVE RESPONSE RULES: 1) For questions asking for lists (exhibitions, events, options, "quelles", "quels"), provide ALL available items with complete details. 2) For single-answer questions, be concise but precise. 3) Use real, specific names - never generic terms. 4) For local events/exhibitions, search official institution websites thoroughly. 5) Check multiple sources including: official sites, recent articles, social media, press releases. 6) Answer in the same language as the question. 7) Remove citation numbers. 8) If asking for multiple items, format as: "Item 1 (details), Item 2 (details), Item 3 (details)" with dates when relevant.'
+            content: systemPrompt
           },
           {
             role: 'user',
@@ -47,7 +86,7 @@ serve(async (req) => {
         top_p: 0.9,
         return_images: false,
         return_related_questions: false,
-        search_recency_filter: 'week',
+        search_recency_filter: recencyFilter,
         frequency_penalty: 1.0,
         presence_penalty: 0
       }),
