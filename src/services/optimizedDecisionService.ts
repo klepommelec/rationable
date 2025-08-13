@@ -69,10 +69,8 @@ const detectListQuestion = (dilemma: string): boolean => {
 const cleanAIResponse = (text: string): string => {
   if (!text) return text;
   
-  // Nettoyer et valider la réponse
-  let cleaned = text
-    .replace(/\s+/g, ' ')
-    .trim();
+  // Nettoyer et valider la réponse, mais préserver le formatage JSON
+  let cleaned = text.trim();
   
   return cleaned;
 };
@@ -219,25 +217,58 @@ Répondez UNIQUEMENT avec un JSON dans ce format exact :
     const result = await searchWithPerplexity(prompt);
     const content = cleanAIResponse(result.content);
     
-    // Extraire le JSON de la réponse avec parsing robuste
+    console.log('🔍 Contenu brut de Perplexity (premiers 500 caractères):', content.substring(0, 500));
+    
+    // Améliorer l'extraction JSON avec plusieurs stratégies
     let parsedResponse;
+    let jsonString = content;
+    
     try {
-      // D'abord essayer de parser directement
+      // Stratégie 1: Parser directement
       parsedResponse = JSON.parse(content);
-    } catch {
-      // Si ça échoue, essayer d'extraire le JSON avec regex
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        console.error('Failed to extract JSON from content:', content.substring(0, 200));
-        throw new Error('Format de réponse invalide - aucun JSON trouvé');
-      }
+      console.log('✅ Parsing direct réussi');
+    } catch (directError) {
+      console.log('❌ Parsing direct échoué, essai d\'extraction:', directError.message);
+      
       try {
-        parsedResponse = JSON.parse(jsonMatch[0]);
-      } catch (parseError) {
-        console.error('Failed to parse extracted JSON:', jsonMatch[0].substring(0, 200));
-        throw new Error('Format de réponse invalide - JSON malformé');
+        // Stratégie 2: Extraire le JSON le plus complet possible
+        // Trouver la première accolade ouvrante et la dernière fermante
+        const firstBrace = content.indexOf('{');
+        const lastBrace = content.lastIndexOf('}');
+        
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+          jsonString = content.substring(firstBrace, lastBrace + 1);
+          console.log('🔍 JSON extrait (premiers 300 caractères):', jsonString.substring(0, 300));
+          
+          parsedResponse = JSON.parse(jsonString);
+          console.log('✅ Parsing avec extraction réussi');
+        } else {
+          console.error('❌ Impossible de trouver les accolades JSON');
+          throw new Error('Aucune structure JSON valide détectée');
+        }
+      } catch (extractError) {
+        console.error('❌ Parsing avec extraction échoué:', extractError.message);
+        console.error('Contenu JSON tenté:', jsonString.substring(0, 200));
+        
+        // Stratégie 3: Fallback avec critères génériques
+        console.log('🔄 Utilisation de critères génériques de fallback');
+        const emoji = generateContextualEmoji(dilemma);
+        
+        // Générer des critères génériques intelligents basés sur le type de question
+        const isListQuestion = detectListQuestion(dilemma);
+        const genericCriteria = isListQuestion 
+          ? ['Disponibilité actuelle', 'Popularité', 'Accessibilité', 'Pertinence']
+          : ['Qualité', 'Prix', 'Convenience', 'Durabilité'];
+        
+        return {
+          emoji,
+          criteria: genericCriteria,
+          suggestedCategory: 'autre',
+          provider: 'perplexity-fallback'
+        };
       }
     }
+    
     const emoji = generateContextualEmoji(dilemma);
     
     return {
