@@ -362,6 +362,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      cleanup_old_rate_limits: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       generate_public_id: {
         Args: Record<PropertyKey, never>
         Returns: string
