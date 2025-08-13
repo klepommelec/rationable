@@ -1,7 +1,7 @@
 
 import { toast } from "sonner";
 import { ICriterion, IResult, IDecision } from '@/types/decision';
-import { generateCriteriaWithPerplexity, generateOptimizedDecision } from '@/services/optimizedDecisionService';
+import { generateCriteriaWithFallback, generateOptionsWithFallback } from '@/services/enhancedDecisionService';
 import { uploadFilesToStorage, deleteFileFromStorage, UploadedFileInfo } from '@/services/fileUploadService';
 import { UploadedFile } from '@/components/FileUpload';
 import { AnalysisStep } from './useDecisionState';
@@ -101,7 +101,7 @@ export const useDecisionAPI = ({
           console.log("📡 [DEBUG] Calling generateOptions API...");
           const startTime = Date.now();
           
-          const apiResult = await generateOptimizedDecision(dilemma, currentCriteria, uploadedFileInfos, workspaceId, forcedType);
+          const apiResult = await generateOptionsWithFallback(dilemma, currentCriteria, uploadedFileInfos, workspaceId);
           
           const endTime = Date.now();
           console.log("✅ [DEBUG] API call successful", {
@@ -230,7 +230,7 @@ export const useDecisionAPI = ({
           console.log("📡 [DEBUG] Phase 1: Generating criteria for question");
           setProgressMessage(workspaceId ? "Analyse du contexte avec documents workspace..." : "Analyse du contexte et génération des critères...");
           
-          const response = await generateCriteriaWithPerplexity(effectiveDilemma, uploadedFileInfos, workspaceId);
+          const response = await generateCriteriaWithFallback(effectiveDilemma, uploadedFileInfos, workspaceId);
           console.log("✅ [DEBUG] Criteria and category generated:", {
             emoji: response.emoji,
             criteriaCount: response.criteria?.length || 0,
@@ -257,7 +257,7 @@ export const useDecisionAPI = ({
           setProgressMessage(workspaceId ? "Génération des options avec documents workspace..." : "Génération des options comparatives...");
           
           try {
-            const optionsResult = await generateOptimizedDecision(effectiveDilemma, newCriteria, uploadedFileInfos, workspaceId, 'comparative');
+            const optionsResult = await generateOptionsWithFallback(effectiveDilemma, newCriteria, uploadedFileInfos, workspaceId);
             
             console.log("✅ [DEBUG] Auto-options generated successfully");
             setResult(optionsResult);
