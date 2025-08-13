@@ -190,14 +190,30 @@ INSTRUCTIONS POUR LES NOMS D'OPTIONS:
 
     let jsonContent;
     try {
-      jsonContent = JSON.parse(content);
+      // Nettoyer le contenu avant parsing
+      const cleanedContent = content.trim().replace(/^```json\s*|```$/g, '');
+      jsonContent = JSON.parse(cleanedContent);
       console.log('✅ Successfully parsed content JSON');
     } catch (contentParseError) {
       console.error("❌ Failed to parse JSON from API response content:", {
         error: contentParseError,
-        contentPreview: content.substring(0, 200)
+        contentPreview: content.substring(0, 200),
+        fullContent: content
       });
-      throw new Error("La réponse de l'API n'était pas un JSON valide.");
+      
+      // Essayer d'extraire un JSON valide avec regex en dernier recours
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          jsonContent = JSON.parse(jsonMatch[0]);
+          console.log('✅ Successfully extracted and parsed JSON with regex fallback');
+        } catch (regexParseError) {
+          console.error("❌ Even regex extraction failed:", regexParseError);
+          throw new Error("La réponse de l'API n'était pas un JSON valide même après extraction.");
+        }
+      } else {
+        throw new Error("La réponse de l'API n'était pas un JSON valide et aucun JSON n'a pu être extrait.");
+      }
     }
 
     // Log successful response structure (without sensitive data)

@@ -116,13 +116,25 @@ Répondez UNIQUEMENT avec un JSON dans ce format exact :
     const result = await searchWithPerplexity(prompt);
     const content = cleanAIResponse(result.content);
     
-    // Extraire le JSON de la réponse
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('Format de réponse invalide');
+    // Extraire le JSON de la réponse avec parsing robuste
+    let parsedResponse;
+    try {
+      // D'abord essayer de parser directement
+      parsedResponse = JSON.parse(content);
+    } catch {
+      // Si ça échoue, essayer d'extraire le JSON avec regex
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        console.error('Failed to extract JSON from content:', content.substring(0, 200));
+        throw new Error('Format de réponse invalide - aucun JSON trouvé');
+      }
+      try {
+        parsedResponse = JSON.parse(jsonMatch[0]);
+      } catch (parseError) {
+        console.error('Failed to parse extracted JSON:', jsonMatch[0].substring(0, 200));
+        throw new Error('Format de réponse invalide - JSON malformé');
+      }
     }
-    
-    const parsedResponse = JSON.parse(jsonMatch[0]);
     const emoji = generateContextualEmoji(dilemma);
     
     return {
@@ -290,15 +302,27 @@ INSTRUCTIONS CRITIQUES:
       };
     }
 
-    // Sinon, parser la réponse OpenAI
+    // Sinon, parser la réponse OpenAI avec parsing robuste
     const content = typeof apiResult === 'string' ? apiResult : apiResult.content || JSON.stringify(apiResult);
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
     
-    if (!jsonMatch) {
-      throw new Error('Format de réponse invalide');
+    let parsedResponse;
+    try {
+      // D'abord essayer de parser directement le contenu
+      parsedResponse = JSON.parse(content);
+    } catch {
+      // Si ça échoue, essayer d'extraire le JSON avec regex
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        console.error('Failed to extract JSON from API content:', content.substring(0, 200));
+        throw new Error('Format de réponse invalide - aucun JSON trouvé dans la réponse API');
+      }
+      try {
+        parsedResponse = JSON.parse(jsonMatch[0]);
+      } catch (parseError) {
+        console.error('Failed to parse extracted JSON from API:', jsonMatch[0].substring(0, 200));
+        throw new Error('Format de réponse invalide - JSON malformé dans la réponse API');
+      }
     }
-    
-    const parsedResponse = JSON.parse(jsonMatch[0]);
     
     // Convertir les options au format breakdown (sans scores)
     const breakdown = parsedResponse.options.map((option: any, index: number) => ({
