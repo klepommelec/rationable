@@ -45,17 +45,9 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
         <div className="flex flex-col gap-6">
           <div className="w-full space-y-4">
             <div className="flex items-start justify-between gap-4 w-full">
-              <div className="flex-1 min-w-0">
-                <Badge variant="secondary" className={`mb-2 ${config.badgeColor}`}>
-                  {config.badge}
-                </Badge>
-                <h3 className={`text-lg font-semibold mb-2 ${config.titleColor} w-full`}>
-                  {result.recommendation?.replace(/^Option\s+\d+:\s*/i, '').trim()}
-                </h3>
-                <div className="w-full">
-                  <ConfidenceIndicator breakdown={result.breakdown} topOption={topOption} result={result} />
-                </div>
-              </div>
+              <Badge variant="secondary" className={`${config.badgeColor}`}>
+                {config.badge}
+              </Badge>
               
               <div className="flex items-center gap-2 flex-shrink-0">
                 {currentDecision && (
@@ -98,6 +90,14 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     </DialogContent>
                   </Dialog>}
               </div>
+            </div>
+            
+            <h3 className={`text-lg font-semibold ${config.titleColor} w-full`}>
+              {result.recommendation?.replace(/^Option\s+\d+:\s*/i, '').trim()}
+            </h3>
+            
+            <div className="w-full">
+              <ConfidenceIndicator breakdown={result.breakdown} topOption={topOption} result={result} />
             </div>
             
             <div className="w-full">
