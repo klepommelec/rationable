@@ -163,34 +163,53 @@ Exemple de format:
   }
 };
 
-// Fonction utilitaire pour détecter les requêtes temps réel
-const detectRealTimeQuery = (dilemma: string): boolean => {
-  const realTimeKeywords = [
-    'draft', '2024', '2025', '2026', 'élection', 'prochain', 'futur', 'prochaine',
-    'récent', 'dernière', 'nouveau', 'nouvelle', 'tendance', 'actualité',
+// Fonction utilitaire pour détecter les requêtes nécessitant des données externes
+const detectExternalDataNeeded = (dilemma: string): boolean => {
+  const lowerDilemma = dilemma.toLowerCase();
+  
+  // Questions nécessitant des données factuelles récentes ou spécifiques
+  const factualKeywords = [
+    // Questions temporelles
+    'qui a gagné', 'qui a été', 'qui sera', 'vainqueur', 'gagnant', 'résultat',
+    'classement', 'podium', 'champion', 'finale',
+    
+    // Événements actuels
+    'exposition', 'expositions', 'du moment', 'actuellement', 'en cours',
+    'programme', 'programmation', 'horaires',
+    
+    // Informations spécifiques sur des lieux/organisations
+    'musée', 'théâtre', 'galerie', 'centre', 'établissement',
+    
+    // Données temporelles dynamiques
     'maintenant', 'aujourd\'hui', 'cette année', 'ce mois', 'cette semaine',
-    'current', 'latest', 'recent', 'now', 'today', 'this year', 'premier choix',
-    'qui a été', 'qui sera', 'quel est', 'résultat', 'gagnant', 'classement'
+    'récent', 'dernière', 'nouveau', 'nouvelle', 'tendance', 'actualité',
+    
+    // Questions directes factuelles
+    'quel est', 'quels sont', 'quelles sont', 'où est', 'où sont',
+    'combien', 'comment', 'quand', 'pourquoi',
+    
+    // Sports et compétitions
+    'draft', 'NBA', 'football', 'sport', 'joueur', 'équipe', 'match', 
+    'championship', 'tournoi', 'compétition', 'ligue'
   ];
   
-  const lowerDilemma = dilemma.toLowerCase();
-  const hasRealTimeKeyword = realTimeKeywords.some(keyword => lowerDilemma.includes(keyword));
+  // Détection d'années (dynamique pour éviter le hardcoding)
+  const currentYear = new Date().getFullYear();
+  const yearPattern = new RegExp(`(${currentYear - 1}|${currentYear}|${currentYear + 1}|${currentYear + 2})`, 'i');
+  const hasRelevantYear = yearPattern.test(dilemma);
   
-  // Détection spéciale pour les questions sportives récentes
-  const isSportsQuery = /draft|NBA|football|sport|joueur|équipe|match|championship/i.test(dilemma);
-  const isRecentYear = /(2024|2025|2026)/i.test(dilemma);
+  const hasFactualKeyword = factualKeywords.some(keyword => lowerDilemma.includes(keyword));
   
-  const needsRealTime = hasRealTimeKeyword || (isSportsQuery && isRecentYear);
+  const needsExternalData = hasFactualKeyword || hasRelevantYear;
   
-  console.log('🕒 Real-time detection:', {
+  console.log('🔍 External data detection:', {
     dilemma: dilemma.substring(0, 50) + '...',
-    hasRealTimeKeyword,
-    isSportsQuery,
-    isRecentYear,
-    needsRealTime
+    hasFactualKeyword,
+    hasRelevantYear,
+    needsExternalData
   });
   
-  return needsRealTime;
+  return needsExternalData;
 };
 
 export const generateOptionsWithFallback = async (
@@ -207,33 +226,36 @@ export const generateOptionsWithFallback = async (
 
   const criteriaList = criteria.map(c => c.name).join(', ');
   
-  // Vérifier si on a besoin de données temps réel
-  const needsRealTimeData = detectRealTimeQuery(dilemma);
+  // Vérifier si on a besoin de données externes (temps réel ou factuelles)
+  const needsExternalData = detectExternalDataNeeded(dilemma);
   let realTimeContext = '';
   let realTimeData = null;
 
-  if (needsRealTimeData) {
-    console.log('🔍 Real-time data needed, using search providers...');
+  if (needsExternalData) {
+    console.log('🔍 External data needed, using search providers...');
     
-    // Context spécifique pour questions sports récentes
-    const isNBADraft = /draft.*NBA.*202[4-9]/i.test(dilemma);
-    const isNBATopic = /NBA|basketball/i.test(dilemma);
-    let searchContext = 'Current sports events and recent information';
+    // Déterminer le contexte de recherche approprié
+    let searchContext = 'Informations actuelles et vérifiées';
     
-    if (isNBADraft) {
-      searchContext = 'NBA Draft 2025 first pick selection results recent news';
-    } else if (isNBATopic) {
-      searchContext = 'NBA recent news and current season information';
+    // Context spécifique selon le type de question
+    if (/exposition|musée|galerie/i.test(dilemma)) {
+      searchContext = 'Expositions actuelles et événements culturels';
+    } else if (/sport|football|NBA|tennis|championnat/i.test(dilemma)) {
+      searchContext = 'Résultats sportifs récents et compétitions actuelles';
+    } else if (/qui a gagné|vainqueur|gagnant|résultat/i.test(dilemma)) {
+      searchContext = 'Résultats récents et informations vérifiées';
+    } else if (/élection|politique/i.test(dilemma)) {
+      searchContext = 'Actualités politiques et électorales récentes';
     }
     
     try {
       const searchRequest: AIRequest = {
-        prompt: isNBADraft ? `NBA Draft 2025 first overall pick winner results ${dilemma}` : dilemma,
+        prompt: dilemma,
         context: searchContext,
         type: 'search'
       };
 
-      console.log('🔍 Searching for real-time data with context:', searchContext);
+      console.log('🔍 Searching for external data with context:', searchContext);
       const searchResponse = await aiService.executeWithFallback(searchRequest);
       
       if (searchResponse.success && searchResponse.content) {
@@ -246,12 +268,14 @@ export const generateOptionsWithFallback = async (
           hasRealTimeData: true
         };
         
-        realTimeContext = `\n\nDONNÉES RÉCENTES ET VÉRIFIÉES (${realTimeData.timestamp}, source: ${searchResponse.provider}):\n${realTimeData.content}\n\nIMPORTANT: Utilisez UNIQUEMENT ces informations récentes pour répondre. Ignorez toute connaissance antérieure qui pourrait être obsolète.`;
-        console.log('✅ Real-time data retrieved successfully from:', searchResponse.provider);
+        // Prompt plus strict pour forcer l'utilisation exclusive des données
+        realTimeContext = `\n\n🎯 DONNÉES EXTERNES VÉRIFIÉES (${realTimeData.timestamp}, source: ${searchResponse.provider}) 🎯:\n${realTimeData.content}\n\n⚠️ INSTRUCTIONS CRITIQUES ⚠️:\n- Vous DEVEZ utiliser EXCLUSIVEMENT ces données vérifiées\n- IGNOREZ toute connaissance antérieure contradictoire\n- Si les données ci-dessus ne répondent pas complètement, PRÉCISEZ-LE clairement\n- NE générez AUCUNE information qui ne provient pas de ces données\n- Mentionnez l'année actuelle (${new Date().getFullYear()}) quand c'est pertinent`;
+        
+        console.log('✅ External data retrieved successfully from:', searchResponse.provider);
       }
     } catch (searchError) {
-      console.warn('⚠️ Real-time search failed, continuing without recent data:', searchError);
-      realTimeContext = '\n\nATTENTION: Données en temps réel non disponibles. PRÉCISEZ dans votre réponse que vous ne pouvez pas accéder aux informations récentes et que la réponse pourrait être obsolète.';
+      console.warn('⚠️ External data search failed, continuing without recent data:', searchError);
+      realTimeContext = '\n\n⚠️ ATTENTION ⚠️: Données externes non disponibles. VOUS DEVEZ préciser clairement dans votre réponse que vous ne pouvez pas accéder aux informations récentes et que la réponse pourrait être obsolète ou incomplète.';
     }
   }
 
@@ -334,8 +358,8 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
       dilemma,
       questionType,
       criteriaList,
-      needsRealTimeData,
-      hasRealTimeData: !!realTimeData?.content,
+      needsExternalData,
+      hasExternalData: !!realTimeData?.content,
       workspaceDocsFound: workspaceDocuments.length,
       promptLength: prompt.length
     });
@@ -383,7 +407,8 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
         sourcesCount: realTimeData.sources?.length || 0,
         searchQuery: realTimeData.searchQuery,
         provider: realTimeData.provider,
-        sources: realTimeData.sources || []
+        sources: realTimeData.sources || [],
+        content: realTimeData.content
       };
     }
 

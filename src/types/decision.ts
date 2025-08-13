@@ -58,6 +58,7 @@ export interface IResult {
     provider?: string;
     searchQuery?: string;
     sources?: string[];
+    content?: string;
   };
   aiProvider?: {
     provider: string;

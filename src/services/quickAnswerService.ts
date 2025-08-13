@@ -16,15 +16,26 @@ export const generateQuickAnswer = async ({
   language
 }: QuickAnswerRequest): Promise<string> => {
   try {
+    console.log('🚀 Génération de réponse rapide...');
+    
     const detectedLanguage = language || I18nService.detectLanguage(originalDilemma);
-    const prompt = buildQuickAnswerPrompt(question, originalDilemma, result, detectedLanguage);
+    
+    // Extraire les données temps réel si disponibles
+    let realTimeContext = '';
+    if (result.realTimeData?.content) {
+      realTimeContext = `\n\nDONNÉES RÉCENTES VÉRIFIÉES (${result.realTimeData.timestamp}):\n${result.realTimeData.content}\n\nIMPORTANT: Utilisez EXCLUSIVEMENT ces informations récentes pour répondre. Ignorez toute connaissance antérieure contradictoire.`;
+      console.log('📊 Utilisation des données temps réel pour la réponse rapide');
+    }
+    
+    const prompt = buildQuickAnswerPrompt(question, originalDilemma, result, detectedLanguage, realTimeContext);
     
     const response = await callOpenAiApi(prompt);
     
+    console.log('✅ Réponse rapide générée avec contexte à jour');
     const fallbackMessages = I18nService.getFallbackMessages(detectedLanguage);
     return response.answer || response.content || fallbackMessages.noAnswerGenerated;
   } catch (error) {
-    console.error('Error generating quick answer:', error);
+    console.error('❌ Erreur génération réponse rapide:', error);
     const detectedLanguage = language || I18nService.detectLanguage(originalDilemma);
     const fallbackMessages = I18nService.getFallbackMessages(detectedLanguage);
     throw new Error(fallbackMessages.quickAnswerError);
@@ -35,7 +46,8 @@ const buildQuickAnswerPrompt = (
   question: IFollowUpQuestion, 
   originalDilemma: string, 
   result: IResult,
-  language: SupportedLanguage
+  language: SupportedLanguage,
+  realTimeContext: string = ''
 ): string => {
   const recommendedOption = result.recommendation;
   
@@ -168,7 +180,7 @@ const buildQuickAnswerPrompt = (
 ${prompt.context}:
 - ${prompt.originalDilemma}: "${originalDilemma}"
 - ${prompt.mainRecommendation}: "${recommendedOption}"
-- ${prompt.description}: "${result.description}"
+- ${prompt.description}: "${result.description}"${realTimeContext}
 
 ${prompt.userQuestion}: "${question.text}"
 

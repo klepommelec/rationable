@@ -18,7 +18,14 @@ export const generateFollowUpQuestions = async ({
     // Analyser le contexte pour adapter les questions
     const context = detectQuestionContext(dilemma, category);
     
-    const prompt = buildFollowUpPrompt(dilemma, result, context);
+    // Extraire les données temps réel du result si disponibles
+    let realTimeContext = '';
+    if (result.realTimeData?.content) {
+      realTimeContext = `\n\nDONNÉES RÉCENTES DISPONIBLES (${result.realTimeData.timestamp}):\n${result.realTimeData.content}\n\nIMPORTANT: Basez vos questions sur ces informations récentes, pas sur des connaissances antérieures.`;
+      console.log('📊 Utilisation des données temps réel pour les questions de suivi');
+    }
+    
+    const prompt = buildFollowUpPrompt(dilemma, result, context, realTimeContext);
     
     const response = await callOpenAiApi(prompt);
     
@@ -29,7 +36,7 @@ export const generateFollowUpQuestions = async ({
         category: q.category || 'context'
       }));
       
-      console.log(`✅ ${questions.length} questions de suivi générées`);
+      console.log(`✅ ${questions.length} questions de suivi générées avec contexte à jour`);
       return questions;
     }
     
@@ -77,7 +84,7 @@ const detectQuestionContext = (dilemma: string, category?: string): string => {
   return 'général';
 };
 
-const buildFollowUpPrompt = (dilemma: string, result: IResult, context: string): string => {
+const buildFollowUpPrompt = (dilemma: string, result: IResult, context: string, realTimeContext: string = ''): string => {
   const recommendedOption = result.recommendation;
   const breakdown = result.breakdown.find(item => 
     item.option.toLowerCase().includes(recommendedOption.toLowerCase()) ||
@@ -96,7 +103,7 @@ CONS DE CETTE OPTION: ${breakdown.cons.join(', ')}
 SCORE: ${breakdown.score}/5
 ` : ''}
 
-CONTEXTE: ${context}
+CONTEXTE: ${context}${realTimeContext}
 
 Instructions importantes:
 1. Les questions doivent être ACTIONABLES et aider l'utilisateur à PASSER À L'ACTION
