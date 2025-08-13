@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { IResult } from '@/types/decision';
-import { DecisionImage } from './DecisionImage';
+
 import { ConfidenceIndicator } from './ConfidenceIndicator';
 import { DataFreshnessIndicator } from './DataFreshnessIndicator';
 import { WorkspaceDocumentIndicator } from './WorkspaceDocumentIndicator';
@@ -101,16 +101,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             </div>
             
             <div className="w-full">
-              <div className="flex flex-col lg:flex-row gap-6 w-full">
-                <div className="flex-1 min-w-0 w-full">
-                  <ExpandableText text={result.description} />
-                </div>
-                {result.imageQuery && (
-                  <div className="hidden lg:block lg:w-60 flex-shrink-0">
-                    <DecisionImage imageQuery={result.imageQuery || result.recommendation} alt={`Illustration pour ${result.recommendation}`} />
-                  </div>
-                )}
-              </div>
+              <ExpandableText text={result.description} />
             </div>
 
             {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && <div className="grid md:grid-cols-2 gap-4 w-full">
