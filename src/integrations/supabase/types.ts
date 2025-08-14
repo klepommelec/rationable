@@ -397,6 +397,10 @@ export type Database = {
         Args: { template_id: string }
         Returns: undefined
       }
+      is_valid_shared_decision_access: {
+        Args: { public_id_param: string }
+        Returns: boolean
+      }
       update_document_usage: {
         Args: { doc_id: string }
         Returns: undefined
