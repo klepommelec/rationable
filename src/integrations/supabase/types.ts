@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -354,9 +354,9 @@ export type Database = {
     Functions: {
       check_rate_limit: {
         Args: {
-          resource: string
           identifier: string
           max_actions?: number
+          resource: string
           window_minutes?: number
         }
         Returns: boolean
@@ -376,6 +376,18 @@ export type Database = {
       generate_template_public_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_shared_decision_by_id: {
+        Args: { p_public_id: string }
+        Returns: {
+          created_at: string
+          decision_data: Json
+          expires_at: string
+          id: string
+          public_id: string
+          title: string
+          view_count: number
+        }[]
       }
       increment_template_copy_count: {
         Args: { template_id: string }
