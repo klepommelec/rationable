@@ -46,7 +46,6 @@ const DecisionMaker = () => {
     uploadedFiles,
     setUploadedFiles
   } = useDecisionMaker();
-
   const {
     analyses,
     currentAnalysisIndex,
@@ -76,9 +75,7 @@ const DecisionMaker = () => {
       const selected = history.find(d => d.id === decisionId);
       if (selected) {
         const key = selected.threadId || selected.id;
-        const thread = history
-          .filter(d => (d.threadId || d.id) === key)
-          .sort((a, b) => a.timestamp - b.timestamp);
+        const thread = history.filter(d => (d.threadId || d.id) === key).sort((a, b) => a.timestamp - b.timestamp);
         const list = thread.map(d => ({
           id: d.id,
           dilemma: d.dilemma,
@@ -87,7 +84,7 @@ const DecisionMaker = () => {
           result: d.result,
           analysisStep: 'done' as const,
           criteria: d.criteria,
-          category: d.category,
+          category: d.category
         }));
         const idx = thread.findIndex(d => d.id === decisionId);
         setAnalysesWithIndex(list, idx === -1 ? list.length - 1 : idx);
@@ -109,7 +106,6 @@ const DecisionMaker = () => {
       toast.info('Une analyse est déjà en cours, veuillez patienter...');
       return;
     }
-    
     try {
       // Mettre immédiatement l'état en chargement pour une UX fluide
       setAnalysisStep('loading-options');
@@ -124,7 +120,7 @@ const DecisionMaker = () => {
         result: null,
         analysisStep: 'loading-options' as const,
         criteria: [],
-        category: undefined,
+        category: undefined
       };
       // Verrouiller les écritures sur cette analyse par ID
       pendingWriteAnalysisIdRef.current = newId;
@@ -137,10 +133,13 @@ const DecisionMaker = () => {
       setEmoji('🤔');
       setSelectedCategory(undefined);
       setDilemma(questionDilemma);
-      
+
       // Démarrer DIRECTEMENT l'analyse complète ici (laisser la classification décider)
       console.log('🚀 Starting integrated follow-up analysis...');
-      await handleStartAnalysis(undefined, { threadFromId: getCurrentDecision()?.id, dilemmaOverride: questionDilemma });
+      await handleStartAnalysis(undefined, {
+        threadFromId: getCurrentDecision()?.id,
+        dilemmaOverride: questionDilemma
+      });
     } catch (error) {
       console.error('❌ Error in follow-up question:', error);
       toast.error('Erreur lors du traitement de la question de suivi');
@@ -163,7 +162,7 @@ const DecisionMaker = () => {
         setCriteria(analysis.criteria);
         setSelectedCategory(analysis.category);
         setAnalysisStep(analysis.analysisStep);
-        
+
         // Plus de reclassification nécessaire - toutes les questions sont comparatives
         console.log('🔄 Navigation - Question type: comparative (unified)');
       });
@@ -175,13 +174,12 @@ const DecisionMaker = () => {
   // Etats d'affichage gelés pour éviter les décalages lorsque l'analyse en cours concerne un autre onglet
   const lockId = pendingWriteAnalysisIdRef.current;
   const isLockedToOther = Boolean(lockId && currentAnalysis && lockId !== currentAnalysis.id);
-
-  const displayDilemma = isLockedToOther ? (currentAnalysis?.dilemma ?? dilemma) : dilemma;
-  const displayEmoji = isLockedToOther ? (currentAnalysis?.emoji ?? emoji) : emoji;
-  const displayResult = isLockedToOther ? (currentAnalysis?.result ?? result) : result;
-  const displayStep = isLockedToOther ? (currentAnalysis?.analysisStep ?? analysisStep) : analysisStep;
-  const displayCriteria = isLockedToOther ? (currentAnalysis?.criteria ?? criteria) : criteria;
-  const displayCategory = isLockedToOther ? (currentAnalysis?.category ?? selectedCategory) : selectedCategory;
+  const displayDilemma = isLockedToOther ? currentAnalysis?.dilemma ?? dilemma : dilemma;
+  const displayEmoji = isLockedToOther ? currentAnalysis?.emoji ?? emoji : emoji;
+  const displayResult = isLockedToOther ? currentAnalysis?.result ?? result : result;
+  const displayStep = isLockedToOther ? currentAnalysis?.analysisStep ?? analysisStep : analysisStep;
+  const displayCriteria = isLockedToOther ? currentAnalysis?.criteria ?? criteria : criteria;
+  const displayCategory = isLockedToOther ? currentAnalysis?.category ?? selectedCategory : selectedCategory;
 
   // État unifié : toutes les questions sont traitées de manière comparative
   const questionType = 'comparative';
@@ -207,7 +205,6 @@ const DecisionMaker = () => {
   // Mettre à jour l'analyse actuelle quand les états changent
   React.useEffect(() => {
     if (!currentAnalysis) return;
-
     const lockId = pendingWriteAnalysisIdRef.current;
     // Si un verrou est actif pour une autre analyse, ne pas synchroniser pour éviter les décalages visuels
     if (lockId && lockId !== currentAnalysis.id) {
@@ -231,7 +228,7 @@ const DecisionMaker = () => {
   }, [dilemma, emoji, result, analysisStep, criteria, selectedCategory, currentAnalysisIndex]);
 
   // Note: La synchronisation des états lors de la navigation est gérée par handleAnalysisNavigation
-  
+
   const shouldShowCriteria = true;
   return <div className="w-full mx-auto px-4 sm:px-6 lg:px-[80px]">
       {/* Skip to main content link for screen readers */}
@@ -241,19 +238,13 @@ const DecisionMaker = () => {
 
       <main id="main-content" role="main" aria-label="Assistant de décision">
         {/* Navigation entre analyses */}
-        {displayStep !== 'idle' && (
-          <AnalysisNavigation 
-            analyses={analyses}
-            currentAnalysisIndex={currentAnalysisIndex}
-            onNavigate={handleAnalysisNavigation}
-          />
-        )}
+        {displayStep !== 'idle' && <AnalysisNavigation analyses={analyses} currentAnalysisIndex={currentAnalysisIndex} onNavigate={handleAnalysisNavigation} />}
 
         {(displayStep === 'criteria-loaded' || displayStep === 'loading-options' || displayStep === 'done') && <>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 animate-fade-in">
               <div className="flex items-baseline gap-4 w-full ">
                 <EmojiPicker emoji={displayEmoji} setEmoji={setEmoji} />
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-left break-words flex-1 min-w-0">
+                <h1 className="text-4xl sm:text-5xl font-bold text-left break-words flex-1 min-w-0 lg:text-4xl">
                   {getCurrentAnalysis()?.displayTitle || getCurrentAnalysis()?.dilemma || displayDilemma}
                 </h1>
               </div>
@@ -275,19 +266,10 @@ const DecisionMaker = () => {
         
         {displayStep === 'loading-options' && <OptionsLoadingSkeleton />}
         
-        {displayStep === 'done' && <AnalysisResult 
-              result={displayResult} 
-              isUpdating={isUpdating} 
-              clearSession={clearAll} 
-              analysisStep={displayStep} 
-              currentDecision={getCurrentDecision()} 
-              dilemma={displayDilemma} 
-              onUpdateDecision={updatedDecision => {
-                // Mettre à jour la décision dans l'état global
-                console.log('Decision updated:', updatedDecision);
-              }}
-              onFollowUpQuestion={handleFollowUpQuestion}
-            />}
+        {displayStep === 'done' && <AnalysisResult result={displayResult} isUpdating={isUpdating} clearSession={clearAll} analysisStep={displayStep} currentDecision={getCurrentDecision()} dilemma={displayDilemma} onUpdateDecision={updatedDecision => {
+        // Mettre à jour la décision dans l'état global
+        console.log('Decision updated:', updatedDecision);
+      }} onFollowUpQuestion={handleFollowUpQuestion} />}
 
         {/* Section commentaires généraux - uniquement en bas de page */}
         {currentDecision && displayStep !== 'idle' && <div className="mt-12 mb-8 border-t pt-8">
