@@ -174,7 +174,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             <div className="h-[72vh] flex items-center justify-center">
                 <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none shadow-none bg-transparent">
                     <CardHeader className="text-center pt-12 px-4 sm:px-6">
-                        <h2 className="font-semibold text-5xl sm:text-5xl md:text-6xl lg:text-6xl">
+                        <h2 className="font-bold text-4xl sm:text-4xl md:text-5xl lg:text-6xl">
                             <div className="font-medium ">Vos décisions seront </div>
                             <div className="flex items-center justify-center gap-3">
                                 <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 xl:h-12 xl:w-12" />
