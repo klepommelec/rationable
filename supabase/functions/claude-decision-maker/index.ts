@@ -4,34 +4,15 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY');
 
-// Dynamic CORS configuration for development and production
-const getAllowedOrigin = (origin: string | null): string => {
-  const allowedOrigins = [
-    'https://rationable.ai',
-    'http://localhost:3000',
-    'http://localhost:5173',
-  ];
-  
-  if (origin && (allowedOrigins.includes(origin) || origin.includes('lovableproject.com'))) {
-    return origin;
-  }
-  
-  return 'https://rationable.ai';
-};
-
-const getCorsHeaders = (origin: string | null) => ({
-  'Access-Control-Allow-Origin': getAllowedOrigin(origin),
+// CORS configuration for all environments
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
-  'X-XSS-Protection': '1; mode=block'
-});
+  'Access-Control-Max-Age': '86400',
+};
 
 serve(async (req) => {
-  const origin = req.headers.get('origin');
-  const corsHeaders = getCorsHeaders(origin);
-  
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
