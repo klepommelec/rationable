@@ -250,7 +250,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         <div className="space-y-3">
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                 {displayedTemplates.map(template => <Button key={template.name} variant="outline" size="sm" onClick={() => handleTemplateClick(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} aria-label={`Utiliser le modèle: ${template.name}`} className="text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-full py-[8px] px-[8px]">
-                                        <span className="truncate text-sm px-[4px] font-normal text-gray-600 dark:text-gray-400">{template.name}</span>
+                                        <span className="truncate text-sm px-[4px] font-medium text-gray-500">{template.name}</span>
                                     </Button>)}
                             </div>
                         </div>
