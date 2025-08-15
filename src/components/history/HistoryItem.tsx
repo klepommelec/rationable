@@ -65,18 +65,10 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
                     </span>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-sm">
-                    <div className="space-y-2">
-                      {decision.result.followUpQuestions?.slice(0, 3).map((question, index) => (
-                        <div key={question.id} className="text-sm">
-                          <p className="font-medium">{question.text}</p>
-                        </div>
-                      ))}
-                      {followUpCount > 3 && (
-                        <p className="text-xs text-muted-foreground">
-                          ... et {followUpCount - 3} autre{followUpCount - 3 > 1 ? 's' : ''}
-                        </p>
-                      )}
-                    </div>
+                    <p className="text-sm">
+                      Cette décision contient {followUpCount} question{followUpCount > 1 ? 's' : ''} de suivi supplémentaire{followUpCount > 1 ? 's' : ''}.
+                      Chargez cette décision pour les voir.
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               )}
