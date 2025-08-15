@@ -58,9 +58,27 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
                 {titleOverride || decision.dilemma}
               </p>
               {typeof followUpCount === 'number' && followUpCount > 0 && (
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  + {followUpCount} question{followUpCount > 1 ? 's' : ''} de suivi
-                </span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap cursor-help hover:text-foreground transition-colors">
+                      + {followUpCount} question{followUpCount > 1 ? 's' : ''} de suivi
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-sm">
+                    <div className="space-y-2">
+                      {decision.result.followUpQuestions?.slice(0, 3).map((question, index) => (
+                        <div key={question.id} className="text-sm">
+                          <p className="font-medium">{question.text}</p>
+                        </div>
+                      ))}
+                      {followUpCount > 3 && (
+                        <p className="text-xs text-muted-foreground">
+                          ... et {followUpCount - 3} autre{followUpCount - 3 > 1 ? 's' : ''}
+                        </p>
+                      )}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
               )}
             </div>
             
