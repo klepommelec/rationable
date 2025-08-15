@@ -39,11 +39,11 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
   return (
     <TooltipProvider>
       <div 
-        className="p-4 pb-8 pr-12 rounded-lg bg-card border cursor-pointer hover:bg-accent/50 transition-colors relative"
+        className="p-4 rounded-lg bg-card border cursor-pointer hover:bg-accent/50 transition-colors relative"
         onClick={handleLoad}
       >
         <div className="flex justify-between items-start gap-2">
-          <div className="flex-1 min-w-0 space-y-2 pr-4">
+          <div className="flex-1 min-w-0 space-y-2">
             {/* Titre principal avec emoji */}
             <div className="mb-1">
               <div className="sm:hidden space-y-1">
@@ -82,7 +82,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
         </div>
         
         {/* Date en bas à droite avec tooltip */}
-        <div className="absolute bottom-3 right-3">
+        <div className="absolute bottom-2 right-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <p className="text-sm text-muted-foreground cursor-help">
