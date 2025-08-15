@@ -142,7 +142,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               </div>
             </div>
             
-            <h3 className={`text-lg font-semibold ${config.titleColor} w-full`}>
+            <h3 className={`text-xl font-semibold ${config.titleColor} w-full`}>
               {result.recommendation?.replace(/^Option\s+\d+:\s*/i, '').trim()}
             </h3>
             
