@@ -52,13 +52,13 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
         <div className="flex justify-between items-start gap-2">
           <div className="flex-1 min-w-0 space-y-1">
             {/* Titre principal avec emoji et questions de suivi */}
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
               <span className="text-lg">{decision.emoji}</span>
-              <p className="font-semibold text-foreground flex-1 min-w-0 truncate">
+              <p className="font-semibold text-foreground truncate">
                 {titleOverride || decision.dilemma}
               </p>
               {typeof followUpCount === 'number' && followUpCount > 0 && (
-                <span className="text-xs text-muted-foreground whitespace-nowrap ml-1">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
                   + {followUpCount} question{followUpCount > 1 ? 's' : ''} de suivi
                 </span>
               )}
