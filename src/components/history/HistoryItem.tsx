@@ -64,7 +64,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
             )}
             
             {/* Réponse principale */}
-            <p className="text-xs text-muted-foreground line-clamp-2">
+            <p className="text-sm text-foreground/80 line-clamp-2">
               {rootRecommendation || decision.result.recommendation}
             </p>
             
