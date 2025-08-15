@@ -143,6 +143,7 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
                 onDelete={onDelete} 
                 followUpCount={item.followUpCount}
                 titleOverride={item.root.dilemma}
+                rootRecommendation={item.root.result.recommendation}
               />
             ))
           )}
