@@ -44,7 +44,7 @@ const Navbar: React.FC<NavbarProps> = ({
   return <header className={`sticky top-0 z-50 w-full transition-all duration-150 ${isScrolled ? 'bg-background/95 backdrop-blur border-b border-border supports-[backdrop-filter]:bg-background/90' : isSettingsPage ? 'bg-transparent border-b border-border' : 'bg-transparent'}`}>
       <div className="container flex h-16 items-center">
         <Link to="/" className="flex items-center gap-2 mr-auto hover:underline transition-all duration-200">
-          <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-9 w-9 rounded-none " />
+          <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-8 w-8 rounded-none " />
           <span className="text-xl font-semibold">Rationable</span>
         </Link>
         
