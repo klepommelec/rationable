@@ -39,11 +39,11 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
   return (
     <TooltipProvider>
       <div 
-        className="p-3 rounded-lg bg-card border cursor-pointer hover:bg-accent/50 transition-colors relative"
+        className="p-4 pb-8 pr-12 rounded-lg bg-card border cursor-pointer hover:bg-accent/50 transition-colors relative"
         onClick={handleLoad}
       >
         <div className="flex justify-between items-start gap-2">
-          <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex-1 min-w-0 space-y-2 pr-4">
             {/* Titre principal avec emoji */}
             <div className="mb-1">
               <div className="sm:hidden space-y-1">
@@ -55,13 +55,6 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
                 <p className="font-semibold text-foreground truncate flex-1">{titleOverride || decision.dilemma}</p>
               </div>
             </div>
-            
-            {/* Catégorie */}
-            {decision.category && decision.category !== 'other' && decision.category !== 'Autre' && (
-              <div>
-                <CategoryBadge categoryId={decision.category} />
-              </div>
-            )}
             
             {/* Réponse principale */}
             <p className="text-sm text-muted-foreground line-clamp-2">
@@ -89,10 +82,10 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
         </div>
         
         {/* Date en bas à droite avec tooltip */}
-        <div className="absolute bottom-2 right-2">
+        <div className="absolute bottom-3 right-3">
           <Tooltip>
             <TooltipTrigger asChild>
-              <p className="text-xs text-muted-foreground cursor-help">
+              <p className="text-sm text-muted-foreground cursor-help">
                 {new Date(decision.timestamp).toLocaleDateString('fr-FR')}
               </p>
             </TooltipTrigger>
