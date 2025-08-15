@@ -4,6 +4,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Database, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { IResult } from '@/types/decision';
+import { useAuth } from '@/hooks/useAuth';
 
 interface DataAccuracyIndicatorProps {
   result: IResult;
@@ -17,6 +18,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
   className = '' 
 }) => {
   const [isSourcesExpanded, setIsSourcesExpanded] = useState(false);
+  const { profile } = useAuth();
 
   // Get creation timestamp from currentDecision
   const getCreationTimestamp = () => {
@@ -62,8 +64,20 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
   const sources = result.realTimeData?.sources || [];
   const creationTimestamp = getCreationTimestamp();
   const updateTimestamp = getUpdateTimestamp();
-  const author = currentDecision?.author || currentDecision?.user_id || 'Système';
-  const updatedBy = currentDecision?.updatedBy || 'Système';
+  
+  // Get user display name
+  const getUserDisplayName = () => {
+    if (profile?.full_name) {
+      return profile.full_name;
+    }
+    if (profile?.email) {
+      return profile.email;
+    }
+    return 'Utilisateur';
+  };
+  
+  const author = getUserDisplayName();
+  const updatedBy = getUserDisplayName();
 
   return (
     <TooltipProvider>
