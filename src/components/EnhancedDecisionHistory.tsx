@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import { IDecision } from '@/types/decision';
 import { HistorySearchBar } from './history/HistorySearchBar';
 import { HistoryActions } from './history/HistoryActions';
@@ -27,6 +28,7 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'date' | 'category'>('date');
+  const [visibleCount, setVisibleCount] = useState(10);
 
   console.log('EnhancedDecisionHistory - onLoad function:', typeof onLoad);
 
@@ -84,6 +86,19 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
     return items;
   }, [filteredAndSortedHistory]);
 
+  // Reset visible count when search/filter changes
+  React.useEffect(() => {
+    setVisibleCount(10);
+  }, [searchQuery, selectedCategory, sortBy]);
+
+  // Get visible items for pagination
+  const visibleThreads = groupedThreads.slice(0, visibleCount);
+  const hasMoreItems = visibleCount < groupedThreads.length;
+
+  const loadMoreItems = () => {
+    setVisibleCount(prev => Math.min(prev + 10, groupedThreads.length));
+  };
+
   const handleLoad = (id: string) => {
     console.log('EnhancedDecisionHistory - handleLoad called with id:', id);
     onLoad(id);
@@ -120,7 +135,7 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
               <p>Aucune décision ne correspond à vos critères de recherche.</p>
             </div>
           ) : (
-            groupedThreads.map(item => (
+            visibleThreads.map(item => (
               <HistoryItem 
                 key={item.last.id} 
                 decision={item.last} 
@@ -130,6 +145,19 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
                 titleOverride={item.root.dilemma}
               />
             ))
+          )}
+          
+          {/* Bouton "Voir plus" */}
+          {hasMoreItems && (
+            <div className="flex justify-center pt-4">
+              <Button 
+                variant="outline" 
+                onClick={loadMoreItems}
+                className="min-w-[120px]"
+              >
+                Voir plus
+              </Button>
+            </div>
           )}
         </div>
       </ScrollArea>
