@@ -243,7 +243,7 @@ const DecisionMaker = () => {
         {(displayStep === 'criteria-loaded' || displayStep === 'loading-options' || displayStep === 'done') && <>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 animate-fade-in">
               {/* Layout mobile : emoji au-dessus du titre, aligné à gauche */}
-              <div className="sm:hidden space-y-2 w-full">
+              <div className="sm:hidden space-y-2 w-full px-[8px]">
                 <EmojiPicker emoji={displayEmoji} setEmoji={setEmoji} />
                 <h1 className="text-4xl font-bold text-left break-words">
                   {getCurrentAnalysis()?.displayTitle || getCurrentAnalysis()?.dilemma || displayDilemma}
