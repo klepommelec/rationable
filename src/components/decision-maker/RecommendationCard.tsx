@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { IResult } from '@/types/decision';
 
 import { ConfidenceIndicator } from './ConfidenceIndicator';
-import { DataFreshnessIndicator } from './DataFreshnessIndicator';
+import { DataAccuracyIndicator } from './DataAccuracyIndicator';
 import { WorkspaceDocumentIndicator } from './WorkspaceDocumentIndicator';
 import { AIProviderIndicator } from './AIProviderIndicator';
 import ValidatedLink from '@/components/ValidatedLink';

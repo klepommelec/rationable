@@ -1,82 +1,119 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Clock, Database, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { IResult } from '@/types/decision';
 
 interface DataAccuracyIndicatorProps {
   result: IResult;
+  currentDecision?: any;
   className?: string;
 }
 
 export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({ 
   result, 
+  currentDecision,
   className = '' 
 }) => {
-  const { realTimeData, dataFreshness } = result;
+  const [isSourcesExpanded, setIsSourcesExpanded] = useState(false);
 
-  if (!realTimeData?.hasRealTimeData) {
-    return null;
-  }
-
-  const getFreshnessInfo = () => {
-    switch (dataFreshness) {
-      case 'very-fresh':
-        return {
-          icon: CheckCircle,
-          color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
-          label: 'Données très récentes',
-          description: 'Informations vérifiées et actualisées'
-        };
-      case 'fresh':
-        return {
-          icon: Clock,
-          color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-          label: 'Données récentes',
-          description: 'Informations fiables et à jour'
-        };
-      default:
-        return {
-          icon: AlertCircle,
-          color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
-          label: 'Données standard',
-          description: 'Informations générales'
-        };
+  // Get timestamp - prioritize realTimeData.timestamp, fallback to currentDecision.timestamp
+  const getTimestamp = () => {
+    if (result.realTimeData?.timestamp) {
+      return result.realTimeData.timestamp;
     }
+    if (currentDecision?.timestamp) {
+      return new Date(currentDecision.timestamp).toISOString();
+    }
+    return null;
   };
 
-  const freshnessInfo = getFreshnessInfo();
-  const IconComponent = freshnessInfo.icon;
-  
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
     return date.toLocaleDateString('fr-FR', {
       day: 'numeric',
       month: 'short',
+      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     });
   };
 
+  // Get sources count and sources list
+  const sourcesCount = result.realTimeData?.sourcesCount || 0;
+  const sources = result.realTimeData?.sources || [];
+  const timestamp = getTimestamp();
+
   return (
-    <div className={`flex items-center gap-3 p-3 rounded-lg bg-muted/30 border ${className}`}>
-      <Badge variant="secondary" className={`gap-1.5 ${freshnessInfo.color}`}>
-        <IconComponent className="h-3 w-3" />
-        {freshnessInfo.label}
-      </Badge>
-      
-      <div className="flex-1 text-sm text-muted-foreground">
-        {freshnessInfo.description}
-        {realTimeData.timestamp && (
-          <span className="ml-2 opacity-70">
-            • Mise à jour: {formatTimestamp(realTimeData.timestamp)}
-          </span>
+    <div className={`space-y-3 p-4 rounded-lg bg-muted/30 border ${className}`}>
+      {/* Header with timestamp and sources count */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        {timestamp && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Clock className="h-4 w-4" />
+            <span>Mis à jour le {formatTimestamp(timestamp)}</span>
+          </div>
+        )}
+        
+        {sourcesCount > 0 && (
+          <Badge variant="outline" className="w-fit">
+            <Database className="h-3 w-3 mr-1" />
+            {sourcesCount} source{sourcesCount > 1 ? 's' : ''}
+          </Badge>
         )}
       </div>
-      
-      {realTimeData.sourcesCount && realTimeData.sourcesCount > 0 && (
-        <Badge variant="outline" className="text-xs">
-          {realTimeData.sourcesCount} source{realTimeData.sourcesCount > 1 ? 's' : ''}
-        </Badge>
+
+      {/* Sources toggle */}
+      {sources.length > 0 && (
+        <Collapsible open={isSourcesExpanded} onOpenChange={setIsSourcesExpanded}>
+          <CollapsibleTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-auto p-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              <span>Voir les sources</span>
+              {isSourcesExpanded ? (
+                <ChevronUp className="h-3 w-3 ml-1" />
+              ) : (
+                <ChevronDown className="h-3 w-3 ml-1" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent className="space-y-2 mt-2">
+            <div className="pl-2 border-l-2 border-muted">
+              {sources.map((source, index) => {
+                // Try to extract URL from source string
+                const urlMatch = source.match(/(https?:\/\/[^\s]+)/);
+                const url = urlMatch ? urlMatch[1] : null;
+                const displayText = source.replace(/(https?:\/\/[^\s]+)/, '').trim() || source;
+
+                return (
+                  <div key={index} className="text-xs text-muted-foreground">
+                    {url ? (
+                      <a 
+                        href={url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 hover:text-foreground transition-colors"
+                      >
+                        <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                        <span className="truncate">{displayText}</span>
+                      </a>
+                    ) : (
+                      <div className="flex items-center gap-1.5">
+                        <Database className="h-3 w-3 flex-shrink-0" />
+                        <span className="truncate">{source}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       )}
     </div>
   );

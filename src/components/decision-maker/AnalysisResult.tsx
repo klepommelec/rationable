@@ -56,8 +56,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   // Affichage unifié pour tous les types de questions
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Indicateur de fraîcheur des données */}
-      <DataAccuracyIndicator result={result} />
+      {/* Indicateur de sources et mise à jour */}
+      <DataAccuracyIndicator result={result} currentDecision={currentDecision} />
       
       <RecommendationCard 
         result={result}
