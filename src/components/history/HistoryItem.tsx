@@ -50,7 +50,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
         onClick={handleLoad}
       >
         <div className="flex justify-between items-start gap-2">
-          <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex-1 min-w-0 space-y-1">
             {/* Titre principal avec emoji et questions de suivi */}
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-lg">{decision.emoji}</span>
@@ -58,7 +58,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
                 {titleOverride || decision.dilemma}
               </p>
               {typeof followUpCount === 'number' && followUpCount > 0 && (
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                <span className="text-xs text-muted-foreground whitespace-nowrap ml-1">
                   + {followUpCount} question{followUpCount > 1 ? 's' : ''} de suivi
                 </span>
               )}
@@ -69,17 +69,19 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
               {rootRecommendation || decision.result.recommendation}
             </p>
             
-            {/* Date */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <p className="text-xs text-muted-foreground cursor-help">
-                  {new Date(decision.timestamp).toLocaleDateString('fr-FR')}
-                </p>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{new Date(decision.timestamp).toLocaleString('fr-FR')}</p>
-              </TooltipContent>
-            </Tooltip>
+            {/* Date avec plus d'espace au-dessus */}
+            <div className="pt-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="text-xs text-muted-foreground cursor-help">
+                    {new Date(decision.timestamp).toLocaleDateString('fr-FR')}
+                  </p>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{new Date(decision.timestamp).toLocaleString('fr-FR')}</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </div>
           
           <DropdownMenu>
