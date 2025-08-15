@@ -72,36 +72,33 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
           {/* Creation and update info */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             {creationTimestamp && (
-              <TooltipTrigger asChild>
-                <span className="cursor-default">
-                  Créé le {formatDateOnly(creationTimestamp)} par {author}
-                </span>
-              </TooltipTrigger>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-default">
+                    Créé le {formatDateOnly(creationTimestamp)} par {author}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">
+                  <div>Créé le {formatDateTime(creationTimestamp)}</div>
+                </TooltipContent>
+              </Tooltip>
             )}
             
             {updateTimestamp && (
               <>
                 <span>, </span>
-                <TooltipTrigger asChild>
-                  <span className="cursor-default hover:text-foreground transition-colors">
-                    mis à jour le {formatDateOnly(updateTimestamp)}
-                  </span>
-                </TooltipTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-default hover:text-foreground transition-colors">
+                      mis à jour le {formatDateOnly(updateTimestamp)}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-xs">
+                    <div>Mis à jour le {formatDateTime(updateTimestamp)} par {updatedBy}</div>
+                  </TooltipContent>
+                </Tooltip>
               </>
             )}
-            
-            <Tooltip>
-              <TooltipContent side="top" className="text-xs">
-                <div className="space-y-1">
-                  {creationTimestamp && (
-                    <div>Créé le {formatDateTime(creationTimestamp)}</div>
-                  )}
-                  {updateTimestamp && (
-                    <div>Mis à jour le {formatDateTime(updateTimestamp)} par {updatedBy}</div>
-                  )}
-                </div>
-              </TooltipContent>
-            </Tooltip>
           </div>
           
           {/* Sources badge - clickable */}
