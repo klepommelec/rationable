@@ -111,7 +111,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Rechercher dans l'historique..."
+            placeholder="Rechercher..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 w-full"
@@ -188,7 +188,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="w-full">
                 <MoreHorizontal className="h-4 w-4 mr-2" />
-                Plus d'options
+                Plus
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
@@ -245,7 +245,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
         <div className="relative" style={{ width: '350px' }}>
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Rechercher dans l'historique..."
+            placeholder="Rechercher..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 w-full"
@@ -320,7 +320,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
               <MoreHorizontal className="h-4 w-4 mr-2" />
-              Plus d'options
+              Plus
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
