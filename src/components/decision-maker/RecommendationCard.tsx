@@ -44,7 +44,57 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
       <CardContent className="space-y-6 pt-6">
         <div className="flex flex-col gap-6">
           <div className="w-full space-y-4">
-            <div className="flex items-start justify-between gap-4 w-full">
+            {/* Layout mobile : boutons sur plusieurs lignes */}
+            <div className="sm:hidden space-y-3">
+              <Badge variant="secondary" className={`${config.badgeColor} w-fit`}>
+                {config.badge}
+              </Badge>
+              
+              <div className="flex flex-wrap gap-2">
+                {currentDecision && (
+                  <ShareButton decision={currentDecision} />
+                )}
+                <Button variant="outline" size="sm" onClick={clearSession} className="flex items-center gap-2">
+                  <RotateCcw className="h-4 w-4" />
+                  Nouvelle analyse
+                </Button>
+                
+                {import.meta.env.DEV && <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="flex items-center gap-2">
+                        <BarChart3 className="h-4 w-4" />
+                        Dashboard AI
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Dashboard AI Providers</DialogTitle>
+                      </DialogHeader>
+                      <Tabs defaultValue="dashboard" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="dashboard">
+                            <BarChart3 className="h-4 w-4 mr-2" />
+                            Statistiques
+                          </TabsTrigger>
+                          <TabsTrigger value="monitoring">
+                            <Activity className="h-4 w-4 mr-2" />
+                            Monitoring
+                          </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="dashboard" className="mt-4">
+                          <AIProviderDashboard />
+                        </TabsContent>
+                        <TabsContent value="monitoring" className="mt-4">
+                          <AIProviderMonitor />
+                        </TabsContent>
+                      </Tabs>
+                    </DialogContent>
+                  </Dialog>}
+              </div>
+            </div>
+            
+            {/* Layout desktop : badge et boutons sur la même ligne */}
+            <div className="hidden sm:flex items-start justify-between gap-4 w-full">
               <Badge variant="secondary" className={`${config.badgeColor}`}>
                 {config.badge}
               </Badge>

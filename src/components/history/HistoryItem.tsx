@@ -40,9 +40,17 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
     >
       <div className="flex justify-between items-start gap-2">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-lg">{decision.emoji}</span>
-            <p className="font-semibold text-foreground truncate flex-1">{titleOverride || decision.dilemma}</p>
+          {/* Layout mobile : emoji au-dessus, tout aligné à gauche */}
+          <div className="mb-1">
+            <div className="sm:hidden space-y-1">
+              <span className="text-lg block">{decision.emoji}</span>
+              <p className="font-semibold text-foreground">{titleOverride || decision.dilemma}</p>
+            </div>
+            {/* Layout desktop : emoji et texte côte à côte */}
+            <div className="hidden sm:flex items-center gap-2">
+              <span className="text-lg">{decision.emoji}</span>
+              <p className="font-semibold text-foreground truncate flex-1">{titleOverride || decision.dilemma}</p>
+            </div>
           </div>
           {decision.category && decision.category !== 'other' && decision.category !== 'Autre' && (
             <div className="mb-1">
