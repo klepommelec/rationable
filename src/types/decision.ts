@@ -81,6 +81,11 @@ export interface IDecision {
   tags?: string[];
   threadId?: string;
   parentId?: string;
+  createdById?: string;
+  createdByName?: string;
+  updatedAt?: number;
+  updatedById?: string;
+  updatedByName?: string;
 }
 
 export interface IDecisionCategory {

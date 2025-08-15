@@ -9,6 +9,7 @@ import { AnalysisStep } from './useDecisionState';
 import { useWorkspaceContext } from './useWorkspaceContext';
 import { generateContextualEmoji } from '@/services/contextualEmojiService';
 import { detectQuestionType } from '@/services/questionClassificationService';
+import { useAuth } from '@/hooks/useAuth';
 
 interface UseDecisionAPIProps {
     dilemma: string;
@@ -56,6 +57,14 @@ export const useDecisionAPI = ({
     uploadedFiles = []
 }: UseDecisionAPIProps) => {
     const { getCurrentWorkspaceId, shouldUseWorkspaceDocuments } = useWorkspaceContext();
+    const { user, profile } = useAuth();
+    
+    // Get user display name helper
+    const getUserDisplayName = () => {
+        if (profile?.full_name) return profile.full_name;
+        if (profile?.email) return profile.email;
+        return 'Utilisateur';
+    };
 
     const handleGenerateOptions = async (isRetry = false, forcedType?: 'comparative') => {
         const currentCriteria = criteria;
@@ -133,7 +142,10 @@ export const useDecisionAPI = ({
                 const updated: IDecision = {
                   ...decisionToUpdate,
                   criteria: currentCriteria,
-                  result: apiResult
+                  result: apiResult,
+                  updatedAt: Date.now(),
+                  updatedById: user?.id,
+                  updatedByName: getUserDisplayName()
                 };
                 updateDecision(updated);
             }
@@ -278,7 +290,9 @@ export const useDecisionAPI = ({
                 result: optionsResult,
                 category: criteriaResponse.suggestedCategory,
                 threadId,
-                parentId: parentDecision?.id
+                parentId: parentDecision?.id,
+                createdById: user?.id,
+                createdByName: getUserDisplayName()
             };
             addDecision(newDecision);
             setCurrentDecisionId(newDecision.id);
