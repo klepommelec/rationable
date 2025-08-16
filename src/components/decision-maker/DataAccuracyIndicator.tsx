@@ -74,9 +74,64 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
     <TooltipProvider>
       <div className={`flex flex-col gap-2 ${className}`}>
         <Collapsible open={isSourcesExpanded} onOpenChange={setIsSourcesExpanded}>
-          {/* Layout adaptatif : vertical sur mobile, horizontal sur desktop */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
-            {/* Informations de création/mise à jour */}
+          {/* Layout mobile : structure verticale en 3 niveaux */}
+          <div className="block sm:hidden">
+            <div className="space-y-1 text-xs text-muted-foreground">
+              {/* 1er niveau: Créé le (date) par (auteur) */}
+              <div className="flex flex-wrap items-center gap-x-1">
+                <span>Créé le</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="underline decoration-dotted cursor-help">
+                      {formatDateOnly(creationTimestamp)}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Créé le {formatDateTime(creationTimestamp)} par {author}</p>
+                  </TooltipContent>
+                </Tooltip>
+                <span>par {author}</span>
+              </div>
+              
+              {/* 2ème niveau: Mis à jour le (date) si ça existe */}
+              {hasUpdates && (
+                <div className="flex flex-wrap items-center gap-x-1">
+                  <span>Mis à jour le</span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="underline decoration-dotted cursor-help">
+                        {formatDateOnly(updateTimestamp)}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Mis à jour le {formatDateTime(updateTimestamp)} par {updatedBy}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              )}
+            </div>
+            
+            {/* 3ème niveau: Badge sources aligné à gauche */}
+            <div className="mt-2">
+              <CollapsibleTrigger asChild>
+                <Badge 
+                  variant="secondary" 
+                  className="cursor-pointer flex items-center gap-2 hover:bg-muted w-fit"
+                >
+                  <Database className="h-3 w-3" />
+                  {allSources.length} source{allSources.length > 1 ? 's' : ''}
+                  {isSourcesExpanded ? (
+                    <ChevronUp className="h-3 w-3" />
+                  ) : (
+                    <ChevronDown className="h-3 w-3" />
+                  )}
+                </Badge>
+              </CollapsibleTrigger>
+            </div>
+          </div>
+
+          {/* Layout desktop : horizontal comme avant */}
+          <div className="hidden sm:flex sm:items-center sm:justify-between gap-4">
             <div className="flex flex-col gap-1 text-xs text-muted-foreground min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
                 <span className="flex-shrink-0">Créé le</span>
@@ -110,23 +165,20 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
               </div>
             </div>
 
-            {/* Badge Sources - Centré sur mobile, aligné à droite sur desktop */}
-            <div className="flex justify-center sm:justify-end">
-              <CollapsibleTrigger asChild>
-                <Badge 
-                  variant="secondary" 
-                  className="flex-shrink-0 cursor-pointer flex items-center gap-2 hover:bg-muted"
-                >
-                  <Database className="h-3 w-3" />
-                  {allSources.length} source{allSources.length > 1 ? 's' : ''}
-                  {isSourcesExpanded ? (
-                    <ChevronUp className="h-3 w-3" />
-                  ) : (
-                    <ChevronDown className="h-3 w-3" />
-                  )}
-                </Badge>
-              </CollapsibleTrigger>
-            </div>
+            <CollapsibleTrigger asChild>
+              <Badge 
+                variant="secondary" 
+                className="flex-shrink-0 cursor-pointer flex items-center gap-2 hover:bg-muted"
+              >
+                <Database className="h-3 w-3" />
+                {allSources.length} source{allSources.length > 1 ? 's' : ''}
+                {isSourcesExpanded ? (
+                  <ChevronUp className="h-3 w-3" />
+                ) : (
+                  <ChevronDown className="h-3 w-3" />
+                )}
+              </Badge>
+            </CollapsibleTrigger>
           </div>
 
           {/* Sources Content - Below when expanded */}
