@@ -37,9 +37,11 @@ serve(async (req) => {
     const { query, language = 'fr', vertical, siteBias, numResults = 3 }: SearchRequest = await req.json();
 
     console.log(`🔍 First result search for: "${query}" (${language}, vertical: ${vertical})`);
+    console.log(`🔧 Available APIs: Google CSE: ${!!Deno.env.get('GOOGLE_API_KEY')}, SerpAPI: ${!!Deno.env.get('SERPAPI_API_KEY')}, Tavily: ${!!Deno.env.get('TAVILY_API_KEY')}, Perplexity: ${!!Deno.env.get('PERPLEXITY_API_KEY')}`);
 
     let results: SearchResult[] = [];
     let provider: SearchResponse['provider'] = 'perplexity'; // fallback
+    let lastError = '';
 
     // Priority 1: Google Custom Search Engine
     if (Deno.env.get('GOOGLE_API_KEY') && Deno.env.get('GOOGLE_SEARCH_ENGINE_ID')) {
@@ -62,7 +64,12 @@ serve(async (req) => {
         
         if (response.ok) {
           const data = await response.json();
-          if (data.items?.length > 0) {
+          console.log(`📊 Google CSE response:`, { hasItems: !!data.items, itemCount: data.items?.length || 0, error: data.error });
+          
+          if (data.error) {
+            console.log(`❌ Google CSE API error: ${data.error.message}`);
+            lastError = `Google CSE: ${data.error.message}`;
+          } else if (data.items?.length > 0) {
             results = data.items.slice(0, numResults).map((item: any, index: number) => ({
               title: item.title,
               url: item.link,
@@ -71,13 +78,22 @@ serve(async (req) => {
             }));
             provider = 'google_cse';
             console.log(`✅ Google CSE returned ${results.length} results`);
+          } else {
+            console.log(`⚠️ Google CSE returned no results`);
+            lastError = 'Google CSE: No results found';
           }
         } else {
-          console.log(`⚠️ Google CSE failed: ${response.status}`);
+          const errorText = await response.text();
+          console.log(`⚠️ Google CSE failed: ${response.status} - ${errorText}`);
+          lastError = `Google CSE: HTTP ${response.status} - ${errorText}`;
         }
       } catch (error) {
         console.log(`⚠️ Google CSE error: ${error.message}`);
+        lastError = `Google CSE: ${error.message}`;
       }
+    } else {
+      console.log('⚠️ Google CSE not configured (missing API key or Search Engine ID)');
+      lastError = 'Google CSE: Not configured';
     }
 
     // Priority 2: SerpAPI (if Google CSE failed)
@@ -162,40 +178,112 @@ serve(async (req) => {
         const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
         const supabase = createClient(supabaseUrl, supabaseKey);
 
+        // Try with a more specific shopping query
+        const shoppingQuery = `buy ${query} online store`;
+        console.log(`🛒 Enhanced Perplexity query: "${shoppingQuery}"`);
+
         const { data, error } = await supabase.functions.invoke('perplexity-search', {
           body: { 
-            message: query, 
+            query: shoppingQuery,
+            message: shoppingQuery, 
             language,
             returnCitations: true 
           }
         });
 
+        console.log(`📊 Perplexity response:`, { 
+          hasData: !!data, 
+          hasError: !!error, 
+          hasCitations: !!data?.citations, 
+          citationsCount: data?.citations?.length || 0,
+          hasContent: !!data?.content,
+          contentLength: data?.content?.length || 0
+        });
+
         if (!error && data?.citations?.length > 0) {
-          results = data.citations.slice(0, numResults).map((citation: any, index: number) => ({
-            title: citation.title || citation.url,
-            url: citation.url,
-            snippet: citation.snippet || '',
-            position: index + 1
-          }));
-          provider = 'perplexity';
-          console.log(`✅ Perplexity fallback returned ${results.length} results`);
-        } else if (!error && data?.content) {
-          // Extract URLs from Perplexity content as last resort
-          const urlRegex = /https?:\/\/[^\s\)]+/g;
-          const urls = data.content.match(urlRegex) || [];
-          const uniqueUrls = [...new Set(urls)].slice(0, numResults);
+          console.log(`📝 Raw citations:`, data.citations.slice(0, 3));
           
-          results = uniqueUrls.map((url: string, index: number) => ({
-            title: url.replace(/^https?:\/\//, '').replace(/\/.*$/, ''),
-            url: url,
-            snippet: 'From Perplexity search',
+          // Filter and prioritize shopping-related URLs
+          const shoppingCitations = data.citations.filter((citation: any) => {
+            const url = citation.url?.toLowerCase() || '';
+            const title = citation.title?.toLowerCase() || '';
+            
+            // Prioritize known e-commerce domains
+            const isEcommerce = url.includes('amazon.') || url.includes('fnac.') || 
+                              url.includes('cdiscount.') || url.includes('darty.') ||
+                              url.includes('boulanger.') || url.includes('samsung.') ||
+                              url.includes('apple.') || url.includes('shop') ||
+                              url.includes('store') || url.includes('buy') ||
+                              title.includes('buy') || title.includes('price') ||
+                              title.includes('shop') || title.includes('store');
+            
+            // Avoid generic social/news sites
+            const isGeneric = url.includes('facebook.') || url.includes('twitter.') ||
+                            url.includes('youtube.') || url.includes('news.') ||
+                            url.includes('wikipedia.') || url.includes('reddit.') ||
+                            url.includes('blog.');
+            
+            return citation.url && isEcommerce && !isGeneric;
+          });
+
+          const finalCitations = shoppingCitations.length > 0 ? shoppingCitations : data.citations;
+          
+          results = finalCitations.slice(0, numResults).map((citation: any, index: number) => ({
+            title: citation.title || citation.url?.replace(/^https?:\/\//, '').replace(/\/.*$/, '') || 'Product page',
+            url: citation.url,
+            snippet: citation.snippet || citation.description || 'Product information',
             position: index + 1
           }));
           provider = 'perplexity';
-          console.log(`✅ Perplexity URL extraction returned ${results.length} results`);
+          console.log(`✅ Perplexity fallback returned ${results.length} results (${shoppingCitations.length} e-commerce filtered)`);
+        } else if (!error && data?.content) {
+          // Improved URL extraction from Perplexity content
+          console.log(`🔍 Extracting URLs from content (length: ${data.content.length})`);
+          
+          // More comprehensive URL extraction
+          const urlPatterns = [
+            /https?:\/\/(?:www\.)?(?:amazon|fnac|cdiscount|darty|boulanger|samsung|apple)\.[\w\-._~:/?#[\]@!$&'()*+,;=]+/g,
+            /https?:\/\/[\w\-._~:/?#[\]@!$&'()*+,;=]+\.(?:com|fr|co\.uk|de)[\w\-._~:/?#[\]@!$&'()*+,;=]*/g
+          ];
+          
+          let extractedUrls: string[] = [];
+          for (const pattern of urlPatterns) {
+            const matches = data.content.match(pattern) || [];
+            extractedUrls.push(...matches);
+          }
+          
+          // Clean and deduplicate URLs
+          const cleanUrls = [...new Set(extractedUrls)]
+            .map(url => url.replace(/[)\],;.!?]+$/, '')) // Remove trailing punctuation
+            .filter(url => {
+              try {
+                new URL(url);
+                return !url.includes('example.') && !url.includes('placeholder') && url.length > 10;
+              } catch {
+                return false;
+              }
+            })
+            .slice(0, numResults);
+          
+          console.log(`🔗 Extracted URLs:`, cleanUrls);
+          
+          if (cleanUrls.length > 0) {
+            results = cleanUrls.map((url: string, index: number) => ({
+              title: url.replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace('www.', '') + ' - Product page',
+              url: url,
+              snippet: 'Product information from web search',
+              position: index + 1
+            }));
+            provider = 'perplexity';
+            console.log(`✅ Perplexity URL extraction returned ${results.length} results`);
+          }
+        } else {
+          console.log(`⚠️ Perplexity fallback failed:`, { error: error?.message, hasData: !!data });
+          lastError = error?.message || 'Perplexity: No data returned';
         }
       } catch (error) {
         console.log(`⚠️ Perplexity error: ${error.message}`);
+        lastError = `Perplexity: ${error.message}`;
       }
     }
 
