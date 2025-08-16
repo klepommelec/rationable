@@ -13,6 +13,7 @@ import { ExternalLink, Lightbulb, CheckCircle, ShoppingBag, Loader2, Navigation 
 import { ExpandableText } from '@/components/ExpandableText';
 import { firstResultService, BestLinksResponse } from '@/services/firstResultService';
 import { I18nService } from '@/services/i18nService';
+import { getFaviconUrl } from '@/utils/favicon';
 interface RecommendationCardProps {
   result: IResult;
   dilemma: string;
@@ -159,21 +160,39 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                         size="sm"
                         onClick={() => window.open(actionLinks.official!.url, '_blank')}
                       >
-                        <ShoppingBag className="h-4 w-4 mr-2" />
+                        <img 
+                          src={getFaviconUrl(actionLinks.official!.url)} 
+                          alt="" 
+                          className="h-4 w-4 mr-2"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList?.remove('hidden');
+                          }}
+                        />
+                        <ShoppingBag className="h-4 w-4 mr-2 hidden" />
                         {I18nService.getOfficialSiteLabel(detectedLanguage)}
                       </Button>
                     ) : actionLinks.merchants[0] ? (
                       <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => window.open(actionLinks.merchants[0].url, '_blank')}
-                      >
-                        <ShoppingBag className="h-4 w-4 mr-2" />
-                        {actionLinks.actionType === 'reserve' ? 
-                          I18nService.getReserveLabel(detectedLanguage) :
-                          firstResultService.getActionVerb(detectedVertical, detectedLanguage)
-                        } sur {firstResultService.getDomainLabel(actionLinks.merchants[0].domain)}
-                      </Button>
+                         variant="default"
+                         size="sm"
+                         onClick={() => window.open(actionLinks.merchants[0].url, '_blank')}
+                       >
+                         <img 
+                           src={getFaviconUrl(actionLinks.merchants[0].url)} 
+                           alt="" 
+                           className="h-4 w-4 mr-2"
+                           onError={(e) => {
+                             e.currentTarget.style.display = 'none';
+                             e.currentTarget.nextElementSibling?.classList?.remove('hidden');
+                           }}
+                         />
+                         <ShoppingBag className="h-4 w-4 mr-2 hidden" />
+                         {actionLinks.actionType === 'reserve' ? 
+                           I18nService.getReserveLabel(detectedLanguage) :
+                           firstResultService.getActionVerb(detectedVertical, detectedLanguage)
+                         } sur {firstResultService.getDomainLabel(actionLinks.merchants[0].domain)}
+                       </Button>
                     ) : null}
                     
                      {/* Secondary buttons: Merchants (excluding already shown ones) */}
@@ -192,15 +211,23 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                        })
                        .slice(0, 2)
                        .map((merchant, i) => (
-                       <Button
-                         key={`merchant-${merchant.domain}-${i}`}
-                         variant="outline"
-                         size="sm"
-                         onClick={() => window.open(merchant.url, '_blank')}
-                         className="min-w-[120px]"
-                       >
-                         {firstResultService.getDomainLabel(merchant.domain)}
-                       </Button>
+                        <Button
+                          key={`merchant-${merchant.domain}-${i}`}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(merchant.url, '_blank')}
+                          className="min-w-[120px]"
+                        >
+                          <img 
+                            src={getFaviconUrl(merchant.url)} 
+                            alt="" 
+                            className="h-4 w-4 mr-2"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                          {firstResultService.getDomainLabel(merchant.domain)}
+                        </Button>
                      ))}
                   </div>
                 ) : null}

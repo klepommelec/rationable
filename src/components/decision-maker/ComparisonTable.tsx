@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { generateOptionSearchLinks } from '@/services/expandOptionsService';
 import { firstResultService, BestLinksResponse } from '@/services/firstResultService';
 import { I18nService } from '@/services/i18nService';
+import { getFaviconUrl } from '@/utils/favicon';
 
 interface ComparisonTableProps {
   breakdown: IBreakdownItem[];
@@ -135,40 +136,66 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                             </Button>
                           ) : optionActionLinks.official ? (
                             <Button
-                              variant="default"
-                              size="sm"
-                              onClick={() => window.open(optionActionLinks.official!.url, '_blank')}
-                              className="text-xs"
-                            >
-                              <ShoppingBag className="h-3 w-3 mr-1" />
-                              {I18nService.getOfficialSiteLabel(detectedLanguage)}
-                            </Button>
+                               variant="default"
+                               size="sm"
+                               onClick={() => window.open(optionActionLinks.official!.url, '_blank')}
+                               className="text-xs"
+                             >
+                               <img 
+                                 src={getFaviconUrl(optionActionLinks.official!.url)} 
+                                 alt="" 
+                                 className="h-3 w-3 mr-1"
+                                 onError={(e) => {
+                                   e.currentTarget.style.display = 'none';
+                                   e.currentTarget.nextElementSibling?.classList?.remove('hidden');
+                                 }}
+                               />
+                               <ShoppingBag className="h-3 w-3 mr-1 hidden" />
+                               {I18nService.getOfficialSiteLabel(detectedLanguage)}
+                             </Button>
                           ) : optionActionLinks.merchants?.[0] ? (
                             <Button
-                              variant="default"
-                              size="sm"
-                              onClick={() => window.open(optionActionLinks.merchants?.[0]?.url, '_blank')}
-                              className="text-xs"
-                            >
-                              <ShoppingBag className="h-3 w-3 mr-1" />
-                              {optionActionLinks.actionType === 'reserve' ? 
-                                I18nService.getReserveLabel(detectedLanguage) :
-                                firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)
-                              }
-                            </Button>
+                               variant="default"
+                               size="sm"
+                               onClick={() => window.open(optionActionLinks.merchants?.[0]?.url, '_blank')}
+                               className="text-xs"
+                             >
+                               <img 
+                                 src={getFaviconUrl(optionActionLinks.merchants?.[0]?.url || '')} 
+                                 alt="" 
+                                 className="h-3 w-3 mr-1"
+                                 onError={(e) => {
+                                   e.currentTarget.style.display = 'none';
+                                   e.currentTarget.nextElementSibling?.classList?.remove('hidden');
+                                 }}
+                               />
+                               <ShoppingBag className="h-3 w-3 mr-1 hidden" />
+                               {optionActionLinks.actionType === 'reserve' ? 
+                                 I18nService.getReserveLabel(detectedLanguage) :
+                                 firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)
+                               }
+                             </Button>
                           ) : null}
                          
                           {/* Secondary buttons: Merchants */}
                           {(optionActionLinks.actionType === 'directions' || optionActionLinks.official ? (optionActionLinks.merchants || []) : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => (
-                            <Button
-                              key={i}
-                              variant="outline"
-                              size="sm"
-                              onClick={() => window.open(merchant.url, '_blank')}
-                              className="text-xs"
-                            >
-                              {firstResultService.getDomainLabel(merchant.domain)}
-                            </Button>
+                             <Button
+                               key={i}
+                               variant="outline"
+                               size="sm"
+                               onClick={() => window.open(merchant.url, '_blank')}
+                               className="text-xs"
+                             >
+                               <img 
+                                 src={getFaviconUrl(merchant.url)} 
+                                 alt="" 
+                                 className="h-3 w-3 mr-1"
+                                 onError={(e) => {
+                                   e.currentTarget.style.display = 'none';
+                                 }}
+                               />
+                               {firstResultService.getDomainLabel(merchant.domain)}
+                             </Button>
                           ))}
                        </div>
                      ) : (
