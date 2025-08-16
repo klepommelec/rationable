@@ -253,7 +253,7 @@ const DecisionMaker = () => {
               {/* Layout desktop : emoji et titre côte à côte */}
               <div className="hidden sm:flex items-baseline gap-4 w-full">
                 <EmojiPicker emoji={displayEmoji} setEmoji={setEmoji} />
-                <h1 className="text-4xl sm:text-5xl font-bold text-left break-words flex-1 min-w-0 lg:text-4xl leading-snug">
+                <h1 className="text-4xl sm:text-4xl md:text-4xl lg:text-5xl font-bold text-left break-words flex-1 min-w-0 leading-snug">
                   {getCurrentAnalysis()?.displayTitle || getCurrentAnalysis()?.dilemma || displayDilemma}
                 </h1>
               </div>
