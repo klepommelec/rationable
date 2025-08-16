@@ -151,6 +151,22 @@ class FirstResultService {
         finalMerchants = [];
       }
 
+      // 10. Last resort fallback: if no official and no merchants, create a Google search button
+      if (!officialResult && finalMerchants.length === 0) {
+        const detectedLanguage = language || I18nService.detectLanguage(dilemma + ' ' + optionName);
+        const detectedVertical = vertical || I18nService.detectVertical(dilemma + ' ' + optionName);
+        const searchQuery = this.buildOptimizedQuery(optionName, detectedVertical, detectedLanguage);
+        const googleSearchUrl = I18nService.buildGoogleWebUrl(searchQuery, detectedLanguage);
+        
+        finalMerchants.push({
+          url: googleSearchUrl,
+          title: `Rechercher "${optionName}"`,
+          domain: 'google.com'
+        });
+        
+        console.log(`🔄 Added Google search fallback for: ${optionName}`);
+      }
+
       const result = {
         official: officialResult,
         merchants: finalMerchants,
@@ -525,6 +541,12 @@ class FirstResultService {
   private detectBrand(optionName: string): string | null {
     const lowerOption = optionName.toLowerCase();
     
+    // Extract potential restaurant/business names using common patterns
+    const restaurantName = this.extractRestaurantName(lowerOption);
+    if (restaurantName) {
+      return restaurantName;
+    }
+    
     // Known brands mapping
     const brandMap = {
       // Automotive
@@ -558,6 +580,23 @@ class FirstResultService {
       'microsoft': 'microsoft',
       'surface': 'microsoft',
       
+      // Dining & Leisure brands
+      'mcdonalds': 'mcdonalds',
+      'kfc': 'kfc',
+      'burger king': 'burgerking',
+      'starbucks': 'starbucks',
+      'subway': 'subway',
+      'fenocchio': 'fenocchio',
+      'paul': 'paul',
+      'plongeoir': 'plongeoir',
+      
+      // Hotels & Travel
+      'hilton': 'hilton',
+      'marriott': 'marriott',
+      'accor': 'accor',
+      'ibis': 'ibis',
+      'novotel': 'novotel',
+      
       // Other
       'nike': 'nike',
       'adidas': 'adidas',
@@ -568,6 +607,42 @@ class FirstResultService {
     for (const [keyword, brand] of Object.entries(brandMap)) {
       if (lowerOption.includes(keyword)) {
         return brand;
+      }
+    }
+    
+    return null;
+  }
+
+  private extractRestaurantName(lowerOption: string): string | null {
+    // Look for restaurant names in common patterns
+    const patterns = [
+      /restaurant\s+([a-zA-ZÀ-ÿ\s]+)/i,
+      /chez\s+([a-zA-ZÀ-ÿ]+)/i,
+      /café\s+([a-zA-ZÀ-ÿ\s]+)/i,
+      /bar\s+([a-zA-ZÀ-ÿ\s]+)/i,
+      /brasserie\s+([a-zA-ZÀ-ÿ\s]+)/i,
+      /bistrot?\s+([a-zA-ZÀ-ÿ\s]+)/i,
+    ];
+    
+    for (const pattern of patterns) {
+      const match = lowerOption.match(pattern);
+      if (match && match[1]) {
+        const name = match[1].trim();
+        if (name.length > 2 && name.length < 30) {
+          return name.toLowerCase().replace(/\s+/g, '');
+        }
+      }
+    }
+    
+    // Look for specific known restaurant names
+    const knownRestaurants = [
+      'fenocchio', 'plongeoir', 'lapérouse', 'procope', 'flore', 'closerie', 
+      'brasserie lipp', 'fouquet', 'maxim', 'train bleu'
+    ];
+    
+    for (const restaurant of knownRestaurants) {
+      if (lowerOption.includes(restaurant.toLowerCase())) {
+        return restaurant.toLowerCase().replace(/\s+/g, '');
       }
     }
     
@@ -589,28 +664,60 @@ class FirstResultService {
       'renault': ['renault.fr', 'renault.com'],
       'dacia': ['dacia.fr', 'dacia.com'],
       'nike': ['nike.com', 'nike.fr'],
-      'adidas': ['adidas.com', 'adidas.fr']
+      'adidas': ['adidas.com', 'adidas.fr'],
+      
+      // Dining brands
+      'mcdonalds': ['mcdonalds.com', 'mcdonalds.fr'],
+      'kfc': ['kfc.com', 'kfc.fr'],
+      'burgerking': ['burgerking.fr', 'burgerking.com'],
+      'starbucks': ['starbucks.com', 'starbucks.fr'],
+      'subway': ['subway.com', 'subway.fr'],
+      
+      // Hotels
+      'hilton': ['hilton.com', 'hilton.fr'],
+      'marriott': ['marriott.com', 'marriott.fr'],
+      'accor': ['accor.com', 'all.accor.com'],
+      'ibis': ['ibis.com', 'all.accor.com'],
+      'novotel': ['novotel.com', 'all.accor.com']
     };
     
-    return domainMap[brand] || [`${brand}.com`, `${brand}.fr`];
+    return domainMap[brand] || [`${brand}.com`, `${brand}.fr`, `www.${brand}.com`, `www.${brand}.fr`];
   }
 
   private isOfficialDomain(url: string, brand: string): boolean {
     const domain = this.extractDomain(url).toLowerCase();
     const brandDomains = this.getBrandDomains(brand);
     
-    // Check if domain contains the brand
-    const containsBrand = brandDomains.some(brandDomain => 
-      domain.includes(brandDomain.toLowerCase()) || 
-      domain.includes(brand.toLowerCase())
+    // Check exact brand domain matches first
+    const exactMatch = brandDomains.some(brandDomain => 
+      domain.includes(brandDomain.toLowerCase())
     );
     
-    // Exclude marketplaces
-    const isMarketplace = ['amazon', 'fnac', 'cdiscount', 'darty', 'boulanger', 'leboncoin', 'ebay', 'rakuten'].some(
-      marketplace => domain.includes(marketplace)
-    );
+    if (exactMatch) {
+      // Exclude marketplaces even for exact matches
+      const isMarketplace = ['amazon', 'fnac', 'cdiscount', 'darty', 'boulanger', 'leboncoin', 'ebay', 'rakuten'].some(
+        marketplace => domain.includes(marketplace)
+      );
+      return !isMarketplace;
+    }
     
-    return containsBrand && !isMarketplace;
+    // More lenient check: domain contains brand name and looks official
+    const containsBrand = domain.includes(brand.toLowerCase());
+    if (containsBrand) {
+      // Check if it's likely to be official (not a marketplace/review site)
+      const isMarketplace = ['amazon', 'fnac', 'cdiscount', 'darty', 'boulanger', 'leboncoin', 'ebay', 'rakuten',
+        'tripadvisor', 'booking', 'expedia', 'yelp', 'google', 'facebook', 'instagram'].some(
+        marketplace => domain.includes(marketplace)
+      );
+      
+      // Likely official if contains brand and not a marketplace
+      return !isMarketplace && (
+        domain.includes('.com') || domain.includes('.fr') || domain.includes('.org') || 
+        domain.includes('restaurant') || domain.includes('hotel') || domain.includes('official')
+      );
+    }
+    
+    return false;
   }
 
   private extractDomain(url: string): string {
@@ -664,9 +771,26 @@ class FirstResultService {
 
   private isMerchantDomain(domain: string): boolean {
     const merchantDomains = [
+      // E-commerce platforms
       'amazon', 'fnac', 'cdiscount', 'darty', 'boulanger', 'leboncoin',
       'rueducommerce', 'ldlc', 'materiel', 'grosbill', 'topachat',
-      'conforama', 'but', 'castorama', 'leroy-merlin'
+      'conforama', 'but', 'castorama', 'leroy-merlin',
+      
+      // Booking/Reservation platforms
+      'booking.com', 'expedia', 'hotels.com', 'agoda', 'trivago', 'kayak',
+      'airbnb', 'vrbo', 'homeaway',
+      
+      // Restaurant booking platforms
+      'opentable', 'thefork', 'lafourchette', 'resy', 'yelp',
+      'tripadvisor', 'zomato', 'deliveroo', 'ubereats', 'justeat',
+      
+      // Activity/Experience platforms
+      'viator', 'getyourguide', 'klook', 'tiqets', 'ticketmaster',
+      'eventbrite', 'stubhub', 'seetickets',
+      
+      // Travel platforms
+      'sncf-connect', 'trainline', 'omio', 'flixbus', 'ouibus',
+      'blablacar', 'europcar', 'hertz', 'avis', 'sixt'
     ];
     
     return merchantDomains.some(merchant => domain.includes(merchant));
@@ -675,21 +799,38 @@ class FirstResultService {
   private scoreMerchant(domain: string, title: string): number {
     let score = 0;
     
-    // Premium merchants
+    // Premium booking platforms
+    if (domain.includes('booking.com')) score += 12;
+    if (domain.includes('opentable')) score += 11;
+    if (domain.includes('thefork') || domain.includes('lafourchette')) score += 11;
+    
+    // Premium e-commerce
     if (domain.includes('amazon')) score += 10;
     if (domain.includes('fnac')) score += 9;
     if (domain.includes('darty')) score += 8;
     if (domain.includes('boulanger')) score += 7;
+    
+    // Travel & activity platforms
+    if (domain.includes('viator')) score += 9;
+    if (domain.includes('getyourguide')) score += 9;
+    if (domain.includes('expedia')) score += 8;
+    if (domain.includes('airbnb')) score += 8;
+    if (domain.includes('tripadvisor')) score += 7;
     
     // Standard merchants
     if (domain.includes('cdiscount')) score += 6;
     if (domain.includes('rueducommerce')) score += 5;
     if (domain.includes('ldlc')) score += 5;
     
-    // Bonus for title containing price or buy keywords
+    // Restaurant delivery
+    if (domain.includes('deliveroo') || domain.includes('ubereats')) score += 6;
+    
+    // Bonus for title containing relevant keywords
     const lowerTitle = title.toLowerCase();
+    if (lowerTitle.includes('réserver') || lowerTitle.includes('book')) score += 3;
     if (lowerTitle.includes('prix') || lowerTitle.includes('price')) score += 2;
     if (lowerTitle.includes('acheter') || lowerTitle.includes('buy')) score += 2;
+    if (lowerTitle.includes('restaurant') || lowerTitle.includes('hotel')) score += 2;
     
     return score;
   }
