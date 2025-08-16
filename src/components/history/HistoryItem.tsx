@@ -68,96 +68,130 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
       >
         <div className="flex justify-between items-start gap-2">
           <div className="flex-1 min-w-0 space-y-1">
-            {/* Titre principal avec emoji */}
-            <div className="flex items-center gap-2 w-full">
-              <span className="text-lg">{decision.emoji}</span>
-              <p className="font-semibold text-foreground truncate flex-1">
-                {titleOverride || decision.dilemma}
+            {/* Layout Desktop */}
+            <div className="hidden sm:block">
+              {/* Titre principal avec emoji et questions de suivi */}
+              <div className="flex items-center gap-2 w-full">
+                <span className="text-lg">{decision.emoji}</span>
+                <p className="font-semibold text-foreground truncate flex-1">
+                  {titleOverride || decision.dilemma}
+                </p>
+                {typeof followUpCount === 'number' && followUpCount > 0 && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap cursor-help hover:text-foreground transition-colors">
+                        + {followUpCount} question{followUpCount > 1 ? 's' : ''} de suivi
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-md max-h-64 overflow-y-auto">
+                      <div className="space-y-3">
+                        {followUpDecisions?.slice(0, 5).map((followUp, index) => (
+                          <div key={followUp.id} className="text-sm">
+                            <p className="font-semibold text-foreground mb-1">
+                              Q{index + 1}: {followUp.dilemma}
+                            </p>
+                            <p className="text-muted-foreground text-xs leading-relaxed">
+                              {followUp.result.recommendation.length > 160 
+                                ? `${followUp.result.recommendation.substring(0, 160)}...` 
+                                : followUp.result.recommendation}
+                            </p>
+                          </div>
+                        ))}
+                        {followUpCount > 5 && (
+                          <p className="text-xs text-muted-foreground italic pt-2 border-t">
+                            ... et {followUpCount - 5} autre{followUpCount - 5 > 1 ? 's' : ''}
+                          </p>
+                        )}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+              
+              {/* Réponse principale */}
+              <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                {rootRecommendation || decision.result.recommendation}
               </p>
-              {/* Questions de suivi - masquées sur mobile */}
-              {typeof followUpCount === 'number' && followUpCount > 0 && (
+              
+              {/* Date avec espacement */}
+              <div className="pt-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className="hidden sm:inline text-xs text-muted-foreground whitespace-nowrap cursor-help hover:text-foreground transition-colors">
-                      + {followUpCount} question{followUpCount > 1 ? 's' : ''} de suivi
-                    </span>
+                    <p className="text-xs text-muted-foreground cursor-help">
+                      {new Date(decision.timestamp).toLocaleDateString('fr-FR')}
+                    </p>
                   </TooltipTrigger>
-                  <TooltipContent className="max-w-md max-h-64 overflow-y-auto">
-                    <div className="space-y-3">
-                      {followUpDecisions?.slice(0, 5).map((followUp, index) => (
-                        <div key={followUp.id} className="text-sm">
-                          <p className="font-semibold text-foreground mb-1">
-                            Q{index + 1}: {followUp.dilemma}
-                          </p>
-                          <p className="text-muted-foreground text-xs leading-relaxed">
-                            {followUp.result.recommendation.length > 160 
-                              ? `${followUp.result.recommendation.substring(0, 160)}...` 
-                              : followUp.result.recommendation}
-                          </p>
-                        </div>
-                      ))}
-                      {followUpCount > 5 && (
-                        <p className="text-xs text-muted-foreground italic pt-2 border-t">
-                          ... et {followUpCount - 5} autre{followUpCount - 5 > 1 ? 's' : ''}
-                        </p>
-                      )}
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-            
-            {/* Questions de suivi sur mobile - ligne séparée */}
-            {typeof followUpCount === 'number' && followUpCount > 0 && (
-              <div className="sm:hidden mt-1 mb-2">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="text-xs text-muted-foreground cursor-help hover:text-foreground transition-colors">
-                      + {followUpCount} question{followUpCount > 1 ? 's' : ''} de suivi
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-md max-h-64 overflow-y-auto">
-                    <div className="space-y-3">
-                      {followUpDecisions?.slice(0, 5).map((followUp, index) => (
-                        <div key={followUp.id} className="text-sm">
-                          <p className="font-semibold text-foreground mb-1">
-                            Q{index + 1}: {followUp.dilemma}
-                          </p>
-                          <p className="text-muted-foreground text-xs leading-relaxed">
-                            {followUp.result.recommendation.length > 160 
-                              ? `${followUp.result.recommendation.substring(0, 160)}...` 
-                              : followUp.result.recommendation}
-                          </p>
-                        </div>
-                      ))}
-                      {followUpCount > 5 && (
-                        <p className="text-xs text-muted-foreground italic pt-2 border-t">
-                          ... et {followUpCount - 5} autre{followUpCount - 5 > 1 ? 's' : ''}
-                        </p>
-                      )}
-                    </div>
+                  <TooltipContent>
+                    <p>{new Date(decision.timestamp).toLocaleString('fr-FR')}</p>
                   </TooltipContent>
                 </Tooltip>
               </div>
-            )}
-            
-            {/* Réponse principale avec espacement ajusté sur mobile */}
-            <p className="text-sm text-muted-foreground line-clamp-2 sm:mt-1">
-              {rootRecommendation || decision.result.recommendation}
-            </p>
-            
-            {/* Date avec plus d'espace au-dessus */}
-            <div className="pt-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <p className="text-xs text-muted-foreground cursor-help">
-                    {new Date(decision.timestamp).toLocaleDateString('fr-FR')}
-                  </p>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{new Date(decision.timestamp).toLocaleString('fr-FR')}</p>
-                </TooltipContent>
-              </Tooltip>
+            </div>
+
+            {/* Layout Mobile */}
+            <div className="block sm:hidden space-y-0.5">
+              {/* 1er niveau: Emoji seul */}
+              <div className="flex items-center justify-between">
+                <span className="text-lg">{decision.emoji}</span>
+              </div>
+              
+              {/* 2ème niveau: Titre */}
+              <p className="font-semibold text-foreground line-clamp-2">
+                {titleOverride || decision.dilemma}
+              </p>
+              
+              {/* 3ème niveau: Questions de suivi */}
+              {typeof followUpCount === 'number' && followUpCount > 0 && (
+                <div className="-mt-0.5">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="text-xs text-muted-foreground cursor-help hover:text-foreground transition-colors">
+                        + {followUpCount} question{followUpCount > 1 ? 's' : ''} de suivi
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-md max-h-64 overflow-y-auto">
+                      <div className="space-y-3">
+                        {followUpDecisions?.slice(0, 5).map((followUp, index) => (
+                          <div key={followUp.id} className="text-sm">
+                            <p className="font-semibold text-foreground mb-1">
+                              Q{index + 1}: {followUp.dilemma}
+                            </p>
+                            <p className="text-muted-foreground text-xs leading-relaxed">
+                              {followUp.result.recommendation.length > 160 
+                                ? `${followUp.result.recommendation.substring(0, 160)}...` 
+                                : followUp.result.recommendation}
+                            </p>
+                          </div>
+                        ))}
+                        {followUpCount > 5 && (
+                          <p className="text-xs text-muted-foreground italic pt-2 border-t">
+                            ... et {followUpCount - 5} autre{followUpCount - 5 > 1 ? 's' : ''}
+                          </p>
+                        )}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              )}
+              
+              {/* 4ème niveau: Réponse avec plus d'espace au dessus */}
+              <p className="text-sm text-muted-foreground line-clamp-2 pt-2">
+                {rootRecommendation || decision.result.recommendation}
+              </p>
+              
+              {/* 5ème niveau: Date */}
+              <div className="pt-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="text-xs text-muted-foreground cursor-help">
+                      {new Date(decision.timestamp).toLocaleDateString('fr-FR')}
+                    </p>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{new Date(decision.timestamp).toLocaleString('fr-FR')}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </div>
           </div>
           
