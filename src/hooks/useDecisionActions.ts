@@ -127,6 +127,11 @@ export const useDecisionActions = ({
             setCurrentDecisionId(decisionToLoad.id);
             setAnalysisStep('done');
             
+            // Forcer le scroll en haut de la page
+            setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: 'instant' });
+            }, 0);
+            
             // Définir les critères de référence pour éviter les changements fantômes
             initialCriteriaRef.current = decisionToLoad.criteria;
             setHasChanges(false);
