@@ -95,7 +95,45 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               <ExpandableText text={result.description} />
             </div>
 
-            {/* Action buttons for top option */}
+            {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && (
+              <div className="grid md:grid-cols-2 gap-4 w-full">
+                {topOption.pros?.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      Avantages
+                    </h4>
+                    <ul className="space-y-1">
+                      {topOption.pros.map((pro, index) => (
+                        <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                          <span className="text-green-500 mt-1">•</span>
+                          <span>{pro}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {topOption.cons?.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-orange-700 dark:text-orange-300 flex items-center gap-2">
+                      <ExternalLink className="h-4 w-4" />
+                      Points d'attention
+                    </h4>
+                    <ul className="space-y-1">
+                      {topOption.cons.map((con, index) => (
+                        <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                          <span className="text-orange-500 mt-1">•</span>
+                          <span>{con}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Action buttons for top option - moved to bottom */}
             {topOption?.option && (
               <div className="w-full">
                 {isLoadingAction ? (
@@ -111,7 +149,6 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                         variant="default"
                         size="lg"
                         onClick={() => window.open(actionLinks.maps!.url, '_blank')}
-                        className="flex-1 min-w-[200px]"
                       >
                         <Navigation className="h-4 w-4 mr-2" />
                         {I18nService.getDirectionsLabel(detectedLanguage)}
@@ -121,7 +158,6 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                         variant="default"
                         size="lg"
                         onClick={() => window.open(actionLinks.official!.url, '_blank')}
-                        className="flex-1 min-w-[200px]"
                       >
                         <ShoppingBag className="h-4 w-4 mr-2" />
                         {I18nService.getOfficialSiteLabel(detectedLanguage)}
@@ -131,7 +167,6 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                         variant="default"
                         size="lg"
                         onClick={() => window.open(actionLinks.merchants[0].url, '_blank')}
-                        className="flex-1 min-w-[200px]"
                       >
                         <ShoppingBag className="h-4 w-4 mr-2" />
                         {actionLinks.actionType === 'reserve' ? 
@@ -171,34 +206,6 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 ) : null}
               </div>
             )}
-
-            {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && <div className="grid md:grid-cols-2 gap-4 w-full">
-                {topOption.pros?.length > 0 && <div className="space-y-2">
-                    <h4 className="font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4" />
-                      Avantages
-                    </h4>
-                    <ul className="space-y-1">
-                      {topOption.pros.map((pro, index) => <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <span className="text-green-500 mt-1">•</span>
-                          <span>{pro}</span>
-                        </li>)}
-                    </ul>
-                  </div>}
-                
-                {topOption.cons?.length > 0 && <div className="space-y-2">
-                    <h4 className="font-medium text-orange-700 dark:text-orange-300 flex items-center gap-2">
-                      <ExternalLink className="h-4 w-4" />
-                      Points d'attention
-                    </h4>
-                    <ul className="space-y-1">
-                      {topOption.cons.map((con, index) => <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <span className="text-orange-500 mt-1">•</span>
-                          <span>{con}</span>
-                        </li>)}
-                    </ul>
-                  </div>}
-              </div>}
           </div>
         </div>
       </CardContent>
