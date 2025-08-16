@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useDecisionMaker } from '@/hooks/useDecisionMaker';
+import { useDecisionMakerContext } from '@/contexts/DecisionMakerContext';
 import { useMultiAnalysis } from '@/hooks/useMultiAnalysis';
 import { detectQuestionType } from '@/services/questionClassificationService';
 import { EmojiPicker } from './EmojiPicker';
@@ -45,7 +45,7 @@ const DecisionMaker = () => {
     getCurrentDecision,
     uploadedFiles,
     setUploadedFiles
-  } = useDecisionMaker();
+  } = useDecisionMakerContext();
   const {
     analyses,
     currentAnalysisIndex,

@@ -5,16 +5,10 @@ import ShareButton from './ShareButton';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
+import { useDecisionMakerContext } from '@/contexts/DecisionMakerContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { WorkspaceSelector } from '@/components/workspace/WorkspaceSelector';
-interface NavbarProps {
-  currentDecision?: any;
-  clearSession?: () => void;
-}
-const Navbar: React.FC<NavbarProps> = ({
-  currentDecision,
-  clearSession
-}) => {
+const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const {
@@ -22,6 +16,31 @@ const Navbar: React.FC<NavbarProps> = ({
     profile,
     signOut
   } = useAuth();
+  
+  const {
+    result,
+    dilemma,
+    analysisStep,
+    getCurrentDecision,
+    clearSession
+  } = useDecisionMakerContext();
+  
+  // Détection d'une décision active
+  const hasActiveDecision = location.pathname === '/' && user && (
+    result !== null || analysisStep !== 'idle' || dilemma.trim() !== ''
+  );
+  
+  // Créer l'objet currentDecision pour ShareButton
+  const currentDecision = hasActiveDecision ? (
+    getCurrentDecision() || {
+      id: 'temp-decision',
+      timestamp: Date.now(),
+      dilemma: dilemma || 'Décision en cours',
+      emoji: '🤔',
+      criteria: [],
+      result: result!
+    }
+  ) : null;
 
   // Check if we're on the settings page
   const isSettingsPage = location.pathname === '/settings';

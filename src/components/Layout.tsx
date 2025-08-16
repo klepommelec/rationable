@@ -2,29 +2,11 @@
 import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import { useDecisionMaker } from "@/hooks/useDecisionMaker";
 import { useAuth } from "@/hooks/useAuth";
 
 const Layout = () => {
   const location = useLocation();
-  const {
-    getCurrentDecision,
-    clearSession,
-    result,
-    analysisStep,
-    dilemma
-  } = useDecisionMaker();
-  const {
-    user
-  } = useAuth();
-
-  // Simple : y'a-t-il une décision/analyse en cours ?
-  const hasActiveDecision = location.pathname === '/' && user && (
-    result !== null || analysisStep !== 'idle' || dilemma.trim() !== ''
-  );
-
-  // Pour compatibilité avec ShareButton, créer un objet simple si nécessaire
-  const currentDecision = hasActiveDecision ? { result, dilemma: dilemma || 'Décision en cours' } : null;
+  const { user } = useAuth();
 
   // Check if we're on the home page
   const isHomePage = location.pathname === '/';
@@ -61,7 +43,7 @@ const Layout = () => {
       )}
       
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Navbar currentDecision={currentDecision} clearSession={clearSession} />
+        <Navbar />
         <main 
           role="main" 
           id="main-content" 
