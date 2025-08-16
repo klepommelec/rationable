@@ -240,7 +240,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
       </div>
       
       {/* Layout desktop : tout sur la même ligne */}
-      <div className="hidden sm:flex gap-2 items-center">
+      <div className="hidden sm:flex gap-2 items-center justify-between">
         {/* Barre de recherche avec largeur fixe */}
         <div className="relative" style={{ width: '350px' }}>
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -252,7 +252,9 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
           />
         </div>
 
-        {/* Bouton Filtrer */}
+        {/* Boutons groupés à droite */}
+        <div className="flex gap-2">
+          {/* Bouton Filtrer */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
@@ -368,6 +370,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
             </AlertDialog>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
       </div>
     </div>
   );
