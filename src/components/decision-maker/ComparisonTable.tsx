@@ -118,7 +118,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                    onClick={() => window.open(optionActionLinks.official!.url, '_blank')}
                                    className="text-xs max-w-[120px] truncate h-7"
                                  >
-                                   <MerchantLogo url={optionActionLinks.official!.url} size={12} className="mr-1" />
+                                   <MerchantLogo url={optionActionLinks.official!.url} size={14} className="mr-1" />
                                    {I18nService.getOfficialSiteLabel(detectedLanguage)}
                                  </Button>
                               ) : optionActionLinks.merchants?.[0] ? (
@@ -128,7 +128,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                    onClick={() => window.open(optionActionLinks.merchants?.[0]?.url, '_blank')}
                                    className="text-xs max-w-[120px] truncate h-7"
                                  >
-                                   <MerchantLogo url={optionActionLinks.merchants?.[0]?.url || ''} size={12} className="mr-1" />
+                                   <MerchantLogo url={optionActionLinks.merchants?.[0]?.url || ''} size={14} className="mr-1" />
                                    {optionActionLinks.actionType === 'reserve' ? 
                                      I18nService.getReserveLabel(detectedLanguage) :
                                      firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)
@@ -145,7 +145,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                    onClick={() => window.open(merchant.url, '_blank')}
                                    className="text-xs max-w-[120px] truncate h-7"
                                  >
-                                   <MerchantLogo url={merchant.url} size={12} className="mr-1" />
+                                   <MerchantLogo url={merchant.url} size={14} className="mr-1" />
                                    {firstResultService.getDomainLabel(merchant.domain)}
                                  </Button>
                               ))}
