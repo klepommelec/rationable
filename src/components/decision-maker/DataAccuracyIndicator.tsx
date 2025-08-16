@@ -75,7 +75,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
       <div className={`flex flex-col gap-2 ${className}`}>
         <Collapsible open={isSourcesExpanded} onOpenChange={setIsSourcesExpanded}>
           {/* Layout mobile : structure verticale en 3 niveaux */}
-          <div className="block sm:hidden">
+          <div className="block sm:hidden px-1">
             <div className="space-y-1 text-xs text-muted-foreground">
               {/* 1er niveau: Créé le (date) par (auteur) */}
               <div className="flex flex-wrap items-center gap-x-1">
