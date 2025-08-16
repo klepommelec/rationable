@@ -114,7 +114,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                         className="flex-1 min-w-[200px]"
                       >
                         <ShoppingBag className="h-4 w-4 mr-2" />
-                        {I18nService.getOfficialSiteLabel(detectedLanguage)} - {topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
+                        {I18nService.getOfficialSiteLabel(detectedLanguage)}
                       </Button>
                     ) : actionLinks.merchants[0] ? (
                       <Button
@@ -124,7 +124,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                         className="flex-1 min-w-[200px]"
                       >
                         <ShoppingBag className="h-4 w-4 mr-2" />
-                        {firstResultService.getActionVerb(detectedVertical, detectedLanguage)} {topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
+                        {firstResultService.getActionVerb(detectedVertical, detectedLanguage)} sur {firstResultService.getDomainLabel(actionLinks.merchants[0].domain)}
                       </Button>
                     ) : null}
                     
