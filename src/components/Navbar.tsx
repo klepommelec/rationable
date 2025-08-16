@@ -1,5 +1,5 @@
 import { Users, LogOut, User, Settings } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import ShareButton from './ShareButton';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { WorkspaceSelector } from '@/components/workspace/WorkspaceSelector';
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const {
     user,
     profile,
@@ -68,13 +69,12 @@ const Navbar: React.FC = () => {
           to="/" 
           className="flex items-center gap-2 mr-auto hover:underline transition-all duration-200"
           onClick={(e) => {
-            console.log('Logo clicked - currentDecision exists:', !!currentDecision);
-            
-            // Si il y a une décision en cours, réinitialiser
+            // Toujours nettoyer la session quand on clique sur le logo
             if (currentDecision && clearSession) {
               e.preventDefault();
-              console.log('Clearing session...');
               clearSession();
+              // Naviguer vers la page d'accueil après avoir nettoyé
+              navigate('/');
             }
           }}
         >
