@@ -8,7 +8,8 @@ import { useAuth } from "@/hooks/useAuth";
 const Layout = () => {
   const location = useLocation();
   const {
-    getCurrentDecision
+    getCurrentDecision,
+    clearSession
   } = useDecisionMaker();
   const {
     user
@@ -52,7 +53,7 @@ const Layout = () => {
       )}
       
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Navbar currentDecision={currentDecision} />
+        <Navbar currentDecision={currentDecision} clearSession={clearSession} />
         <main 
           role="main" 
           id="main-content" 
