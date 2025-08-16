@@ -160,7 +160,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                         size="sm"
                         onClick={() => window.open(actionLinks.official!.url, '_blank')}
                       >
-                        <MerchantLogo url={actionLinks.official!.url} size={18} className="mr-2" />
+                        <MerchantLogo url={actionLinks.official!.url} size={24} className="mr-2" />
                         {I18nService.getOfficialSiteLabel(detectedLanguage)}
                       </Button>
                     ) : actionLinks.merchants[0] ? (
@@ -169,7 +169,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                          size="sm"
                          onClick={() => window.open(actionLinks.merchants[0].url, '_blank')}
                        >
-                         <MerchantLogo url={actionLinks.merchants[0].url} size={18} className="mr-2" />
+                         <MerchantLogo url={actionLinks.merchants[0].url} size={24} className="mr-2" />
                          {actionLinks.actionType === 'reserve' ? 
                            I18nService.getReserveLabel(detectedLanguage) :
                            firstResultService.getActionVerb(detectedVertical, detectedLanguage)
@@ -200,7 +200,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                           onClick={() => window.open(merchant.url, '_blank')}
                           className="min-w-[120px]"
                          >
-                           <MerchantLogo url={merchant.url} size={18} className="mr-2" />
+                           <MerchantLogo url={merchant.url} size={24} className="mr-2" />
                            {firstResultService.getDomainLabel(merchant.domain)}
                          </Button>
                      ))}
