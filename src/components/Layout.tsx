@@ -9,14 +9,18 @@ const Layout = () => {
   const location = useLocation();
   const {
     getCurrentDecision,
-    clearSession
+    clearSession,
+    result,
+    analysisStep
   } = useDecisionMaker();
   const {
     user
   } = useAuth();
 
-  // Only show share button on the main decision maker page when there's a completed decision
-  const currentDecision = location.pathname === '/' && user ? getCurrentDecision() : null;
+  // Détecter une décision en cours : soit une décision existante, soit un résultat présent
+  const currentDecision = location.pathname === '/' && user ? (
+    getCurrentDecision() || (result && analysisStep === 'done' ? { result, dilemma: 'Decision in progress' } : null)
+  ) : null;
 
   // Check if we're on the home page
   const isHomePage = location.pathname === '/';

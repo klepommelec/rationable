@@ -51,7 +51,10 @@ const Navbar: React.FC<NavbarProps> = ({
           onClick={(e) => {
             // Seulement réinitialiser si on est dans une décision en cours
             if (currentDecision && clearSession) {
+              console.log('Logo clicked - clearing session');
               clearSession();
+            } else {
+              console.log('Logo clicked - normal navigation', { currentDecision: !!currentDecision, clearSession: !!clearSession });
             }
           }}
         >
