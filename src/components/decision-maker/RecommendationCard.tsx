@@ -34,7 +34,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     titleColor: 'text-primary'
   };
   return <Card className={`border-2 ${config.borderColor} ${config.bgGradient} w-full`}>
-      <CardContent className="space-y-6 pt-6 sm:pt-3">
+      <CardContent className="space-y-6 pt-4 sm:pt-2">
         <div className="flex flex-col gap-6">
           <div className="w-full space-y-4">
             {/* Layout mobile : badge centré */}
