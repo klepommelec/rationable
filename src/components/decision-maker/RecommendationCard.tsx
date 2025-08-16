@@ -9,7 +9,7 @@ import { DataAccuracyIndicator } from './DataAccuracyIndicator';
 import { WorkspaceDocumentIndicator } from './WorkspaceDocumentIndicator';
 import { AIProviderIndicator } from './AIProviderIndicator';
 import ValidatedLink from '@/components/ValidatedLink';
-import { ExternalLink, Lightbulb, CheckCircle, ShoppingBag, Loader2 } from 'lucide-react';
+import { ExternalLink, Lightbulb, CheckCircle, ShoppingBag, Loader2, Navigation } from 'lucide-react';
 import { ExpandableText } from '@/components/ExpandableText';
 import { firstResultService, BestLinksResponse } from '@/services/firstResultService';
 import { I18nService } from '@/services/i18nService';
@@ -105,8 +105,18 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   </Button>
                 ) : actionLinks ? (
                   <div className="flex flex-wrap gap-3">
-                    {/* Primary button: Official site or first merchant */}
-                    {actionLinks.official ? (
+                    {/* Primary button: Based on action type */}
+                    {actionLinks.actionType === 'directions' && actionLinks.maps ? (
+                      <Button
+                        variant="default"
+                        size="lg"
+                        onClick={() => window.open(actionLinks.maps!.url, '_blank')}
+                        className="flex-1 min-w-[200px]"
+                      >
+                        <Navigation className="h-4 w-4 mr-2" />
+                        {I18nService.getDirectionsLabel(detectedLanguage)}
+                      </Button>
+                    ) : actionLinks.official ? (
                       <Button
                         variant="default"
                         size="lg"
@@ -124,13 +134,18 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                         className="flex-1 min-w-[200px]"
                       >
                         <ShoppingBag className="h-4 w-4 mr-2" />
-                        {firstResultService.getActionVerb(detectedVertical, detectedLanguage)} sur {firstResultService.getDomainLabel(actionLinks.merchants[0].domain)}
+                        {actionLinks.actionType === 'reserve' ? 
+                          I18nService.getReserveLabel(detectedLanguage) :
+                          firstResultService.getActionVerb(detectedVertical, detectedLanguage)
+                        } sur {firstResultService.getDomainLabel(actionLinks.merchants[0].domain)}
                       </Button>
                     ) : null}
                     
                      {/* Secondary buttons: Merchants (excluding already shown ones) */}
                      {actionLinks.merchants
                        .filter((merchant, index) => {
+                         // If we have directions as primary, show all merchants
+                         if (actionLinks.actionType === 'directions') return true;
                          // If we have an official site, show all merchants
                          if (actionLinks.official) return true;
                          // If no official site, skip the first merchant (already shown as primary)

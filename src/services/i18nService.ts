@@ -414,6 +414,30 @@ export class I18nService {
     };
     return labels[lang] || labels.fr;
   }
+  
+  static getDirectionsLabel(language?: SupportedLanguage): string {
+    const lang = language || this.getCurrentLanguage();
+    const labels = {
+      'fr': 'Itinéraire',
+      'en': 'Directions',
+      'es': 'Direcciones',
+      'it': 'Indicazioni',
+      'de': 'Wegbeschreibung'
+    };
+    return labels[lang] || labels.fr;
+  }
+  
+  static getReserveLabel(language?: SupportedLanguage): string {
+    const lang = language || this.getCurrentLanguage();
+    const labels = {
+      'fr': 'Réserver',
+      'en': 'Book',
+      'es': 'Reservar',
+      'it': 'Prenota',
+      'de': 'Buchen'
+    };
+    return labels[lang] || labels.fr;
+  }
 
   // Vertical detection methods
   static getVerticalKeywords(): Record<SupportedLanguage, Record<string, string[]>> {

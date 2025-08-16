@@ -13,6 +13,8 @@ export interface FirstResultResponse {
 export interface BestLinksResponse {
   official?: { url: string; title: string; domain: string };
   merchants: Array<{ url: string; title: string; domain: string }>;
+  maps?: { url: string; title: string };
+  actionType: 'directions' | 'reserve' | 'buy';
   provider: 'google_cse' | 'serpapi' | 'tavily' | 'perplexity';
   fromCache: boolean;
 }
@@ -30,14 +32,28 @@ class FirstResultService {
     const detectedLanguage = language || I18nService.detectLanguage(dilemma + ' ' + optionName);
     const detectedVertical = vertical || I18nService.detectVertical(dilemma + ' ' + optionName);
     
-    // 2. Detect brand from option name
+    // 2. Classify action type and extract location context
+    const actionType = this.classifyActionType(optionName, detectedVertical);
+    const cityContext = this.extractCityFromDilemma(dilemma);
+    
+    // 3. Detect brand from option name
     const brand = this.detectBrand(optionName);
     console.log(`🏷️ Brand detected: ${brand || 'none'} for "${optionName}"`);
+    console.log(`📍 Action type: ${actionType}, City context: ${cityContext || 'none'}`);
     
-    // 3. Build search query
-    const query = this.buildOptimizedQuery(optionName, detectedVertical, detectedLanguage);
+    // 4. Build search query with location context
+    const query = this.buildOptimizedQuery(optionName, detectedVertical, detectedLanguage, cityContext);
     
-    // 4. Check cache for both official and merchants
+    // 5. Generate maps URL for directions actions
+    const mapsResult = actionType === 'directions' ? {
+      url: I18nService.buildGoogleMapsSearchUrl(
+        cityContext ? `${optionName} ${cityContext}` : optionName, 
+        detectedLanguage
+      ),
+      title: I18nService.getDirectionsLabel(detectedLanguage)
+    } : undefined;
+    
+    // 6. Check cache for both official and merchants
     const officialCacheKey = `${query}_${detectedLanguage}_${detectedVertical || 'general'}_official`;
     const merchantsCacheKey = `${query}_${detectedLanguage}_${detectedVertical || 'general'}_merchants`;
     
@@ -49,6 +65,8 @@ class FirstResultService {
       return {
         official: cachedOfficial.content.official,
         merchants: cachedMerchants.content.merchants || [],
+        maps: mapsResult,
+        actionType,
         provider: cachedOfficial.provider as any,
         fromCache: true
       };
@@ -57,7 +75,7 @@ class FirstResultService {
     try {
       console.log(`🔍 Searching best links for: "${query}" (${detectedLanguage}, ${detectedVertical})`);
       
-      // 5. Search for official site first if we have a brand
+      // 7. Search for official site first if we have a brand
       let officialResult = null;
       if (brand) {
         const officialQuery = `${brand} ${optionName} site officiel`;
@@ -96,10 +114,11 @@ class FirstResultService {
         }
       }
       
-      // 6. Search for general results (merchants)
+      // 8. Search for general results (merchants) with location boost
+      const locationBoostQuery = cityContext ? `${query} ${cityContext}` : query;
       const { data, error } = await supabase.functions.invoke('first-web-result', {
         body: {
-          query,
+          query: locationBoostQuery,
           language: detectedLanguage,
           vertical: detectedVertical,
           numResults: 8 // More results to find good merchants
@@ -116,8 +135,8 @@ class FirstResultService {
         throw new Error('No results returned from search');
       }
 
-      // 7. Separate official vs merchants and prioritize
-      const { merchants } = this.separateOfficialAndMerchants(data.results, brand, officialResult);
+      // 9. Separate official vs merchants and prioritize with location boost
+      const { merchants } = this.separateOfficialAndMerchants(data.results, brand, officialResult, cityContext, actionType);
       
       // 8. Verify merchant links
       const merchantsToVerify = merchants.slice(0, 5).map((r: any) => ({ 
@@ -170,6 +189,8 @@ class FirstResultService {
       const result = {
         official: officialResult,
         merchants: finalMerchants,
+        maps: mapsResult,
+        actionType,
         provider: data.provider,
         fromCache: false
       };
@@ -195,6 +216,8 @@ class FirstResultService {
           title: fallback.title,
           domain: this.extractDomain(fallback.url)
         }],
+        maps: mapsResult,
+        actionType,
         provider: fallback.sourceProvider,
         fromCache: fallback.fromCache
       };
@@ -343,35 +366,36 @@ class FirstResultService {
     }
   }
 
-  private buildOptimizedQuery(optionName: string, vertical: string | null, language: SupportedLanguage): string {
+  private buildOptimizedQuery(optionName: string, vertical: string | null, language: SupportedLanguage, cityContext?: string | null): string {
     const config = I18nService.getShoppingConfig(language);
+    const locationSuffix = cityContext ? ` ${cityContext}` : '';
     
     // Build contextual query based on vertical
     switch (vertical) {
       case 'dining':
-        return language === 'fr' ? `Réserver ${optionName}` : 
-               language === 'es' ? `Reservar ${optionName}` :
-               language === 'it' ? `Prenotare ${optionName}` :
-               language === 'de' ? `Reservieren ${optionName}` :
-               `Book ${optionName}`;
+        return language === 'fr' ? `Réserver ${optionName}${locationSuffix}` : 
+               language === 'es' ? `Reservar ${optionName}${locationSuffix}` :
+               language === 'it' ? `Prenotare ${optionName}${locationSuffix}` :
+               language === 'de' ? `Reservieren ${optionName}${locationSuffix}` :
+               `Book ${optionName}${locationSuffix}`;
       
       case 'accommodation':
-        return language === 'fr' ? `Réserver ${optionName} hôtel` : 
-               language === 'es' ? `Reservar ${optionName} hotel` :
-               language === 'it' ? `Prenotare ${optionName} hotel` :
-               language === 'de' ? `${optionName} Hotel buchen` :
-               `Book ${optionName} hotel`;
+        return language === 'fr' ? `Réserver ${optionName} hôtel${locationSuffix}` : 
+               language === 'es' ? `Reservar ${optionName} hotel${locationSuffix}` :
+               language === 'it' ? `Prenotare ${optionName} hotel${locationSuffix}` :
+               language === 'de' ? `${optionName} Hotel buchen${locationSuffix}` :
+               `Book ${optionName} hotel${locationSuffix}`;
       
       case 'travel':
-        return language === 'fr' ? `Réserver ${optionName}` : 
-               language === 'es' ? `Reservar ${optionName}` :
-               language === 'it' ? `Prenotare ${optionName}` :
-               language === 'de' ? `${optionName} buchen` :
-               `Book ${optionName}`;
+        return language === 'fr' ? `Réserver ${optionName}${locationSuffix}` : 
+               language === 'es' ? `Reservar ${optionName}${locationSuffix}` :
+               language === 'it' ? `Prenotare ${optionName}${locationSuffix}` :
+               language === 'de' ? `${optionName} buchen${locationSuffix}` :
+               `Book ${optionName}${locationSuffix}`;
       
       default:
         // For shopping/general items, use buy verb
-        return `${config.buyVerb} ${optionName}`;
+        return `${config.buyVerb} ${optionName}${locationSuffix}`;
     }
   }
 
@@ -728,7 +752,7 @@ class FirstResultService {
     }
   }
 
-  private separateOfficialAndMerchants(results: any[], brand: string | null, existingOfficial: any) {
+  private separateOfficialAndMerchants(results: any[], brand: string | null, existingOfficial: any, cityContext?: string | null, actionType?: string) {
     const merchants: any[] = [];
     let official = existingOfficial;
     
@@ -752,10 +776,21 @@ class FirstResultService {
       
       // Add to merchants if it's a known e-commerce site
       if (this.isMerchantDomain(domain)) {
+        let score = this.scoreMerchant(domain, result.title);
+        
+        // Boost score if merchant matches city context
+        if (cityContext && (result.title.toLowerCase().includes(cityContext.toLowerCase()) || 
+                           result.url.toLowerCase().includes(cityContext.toLowerCase()))) {
+          score += 5;
+        }
+        
+        // Boost relevant merchants based on action type
+        score += this.getActionTypeBonus(domain, actionType || 'buy');
+        
         merchants.push({
           ...result,
           domain,
-          _score: this.scoreMerchant(domain, result.title)
+          _score: score
         });
       }
     }
@@ -920,6 +955,98 @@ class FirstResultService {
     
     // Fallback: capitalize the main domain
     return mainDomain.charAt(0).toUpperCase() + mainDomain.slice(1);
+  }
+  
+  private classifyActionType(optionName: string, vertical: string | null): 'directions' | 'reserve' | 'buy' {
+    const lowerOption = optionName.toLowerCase();
+    
+    // Places/locations that need directions
+    const locationKeywords = [
+      'château', 'castle', 'colline', 'hill', 'mont', 'mountain', 'plage', 'beach', 
+      'parc', 'park', 'jardin', 'garden', 'musée', 'museum', 'cathédrale', 'cathedral',
+      'église', 'church', 'marché', 'market', 'centre', 'center', 'quartier', 'district',
+      'promenade', 'promenada', 'corso', 'avenue', 'rue', 'street', 'place', 'square',
+      'tour', 'tower', 'pont', 'bridge', 'fort', 'bastille', 'citadelle'
+    ];
+    
+    if (locationKeywords.some(keyword => lowerOption.includes(keyword))) {
+      return 'directions';
+    }
+    
+    // Services that need reservations
+    if (vertical === 'dining' || vertical === 'accommodation' || vertical === 'travel') {
+      return 'reserve';
+    }
+    
+    // Products that need to be bought
+    return 'buy';
+  }
+  
+  private extractCityFromDilemma(dilemma: string): string | null {
+    const lowerDilemma = dilemma.toLowerCase();
+    
+    // Common city patterns
+    const cityPatterns = [
+      /(?:à|in|en|dans|cerca de|vicino a|bei)\s+([a-zA-ZÀ-ÿ\s]+?)(?:\s|,|\?|$)/g,
+      /(?:ville de|city of|ciudad de|città di|stadt)\s+([a-zA-ZÀ-ÿ]+)/g,
+      /([a-zA-ZÀ-ÿ]+)\s+(?:city|ville|ciudad|città)/g
+    ];
+    
+    // Known major cities for better detection
+    const knownCities = [
+      'nice', 'paris', 'londres', 'madrid', 'barcelone', 'rome', 'milan', 'berlin',
+      'munich', 'vienne', 'amsterdam', 'bruxelles', 'geneva', 'zurich', 'lisboa',
+      'porto', 'florence', 'venise', 'naples', 'turin', 'bologne', 'palermo',
+      'lyon', 'marseille', 'toulouse', 'bordeaux', 'nantes', 'strasbourg', 'lille',
+      'london', 'manchester', 'birmingham', 'liverpool', 'edinburgh', 'glasgow',
+      'valencia', 'sevilla', 'bilbao', 'malaga', 'zaragoza', 'palma', 'valencia'
+    ];
+    
+    // First try to match known cities directly
+    for (const city of knownCities) {
+      if (lowerDilemma.includes(city)) {
+        return city.charAt(0).toUpperCase() + city.slice(1);
+      }
+    }
+    
+    // Then try patterns
+    for (const pattern of cityPatterns) {
+      const matches = Array.from(lowerDilemma.matchAll(pattern));
+      for (const match of matches) {
+        const cityCandidate = match[1]?.trim();
+        if (cityCandidate && cityCandidate.length > 2 && cityCandidate.length < 20) {
+          return cityCandidate.charAt(0).toUpperCase() + cityCandidate.slice(1);
+        }
+      }
+    }
+    
+    return null;
+  }
+  
+  private getActionTypeBonus(domain: string, actionType: string): number {
+    let bonus = 0;
+    
+    switch (actionType) {
+      case 'directions':
+        // Boost map and navigation services for directions
+        if (domain.includes('google') || domain.includes('maps')) bonus += 10;
+        break;
+        
+      case 'reserve':
+        // Boost booking platforms for reservations
+        if (domain.includes('booking') || domain.includes('opentable') || 
+            domain.includes('thefork') || domain.includes('airbnb') ||
+            domain.includes('expedia') || domain.includes('hotels')) bonus += 8;
+        break;
+        
+      case 'buy':
+        // Boost e-commerce for purchases
+        if (domain.includes('amazon') || domain.includes('fnac') ||
+            domain.includes('darty') || domain.includes('cdiscount')) bonus += 6;
+        break;
+    }
+    
+    return bonus;
   }
 }
 

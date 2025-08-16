@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { IBreakdownItem } from '@/types/decision';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, ExternalLink, ShoppingBag, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, ExternalLink, ShoppingBag, Loader2, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { generateOptionSearchLinks } from '@/services/expandOptionsService';
 import { firstResultService, BestLinksResponse } from '@/services/firstResultService';
@@ -121,42 +121,55 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                         Recherche...
                       </Button>
                      ) : optionActionLinks && (optionActionLinks.official || (optionActionLinks.merchants && optionActionLinks.merchants.length > 0)) ? (
-                       <div className="flex flex-wrap gap-2">
-                         {/* Primary button: Official site or first merchant */}
-                         {optionActionLinks.official ? (
-                           <Button
-                             variant="default"
-                             size="sm"
-                             onClick={() => window.open(optionActionLinks.official!.url, '_blank')}
-                             className="text-xs"
-                           >
-                             <ShoppingBag className="h-3 w-3 mr-1" />
-                             {I18nService.getOfficialSiteLabel(detectedLanguage)}
-                           </Button>
-                         ) : optionActionLinks.merchants?.[0] ? (
-                           <Button
-                             variant="default"
-                             size="sm"
-                             onClick={() => window.open(optionActionLinks.merchants?.[0]?.url, '_blank')}
-                             className="text-xs"
-                           >
-                             <ShoppingBag className="h-3 w-3 mr-1" />
-                             {firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)}
-                           </Button>
-                         ) : null}
+                        <div className="flex flex-wrap gap-2">
+                          {/* Primary button: Based on action type */}
+                          {optionActionLinks.actionType === 'directions' && optionActionLinks.maps ? (
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => window.open(optionActionLinks.maps!.url, '_blank')}
+                              className="text-xs"
+                            >
+                              <Navigation className="h-3 w-3 mr-1" />
+                              {I18nService.getDirectionsLabel(detectedLanguage)}
+                            </Button>
+                          ) : optionActionLinks.official ? (
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => window.open(optionActionLinks.official!.url, '_blank')}
+                              className="text-xs"
+                            >
+                              <ShoppingBag className="h-3 w-3 mr-1" />
+                              {I18nService.getOfficialSiteLabel(detectedLanguage)}
+                            </Button>
+                          ) : optionActionLinks.merchants?.[0] ? (
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => window.open(optionActionLinks.merchants?.[0]?.url, '_blank')}
+                              className="text-xs"
+                            >
+                              <ShoppingBag className="h-3 w-3 mr-1" />
+                              {optionActionLinks.actionType === 'reserve' ? 
+                                I18nService.getReserveLabel(detectedLanguage) :
+                                firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)
+                              }
+                            </Button>
+                          ) : null}
                          
-                         {/* Secondary buttons: Merchants */}
-                         {(optionActionLinks.official ? (optionActionLinks.merchants || []) : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => (
-                           <Button
-                             key={i}
-                             variant="outline"
-                             size="sm"
-                             onClick={() => window.open(merchant.url, '_blank')}
-                             className="text-xs"
-                           >
-                             {firstResultService.getDomainLabel(merchant.domain)}
-                           </Button>
-                         ))}
+                          {/* Secondary buttons: Merchants */}
+                          {(optionActionLinks.actionType === 'directions' || optionActionLinks.official ? (optionActionLinks.merchants || []) : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => (
+                            <Button
+                              key={i}
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(merchant.url, '_blank')}
+                              className="text-xs"
+                            >
+                              {firstResultService.getDomainLabel(merchant.domain)}
+                            </Button>
+                          ))}
                        </div>
                      ) : (
                        <Button variant="secondary" size="sm" disabled className="text-xs">
