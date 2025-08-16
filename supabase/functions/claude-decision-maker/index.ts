@@ -40,16 +40,48 @@ serve(async (req) => {
     console.log(`🤖 Using Claude model: ${model}`);
     console.log(`🔑 API Key format: ${anthropicApiKey.substring(0, 10)}...`);
 
+    // Détection de la langue et configuration locale
+    const detectedLanguage = dilemma ? (() => {
+      const lowerText = dilemma.toLowerCase();
+      if (lowerText.match(/\b(le|la|les|et|ou|est|sont|avoir|sera|serait|devrait|pourrait)\b/g)) return 'fr';
+      if (lowerText.match(/\b(el|la|los|las|y|o|es|son|tener|será|sería|debería|podría)\b/g)) return 'es';
+      if (lowerText.match(/\b(il|la|gli|le|e|o|è|sono|avere|sarà|sarebbe|dovrebbe|potrebbe)\b/g)) return 'it';
+      if (lowerText.match(/\b(der|die|das|und|oder|ist|sind|haben|wird|würde|sollte|könnte)\b/g)) return 'de';
+      if (lowerText.match(/\b(the|and|or|is|are|have|will|would|should|could)\b/g)) return 'en';
+      return 'fr'; // default
+    })() : 'fr';
+
+    const languageConfig = {
+      fr: { buyVerb: 'acheter', currency: '€', country: 'France', domains: 'amazon.fr, fnac.com, darty.com, cdiscount.com' },
+      en: { buyVerb: 'buy', currency: '$', country: 'USA', domains: 'amazon.com, bestbuy.com, target.com, walmart.com' },
+      es: { buyVerb: 'comprar', currency: '€', country: 'España', domains: 'amazon.es, elcorteingles.es, mediamarkt.es, fnac.es' },
+      it: { buyVerb: 'comprare', currency: '€', country: 'Italia', domains: 'amazon.it, mediaworld.it, unieuro.it, eprice.it' },
+      de: { buyVerb: 'kaufen', currency: '€', country: 'Deutschland', domains: 'amazon.de, otto.de, mediamarkt.de, saturn.de' }
+    };
+    const config = languageConfig[detectedLanguage as keyof typeof languageConfig] || languageConfig.fr;
+
     // Construction du prompt système amélioré
     let systemPrompt = `Tu es un assistant expert en prise de décision avec accès aux informations les plus récentes.
 
 RÈGLES CRITIQUES POUR LA DESCRIPTION:
-1. Soyez ULTRA-SPÉCIFIQUE au dilemme posé - pas de texte générique
+1. Soyez ULTRA-SPÉCIFIQUE au dilemma posé - pas de texte générique
 2. Analysez les ENJEUX PARTICULIERS de cette situation précise
 3. Expliquez POURQUOI cette recommandation est la meilleure pour CE cas
 4. INTERDICTION ABSOLUE de phrases comme: "Le choix de X", "Cette décision", "Il est important de"
 5. Concentrez-vous sur la VALEUR AJOUTÉE et l'UTILITÉ concrète
 6. Maximum 150 mots pour la description
+
+RÈGLES CRITIQUES POUR LES LIENS D'ACHAT (shoppingLinks):
+- Langue détectée: ${detectedLanguage.toUpperCase()} - Pays: ${config.country}
+- Pour les produits/services recommandés, fournir 2-4 liens d'achat PRIORITAIRES:
+  1. Page officielle du produit/marque (si applicable)
+  2. 1-2 revendeurs officiels majeurs (${config.domains})
+  3. 1 option d'occasion certifiée (si pertinent)
+- URLs RÉELLES et FONCTIONNELLES uniquement - pas d'exemples
+- Si un produit n'est plus vendu neuf, omettre ce type de lien
+- Adapter au contexte: voitures = concessionnaires + occasions, électronique = sites tech, etc.
+- Format titre: "Nom exact du produit chez [Revendeur]"
+- Description: "Page officielle" ou "Revendeur certifié" ou "Marché d'occasion"
 
 IMPORTANT: 
 - Analyse en profondeur la question posée
@@ -79,7 +111,13 @@ Tu dois répondre EXCLUSIVEMENT en JSON valide, sans texte avant ou après. Le f
       "description": "Description de la source"
     }
   ],
-  "shoppingLinks": []
+  "shoppingLinks": [
+    {
+      "title": "Titre du lien d'achat spécifique",
+      "url": "https://domain.com/product-page",
+      "description": "Page officielle du produit ou revendeur certifié"
+    }
+  ]
 }`;
 
     // Ajout des données temps réel si disponibles

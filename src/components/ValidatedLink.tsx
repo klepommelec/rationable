@@ -2,6 +2,7 @@
 import React from 'react';
 import { ExternalLink, Search } from 'lucide-react';
 import { ILink } from '@/types/decision';
+import { I18nService } from '@/services/i18nService';
 
 interface ValidatedLinkProps {
   link: ILink;
@@ -9,11 +10,68 @@ interface ValidatedLinkProps {
   className?: string;
 }
 
+// International merchant domain whitelist
+const TRUSTED_MERCHANT_DOMAINS = {
+  // Global
+  global: [
+    'amazon.com', 'amazon.co.uk', 'amazon.de', 'amazon.fr', 'amazon.es', 'amazon.it',
+    'ebay.com', 'ebay.co.uk', 'ebay.de', 'ebay.fr', 'ebay.es', 'ebay.it',
+    'apple.com', 'samsung.com', 'microsoft.com', 'sony.com', 'nike.com', 'adidas.com'
+  ],
+  // France
+  fr: [
+    'fnac.com', 'darty.com', 'boulanger.com', 'cdiscount.com', 'carrefour.fr',
+    'auchan.fr', 'leclerc.com', 'decathlon.fr', 'leroymerlin.fr', 'ikea.com',
+    'zalando.fr', 'vinted.fr', 'leboncoin.fr'
+  ],
+  // USA
+  us: [
+    'bestbuy.com', 'target.com', 'walmart.com', 'homedepot.com', 'lowes.com',
+    'costco.com', 'macys.com', 'nordstrom.com', 'zappos.com'
+  ],
+  // UK
+  uk: [
+    'argos.co.uk', 'currys.co.uk', 'johnlewis.com', 'marks-and-spencer.com',
+    'tesco.com', 'boots.com', 'next.co.uk'
+  ],
+  // Germany
+  de: [
+    'otto.de', 'zalando.de', 'mediamarkt.de', 'saturn.de', 'real.de',
+    'kaufland.de', 'lidl.de', 'aldi.de'
+  ],
+  // Spain
+  es: [
+    'elcorteingles.es', 'mediamarkt.es', 'carrefour.es', 'fnac.es',
+    'zalando.es', 'pccomponentes.com'
+  ],
+  // Italy
+  it: [
+    'mediaworld.it', 'unieuro.it', 'carrefour.it', 'zalando.it',
+    'yoox.com', 'eprice.it'
+  ]
+};
+
 const ValidatedLink: React.FC<ValidatedLinkProps> = ({ 
   link, 
   fallbackSearchQuery, 
   className = "text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5" 
 }) => {
+  const currentLanguage = I18nService.getCurrentLanguage();
+  
+  const cleanUrl = (url: string): string => {
+    try {
+      const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
+      // Remove tracking parameters
+      const trackingParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid'];
+      trackingParams.forEach(param => urlObj.searchParams.delete(param));
+      // Force HTTPS
+      urlObj.protocol = 'https:';
+      return urlObj.toString();
+    } catch {
+      return url;
+    }
+  };
+
   const isValidUrl = (url: string): boolean => {
     try {
       const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
@@ -23,26 +81,69 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
     }
   };
 
-  const generateFallbackUrl = (title: string, query?: string): string => {
-    const searchQuery = encodeURIComponent(query || title);
-    
-    // Check if it's a shopping-related link
-    if (title.toLowerCase().includes('achat') || 
-        title.toLowerCase().includes('acheter') || 
-        title.toLowerCase().includes('prix') ||
-        title.toLowerCase().includes('comparer')) {
-      return `https://www.google.fr/search?q=${searchQuery}&tbm=shop`;
+  const isTrustedMerchant = (url: string): boolean => {
+    try {
+      const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
+      const domain = urlObj.hostname.toLowerCase().replace('www.', '');
+      
+      // Check global domains
+      if (TRUSTED_MERCHANT_DOMAINS.global.some(d => domain.includes(d.toLowerCase()))) {
+        return true;
+      }
+      
+      // Check language-specific domains
+      const languageKey = currentLanguage === 'en' ? 'us' : currentLanguage;
+      const languageDomains = TRUSTED_MERCHANT_DOMAINS[languageKey as keyof typeof TRUSTED_MERCHANT_DOMAINS] || [];
+      return languageDomains.some(d => domain.includes(d.toLowerCase()));
+    } catch {
+      return false;
     }
-    
-    // Default to regular Google search
-    return `https://www.google.fr/search?q=${searchQuery}`;
   };
 
-  const finalUrl = isValidUrl(link.url) ? 
-    (link.url.startsWith('http') ? link.url : `https://${link.url}`) : 
-    generateFallbackUrl(link.title, fallbackSearchQuery);
+  const generateFallbackUrl = (title: string, query?: string, originalUrl?: string): string => {
+    const searchQuery = query || title;
+    let finalQuery = searchQuery;
+    
+    // Extract domain from original URL for site-specific search
+    if (originalUrl && isValidUrl(originalUrl)) {
+      try {
+        const urlObj = new URL(originalUrl.startsWith('http') ? originalUrl : `https://${originalUrl}`);
+        const domain = urlObj.hostname.replace('www.', '');
+        finalQuery = `${searchQuery} site:${domain}`;
+      } catch {
+        // Use original query if domain extraction fails
+      }
+    }
+    
+    // Check if it's shopping-related or use shopping-specific search
+    const isShoppingRelated = I18nService.isShoppingRelated(title, currentLanguage) || 
+                             (query && I18nService.isShoppingRelated(query, currentLanguage));
+    
+    if (isShoppingRelated) {
+      return I18nService.buildGoogleShoppingUrl(finalQuery, currentLanguage);
+    }
+    
+    // Default to regular localized Google search
+    const config = I18nService.getShoppingConfig(currentLanguage);
+    const encodedQuery = encodeURIComponent(finalQuery);
+    return `https://www.google.${config.googleTLD}/search?q=${encodedQuery}&hl=${config.uiLanguage}&gl=${config.countryCode}`;
+  };
 
-  const isSearchUrl = finalUrl.includes('google.fr/search');
+  const finalUrl = (() => {
+    if (isValidUrl(link.url)) {
+      const cleanedUrl = cleanUrl(link.url);
+      // If valid and trusted, use direct link
+      if (isTrustedMerchant(cleanedUrl)) {
+        return cleanedUrl;
+      }
+      // If valid but not trusted, fallback to search with site filter
+      return generateFallbackUrl(link.title, fallbackSearchQuery, link.url);
+    }
+    // If invalid URL, fallback to search
+    return generateFallbackUrl(link.title, fallbackSearchQuery);
+  })();
+
+  const isSearchUrl = finalUrl.includes('/search');
 
   return (
     <a 
@@ -50,7 +151,7 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
       target="_blank" 
       rel="noopener noreferrer" 
       className={className}
-      title={isSearchUrl ? `Rechercher: ${link.title}` : link.title}
+      title={isSearchUrl ? `${I18nService.getShoppingConfig(currentLanguage).buyVerb}: ${link.title}` : link.title}
     >
       <span className="flex items-center gap-2 truncate flex-1 text-gray-700 dark:text-gray-300">
         {isSearchUrl ? <Search className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-blue-500 dark:text-blue-400" aria-hidden="true" /> : <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-blue-500 dark:text-blue-400" aria-hidden="true" />}

@@ -7,6 +7,7 @@ export interface LocaleConfig {
   temporalKeywords: TemporalKeywords;
   systemPrompts: SystemPrompts;
   fallbackMessages: FallbackMessages;
+  shopping: ShoppingConfig;
 }
 
 export interface TemporalKeywords {
@@ -31,6 +32,14 @@ export interface FallbackMessages {
   quickAnswerError: string;
   perplexityError: string;
   claudeError: string;
+}
+
+export interface ShoppingConfig {
+  buyVerb: string;
+  googleTLD: string;
+  uiLanguage: string;
+  countryCode: string;
+  synonyms: string[];
 }
 
 const LOCALE_CONFIGS: Record<SupportedLanguage, LocaleConfig> = {
@@ -73,6 +82,13 @@ const LOCALE_CONFIGS: Record<SupportedLanguage, LocaleConfig> = {
       quickAnswerError: "Impossible de générer une réponse rapide",
       perplexityError: "Erreur de recherche Perplexity",
       claudeError: "Erreur Claude"
+    },
+    shopping: {
+      buyVerb: 'acheter',
+      googleTLD: 'fr',
+      uiLanguage: 'fr',
+      countryCode: 'FR',
+      synonyms: ['achat', 'acheter', 'prix', 'comparer', 'magasin', 'boutique']
     }
   },
   en: {
@@ -115,6 +131,13 @@ const LOCALE_CONFIGS: Record<SupportedLanguage, LocaleConfig> = {
       quickAnswerError: "Unable to generate a quick response",
       perplexityError: "Perplexity search error",
       claudeError: "Claude error"
+    },
+    shopping: {
+      buyVerb: 'buy',
+      googleTLD: 'com',
+      uiLanguage: 'en',
+      countryCode: 'US',
+      synonyms: ['buy', 'purchase', 'price', 'compare', 'store', 'shop']
     }
   },
   es: {
@@ -158,6 +181,13 @@ const LOCALE_CONFIGS: Record<SupportedLanguage, LocaleConfig> = {
       quickAnswerError: "No se pudo generar una respuesta rápida",
       perplexityError: "Error de búsqueda Perplexity",
       claudeError: "Error Claude"
+    },
+    shopping: {
+      buyVerb: 'comprar',
+      googleTLD: 'es',
+      uiLanguage: 'es',
+      countryCode: 'ES',
+      synonyms: ['comprar', 'compra', 'precio', 'comparar', 'tienda', 'comercio']
     }
   },
   it: {
@@ -201,6 +231,13 @@ const LOCALE_CONFIGS: Record<SupportedLanguage, LocaleConfig> = {
       quickAnswerError: "Impossibile generare una risposta rapida",
       perplexityError: "Errore di ricerca Perplexity",
       claudeError: "Errore Claude"
+    },
+    shopping: {
+      buyVerb: 'comprare',
+      googleTLD: 'it',
+      uiLanguage: 'it',
+      countryCode: 'IT',
+      synonyms: ['comprare', 'acquisto', 'prezzo', 'confrontare', 'negozio', 'shop']
     }
   },
   de: {
@@ -244,6 +281,13 @@ const LOCALE_CONFIGS: Record<SupportedLanguage, LocaleConfig> = {
       quickAnswerError: "Konnte keine schnelle Antwort generieren",
       perplexityError: "Perplexity-Suchfehler",
       claudeError: "Claude-Fehler"
+    },
+    shopping: {
+      buyVerb: 'kaufen',
+      googleTLD: 'de',
+      uiLanguage: 'de',
+      countryCode: 'DE',
+      synonyms: ['kaufen', 'kauf', 'preis', 'vergleichen', 'geschäft', 'shop']
     }
   }
 };
@@ -329,5 +373,27 @@ export class I18nService {
   static detectYearsInText(text: string): number[] {
     const yearMatches = text.match(/\b(19|20)\d{2}\b/g);
     return yearMatches ? yearMatches.map(y => parseInt(y)) : [];
+  }
+
+  // Shopping helper methods
+  static getShoppingConfig(language?: SupportedLanguage): ShoppingConfig {
+    return this.getLocaleConfig(language).shopping;
+  }
+
+  static buildShoppingQuery(item: string, language?: SupportedLanguage): string {
+    const config = this.getShoppingConfig(language);
+    return `${config.buyVerb} ${item}`;
+  }
+
+  static buildGoogleShoppingUrl(query: string, language?: SupportedLanguage): string {
+    const config = this.getShoppingConfig(language);
+    const encodedQuery = encodeURIComponent(query);
+    return `https://www.google.${config.googleTLD}/search?q=${encodedQuery}&tbm=shop&hl=${config.uiLanguage}&gl=${config.countryCode}`;
+  }
+
+  static isShoppingRelated(text: string, language?: SupportedLanguage): boolean {
+    const config = this.getShoppingConfig(language);
+    const lowerText = text.toLowerCase();
+    return config.synonyms.some(synonym => lowerText.includes(synonym.toLowerCase()));
   }
 }
