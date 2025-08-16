@@ -94,7 +94,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                       {/* Action buttons moved here */}
                       <div className="mt-2">
                         {isLoading ? (
-                          <Button variant="secondary" size="sm" disabled className="w-full text-xs">
+                          <Button variant="secondary" size="sm" disabled className="w-full text-xs h-7">
                             <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                             {I18nService.getSearchingLabel(detectedLanguage)}
                           </Button>
@@ -106,7 +106,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                   variant="outline"
                                   size="sm"
                                   onClick={() => window.open(optionActionLinks.maps!.url, '_blank')}
-                                  className="text-xs max-w-[140px] truncate"
+                                  className="text-xs max-w-[120px] truncate h-7"
                                 >
                                   <Navigation className="h-3 w-3 mr-1" />
                                   {I18nService.getDirectionsLabel(detectedLanguage)}
@@ -116,7 +116,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                    variant="outline"
                                    size="sm"
                                    onClick={() => window.open(optionActionLinks.official!.url, '_blank')}
-                                   className="text-xs max-w-[140px] truncate"
+                                   className="text-xs max-w-[120px] truncate h-7"
                                  >
                                    <MerchantLogo url={optionActionLinks.official!.url} size={14} className="mr-1" />
                                    {I18nService.getOfficialSiteLabel(detectedLanguage)}
@@ -126,7 +126,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                    variant="outline"
                                    size="sm"
                                    onClick={() => window.open(optionActionLinks.merchants?.[0]?.url, '_blank')}
-                                   className="text-xs max-w-[140px] truncate"
+                                   className="text-xs max-w-[120px] truncate h-7"
                                  >
                                    <MerchantLogo url={optionActionLinks.merchants?.[0]?.url || ''} size={14} className="mr-1" />
                                    {optionActionLinks.actionType === 'reserve' ? 
@@ -143,7 +143,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                    variant="secondary"
                                    size="sm"
                                    onClick={() => window.open(merchant.url, '_blank')}
-                                   className="text-xs max-w-[140px] truncate"
+                                   className="text-xs max-w-[120px] truncate h-7"
                                  >
                                    <MerchantLogo url={merchant.url} size={14} className="mr-1" />
                                    {firstResultService.getDomainLabel(merchant.domain)}
@@ -151,7 +151,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                               ))}
                            </div>
                           ) : !optionActionLinks?.maps ? (
-                             <Button variant="secondary" size="sm" disabled className="text-xs max-w-[140px] truncate">
+                             <Button variant="secondary" size="sm" disabled className="text-xs max-w-[120px] truncate h-7">
                                {I18nService.getNoLinkLabel(detectedLanguage)}
                              </Button>
                           ) : null}
