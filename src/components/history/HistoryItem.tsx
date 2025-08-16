@@ -13,6 +13,7 @@ interface HistoryItemProps {
   onDelete: (id: string) => void;
   loadId?: string;
   followUpCount?: number;
+  followUpDecisions?: IDecision[];
   titleOverride?: string;
   rootRecommendation?: string;
 }
@@ -23,6 +24,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
   onDelete,
   loadId,
   followUpCount,
+  followUpDecisions,
   titleOverride,
   rootRecommendation
 }) => {
@@ -64,11 +66,26 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
                       + {followUpCount} question{followUpCount > 1 ? 's' : ''} de suivi
                     </span>
                   </TooltipTrigger>
-                  <TooltipContent className="max-w-sm">
-                    <p className="text-sm">
-                      Cette décision contient {followUpCount} question{followUpCount > 1 ? 's' : ''} de suivi supplémentaire{followUpCount > 1 ? 's' : ''}.
-                      Chargez cette décision pour les voir.
-                    </p>
+                  <TooltipContent className="max-w-md max-h-64 overflow-y-auto">
+                    <div className="space-y-3">
+                      {followUpDecisions?.slice(0, 5).map((followUp, index) => (
+                        <div key={followUp.id} className="text-sm">
+                          <p className="font-semibold text-foreground mb-1">
+                            Q{index + 1}: {followUp.dilemma}
+                          </p>
+                          <p className="text-muted-foreground text-xs leading-relaxed">
+                            {followUp.result.recommendation.length > 160 
+                              ? `${followUp.result.recommendation.substring(0, 160)}...` 
+                              : followUp.result.recommendation}
+                          </p>
+                        </div>
+                      ))}
+                      {followUpCount > 5 && (
+                        <p className="text-xs text-muted-foreground italic pt-2 border-t">
+                          ... et {followUpCount - 5} autre{followUpCount - 5 > 1 ? 's' : ''}
+                        </p>
+                      )}
+                    </div>
                   </TooltipContent>
                 </Tooltip>
               )}

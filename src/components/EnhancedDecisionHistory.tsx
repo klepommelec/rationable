@@ -73,11 +73,13 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
       const sorted = [...decisions].sort((a, b) => a.timestamp - b.timestamp);
       const root = sorted.find(d => (d.threadId || d.id) === key) || sorted[0];
       const last = sorted[sorted.length - 1];
+      const followUps = sorted.filter(d => d !== root); // Toutes les questions de suivi
       return {
         key,
         root,
         last,
-        followUpCount: sorted.length - 1
+        followUps,
+        followUpCount: followUps.length
       };
     });
 
@@ -142,6 +144,7 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
                 onLoad={handleLoad} 
                 onDelete={onDelete} 
                 followUpCount={item.followUpCount}
+                followUpDecisions={item.followUps}
                 titleOverride={item.root.dilemma}
                 rootRecommendation={item.root.result.recommendation}
               />
