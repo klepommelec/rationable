@@ -106,7 +106,6 @@ export const useDecisionActions = ({
 
     const clearSession = () => {
         resetState();
-        toast.info("Session réinitialisée.");
     };
     
     const loadDecision = (decisionId: string) => {
