@@ -135,7 +135,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
             {/* Action buttons for top option - moved to bottom */}
             {topOption?.option && (
-              <div className="w-full">
+              <div className="w-full pt-4">{/* Added pt-4 for more spacing */}
                 {isLoadingAction ? (
                   <Button variant="secondary" size="sm" disabled className="w-full sm:w-auto">
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
