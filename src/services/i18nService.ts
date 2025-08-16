@@ -396,4 +396,66 @@ export class I18nService {
     const lowerText = text.toLowerCase();
     return config.synonyms.some(synonym => lowerText.includes(synonym.toLowerCase()));
   }
+
+  static buildGoogleWebUrl(query: string, language?: SupportedLanguage): string {
+    const config = this.getShoppingConfig(language);
+    const encodedQuery = encodeURIComponent(query);
+    return `https://www.google.${config.googleTLD}/search?q=${encodedQuery}&hl=${config.uiLanguage}&gl=${config.countryCode}`;
+  }
+
+  // Vertical detection methods
+  static getVerticalKeywords(): Record<SupportedLanguage, Record<string, string[]>> {
+    return {
+      fr: {
+        automotive: ['voiture', 'auto', 'véhicule', 'automobile', 'concessionnaire', 'garage', 'occasion', 'neuf', 'hybride', 'électrique', 'diesel', 'essence'],
+        travel: ['voyage', 'vacances', 'hôtel', 'vol', 'avion', 'train', 'réservation', 'séjour', 'destination', 'tourisme'],
+        software: ['logiciel', 'application', 'app', 'programme', 'télécharger', 'installer', 'licence', 'abonnement']
+      },
+      en: {
+        automotive: ['car', 'auto', 'vehicle', 'automobile', 'dealer', 'garage', 'used', 'new', 'hybrid', 'electric', 'diesel', 'gasoline'],
+        travel: ['travel', 'vacation', 'hotel', 'flight', 'plane', 'train', 'booking', 'stay', 'destination', 'tourism'],
+        software: ['software', 'application', 'app', 'program', 'download', 'install', 'license', 'subscription']
+      },
+      es: {
+        automotive: ['coche', 'auto', 'vehículo', 'automóvil', 'concesionario', 'garaje', 'usado', 'nuevo', 'híbrido', 'eléctrico', 'diesel', 'gasolina'],
+        travel: ['viaje', 'vacaciones', 'hotel', 'vuelo', 'avión', 'tren', 'reserva', 'estancia', 'destino', 'turismo'],
+        software: ['software', 'aplicación', 'app', 'programa', 'descargar', 'instalar', 'licencia', 'suscripción']
+      },
+      it: {
+        automotive: ['auto', 'automobile', 'veicolo', 'concessionario', 'garage', 'usato', 'nuovo', 'ibrido', 'elettrico', 'diesel', 'benzina'],
+        travel: ['viaggio', 'vacanza', 'hotel', 'volo', 'aereo', 'treno', 'prenotazione', 'soggiorno', 'destinazione', 'turismo'],
+        software: ['software', 'applicazione', 'app', 'programma', 'scaricare', 'installare', 'licenza', 'abbonamento']
+      },
+      de: {
+        automotive: ['auto', 'wagen', 'fahrzeug', 'automobil', 'händler', 'garage', 'gebraucht', 'neu', 'hybrid', 'elektrisch', 'diesel', 'benzin'],
+        travel: ['reise', 'urlaub', 'hotel', 'flug', 'flugzeug', 'zug', 'buchung', 'aufenthalt', 'reiseziel', 'tourismus'],
+        software: ['software', 'anwendung', 'app', 'programm', 'herunterladen', 'installieren', 'lizenz', 'abonnement']
+      }
+    };
+  }
+
+  static detectVertical(text: string, language?: SupportedLanguage): string | null {
+    const lang = language || this.currentLanguage;
+    const verticalKeywords = this.getVerticalKeywords()[lang];
+    const lowerText = text.toLowerCase();
+    
+    for (const [vertical, keywords] of Object.entries(verticalKeywords)) {
+      if (keywords.some(keyword => lowerText.includes(keyword))) {
+        return vertical;
+      }
+    }
+    return null;
+  }
+
+  static isAutomotiveRelated(text: string, language?: SupportedLanguage): boolean {
+    return this.detectVertical(text, language) === 'automotive';
+  }
+
+  static isTravelRelated(text: string, language?: SupportedLanguage): boolean {
+    return this.detectVertical(text, language) === 'travel';
+  }
+
+  static isSoftwareRelated(text: string, language?: SupportedLanguage): boolean {
+    return this.detectVertical(text, language) === 'software';
+  }
 }

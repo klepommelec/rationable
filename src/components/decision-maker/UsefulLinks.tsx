@@ -24,7 +24,9 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
   const hasContent = (shoppingLinks && shoppingLinks.length > 0) || 
                     (socialContent?.youtubeVideos && socialContent.youtubeVideos.length > 0);
   
-  if (!hasContent) {
+  const shouldShowFallbackSearch = !shoppingLinks || shoppingLinks.length === 0;
+  
+  if (!hasContent && !shouldShowFallbackSearch) {
     return null;
   }
 
@@ -95,6 +97,36 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
                   />
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Fallback search when no shopping links */}
+        {shouldShowFallbackSearch && recommendation && (
+          <div className="space-y-3">
+            <h4 
+              className="font-medium text-sm sm:text-base text-gray-800 dark:text-gray-200 flex items-center gap-2"
+              id="fallback-search-heading"
+            >
+              <span className="text-base sm:text-lg" aria-hidden="true">🔍</span>
+              Recherche suggérée
+            </h4>
+            <div 
+              className="space-y-2"
+              role="list"
+              aria-labelledby="fallback-search-heading"
+            >
+              <div className="group">
+                <ValidatedLink 
+                  link={{
+                    title: `Rechercher "${recommendation}"`,
+                    url: '',
+                    description: 'Recherche contextuelle'
+                  }} 
+                  fallbackSearchQuery={I18nService.buildShoppingQuery(recommendation, I18nService.getCurrentLanguage())} 
+                  className="flex items-center gap-2 p-2 sm:p-3 rounded-lg border border-blue-200 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-600 text-xs sm:text-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md group-focus-within:ring-2 group-focus-within:ring-blue-500 group-focus-within:ring-offset-2" 
+                />
+              </div>
             </div>
           </div>
         )}

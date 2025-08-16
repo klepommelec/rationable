@@ -79,9 +79,15 @@ RÈGLES CRITIQUES POUR LES LIENS D'ACHAT (shoppingLinks):
   3. 1 option d'occasion certifiée (si pertinent)
 - URLs RÉELLES et FONCTIONNELLES uniquement - pas d'exemples
 - Si un produit n'est plus vendu neuf, omettre ce type de lien
-- Adapter au contexte: voitures = concessionnaires + occasions, électronique = sites tech, etc.
-- Format titre: "Nom exact du produit chez [Revendeur]"
-- Description: "Page officielle" ou "Revendeur certifié" ou "Marché d'occasion"
+- Adapter au contexte par verticale:
+  * AUTOMOBILES: 1 lien officiel constructeur + 1-2 concessionnaires/revendeurs + 1-2 occasions certifiées (lacentrale.fr, autoscout24.fr, etc.)
+  * VOYAGES: 1 lien officiel compagnie/hôtel + 1-2 plateformes de réservation (booking.com, expedia.fr, etc.)
+  * ÉLECTRONIQUE: 1 lien constructeur + 1-2 revendeurs tech certifiés + 1-2 marketplaces fiables
+  * LOGICIELS: 1 lien éditeur officiel + 1-2 revendeurs de licences certifiés
+- Format titre: "Nom exact du produit/service chez [Revendeur]"
+- Description: "Page officielle" ou "Revendeur certifié" ou "Marché d'occasion" ou "Plateforme de réservation"
+- Respecter la langue de l'utilisateur dans les titres et descriptions
+- Utiliser les domaines locaux appropriés au pays/langue (ex: .fr pour français, .de pour allemand)
 
 IMPORTANT: 
 - Analyse en profondeur la question posée
