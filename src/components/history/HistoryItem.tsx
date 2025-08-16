@@ -109,7 +109,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
             
             {/* Questions de suivi sur mobile - ligne séparée */}
             {typeof followUpCount === 'number' && followUpCount > 0 && (
-              <div className="sm:hidden">
+              <div className="sm:hidden mt-1 mb-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="text-xs text-muted-foreground cursor-help hover:text-foreground transition-colors">
@@ -141,8 +141,8 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
               </div>
             )}
             
-            {/* Réponse principale */}
-            <p className="text-sm text-muted-foreground line-clamp-2">
+            {/* Réponse principale avec espacement ajusté sur mobile */}
+            <p className="text-sm text-muted-foreground line-clamp-2 sm:mt-1">
               {rootRecommendation || decision.result.recommendation}
             </p>
             
