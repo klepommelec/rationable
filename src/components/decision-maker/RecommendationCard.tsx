@@ -137,7 +137,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             {topOption?.option && (
               <div className="w-full">
                 {isLoadingAction ? (
-                  <Button variant="secondary" size="lg" disabled className="w-full sm:w-auto">
+                  <Button variant="secondary" size="sm" disabled className="w-full sm:w-auto">
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Recherche...
                   </Button>
@@ -147,7 +147,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     {actionLinks.actionType === 'directions' && actionLinks.maps ? (
                       <Button
                         variant="default"
-                        size="lg"
+                        size="sm"
                         onClick={() => window.open(actionLinks.maps!.url, '_blank')}
                       >
                         <Navigation className="h-4 w-4 mr-2" />
@@ -156,7 +156,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     ) : actionLinks.official ? (
                       <Button
                         variant="default"
-                        size="lg"
+                        size="sm"
                         onClick={() => window.open(actionLinks.official!.url, '_blank')}
                       >
                         <ShoppingBag className="h-4 w-4 mr-2" />
@@ -165,7 +165,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     ) : actionLinks.merchants[0] ? (
                       <Button
                         variant="default"
-                        size="lg"
+                        size="sm"
                         onClick={() => window.open(actionLinks.merchants[0].url, '_blank')}
                       >
                         <ShoppingBag className="h-4 w-4 mr-2" />
@@ -195,7 +195,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                        <Button
                          key={`merchant-${merchant.domain}-${i}`}
                          variant="outline"
-                         size="lg"
+                         size="sm"
                          onClick={() => window.open(merchant.url, '_blank')}
                          className="min-w-[120px]"
                        >
