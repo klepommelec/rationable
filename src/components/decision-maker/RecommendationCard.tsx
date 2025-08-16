@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,8 +9,10 @@ import { DataAccuracyIndicator } from './DataAccuracyIndicator';
 import { WorkspaceDocumentIndicator } from './WorkspaceDocumentIndicator';
 import { AIProviderIndicator } from './AIProviderIndicator';
 import ValidatedLink from '@/components/ValidatedLink';
-import { ExternalLink, Lightbulb, CheckCircle } from 'lucide-react';
+import { ExternalLink, Lightbulb, CheckCircle, ShoppingBag, Loader2 } from 'lucide-react';
 import { ExpandableText } from '@/components/ExpandableText';
+import { firstResultService, FirstResultResponse } from '@/services/firstResultService';
+import { I18nService } from '@/services/i18nService';
 interface RecommendationCardProps {
   result: IResult;
   dilemma: string;
@@ -22,6 +24,35 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   currentDecision
 }) => {
   const topOption = result.breakdown?.[0];
+  const [actionButton, setActionButton] = useState<FirstResultResponse | null>(null);
+  const [isLoadingAction, setIsLoadingAction] = useState(false);
+  const detectedLanguage = dilemma ? I18nService.detectLanguage(dilemma) : 'fr';
+  const detectedVertical = dilemma ? I18nService.detectVertical(dilemma) : null;
+
+  // Load action button for top option
+  useEffect(() => {
+    if (!topOption?.option || !dilemma) return;
+
+    const loadActionButton = async () => {
+      setIsLoadingAction(true);
+      try {
+        const result = await firstResultService.getFirstResultUrl({
+          optionName: topOption.option,
+          dilemma: dilemma,
+          language: detectedLanguage,
+          vertical: detectedVertical as any
+        });
+        setActionButton(result);
+      } catch (error) {
+        console.error(`Failed to get action button for ${topOption.option}:`, error);
+        setActionButton(null);
+      } finally {
+        setIsLoadingAction(false);
+      }
+    };
+
+    loadActionButton();
+  }, [topOption?.option, dilemma, detectedLanguage, detectedVertical]);
   
   // Configuration unifiée pour tous les types de résultats
   const config = {
@@ -33,6 +64,10 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     badgeColor: 'bg-primary/10 text-primary',
     titleColor: 'text-primary'
   };
+
+  const actionVerb = actionButton ? 
+    firstResultService.getActionVerb(detectedVertical, detectedLanguage) : 
+    firstResultService.getDiscoverVerb(detectedLanguage);
   return <Card className={`border-2 ${config.borderColor} ${config.bgGradient} w-full`}>
       <CardContent className="space-y-6 pt-4 sm:pt-2">
         <div className="flex flex-col gap-6">
@@ -62,6 +97,31 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             <div className="w-full">
               <ExpandableText text={result.description} />
             </div>
+
+            {/* Action button for top option */}
+            {topOption?.option && (
+              <div className="w-full">
+                <Button
+                  variant={actionButton && !actionButton.url.includes('google.') ? "default" : "secondary"}
+                  size="lg"
+                  onClick={() => actionButton && window.open(actionButton.url, '_blank')}
+                  disabled={isLoadingAction || !actionButton}
+                  className="w-full sm:w-auto"
+                >
+                  {isLoadingAction ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Recherche...
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingBag className="h-4 w-4 mr-2" />
+                      {actionVerb} {topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
 
             {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && <div className="grid md:grid-cols-2 gap-4 w-full">
                 {topOption.pros?.length > 0 && <div className="space-y-2">

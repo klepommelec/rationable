@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { IBreakdownItem } from '@/types/decision';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, ExternalLink } from 'lucide-react';
+import { CheckCircle, XCircle, ExternalLink, ShoppingBag, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { generateOptionSearchLinks } from '@/services/expandOptionsService';
+import { firstResultService, FirstResultResponse } from '@/services/firstResultService';
+import { I18nService } from '@/services/i18nService';
+
 interface ComparisonTableProps {
   breakdown: IBreakdownItem[];
   dilemma?: string;
@@ -13,6 +16,36 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   breakdown,
   dilemma
 }) => {
+  const [actionButtons, setActionButtons] = useState<Record<string, FirstResultResponse | null>>({});
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+  const detectedLanguage = dilemma ? I18nService.detectLanguage(dilemma) : 'fr';
+  const detectedVertical = dilemma ? I18nService.detectVertical(dilemma) : null;
+
+  useEffect(() => {
+    if (!breakdown?.length || !dilemma) return;
+
+    // Load action buttons for each option
+    breakdown.forEach(async (option) => {
+      const optionKey = option.option;
+      setLoadingStates(prev => ({ ...prev, [optionKey]: true }));
+
+      try {
+        const result = await firstResultService.getFirstResultUrl({
+          optionName: option.option,
+          dilemma: dilemma,
+          language: detectedLanguage,
+          vertical: detectedVertical as any
+        });
+
+        setActionButtons(prev => ({ ...prev, [optionKey]: result }));
+      } catch (error) {
+        console.error(`Failed to get action button for ${optionKey}:`, error);
+        setActionButtons(prev => ({ ...prev, [optionKey]: null }));
+      } finally {
+        setLoadingStates(prev => ({ ...prev, [optionKey]: false }));
+      }
+    });
+  }, [breakdown, dilemma, detectedLanguage, detectedVertical]);
   if (!breakdown || breakdown.length === 0) {
     return <div className="flex items-center justify-center p-8 text-muted-foreground">
         <p>Aucune donnée disponible pour le tableau comparatif</p>
@@ -36,12 +69,19 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
               <TableHead className="w-[200px]">Option</TableHead>
               <TableHead>Avantages</TableHead>
               <TableHead>Inconvénients</TableHead>
+              <TableHead className="w-[120px]">Action</TableHead>
               <TableHead className="w-[180px]">En savoir plus</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedOptions.map((option, index) => {
               const searchLinks = generateOptionSearchLinks(option.option, dilemma || '');
+              const optionKey = option.option;
+              const actionButton = actionButtons[optionKey];
+              const isLoading = loadingStates[optionKey];
+              const actionVerb = actionButton ? 
+                firstResultService.getActionVerb(detectedVertical as any, detectedLanguage) : 
+                firstResultService.getDiscoverVerb(detectedLanguage);
               
               return (
                 <TableRow key={index} className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''}>
@@ -76,6 +116,27 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                           +{option.cons.length - 3} autres inconvénients
                         </p>}
                     </div>
+                  </TableCell>
+                  <TableCell className="align-top">
+                    <Button
+                      variant={actionButton && !actionButton.url.includes('google.') ? "default" : "secondary"}
+                      size="sm"
+                      onClick={() => actionButton && window.open(actionButton.url, '_blank')}
+                      disabled={isLoading || !actionButton}
+                      className="w-full text-xs"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          Recherche...
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingBag className="h-3 w-3 mr-1" />
+                          {actionVerb}
+                        </>
+                      )}
+                    </Button>
                   </TableCell>
                   <TableCell className="align-top">
                     <div className="space-y-1">

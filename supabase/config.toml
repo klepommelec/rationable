@@ -1,1 +1,4 @@
 project_id = "dzrlrfkidaahceryoajc"
+
+[functions.first-web-result]
+verify_jwt = false
