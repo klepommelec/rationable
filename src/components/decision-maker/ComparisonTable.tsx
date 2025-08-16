@@ -106,7 +106,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                   variant="default"
                                   size="sm"
                                   onClick={() => window.open(optionActionLinks.maps!.url, '_blank')}
-                                  className="text-xs"
+                                  className="text-xs max-w-[140px] truncate"
                                 >
                                   <Navigation className="h-3 w-3 mr-1" />
                                   {I18nService.getDirectionsLabel(detectedLanguage)}
@@ -116,7 +116,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                    variant="default"
                                    size="sm"
                                    onClick={() => window.open(optionActionLinks.official!.url, '_blank')}
-                                   className="text-xs"
+                                   className="text-xs max-w-[140px] truncate"
                                  >
                                    <MerchantLogo url={optionActionLinks.official!.url} size={14} className="mr-1" />
                                    {I18nService.getOfficialSiteLabel(detectedLanguage)}
@@ -126,7 +126,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                    variant="default"
                                    size="sm"
                                    onClick={() => window.open(optionActionLinks.merchants?.[0]?.url, '_blank')}
-                                   className="text-xs"
+                                   className="text-xs max-w-[140px] truncate"
                                  >
                                    <MerchantLogo url={optionActionLinks.merchants?.[0]?.url || ''} size={14} className="mr-1" />
                                    {optionActionLinks.actionType === 'reserve' ? 
@@ -143,7 +143,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                    variant="outline"
                                    size="sm"
                                    onClick={() => window.open(merchant.url, '_blank')}
-                                   className="text-xs"
+                                   className="text-xs max-w-[140px] truncate"
                                  >
                                    <MerchantLogo url={merchant.url} size={14} className="mr-1" />
                                    {firstResultService.getDomainLabel(merchant.domain)}
@@ -151,7 +151,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                               ))}
                            </div>
                          ) : (
-                           <Button variant="secondary" size="sm" disabled className="text-xs">
+                           <Button variant="secondary" size="sm" disabled className="text-xs max-w-[140px] truncate">
                              Aucun lien
                            </Button>
                          )}
