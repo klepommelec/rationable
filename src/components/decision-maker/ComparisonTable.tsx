@@ -77,8 +77,8 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
             {sortedOptions.map((option, index) => {
               const searchLinks = generateOptionSearchLinks(option.option, dilemma || '');
               const optionKey = option.option;
-              const optionActionLinks = actionLinks[optionKey];
-              const isLoading = loadingStates[optionKey];
+              const optionActionLinks = actionLinks?.[optionKey] || null;
+              const isLoading = loadingStates?.[optionKey] || false;
               
               return (
                 <TableRow key={index} className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''}>
@@ -133,11 +133,11 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                             <ShoppingBag className="h-3 w-3 mr-1" />
                             {I18nService.getOfficialSiteLabel(detectedLanguage)}
                           </Button>
-                        ) : optionActionLinks.merchants[0] ? (
+                        ) : optionActionLinks.merchants?.[0] ? (
                           <Button
                             variant="default"
                             size="sm"
-                            onClick={() => window.open(optionActionLinks.merchants[0].url, '_blank')}
+                            onClick={() => window.open(optionActionLinks.merchants?.[0]?.url, '_blank')}
                             className="text-xs"
                           >
                             <ShoppingBag className="h-3 w-3 mr-1" />
@@ -146,7 +146,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                         ) : null}
                         
                         {/* Secondary buttons: Merchants */}
-                        {(optionActionLinks.official ? optionActionLinks.merchants : optionActionLinks.merchants.slice(1)).slice(0, 2).map((merchant, i) => (
+                        {(optionActionLinks.official ? (optionActionLinks.merchants || []) : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => (
                           <Button
                             key={i}
                             variant="outline"
