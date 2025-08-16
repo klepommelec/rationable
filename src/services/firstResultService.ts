@@ -170,21 +170,7 @@ class FirstResultService {
         finalMerchants = [];
       }
 
-      // 10. Last resort fallback: if no official and no merchants, create a Google search button
-      if (!officialResult && finalMerchants.length === 0) {
-        const detectedLanguage = language || I18nService.detectLanguage(dilemma + ' ' + optionName);
-        const detectedVertical = vertical || I18nService.detectVertical(dilemma + ' ' + optionName);
-        const searchQuery = this.buildOptimizedQuery(optionName, detectedVertical, detectedLanguage);
-        const googleSearchUrl = I18nService.buildGoogleWebUrl(searchQuery, detectedLanguage);
-        
-        finalMerchants.push({
-          url: googleSearchUrl,
-          title: `${I18nService.getSearchLabel(detectedLanguage)} "${optionName}"`,
-          domain: 'google.com'
-        });
-        
-        console.log(`🔄 Added Google search fallback for: ${optionName}`);
-      }
+      // No fallback for directions (local queries) - return with empty merchants
 
       const result = {
         official: officialResult,
@@ -846,16 +832,12 @@ class FirstResultService {
       'blablacar', 'europcar', 'hertz', 'avis', 'sixt'
     ];
     
-    // Check if it's a merchant domain but exclude non-Maps Google links
+    // Check if it's a merchant domain but completely exclude all Google domains
     const isMerchant = merchantDomains.some(merchant => domain.includes(merchant));
     
-    // Filter out generic Google links (keep only Maps-related Google links)
+    // Exclude ALL Google domains from merchants (Google Maps should only be via maps button)
     if (domain.includes('google')) {
-      // Only allow Google Maps related URLs, not generic Google search
-      return domain.includes('maps.google') || 
-             domain.includes('google.com/maps') || 
-             domain.includes('g.page') || 
-             (domain.includes('goo.gl') && domain.includes('maps'));
+      return false;
     }
     
     return isMerchant;
@@ -867,7 +849,7 @@ class FirstResultService {
     // Review/Rating platforms (high priority for local businesses)
     if (domain.includes('tripadvisor')) score += 15; // Higher than booking for local restaurants
     if (domain.includes('yelp')) score += 13;
-    if (domain.includes('google')) score += 12; // Google Business listings
+    // Google completely removed from merchant scoring (handled via maps button only)
     
     // Premium booking platforms
     if (domain.includes('booking.com')) score += 12;
@@ -927,7 +909,7 @@ class FirstResultService {
       'tripadvisor': 'TripAdvisor',
       'yelp': 'Yelp',
       'thefork': 'LaFourche',
-      'google': 'Google',
+      // 'google': 'Google', // Removed - Google should only appear via maps button
       'expedia': 'Expedia',
       'hotels': 'Hotels.com',
       'kayak': 'Kayak',
@@ -1106,8 +1088,7 @@ class FirstResultService {
       case 'directions':
         // Boost review/rating sites for local businesses (restaurants, shops, etc.)
         if (domain.includes('tripadvisor') || domain.includes('yelp')) bonus += 12;
-        if (domain.includes('google')) bonus += 10; // Google Business listings with reviews
-        // Maps services get lower bonus since we already have a dedicated maps button
+        // Google removed from bonus scoring - only handled via maps button
         break;
         
       case 'reserve':
