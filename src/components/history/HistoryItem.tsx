@@ -68,16 +68,17 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
       >
         <div className="flex justify-between items-start gap-2">
           <div className="flex-1 min-w-0 space-y-1">
-            {/* Titre principal avec emoji et questions de suivi */}
-            <div className="flex items-center gap-2">
+            {/* Titre principal avec emoji */}
+            <div className="flex items-center gap-2 w-full">
               <span className="text-lg">{decision.emoji}</span>
-              <p className="font-semibold text-foreground truncate">
+              <p className="font-semibold text-foreground truncate flex-1">
                 {titleOverride || decision.dilemma}
               </p>
+              {/* Questions de suivi - masquées sur mobile */}
               {typeof followUpCount === 'number' && followUpCount > 0 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap cursor-help hover:text-foreground transition-colors">
+                    <span className="hidden sm:inline text-xs text-muted-foreground whitespace-nowrap cursor-help hover:text-foreground transition-colors">
                       + {followUpCount} question{followUpCount > 1 ? 's' : ''} de suivi
                     </span>
                   </TooltipTrigger>
@@ -105,6 +106,40 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
                 </Tooltip>
               )}
             </div>
+            
+            {/* Questions de suivi sur mobile - ligne séparée */}
+            {typeof followUpCount === 'number' && followUpCount > 0 && (
+              <div className="sm:hidden">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-xs text-muted-foreground cursor-help hover:text-foreground transition-colors">
+                      + {followUpCount} question{followUpCount > 1 ? 's' : ''} de suivi
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-md max-h-64 overflow-y-auto">
+                    <div className="space-y-3">
+                      {followUpDecisions?.slice(0, 5).map((followUp, index) => (
+                        <div key={followUp.id} className="text-sm">
+                          <p className="font-semibold text-foreground mb-1">
+                            Q{index + 1}: {followUp.dilemma}
+                          </p>
+                          <p className="text-muted-foreground text-xs leading-relaxed">
+                            {followUp.result.recommendation.length > 160 
+                              ? `${followUp.result.recommendation.substring(0, 160)}...` 
+                              : followUp.result.recommendation}
+                          </p>
+                        </div>
+                      ))}
+                      {followUpCount > 5 && (
+                        <p className="text-xs text-muted-foreground italic pt-2 border-t">
+                          ... et {followUpCount - 5} autre{followUpCount - 5 > 1 ? 's' : ''}
+                        </p>
+                      )}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            )}
             
             {/* Réponse principale */}
             <p className="text-sm text-muted-foreground line-clamp-2">
