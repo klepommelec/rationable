@@ -837,42 +837,89 @@ class FirstResultService {
 
   getDomainLabel(domain: string): string {
     const labelMap: Record<string, string> = {
-      'amazon.fr': 'Amazon',
-      'amazon.com': 'Amazon',
-      'fnac.com': 'Fnac',
-      'cdiscount.com': 'Cdiscount',
-      'darty.com': 'Darty',
-      'boulanger.com': 'Boulanger',
-      'ldlc.com': 'LDLC',
-      'materiel.net': 'Materiel.net',
-      'rueducommerce.fr': 'Rue du Commerce',
-      'topachat.com': 'TopAchat',
-      'grosbill.com': 'Grosbill',
-      'samsung.com': 'Samsung',
-      'samsung.fr': 'Samsung',
-      'apple.com': 'Apple',
-      'apple.fr': 'Apple',
-      'toyota.fr': 'Toyota',
-      'honda.fr': 'Honda',
-      'peugeot.fr': 'Peugeot'
+      'amazon': 'Amazon',
+      'fnac': 'Fnac',
+      'cdiscount': 'Cdiscount',
+      'darty': 'Darty',
+      'boulanger': 'Boulanger',
+      'ldlc': 'LDLC',
+      'materiel': 'Materiel.net',
+      'rueducommerce': 'Rue du Commerce',
+      'topachat': 'TopAchat',
+      'grosbill': 'Grosbill',
+      'samsung': 'Samsung',
+      'apple': 'Apple',
+      'toyota': 'Toyota',
+      'honda': 'Honda',
+      'peugeot': 'Peugeot',
+      'booking': 'Booking',
+      'airbnb': 'Airbnb',
+      'tripadvisor': 'TripAdvisor',
+      'thefork': 'LaFourche',
+      'google': 'Google',
+      'expedia': 'Expedia',
+      'hotels': 'Hotels.com',
+      'kayak': 'Kayak',
+      'skyscanner': 'Skyscanner',
+      'opentable': 'OpenTable',
+      'leboncoin': 'Leboncoin',
+      'ebay': 'eBay',
+      'carrefour': 'Carrefour',
+      'leclerc': 'Leclerc',
+      'auchan': 'Auchan',
+      'conforama': 'Conforama',
+      'ikea': 'IKEA',
+      'decathlon': 'Decathlon'
     };
     
-    // Try exact match first
-    const cleanDomain = domain.replace(/^www\./, '');
-    if (labelMap[cleanDomain]) {
-      return labelMap[cleanDomain];
+    // Normalize domain: remove www, extract main domain
+    const cleanDomain = domain.replace(/^www\./, '').toLowerCase();
+    
+    // Extract the main domain name (handle subdomains like fr.booking.com)
+    const parts = cleanDomain.split('.');
+    let mainDomain = '';
+    
+    // For domains like fr.booking.com, we want "booking"
+    // For domains like booking.com, we want "booking"
+    if (parts.length >= 2) {
+      // Check if the second-to-last part is a known brand
+      const secondToLast = parts[parts.length - 2];
+      if (labelMap[secondToLast]) {
+        mainDomain = secondToLast;
+      } else {
+        // If no match, use the first non-language subdomain
+        // Skip common language codes
+        const languageCodes = ['fr', 'en', 'es', 'de', 'it', 'nl', 'pt', 'ru', 'ja', 'ko', 'zh', 'www'];
+        for (const part of parts) {
+          if (!languageCodes.includes(part) && part.length > 2) {
+            mainDomain = part;
+            break;
+          }
+        }
+        
+        // If still no main domain, use the second-to-last part
+        if (!mainDomain && parts.length >= 2) {
+          mainDomain = parts[parts.length - 2];
+        }
+      }
+    } else {
+      mainDomain = parts[0];
     }
     
-    // Try partial matches
+    // Try to find a match in our label map
+    if (labelMap[mainDomain]) {
+      return labelMap[mainDomain];
+    }
+    
+    // Try partial matches for compound names
     for (const [key, label] of Object.entries(labelMap)) {
-      if (cleanDomain.includes(key.split('.')[0])) {
+      if (mainDomain.includes(key) || key.includes(mainDomain)) {
         return label;
       }
     }
     
-    // Fallback: capitalize first letter of domain name
-    const domainName = cleanDomain.split('.')[0];
-    return domainName.charAt(0).toUpperCase() + domainName.slice(1);
+    // Fallback: capitalize the main domain
+    return mainDomain.charAt(0).toUpperCase() + mainDomain.slice(1);
   }
 }
 
