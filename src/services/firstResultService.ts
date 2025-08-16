@@ -179,7 +179,7 @@ class FirstResultService {
         
         finalMerchants.push({
           url: googleSearchUrl,
-          title: `Rechercher "${optionName}"`,
+          title: `${I18nService.getSearchLabel(detectedLanguage)} "${optionName}"`,
           domain: 'google.com'
         });
         
@@ -348,7 +348,7 @@ class FirstResultService {
         console.log(`🔄 Using merchant fallback: ${merchantFallback}`);
         return {
           url: merchantFallback,
-          title: `Rechercher "${optionName}"`,
+          title: `${I18nService.getSearchLabel(detectedLanguage)} "${optionName}"`,
           sourceProvider: 'perplexity', // arbitrary fallback
           fromCache: false
         };
@@ -359,7 +359,7 @@ class FirstResultService {
       console.log(`🔄 Using Google fallback: ${fallbackUrl}`);
       return {
         url: fallbackUrl,
-        title: `Rechercher "${optionName}"`,
+        title: `${I18nService.getSearchLabel(detectedLanguage)} "${optionName}"`,
         sourceProvider: 'perplexity', // arbitrary fallback
         fromCache: false
       };

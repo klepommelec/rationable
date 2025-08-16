@@ -27,7 +27,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   const topOption = result.breakdown?.[0];
   const [actionLinks, setActionLinks] = useState<BestLinksResponse | null>(null);
   const [isLoadingAction, setIsLoadingAction] = useState(false);
-  const detectedLanguage = 'fr'; // Force French for UI labels
+  const detectedLanguage = I18nService.getCurrentLanguage();
   const detectedVertical = dilemma ? I18nService.detectVertical(dilemma) : null;
 
   // Load action button for top option
@@ -140,7 +140,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 {isLoadingAction ? (
                   <Button variant="secondary" size="sm" disabled className="w-full sm:w-auto">
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Recherche...
+                    {I18nService.getSearchingLabel(detectedLanguage)}
                   </Button>
                 ) : actionLinks ? (
                   <div className="flex flex-wrap gap-3">

@@ -295,6 +295,7 @@ const LOCALE_CONFIGS: Record<SupportedLanguage, LocaleConfig> = {
 export class I18nService {
   private static defaultLanguage: SupportedLanguage = 'fr';
   private static currentLanguage: SupportedLanguage = 'fr';
+  private static readonly STORAGE_KEY = 'rationable_language';
 
   static detectLanguage(text: string): SupportedLanguage {
     const lowerText = text.toLowerCase();
@@ -334,10 +335,22 @@ export class I18nService {
 
   static setLanguage(language: SupportedLanguage): void {
     this.currentLanguage = language;
+    localStorage.setItem(this.STORAGE_KEY, language);
   }
 
   static getCurrentLanguage(): SupportedLanguage {
     return this.currentLanguage;
+  }
+
+  static initializeLanguage(): void {
+    const stored = localStorage.getItem(this.STORAGE_KEY);
+    if (stored && this.isValidLanguage(stored)) {
+      this.currentLanguage = stored as SupportedLanguage;
+    }
+  }
+
+  private static isValidLanguage(lang: string): boolean {
+    return ['fr', 'en', 'es', 'it', 'de'].includes(lang);
   }
 
   static formatDate(date: Date, language?: SupportedLanguage): string {
@@ -435,6 +448,54 @@ export class I18nService {
       'es': 'Reservar',
       'it': 'Prenota',
       'de': 'Buchen'
+    };
+    return labels[lang] || labels.fr;
+  }
+
+  static getSearchLabel(language?: SupportedLanguage): string {
+    const lang = language || this.getCurrentLanguage();
+    const labels = {
+      'fr': 'Rechercher',
+      'en': 'Search',
+      'es': 'Buscar',
+      'it': 'Cercare',
+      'de': 'Suchen'
+    };
+    return labels[lang] || labels.fr;
+  }
+
+  static getCompareLabel(language?: SupportedLanguage): string {
+    const lang = language || this.getCurrentLanguage();
+    const labels = {
+      'fr': 'Comparer',
+      'en': 'Compare',
+      'es': 'Comparar',
+      'it': 'Confrontare',
+      'de': 'Vergleichen'
+    };
+    return labels[lang] || labels.fr;
+  }
+
+  static getNoLinkLabel(language?: SupportedLanguage): string {
+    const lang = language || this.getCurrentLanguage();
+    const labels = {
+      'fr': 'Aucun lien',
+      'en': 'No links',
+      'es': 'Sin enlaces',
+      'it': 'Nessun collegamento',
+      'de': 'Keine Links'
+    };
+    return labels[lang] || labels.fr;
+  }
+
+  static getSearchingLabel(language?: SupportedLanguage): string {
+    const lang = language || this.getCurrentLanguage();
+    const labels = {
+      'fr': 'Recherche...',
+      'en': 'Searching...',
+      'es': 'Buscando...',
+      'it': 'Ricerca...',
+      'de': 'Suche...'
     };
     return labels[lang] || labels.fr;
   }

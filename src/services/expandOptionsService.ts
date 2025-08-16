@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { IBreakdownItem, IDecision } from '@/types/decision';
+import { I18nService } from './i18nService';
 
 export const generateMoreOptions = async (
   decision: IDecision,
@@ -31,17 +32,18 @@ export const generateMoreOptions = async (
 };
 
 export const generateOptionSearchLinks = (option: string, dilemma: string, category?: string): Array<{title: string, url: string}> => {
+  const currentLanguage = I18nService.getCurrentLanguage();
   const searchQuery = encodeURIComponent(`${option} ${category || ''}`);
   const comparisonQuery = encodeURIComponent(`${option} vs alternatives comparison`);
   
   const links = [
     {
-      title: `Rechercher "${option}"`,
-      url: `https://www.google.fr/search?q=${searchQuery}`
+      title: `${I18nService.getSearchLabel(currentLanguage)} "${option}"`,
+      url: I18nService.buildGoogleWebUrl(`${option} ${category || ''}`, currentLanguage)
     },
     {
-      title: `Comparer "${option}"`,
-      url: `https://www.google.fr/search?q=${comparisonQuery}`
+      title: `${I18nService.getCompareLabel(currentLanguage)} "${option}"`,
+      url: I18nService.buildGoogleWebUrl(`${option} vs alternatives comparison`, currentLanguage)
     }
   ];
 
@@ -50,19 +52,39 @@ export const generateOptionSearchLinks = (option: string, dilemma: string, categ
     const categoryLower = category.toLowerCase();
     
     if (['tech', 'technologie'].includes(categoryLower)) {
+      const techLabel = currentLanguage === 'fr' ? 'Voir sur TechCrunch' :
+                       currentLanguage === 'es' ? 'Ver en TechCrunch' :
+                       currentLanguage === 'it' ? 'Vedi su TechCrunch' :
+                       currentLanguage === 'de' ? 'Auf TechCrunch ansehen' :
+                       'View on TechCrunch';
       links.push({
-        title: 'Voir sur TechCrunch',
-        url: `https://www.google.fr/search?q=${searchQuery}+site:techcrunch.com`
+        title: techLabel,
+        url: I18nService.buildGoogleWebUrl(`${option} site:techcrunch.com`, currentLanguage)
       });
     } else if (['travel', 'voyages'].includes(categoryLower)) {
+      const tripAdvisorDomain = currentLanguage === 'fr' ? 'tripadvisor.fr' :
+                               currentLanguage === 'es' ? 'tripadvisor.es' :
+                               currentLanguage === 'it' ? 'tripadvisor.it' :
+                               currentLanguage === 'de' ? 'tripadvisor.de' :
+                               'tripadvisor.com';
+      const tripLabel = currentLanguage === 'fr' ? 'Voir sur TripAdvisor' :
+                       currentLanguage === 'es' ? 'Ver en TripAdvisor' :
+                       currentLanguage === 'it' ? 'Vedi su TripAdvisor' :
+                       currentLanguage === 'de' ? 'Auf TripAdvisor ansehen' :
+                       'View on TripAdvisor';
       links.push({
-        title: 'Voir sur TripAdvisor',
-        url: `https://www.google.fr/search?q=${searchQuery}+site:tripadvisor.fr`
+        title: tripLabel,
+        url: I18nService.buildGoogleWebUrl(`${option} site:${tripAdvisorDomain}`, currentLanguage)
       });
     } else if (['finance'].includes(categoryLower)) {
+      const priceLabel = currentLanguage === 'fr' ? 'Comparer les prix' :
+                        currentLanguage === 'es' ? 'Comparar precios' :
+                        currentLanguage === 'it' ? 'Confronta i prezzi' :
+                        currentLanguage === 'de' ? 'Preise vergleichen' :
+                        'Compare prices';
       links.push({
-        title: 'Comparer les prix',
-        url: `https://www.google.fr/search?q=${searchQuery}&tbm=shop`
+        title: priceLabel,
+        url: I18nService.buildGoogleShoppingUrl(option, currentLanguage)
       });
     }
   }

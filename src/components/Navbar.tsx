@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useDecisionMakerContext } from '@/contexts/DecisionMakerContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { WorkspaceSelector } from '@/components/workspace/WorkspaceSelector';
+import { LanguageSelector } from '@/components/LanguageSelector';
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
@@ -80,6 +81,8 @@ const Navbar: React.FC = () => {
         </Link>
         
         <div className="flex items-center gap-2">
+          <LanguageSelector />
+          
           {user ? <>
               {!hasActiveDecision && (
                 <Link to="/templates">

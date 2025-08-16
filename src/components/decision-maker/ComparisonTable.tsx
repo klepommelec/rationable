@@ -19,7 +19,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
 }) => {
   const [actionLinks, setActionLinks] = useState<Record<string, BestLinksResponse | null>>({});
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
-  const detectedLanguage = 'fr'; // Force French for UI labels
+  const detectedLanguage = I18nService.getCurrentLanguage();
   const detectedVertical = dilemma ? I18nService.detectVertical(dilemma) : null;
 
   useEffect(() => {
@@ -96,7 +96,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                         {isLoading ? (
                           <Button variant="secondary" size="sm" disabled className="w-full text-xs">
                             <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                            Recherche...
+                            {I18nService.getSearchingLabel(detectedLanguage)}
                           </Button>
                          ) : optionActionLinks && (optionActionLinks.official || (optionActionLinks.merchants && optionActionLinks.merchants.length > 0)) ? (
                             <div className="flex flex-col gap-2">
@@ -151,9 +151,9 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                               ))}
                            </div>
                          ) : (
-                           <Button variant="secondary" size="sm" disabled className="text-xs max-w-[140px] truncate">
-                             Aucun lien
-                           </Button>
+                            <Button variant="secondary" size="sm" disabled className="text-xs max-w-[140px] truncate">
+                              {I18nService.getNoLinkLabel(detectedLanguage)}
+                            </Button>
                          )}
                       </div>
                     </div>
