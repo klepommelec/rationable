@@ -33,7 +33,7 @@ class FirstResultService {
     const detectedVertical = vertical || I18nService.detectVertical(dilemma + ' ' + optionName);
     
     // 2. Classify action type and extract location context
-    const actionType = this.classifyActionType(optionName, detectedVertical);
+    const actionType = this.classifyActionType(optionName, detectedVertical, dilemma);
     const cityContext = this.extractCityFromDilemma(dilemma);
     
     // 3. Detect brand from option name
@@ -121,7 +121,7 @@ class FirstResultService {
           query: locationBoostQuery,
           language: detectedLanguage,
           vertical: detectedVertical,
-          numResults: 8 // More results to find good merchants
+          numResults: actionType === 'directions' ? 10 : 8 // More results for local searches
         }
       });
 
@@ -815,7 +815,7 @@ class FirstResultService {
       'booking.com', 'expedia', 'hotels.com', 'agoda', 'trivago', 'kayak',
       'airbnb', 'vrbo', 'homeaway',
       
-      // Restaurant booking platforms
+      // Restaurant booking platforms + Review sites (important for local businesses)
       'opentable', 'thefork', 'lafourchette', 'resy', 'yelp',
       'tripadvisor', 'zomato', 'deliveroo', 'ubereats', 'justeat',
       
@@ -825,7 +825,10 @@ class FirstResultService {
       
       // Travel platforms
       'sncf-connect', 'trainline', 'omio', 'flixbus', 'ouibus',
-      'blablacar', 'europcar', 'hertz', 'avis', 'sixt'
+      'blablacar', 'europcar', 'hertz', 'avis', 'sixt',
+      
+      // Google services (for local businesses)
+      'google', 'maps.google'
     ];
     
     return merchantDomains.some(merchant => domain.includes(merchant));
@@ -833,6 +836,11 @@ class FirstResultService {
 
   private scoreMerchant(domain: string, title: string): number {
     let score = 0;
+    
+    // Review/Rating platforms (high priority for local businesses)
+    if (domain.includes('tripadvisor')) score += 15; // Higher than booking for local restaurants
+    if (domain.includes('yelp')) score += 13;
+    if (domain.includes('google')) score += 12; // Google Business listings
     
     // Premium booking platforms
     if (domain.includes('booking.com')) score += 12;
@@ -850,7 +858,6 @@ class FirstResultService {
     if (domain.includes('getyourguide')) score += 9;
     if (domain.includes('expedia')) score += 8;
     if (domain.includes('airbnb')) score += 8;
-    if (domain.includes('tripadvisor')) score += 7;
     
     // Standard merchants
     if (domain.includes('cdiscount')) score += 6;
@@ -862,6 +869,7 @@ class FirstResultService {
     
     // Bonus for title containing relevant keywords
     const lowerTitle = title.toLowerCase();
+    if (lowerTitle.includes('avis') || lowerTitle.includes('review') || lowerTitle.includes('note')) score += 4;
     if (lowerTitle.includes('réserver') || lowerTitle.includes('book')) score += 3;
     if (lowerTitle.includes('prix') || lowerTitle.includes('price')) score += 2;
     if (lowerTitle.includes('acheter') || lowerTitle.includes('buy')) score += 2;
@@ -890,6 +898,7 @@ class FirstResultService {
       'booking': 'Booking',
       'airbnb': 'Airbnb',
       'tripadvisor': 'TripAdvisor',
+      'yelp': 'Yelp',
       'thefork': 'LaFourche',
       'google': 'Google',
       'expedia': 'Expedia',
@@ -957,8 +966,27 @@ class FirstResultService {
     return mainDomain.charAt(0).toUpperCase() + mainDomain.slice(1);
   }
   
-  private classifyActionType(optionName: string, vertical: string | null): 'directions' | 'reserve' | 'buy' {
+  private classifyActionType(optionName: string, vertical: string | null, dilemma?: string): 'directions' | 'reserve' | 'buy' {
     const lowerOption = optionName.toLowerCase();
+    const lowerDilemma = dilemma?.toLowerCase() || '';
+    
+    // Check if there's a city context in the dilemma
+    const hasCityContext = this.extractCityFromDilemma(dilemma || '') !== null;
+    
+    // Local business keywords that indicate physical locations
+    const localBusinessKeywords = [
+      // Food & dining
+      'restaurant', 'café', 'bar', 'bistrot', 'brasserie', 'pizzeria', 'crêperie',
+      'boulangerie', 'pâtisserie', 'deli', 'sandwicherie', 'fast-food', 'food truck',
+      'traiteur', 'glacier', 'salon de thé',
+      // Services & shopping
+      'magasin', 'boutique', 'shop', 'store', 'pharmacie', 'librairie', 'pressing',
+      'coiffeur', 'barbier', 'institut', 'spa', 'garage', 'station-service',
+      // Entertainment & culture  
+      'cinéma', 'théâtre', 'discothèque', 'club', 'casino', 'bowling',
+      // Accommodation
+      'hôtel', 'auberge', 'gîte', 'chambre d\'hôte', 'hostel'
+    ];
     
     // Places/locations that need directions
     const locationKeywords = [
@@ -969,12 +997,33 @@ class FirstResultService {
       'tour', 'tower', 'pont', 'bridge', 'fort', 'bastille', 'citadelle'
     ];
     
+    // If it's a place/location, always directions
     if (locationKeywords.some(keyword => lowerOption.includes(keyword))) {
       return 'directions';
     }
     
-    // Services that need reservations
-    if (vertical === 'dining' || vertical === 'accommodation' || vertical === 'travel') {
+    // If dilemma contains local search terms + city context, likely a local business
+    const localSearchTerms = ['où', 'where', 'dónde', 'dove', 'wo', 'près de', 'near', 'cerca', 'vicino', 'autour'];
+    const hasLocalSearch = localSearchTerms.some(term => lowerDilemma.includes(term));
+    
+    // If it's a dining question with local context, prioritize directions over reservation
+    if (hasCityContext && (hasLocalSearch || lowerDilemma.includes('manger') || lowerDilemma.includes('eat'))) {
+      // Check if the option looks like a local business
+      if (localBusinessKeywords.some(keyword => 
+        lowerOption.includes(keyword) || lowerDilemma.includes(keyword)
+      )) {
+        return 'directions';
+      }
+      
+      // If it's clearly a restaurant/food place with a proper name (not generic)
+      if ((vertical === 'dining' || lowerDilemma.includes('restaurant') || lowerDilemma.includes('sandwich')) && 
+          optionName.length > 3 && !lowerOption.includes('option')) {
+        return 'directions';
+      }
+    }
+    
+    // Services that need reservations (only if not a local search)
+    if (!hasCityContext && (vertical === 'dining' || vertical === 'accommodation' || vertical === 'travel')) {
       return 'reserve';
     }
     
@@ -1028,8 +1077,10 @@ class FirstResultService {
     
     switch (actionType) {
       case 'directions':
-        // Boost map and navigation services for directions
-        if (domain.includes('google') || domain.includes('maps')) bonus += 10;
+        // Boost review/rating sites for local businesses (restaurants, shops, etc.)
+        if (domain.includes('tripadvisor') || domain.includes('yelp')) bonus += 12;
+        if (domain.includes('google')) bonus += 10; // Google Business listings with reviews
+        // Maps services get lower bonus since we already have a dedicated maps button
         break;
         
       case 'reserve':
