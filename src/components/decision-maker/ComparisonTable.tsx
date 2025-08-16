@@ -103,7 +103,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                               {/* Primary button: Based on action type */}
                               {optionActionLinks.actionType === 'directions' && optionActionLinks.maps ? (
                                 <Button
-                                  variant="default"
+                                  variant="secondary"
                                   size="sm"
                                   onClick={() => window.open(optionActionLinks.maps!.url, '_blank')}
                                   className="text-xs max-w-[140px] truncate"
@@ -113,7 +113,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                 </Button>
                               ) : optionActionLinks.official ? (
                                 <Button
-                                   variant="default"
+                                   variant="secondary"
                                    size="sm"
                                    onClick={() => window.open(optionActionLinks.official!.url, '_blank')}
                                    className="text-xs max-w-[140px] truncate"
@@ -123,7 +123,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                  </Button>
                               ) : optionActionLinks.merchants?.[0] ? (
                                 <Button
-                                   variant="default"
+                                   variant="secondary"
                                    size="sm"
                                    onClick={() => window.open(optionActionLinks.merchants?.[0]?.url, '_blank')}
                                    className="text-xs max-w-[140px] truncate"
@@ -140,7 +140,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                               {(optionActionLinks.actionType === 'directions' || optionActionLinks.official ? (optionActionLinks.merchants || []) : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => (
                                  <Button
                                    key={i}
-                                   variant="outline"
+                                   variant="ghost"
                                    size="sm"
                                    onClick={() => window.open(merchant.url, '_blank')}
                                    className="text-xs max-w-[140px] truncate"
