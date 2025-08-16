@@ -69,13 +69,10 @@ const Navbar: React.FC = () => {
           to="/" 
           className="flex items-center gap-2 mr-auto hover:underline transition-all duration-200"
           onClick={(e) => {
-            // Toujours nettoyer la session quand on clique sur le logo
-            if (currentDecision && clearSession) {
-              e.preventDefault();
-              clearSession();
-              // Naviguer vers la page d'accueil après avoir nettoyé
-              navigate('/');
-            }
+            // TOUJOURS nettoyer la session quand on clique sur le logo
+            e.preventDefault();
+            clearSession();
+            navigate('/');
           }}
         >
           <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-8 w-8 rounded-none " />
