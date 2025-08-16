@@ -180,7 +180,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
               </p>
               
               {/* 5ème niveau: Date */}
-              <div className="pt-1">
+              <div className="pt-3">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <p className="text-xs text-muted-foreground cursor-help">
