@@ -13,7 +13,7 @@ import { ExternalLink, Lightbulb, CheckCircle, ShoppingBag, Loader2, Navigation 
 import { ExpandableText } from '@/components/ExpandableText';
 import { firstResultService, BestLinksResponse } from '@/services/firstResultService';
 import { I18nService } from '@/services/i18nService';
-import { getFaviconUrl } from '@/utils/favicon';
+import { MerchantLogo } from '@/components/MerchantLogo';
 interface RecommendationCardProps {
   result: IResult;
   dilemma: string;
@@ -160,16 +160,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                         size="sm"
                         onClick={() => window.open(actionLinks.official!.url, '_blank')}
                       >
-                        <img 
-                          src={getFaviconUrl(actionLinks.official!.url)} 
-                          alt="" 
-                          className="h-4 w-4 mr-2"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextElementSibling?.classList?.remove('hidden');
-                          }}
-                        />
-                        <ShoppingBag className="h-4 w-4 mr-2 hidden" />
+                        <MerchantLogo url={actionLinks.official!.url} size={18} className="mr-2" />
                         {I18nService.getOfficialSiteLabel(detectedLanguage)}
                       </Button>
                     ) : actionLinks.merchants[0] ? (
@@ -178,16 +169,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                          size="sm"
                          onClick={() => window.open(actionLinks.merchants[0].url, '_blank')}
                        >
-                         <img 
-                           src={getFaviconUrl(actionLinks.merchants[0].url)} 
-                           alt="" 
-                           className="h-4 w-4 mr-2"
-                           onError={(e) => {
-                             e.currentTarget.style.display = 'none';
-                             e.currentTarget.nextElementSibling?.classList?.remove('hidden');
-                           }}
-                         />
-                         <ShoppingBag className="h-4 w-4 mr-2 hidden" />
+                         <MerchantLogo url={actionLinks.merchants[0].url} size={18} className="mr-2" />
                          {actionLinks.actionType === 'reserve' ? 
                            I18nService.getReserveLabel(detectedLanguage) :
                            firstResultService.getActionVerb(detectedVertical, detectedLanguage)
@@ -217,17 +199,10 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                           size="sm"
                           onClick={() => window.open(merchant.url, '_blank')}
                           className="min-w-[120px]"
-                        >
-                          <img 
-                            src={getFaviconUrl(merchant.url)} 
-                            alt="" 
-                            className="h-4 w-4 mr-2"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                          {firstResultService.getDomainLabel(merchant.domain)}
-                        </Button>
+                         >
+                           <MerchantLogo url={merchant.url} size={18} className="mr-2" />
+                           {firstResultService.getDomainLabel(merchant.domain)}
+                         </Button>
                      ))}
                   </div>
                 ) : null}
