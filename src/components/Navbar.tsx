@@ -91,9 +91,6 @@ const Navbar: React.FC = () => {
                 </Button>
               </Link>
               
-              {/* Bouton partager dans la navbar pour les décisions en cours */}
-              {currentDecision && <ShareButton decision={currentDecision} />}
-              
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="flex items-center gap-2">
@@ -128,6 +125,9 @@ const Navbar: React.FC = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              
+              {/* Bouton partager en dernier pour les décisions en cours */}
+              {currentDecision && <ShareButton decision={currentDecision} />}
             </> : <Link to="/auth">
               <Button variant="default" size="sm">
                 Se connecter
