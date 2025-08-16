@@ -52,9 +52,8 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
 
   // Combine all sources for comprehensive display
   const getAllSources = () => {
-    const sources = [
+    const sources: (string | { url: string; title?: string })[] = [
       ...(result.realTimeData?.sources || []),
-      ...(result.infoLinks?.map(link => ({ url: link.url, title: link.title })) || []),
       ...(result.workspaceData?.documentSources || [])
     ];
     

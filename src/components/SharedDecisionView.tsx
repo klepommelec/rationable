@@ -207,45 +207,24 @@ const SharedDecisionView: React.FC = () => {
       )}
 
       {/* Links */}
-      {((decision.result.infoLinks && decision.result.infoLinks.length > 0) || 
-        (decision.result.shoppingLinks && decision.result.shoppingLinks.length > 0)) && (
+      {decision.result.shoppingLinks && decision.result.shoppingLinks.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Liens utiles</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-2 gap-6">
-              {decision.result.infoLinks && decision.result.infoLinks.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-3">📚 Ressources d'information</h4>
-                  <div className="space-y-2">
-                    {decision.result.infoLinks.map((link, index) => (
-                      <ValidatedLink
-                        key={index}
-                        link={link}
-                        fallbackSearchQuery={decision.dilemma}
-                        className="block p-2 rounded border hover:bg-muted text-sm"
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {decision.result.shoppingLinks && decision.result.shoppingLinks.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-3">🛒 Liens d'achat</h4>
-                  <div className="space-y-2">
-                    {decision.result.shoppingLinks.map((link, index) => (
-                      <ValidatedLink
-                        key={index}
-                        link={link}
-                        fallbackSearchQuery={`acheter ${decision.result.recommendation}`}
-                        className="block p-2 rounded border hover:bg-muted text-sm"
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
+            <div>
+              <h4 className="font-medium mb-3">🛒 Liens d'achat</h4>
+              <div className="space-y-2">
+                {decision.result.shoppingLinks.map((link, index) => (
+                  <ValidatedLink
+                    key={index}
+                    link={link}
+                    fallbackSearchQuery={`acheter ${decision.result.recommendation}`}
+                    className="block p-2 rounded border hover:bg-muted text-sm"
+                  />
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -64,7 +64,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
       />
       
       <UsefulLinks 
-        infoLinks={result.infoLinks}
         shoppingLinks={result.shoppingLinks}
         socialContent={result.socialContent}
         dilemma={dilemma}
