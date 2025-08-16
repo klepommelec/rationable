@@ -166,10 +166,9 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
     }
   };
 
-  const hasContent = (verifiedShoppingLinks.length > 0) || 
-                    (socialContent?.youtubeVideos && socialContent.youtubeVideos.length > 0);
+  const hasContent = (socialContent?.youtubeVideos && socialContent.youtubeVideos.length > 0);
   
-  const shouldShowFallbackSearch = verifiedShoppingLinks.length === 0;
+  const shouldShowFallbackSearch = false; // Disabled since actions are now in RecommendationCard
   
   if (!hasContent && !shouldShowFallbackSearch) {
     return null;
@@ -214,57 +213,6 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
           </div>
         )}
 
-        {/* Liens d'achat */}
-        {verifiedShoppingLinks.length > 0 && (
-          <div className="space-y-3">
-            <h4 
-              className="font-medium text-sm sm:text-base text-gray-800 dark:text-gray-200 flex items-center gap-2"
-              id="shopping-links-heading"
-            >
-              <span className="text-base sm:text-lg" aria-hidden="true">
-                {detectedVertical === 'dining' ? '🍽️' : 
-                 detectedVertical === 'accommodation' ? '🏨' : 
-                 detectedVertical === 'travel' ? '✈️' : '🛒'}
-              </span>
-              {detectedVertical === 'dining' ? (
-                currentLanguage === 'fr' ? 'Réservations' : 
-                currentLanguage === 'es' ? 'Reservas' : 
-                currentLanguage === 'it' ? 'Prenotazioni' : 
-                currentLanguage === 'de' ? 'Reservierungen' : 'Reservations'
-              ) : detectedVertical === 'accommodation' ? (
-                currentLanguage === 'fr' ? 'Hébergements' : 
-                currentLanguage === 'es' ? 'Alojamientos' : 
-                currentLanguage === 'it' ? 'Alloggi' : 
-                currentLanguage === 'de' ? 'Unterkünfte' : 'Accommodations'
-              ) : (
-                currentLanguage === 'fr' ? 'Liens d\'achat' : 
-                currentLanguage === 'es' ? 'Enlaces de compra' : 
-                currentLanguage === 'it' ? 'Link per acquisti' : 
-                currentLanguage === 'de' ? 'Einkaufslinks' : 'Shopping Links'
-              )}
-            </h4>
-            <div 
-              className="space-y-2"
-              role="list"
-              aria-labelledby="shopping-links-heading"
-            >
-              {verifiedShoppingLinks.map((link, index) => (
-                <div 
-                  key={index}
-                  role="listitem"
-                  className="group"
-                >
-                  <ValidatedLink 
-                    link={link} 
-                    fallbackSearchQuery={I18nService.buildVerticalQuery(recommendation || '', detectedVertical, currentLanguage)} 
-                    contextText={contextText}
-                    className="flex items-center gap-2 p-2 sm:p-3 rounded-lg border border-green-200 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-300 dark:hover:border-green-600 text-xs sm:text-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md group-focus-within:ring-2 group-focus-within:ring-green-500 group-focus-within:ring-offset-2" 
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Fallback search when no shopping links */}
         {shouldShowFallbackSearch && recommendation && (
