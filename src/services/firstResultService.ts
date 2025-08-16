@@ -130,12 +130,26 @@ class FirstResultService {
       const verified = await LinkVerifierService.verifyLinks(merchantsToVerify);
       console.log(`✅ Merchant verification complete:`, verified.summary);
 
-      // 9. Build final merchant list (max 3)
-      const finalMerchants = verified.validLinks.slice(0, 3).map(link => ({
-        url: link.url,
-        title: link.title,
-        domain: this.extractDomain(link.url)
-      }));
+      // 9. Build final merchant list (max 3) - Use fallback if verification fails
+      let finalMerchants;
+      if (verified.validLinks.length > 0) {
+        // Use verified links
+        finalMerchants = verified.validLinks.slice(0, 3).map(link => ({
+          url: link.url,
+          title: link.title,
+          domain: this.extractDomain(link.url)
+        }));
+      } else if (merchants.length > 0) {
+        // Fallback: use unverified but prioritized merchants
+        console.log(`⚠️ Link verification failed, using unverified merchants as fallback`);
+        finalMerchants = merchants.slice(0, 3).map(merchant => ({
+          url: merchant.url,
+          title: merchant.title,
+          domain: this.extractDomain(merchant.url)
+        }));
+      } else {
+        finalMerchants = [];
+      }
 
       const result = {
         official: officialResult,

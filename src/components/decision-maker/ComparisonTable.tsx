@@ -120,49 +120,49 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                         <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                         Recherche...
                       </Button>
-                    ) : optionActionLinks ? (
-                      <div className="flex flex-wrap gap-2">
-                        {/* Primary button: Official site or first merchant */}
-                        {optionActionLinks.official ? (
-                          <Button
-                            variant="default"
-                            size="sm"
-                            onClick={() => window.open(optionActionLinks.official!.url, '_blank')}
-                            className="text-xs"
-                          >
-                            <ShoppingBag className="h-3 w-3 mr-1" />
-                            {I18nService.getOfficialSiteLabel(detectedLanguage)}
-                          </Button>
-                        ) : optionActionLinks.merchants?.[0] ? (
-                          <Button
-                            variant="default"
-                            size="sm"
-                            onClick={() => window.open(optionActionLinks.merchants?.[0]?.url, '_blank')}
-                            className="text-xs"
-                          >
-                            <ShoppingBag className="h-3 w-3 mr-1" />
-                            {firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)}
-                          </Button>
-                        ) : null}
-                        
-                        {/* Secondary buttons: Merchants */}
-                        {(optionActionLinks.official ? (optionActionLinks.merchants || []) : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => (
-                          <Button
-                            key={i}
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(merchant.url, '_blank')}
-                            className="text-xs"
-                          >
-                            {firstResultService.getDomainLabel(merchant.domain)}
-                          </Button>
-                        ))}
-                      </div>
-                    ) : (
-                      <Button variant="secondary" size="sm" disabled className="text-xs">
-                        Aucun lien
-                      </Button>
-                    )}
+                     ) : optionActionLinks && (optionActionLinks.official || (optionActionLinks.merchants && optionActionLinks.merchants.length > 0)) ? (
+                       <div className="flex flex-wrap gap-2">
+                         {/* Primary button: Official site or first merchant */}
+                         {optionActionLinks.official ? (
+                           <Button
+                             variant="default"
+                             size="sm"
+                             onClick={() => window.open(optionActionLinks.official!.url, '_blank')}
+                             className="text-xs"
+                           >
+                             <ShoppingBag className="h-3 w-3 mr-1" />
+                             {I18nService.getOfficialSiteLabel(detectedLanguage)}
+                           </Button>
+                         ) : optionActionLinks.merchants?.[0] ? (
+                           <Button
+                             variant="default"
+                             size="sm"
+                             onClick={() => window.open(optionActionLinks.merchants?.[0]?.url, '_blank')}
+                             className="text-xs"
+                           >
+                             <ShoppingBag className="h-3 w-3 mr-1" />
+                             {firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)}
+                           </Button>
+                         ) : null}
+                         
+                         {/* Secondary buttons: Merchants */}
+                         {(optionActionLinks.official ? (optionActionLinks.merchants || []) : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => (
+                           <Button
+                             key={i}
+                             variant="outline"
+                             size="sm"
+                             onClick={() => window.open(merchant.url, '_blank')}
+                             className="text-xs"
+                           >
+                             {firstResultService.getDomainLabel(merchant.domain)}
+                           </Button>
+                         ))}
+                       </div>
+                     ) : (
+                       <Button variant="secondary" size="sm" disabled className="text-xs">
+                         Aucun lien
+                       </Button>
+                     )}
                   </TableCell>
                   <TableCell className="align-top">
                     <div className="space-y-1">
