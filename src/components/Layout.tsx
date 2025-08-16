@@ -18,15 +18,13 @@ const Layout = () => {
     user
   } = useAuth();
 
-  // Détecter une décision en cours : soit une décision sauvée, soit un processus en cours
-  const currentDecision = location.pathname === '/' && user ? (
-    // 1. Décision sauvée avec ID
-    getCurrentDecision() || 
-    // 2. Analyse en cours ou terminée (result existe)
-    (result ? { result, dilemma: dilemma || 'Décision en cours' } : null) ||
-    // 3. Processus démarré (pas idle et dilemma existe) 
-    (analysisStep !== 'idle' && dilemma ? { dilemma, result: null } : null)
-  ) : null;
+  // Simple : y'a-t-il une décision/analyse en cours ?
+  const hasActiveDecision = location.pathname === '/' && user && (
+    result !== null || analysisStep !== 'idle' || dilemma.trim() !== ''
+  );
+
+  // Pour compatibilité avec ShareButton, créer un objet simple si nécessaire
+  const currentDecision = hasActiveDecision ? { result, dilemma: dilemma || 'Décision en cours' } : null;
 
   // Check if we're on the home page
   const isHomePage = location.pathname === '/';
