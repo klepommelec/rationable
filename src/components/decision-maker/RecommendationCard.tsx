@@ -128,18 +128,30 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                       </Button>
                     ) : null}
                     
-                    {/* Secondary buttons: Merchants */}
-                    {(actionLinks.official ? actionLinks.merchants : actionLinks.merchants.slice(1)).slice(0, 2).map((merchant, i) => (
-                      <Button
-                        key={i}
-                        variant="outline"
-                        size="lg"
-                        onClick={() => window.open(merchant.url, '_blank')}
-                        className="min-w-[120px]"
-                      >
-                        {firstResultService.getDomainLabel(merchant.domain)}
-                      </Button>
-                    ))}
+                     {/* Secondary buttons: Merchants (excluding already shown ones) */}
+                     {actionLinks.merchants
+                       .filter((merchant, index) => {
+                         // If we have an official site, show all merchants
+                         if (actionLinks.official) return true;
+                         // If no official site, skip the first merchant (already shown as primary)
+                         return index > 0;
+                       })
+                       .filter((merchant, index, filteredArray) => {
+                         // Remove duplicates based on domain
+                         return filteredArray.findIndex(m => m.domain === merchant.domain) === index;
+                       })
+                       .slice(0, 2)
+                       .map((merchant, i) => (
+                       <Button
+                         key={`merchant-${merchant.domain}-${i}`}
+                         variant="outline"
+                         size="lg"
+                         onClick={() => window.open(merchant.url, '_blank')}
+                         className="min-w-[120px]"
+                       >
+                         {firstResultService.getDomainLabel(merchant.domain)}
+                       </Button>
+                     ))}
                   </div>
                 ) : null}
               </div>
