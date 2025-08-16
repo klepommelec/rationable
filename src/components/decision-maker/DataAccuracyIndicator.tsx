@@ -54,7 +54,8 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
   const getAllSources = () => {
     const sources: (string | { url: string; title?: string })[] = [
       ...(result.realTimeData?.sources || []),
-      ...(result.workspaceData?.documentSources || [])
+      ...(result.workspaceData?.documentSources || []),
+      ...(result.infoLinks?.map(link => ({ url: link.url, title: link.title })) || [])
     ];
     
     // Deduplicate by URL
