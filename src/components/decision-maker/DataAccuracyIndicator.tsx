@@ -74,14 +74,15 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
     <TooltipProvider>
       <div className={`flex flex-col gap-2 ${className}`}>
         <Collapsible open={isSourcesExpanded} onOpenChange={setIsSourcesExpanded}>
-          {/* Creation/Update Info and Sources Badge on same line */}
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <span>Créé le</span>
+          {/* Layout adaptatif : vertical sur mobile, horizontal sur desktop */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+            {/* Informations de création/mise à jour */}
+            <div className="flex flex-col gap-1 text-xs text-muted-foreground min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
+                <span className="flex-shrink-0">Créé le</span>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className="underline decoration-dotted cursor-help">
+                    <span className="underline decoration-dotted cursor-help flex-shrink-0">
                       {formatDateOnly(creationTimestamp)}
                     </span>
                   </TooltipTrigger>
@@ -89,13 +90,14 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                     <p>Créé le {formatDateTime(creationTimestamp)} par {author}</p>
                   </TooltipContent>
                 </Tooltip>
-                <span>par {author}</span>
+                <span className="flex-shrink-0">par</span>
+                <span className="truncate min-w-0" title={author}>{author}</span>
                 {hasUpdates && (
                   <>
-                    <span>, mis à jour le</span>
+                    <span className="flex-shrink-0">, mis à jour le</span>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="underline decoration-dotted cursor-help">
+                        <span className="underline decoration-dotted cursor-help flex-shrink-0">
                           {formatDateOnly(updateTimestamp)}
                         </span>
                       </TooltipTrigger>
@@ -108,21 +110,23 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
               </div>
             </div>
 
-            {/* Sources Badge - Aligned to the right */}
-            <CollapsibleTrigger asChild>
-              <Badge 
-                variant="secondary" 
-                className="flex-shrink-0 cursor-pointer flex items-center gap-2 hover:bg-muted"
-              >
-                <Database className="h-3 w-3" />
-                {allSources.length} source{allSources.length > 1 ? 's' : ''}
-                {isSourcesExpanded ? (
-                  <ChevronUp className="h-3 w-3" />
-                ) : (
-                  <ChevronDown className="h-3 w-3" />
-                )}
-              </Badge>
-            </CollapsibleTrigger>
+            {/* Badge Sources - Centré sur mobile, aligné à droite sur desktop */}
+            <div className="flex justify-center sm:justify-end">
+              <CollapsibleTrigger asChild>
+                <Badge 
+                  variant="secondary" 
+                  className="flex-shrink-0 cursor-pointer flex items-center gap-2 hover:bg-muted"
+                >
+                  <Database className="h-3 w-3" />
+                  {allSources.length} source{allSources.length > 1 ? 's' : ''}
+                  {isSourcesExpanded ? (
+                    <ChevronUp className="h-3 w-3" />
+                  ) : (
+                    <ChevronDown className="h-3 w-3" />
+                  )}
+                </Badge>
+              </CollapsibleTrigger>
+            </div>
           </div>
 
           {/* Sources Content - Below when expanded */}
