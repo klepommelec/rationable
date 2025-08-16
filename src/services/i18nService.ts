@@ -408,27 +408,37 @@ export class I18nService {
     return {
       fr: {
         automotive: ['voiture', 'auto', 'véhicule', 'automobile', 'concessionnaire', 'garage', 'occasion', 'neuf', 'hybride', 'électrique', 'diesel', 'essence'],
-        travel: ['voyage', 'vacances', 'hôtel', 'vol', 'avion', 'train', 'réservation', 'séjour', 'destination', 'tourisme'],
+        accommodation: ['hôtel', 'hébergement', 'chambre', 'suite', 'resort', 'bed', 'breakfast', 'airbnb', 'gîte', 'camping'],
+        travel: ['voyage', 'vacances', 'vol', 'avion', 'train', 'transport', 'billet', 'séjour', 'destination', 'tourisme'],
+        dining: ['restaurant', 'réserver', 'réservation', 'table', 'dîner', 'déjeuner', 'cuisine', 'gastronomie', 'bistrot', 'brasserie', 'menu'],
         software: ['logiciel', 'application', 'app', 'programme', 'télécharger', 'installer', 'licence', 'abonnement']
       },
       en: {
         automotive: ['car', 'auto', 'vehicle', 'automobile', 'dealer', 'garage', 'used', 'new', 'hybrid', 'electric', 'diesel', 'gasoline'],
-        travel: ['travel', 'vacation', 'hotel', 'flight', 'plane', 'train', 'booking', 'stay', 'destination', 'tourism'],
+        accommodation: ['hotel', 'accommodation', 'room', 'suite', 'resort', 'bed', 'breakfast', 'airbnb', 'lodge', 'camping'],
+        travel: ['travel', 'vacation', 'flight', 'plane', 'train', 'transport', 'ticket', 'stay', 'destination', 'tourism'],
+        dining: ['restaurant', 'book', 'reservation', 'table', 'dinner', 'lunch', 'cuisine', 'gastronomy', 'bistro', 'brasserie', 'menu'],
         software: ['software', 'application', 'app', 'program', 'download', 'install', 'license', 'subscription']
       },
       es: {
         automotive: ['coche', 'auto', 'vehículo', 'automóvil', 'concesionario', 'garaje', 'usado', 'nuevo', 'híbrido', 'eléctrico', 'diesel', 'gasolina'],
-        travel: ['viaje', 'vacaciones', 'hotel', 'vuelo', 'avión', 'tren', 'reserva', 'estancia', 'destino', 'turismo'],
+        accommodation: ['hotel', 'alojamiento', 'habitación', 'suite', 'resort', 'bed', 'breakfast', 'airbnb', 'posada', 'camping'],
+        travel: ['viaje', 'vacaciones', 'vuelo', 'avión', 'tren', 'transporte', 'billete', 'estancia', 'destino', 'turismo'],
+        dining: ['restaurante', 'reservar', 'reserva', 'mesa', 'cena', 'almuerzo', 'cocina', 'gastronomía', 'bistró', 'brasería', 'menú'],
         software: ['software', 'aplicación', 'app', 'programa', 'descargar', 'instalar', 'licencia', 'suscripción']
       },
       it: {
         automotive: ['auto', 'automobile', 'veicolo', 'concessionario', 'garage', 'usato', 'nuovo', 'ibrido', 'elettrico', 'diesel', 'benzina'],
-        travel: ['viaggio', 'vacanza', 'hotel', 'volo', 'aereo', 'treno', 'prenotazione', 'soggiorno', 'destinazione', 'turismo'],
+        accommodation: ['hotel', 'alloggio', 'camera', 'suite', 'resort', 'bed', 'breakfast', 'airbnb', 'locanda', 'camping'],
+        travel: ['viaggio', 'vacanza', 'volo', 'aereo', 'treno', 'trasporto', 'biglietto', 'soggiorno', 'destinazione', 'turismo'],
+        dining: ['ristorante', 'prenotare', 'prenotazione', 'tavolo', 'cena', 'pranzo', 'cucina', 'gastronomia', 'bistrot', 'brasseria', 'menu'],
         software: ['software', 'applicazione', 'app', 'programma', 'scaricare', 'installare', 'licenza', 'abbonamento']
       },
       de: {
         automotive: ['auto', 'wagen', 'fahrzeug', 'automobil', 'händler', 'garage', 'gebraucht', 'neu', 'hybrid', 'elektrisch', 'diesel', 'benzin'],
-        travel: ['reise', 'urlaub', 'hotel', 'flug', 'flugzeug', 'zug', 'buchung', 'aufenthalt', 'reiseziel', 'tourismus'],
+        accommodation: ['hotel', 'unterkunft', 'zimmer', 'suite', 'resort', 'bed', 'breakfast', 'airbnb', 'pension', 'camping'],
+        travel: ['reise', 'urlaub', 'flug', 'flugzeug', 'zug', 'transport', 'ticket', 'aufenthalt', 'reiseziel', 'tourismus'],
+        dining: ['restaurant', 'reservieren', 'reservierung', 'tisch', 'abendessen', 'mittagessen', 'küche', 'gastronomie', 'bistro', 'brasserie', 'speisekarte'],
         software: ['software', 'anwendung', 'app', 'programm', 'herunterladen', 'installieren', 'lizenz', 'abonnement']
       }
     };
@@ -439,12 +449,85 @@ export class I18nService {
     const verticalKeywords = this.getVerticalKeywords()[lang];
     const lowerText = text.toLowerCase();
     
+    // Scoring system for better accuracy
+    const scores: Record<string, number> = {};
+    
     for (const [vertical, keywords] of Object.entries(verticalKeywords)) {
-      if (keywords.some(keyword => lowerText.includes(keyword))) {
-        return vertical;
+      scores[vertical] = 0;
+      for (const keyword of keywords) {
+        const regex = new RegExp(`\\b${keyword.toLowerCase()}\\b`, 'gi');
+        const matches = lowerText.match(regex);
+        if (matches) {
+          scores[vertical] += matches.length;
+        }
       }
     }
-    return null;
+    
+    // Return the vertical with the highest score, or null if no matches
+    const maxScore = Math.max(...Object.values(scores));
+    if (maxScore === 0) return null;
+    
+    return Object.keys(scores).find(vertical => scores[vertical] === maxScore) || null;
+  }
+
+  static buildVerticalQuery(text: string, vertical: string | null, language?: SupportedLanguage): string {
+    const lang = language || this.currentLanguage;
+    
+    if (!vertical) return text;
+    
+    const verticalPrefixes = {
+      fr: {
+        dining: 'restaurant',
+        accommodation: 'hôtel',
+        travel: 'voyage',
+        automotive: 'voiture',
+        software: 'logiciel'
+      },
+      en: {
+        dining: 'restaurant',
+        accommodation: 'hotel',
+        travel: 'travel',
+        automotive: 'car',
+        software: 'software'
+      },
+      es: {
+        dining: 'restaurante',
+        accommodation: 'hotel',
+        travel: 'viaje',
+        automotive: 'coche',
+        software: 'software'
+      },
+      it: {
+        dining: 'ristorante',
+        accommodation: 'hotel',
+        travel: 'viaggio',
+        automotive: 'auto',
+        software: 'software'
+      },
+      de: {
+        dining: 'restaurant',
+        accommodation: 'hotel',
+        travel: 'reise',
+        automotive: 'auto',
+        software: 'software'
+      }
+    };
+    
+    const prefix = verticalPrefixes[lang]?.[vertical as keyof typeof verticalPrefixes['fr']];
+    return prefix ? `${prefix} ${text}` : text;
+  }
+
+  static buildGoogleMapsSearchUrl(query: string, language?: SupportedLanguage): string {
+    const config = this.getShoppingConfig(language);
+    const encodedQuery = encodeURIComponent(query);
+    return `https://www.google.${config.googleTLD}/maps/search/${encodedQuery}/@0,0,15z?hl=${config.uiLanguage}&gl=${config.countryCode}`;
+  }
+
+  static buildMerchantSearchUrl(merchantDomain: string, query: string, language?: SupportedLanguage): string {
+    const config = this.getShoppingConfig(language);
+    const searchQuery = `site:${merchantDomain} ${query}`;
+    const encodedQuery = encodeURIComponent(searchQuery);
+    return `https://www.google.${config.googleTLD}/search?q=${encodedQuery}&hl=${config.uiLanguage}&gl=${config.countryCode}`;
   }
 
   static isAutomotiveRelated(text: string, language?: SupportedLanguage): boolean {
@@ -453,6 +536,14 @@ export class I18nService {
 
   static isTravelRelated(text: string, language?: SupportedLanguage): boolean {
     return this.detectVertical(text, language) === 'travel';
+  }
+
+  static isAccommodationRelated(text: string, language?: SupportedLanguage): boolean {
+    return this.detectVertical(text, language) === 'accommodation';
+  }
+
+  static isDiningRelated(text: string, language?: SupportedLanguage): boolean {
+    return this.detectVertical(text, language) === 'dining';
   }
 
   static isSoftwareRelated(text: string, language?: SupportedLanguage): boolean {

@@ -79,11 +79,14 @@ RÈGLES CRITIQUES POUR LES LIENS D'ACHAT (shoppingLinks):
   3. 1 option d'occasion certifiée (si pertinent)
 - URLs RÉELLES et FONCTIONNELLES uniquement - pas d'exemples
 - Si un produit n'est plus vendu neuf, omettre ce type de lien
-- Adapter au contexte par verticale:
+- ADAPTER PRÉCISÉMENT au contexte par verticale:
+  * RESTAURANTS/DINING: 1 site officiel restaurant + 1-2 plateformes de réservation (thefork.fr, opentable.fr, etc.) - JAMAIS de liens hôtels
+  * HÉBERGEMENT: 1 site officiel hôtel + 1-2 plateformes de réservation (booking.com, expedia.fr, etc.) - JAMAIS de liens restaurants
   * AUTOMOBILES: 1 lien officiel constructeur + 1-2 concessionnaires/revendeurs + 1-2 occasions certifiées (lacentrale.fr, autoscout24.fr, etc.)
-  * VOYAGES: 1 lien officiel compagnie/hôtel + 1-2 plateformes de réservation (booking.com, expedia.fr, etc.)
-  * ÉLECTRONIQUE: 1 lien constructeur + 1-2 revendeurs tech certifiés + 1-2 marketplaces fiables
+  * VOYAGES/TRANSPORT: 1 lien officiel compagnie + 1-2 plateformes de réservation transport (trainline.com, etc.)
+  * ÉLECTRONIQUE: 1 lien constructeur + 1-2 revendeurs tech certifiés + éviter fnac.com (URLs souvent cassées)
   * LOGICIELS: 1 lien éditeur officiel + 1-2 revendeurs de licences certifiés
+- VÉRIFICATION DE COHÉRENCE: Si la question porte sur un restaurant, NE JAMAIS proposer de liens hôtels ou inversement
 - Format titre: "Nom exact du produit/service chez [Revendeur]"
 - Description: "Page officielle" ou "Revendeur certifié" ou "Marché d'occasion" ou "Plateforme de réservation"
 - Respecter la langue de l'utilisateur dans les titres et descriptions

@@ -7,8 +7,31 @@ import { I18nService } from '@/services/i18nService';
 interface ValidatedLinkProps {
   link: ILink;
   fallbackSearchQuery?: string;
+  contextText?: string;
   className?: string;
 }
+
+// Vertical-specific merchant domains
+const VERTICAL_MERCHANT_DOMAINS = {
+  // Dining/Restaurant platforms
+  dining: {
+    global: ['opentable.com', 'resy.com', 'bookatable.com'],
+    fr: ['thefork.fr', 'lafourchette.com', 'opentable.fr', 'zomato.com'],
+    en: ['opentable.com', 'resy.com', 'bookatable.com', 'zomato.com'],
+    es: ['eltenedor.es', 'opentable.es', 'zomato.com'],
+    it: ['thefork.it', 'opentable.it', 'zomato.com'],
+    de: ['opentable.de', 'bookatable.de', 'zomato.com']
+  },
+  // Accommodation platforms
+  accommodation: {
+    global: ['booking.com', 'expedia.com', 'hotels.com', 'airbnb.com', 'tripadvisor.com'],
+    fr: ['booking.com', 'expedia.fr', 'hotels.com', 'airbnb.fr'],
+    en: ['booking.com', 'expedia.com', 'hotels.com', 'airbnb.com'],
+    es: ['booking.com', 'expedia.es', 'hotels.com', 'airbnb.es'],
+    it: ['booking.com', 'expedia.it', 'hotels.com', 'airbnb.it'],
+    de: ['booking.com', 'expedia.de', 'hotels.com', 'airbnb.de']
+  }
+};
 
 // International merchant domain whitelist by vertical
 const TRUSTED_MERCHANT_DOMAINS = {
@@ -85,7 +108,8 @@ const TRUSTED_MERCHANT_DOMAINS = {
 
 const ValidatedLink: React.FC<ValidatedLinkProps> = ({ 
   link, 
-  fallbackSearchQuery, 
+  fallbackSearchQuery,
+  contextText, 
   className = "text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5" 
 }) => {
   const currentLanguage = I18nService.getCurrentLanguage();
@@ -132,6 +156,29 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
     }
   };
 
+  const isVerticalCompatible = (url: string, vertical: string | null): boolean => {
+    if (!vertical) return true;
+    
+    try {
+      const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
+      const domain = urlObj.hostname.toLowerCase().replace('www.', '');
+      
+      const verticalDomains = VERTICAL_MERCHANT_DOMAINS[vertical as keyof typeof VERTICAL_MERCHANT_DOMAINS];
+      if (!verticalDomains) return true;
+      
+      // Check global and language-specific vertical domains
+      const languageKey = currentLanguage === 'en' ? 'en' : currentLanguage;
+      const relevantDomains = [
+        ...verticalDomains.global,
+        ...(verticalDomains[languageKey as keyof typeof verticalDomains.global] || [])
+      ];
+      
+      return relevantDomains.some(d => domain.includes(d.toLowerCase()));
+    } catch {
+      return true; // Allow invalid URLs to be processed by fallback
+    }
+  };
+
   const generateFallbackUrl = (title: string, query?: string, originalUrl?: string): string => {
     const searchQuery = query || title;
     let finalQuery = searchQuery;
@@ -148,20 +195,38 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
       }
     }
     
-    // Detect vertical category
-    const fullText = `${title} ${query || ''}`;
-    const isAutomotive = I18nService.isAutomotiveRelated(fullText, currentLanguage);
-    const isTravel = I18nService.isTravelRelated(fullText, currentLanguage);
-    const isSoftware = I18nService.isSoftwareRelated(fullText, currentLanguage);
+    // Detect vertical category with context
+    const fullText = `${title} ${query || ''} ${contextText || ''}`;
+    const detectedVertical = I18nService.detectVertical(fullText, currentLanguage);
+    const isAutomotive = detectedVertical === 'automotive';
+    const isDining = detectedVertical === 'dining';
+    const isAccommodation = detectedVertical === 'accommodation';
+    const isTravel = detectedVertical === 'travel';
+    const isSoftware = detectedVertical === 'software';
     const isShoppingRelated = I18nService.isShoppingRelated(fullText, currentLanguage);
     
-    // For site-specific searches, check if domain is a trusted e-commerce merchant
+    // For site-specific searches with known domains
     if (extractedDomain) {
       const isTrustedEcommerce = isTrustedMerchant(`https://${extractedDomain}`);
+      
+      // Special handling for Fnac - use merchant search instead of direct links
+      if (extractedDomain.includes('fnac.')) {
+        return I18nService.buildMerchantSearchUrl(extractedDomain, query || title, currentLanguage);
+      }
+      
       // If it's not a trusted e-commerce domain, use Web search (not Shopping)
       if (!isTrustedEcommerce) {
         return I18nService.buildGoogleWebUrl(finalQuery, currentLanguage);
       }
+    }
+    
+    // Vertical-specific fallback logic
+    if (isDining) {
+      return I18nService.buildGoogleMapsSearchUrl(I18nService.buildVerticalQuery(finalQuery, 'dining', currentLanguage), currentLanguage);
+    }
+    
+    if (isAccommodation) {
+      return I18nService.buildGoogleWebUrl(I18nService.buildVerticalQuery(finalQuery, 'accommodation', currentLanguage), currentLanguage);
     }
     
     // For specific verticals that work better with Web search
@@ -179,8 +244,18 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
   };
 
   const finalUrl = (() => {
+    const fullText = `${link.title} ${fallbackSearchQuery || ''} ${contextText || ''}`;
+    const detectedVertical = I18nService.detectVertical(fullText, currentLanguage);
+    
     if (isValidUrl(link.url)) {
       const cleanedUrl = cleanUrl(link.url);
+      
+      // Check if link is compatible with the detected vertical
+      if (!isVerticalCompatible(cleanedUrl, detectedVertical)) {
+        console.log(`🔄 Vertical mismatch for ${cleanedUrl}, falling back to search`);
+        return generateFallbackUrl(link.title, fallbackSearchQuery, link.url);
+      }
+      
       // If valid and trusted, use direct link
       if (isTrustedMerchant(cleanedUrl)) {
         return cleanedUrl;
@@ -192,7 +267,35 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
     return generateFallbackUrl(link.title, fallbackSearchQuery);
   })();
 
-  const isSearchUrl = finalUrl.includes('/search');
+  const isSearchUrl = finalUrl.includes('/search') || finalUrl.includes('/maps/search');
+  const fullText = `${link.title} ${fallbackSearchQuery || ''} ${contextText || ''}`;
+  const detectedVertical = I18nService.detectVertical(fullText, currentLanguage);
+  
+  // Context-aware action verbs
+  const getActionVerb = (): string => {
+    if (!isSearchUrl) return link.title;
+    
+    const config = I18nService.getShoppingConfig(currentLanguage);
+    switch (detectedVertical) {
+      case 'dining':
+        return currentLanguage === 'fr' ? 'Réserver' : 
+               currentLanguage === 'es' ? 'Reservar' :
+               currentLanguage === 'it' ? 'Prenotare' :
+               currentLanguage === 'de' ? 'Reservieren' : 'Book';
+      case 'accommodation':
+        return currentLanguage === 'fr' ? 'Réserver' :
+               currentLanguage === 'es' ? 'Reservar' :
+               currentLanguage === 'it' ? 'Prenotare' :
+               currentLanguage === 'de' ? 'Buchen' : 'Book';
+      case 'travel':
+        return currentLanguage === 'fr' ? 'Réserver' :
+               currentLanguage === 'es' ? 'Reservar' :
+               currentLanguage === 'it' ? 'Prenotare' :
+               currentLanguage === 'de' ? 'Buchen' : 'Book';
+      default:
+        return config.buyVerb;
+    }
+  };
 
   return (
     <a 
@@ -200,7 +303,7 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
       target="_blank" 
       rel="noopener noreferrer" 
       className={className}
-      title={isSearchUrl ? `${I18nService.getShoppingConfig(currentLanguage).buyVerb}: ${link.title}` : link.title}
+      title={isSearchUrl ? `${getActionVerb()}: ${link.title}` : link.title}
     >
       <span className="flex items-center gap-2 truncate flex-1 text-gray-700 dark:text-gray-300">
         {isSearchUrl ? <Search className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-blue-500 dark:text-blue-400" aria-hidden="true" /> : <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-blue-500 dark:text-blue-400" aria-hidden="true" />}

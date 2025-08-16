@@ -131,6 +131,9 @@ const DecisionMaker = () => {
       setResult(null);
       // Ne pas vider les critères immédiatement pour éviter les disparitions visuelles
       setEmoji('🤔');
+      
+      // Reset threading ref to prevent new analysis from being incorrectly threaded
+      pendingWriteAnalysisIdRef.current = newId;
       setSelectedCategory(undefined);
       setDilemma(questionDilemma);
 
