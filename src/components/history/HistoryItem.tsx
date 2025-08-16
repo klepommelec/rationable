@@ -71,7 +71,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
             {/* Layout Desktop */}
             <div className="hidden sm:block">
               {/* Titre principal avec emoji et questions de suivi */}
-              <div className="flex items-center gap-2 w-full">
+              <div className="flex items-center gap-1 w-full">
                 <span className="text-lg">{decision.emoji}</span>
                 <p className="font-semibold text-foreground truncate flex-1">
                   {titleOverride || decision.dilemma}
