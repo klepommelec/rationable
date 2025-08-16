@@ -286,13 +286,39 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
     if (isValidUrl(link.url)) {
       const cleanedUrl = cleanUrl(link.url);
       
+      // AGGRESSIVE handling for fragile merchants - force search for deep links
+      try {
+        const urlObj = new URL(cleanedUrl);
+        const domain = urlObj.hostname.toLowerCase().replace('www.', '');
+        const path = urlObj.pathname.toLowerCase();
+        
+        // Force merchant search for fragile domains with deep product links
+        if (domain.includes('fnac.') && (path.includes('/p/') || path.includes('/product/') || path.length > 20)) {
+          console.log(`🔄 Fnac deep link detected, forcing merchant search: ${cleanedUrl}`);
+          return I18nService.buildMerchantSearchUrl(domain, I18nService.sanitizeProductQuery(link.title), currentLanguage);
+        }
+        
+        if (domain.includes('samsung.') && (path.includes('/product/') || path.includes('/p/') || path.length > 20)) {
+          console.log(`🔄 Samsung deep link detected, forcing merchant search: ${cleanedUrl}`);
+          return I18nService.buildMerchantSearchUrl(domain, I18nService.sanitizeProductQuery(link.title), currentLanguage);
+        }
+        
+        // Force merchant search for other e-commerce sites with suspiciously long paths
+        if (isTrustedMerchant(cleanedUrl) && path.length > 30 && (path.includes('/product/') || path.includes('/p/') || path.includes('/item/'))) {
+          console.log(`🔄 Deep product link detected, forcing merchant search: ${cleanedUrl}`);
+          return I18nService.buildMerchantSearchUrl(domain, I18nService.sanitizeProductQuery(link.title), currentLanguage);
+        }
+      } catch (error) {
+        console.warn('URL parsing error:', error);
+      }
+      
       // Check if link is compatible with the detected vertical
       if (!isVerticalCompatible(cleanedUrl, detectedVertical)) {
         console.log(`🔄 Vertical mismatch for ${cleanedUrl}, falling back to search`);
         return generateFallbackUrl(link.title, fallbackSearchQuery, link.url);
       }
       
-      // If valid and trusted, use direct link
+      // If valid and trusted, use direct link (only for root/category pages now)
       if (isTrustedMerchant(cleanedUrl)) {
         return cleanedUrl;
       }

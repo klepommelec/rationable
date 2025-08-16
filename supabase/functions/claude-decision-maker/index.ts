@@ -75,30 +75,38 @@ RÈGLES CRITIQUES POUR LES LIENS D'ACHAT - CONFORMITÉ STRICTE REQUISE:
 - Langue détectée: ${detectedLanguage.toUpperCase()} - Pays: ${config.country}
 - DOMAINES AUTORISÉS UNIQUEMENT: ${config.domains}
 
-CONTRÔLES DE QUALITÉ OBLIGATOIRES:
-1. AVANT de générer un lien, VALIDEZ mentalement: "Ce domaine vend-il réellement ce produit?"
-2. INTERDICTION ABSOLUE: liens génériques, placeholder, example.com, ou domaines inexistants
-3. VÉRIFICATION VERTICALE: restaurant≠hôtel, voiture≠téléphone, sport≠livre
-4. TERMES SPÉCIFIQUES: "iPhone 15" PAS "téléphone", "Nike Air Max" PAS "chaussures"
-5. LIENS TESTABLES: utilisez des URL avec structure logique (ex: /search?q=produit-specifique)
+⚠️ INTERDICTIONS ABSOLUES - ZÉRO TOLÉRANCE:
+1. FNAC/SAMSUNG: JAMAIS de liens profonds (/p/, /product/) - SEULEMENT /search?q=produit-exact
+2. URLs GÉNÉRIQUES: exemple.com, placeholder.com, domain.com/category
+3. LIENS NON-TESTABLES: URLs avec >3 segments de path ou ID numériques aléatoires
+4. DOMAINES INEXISTANTS: Vérifiez mentalement l'existence avant génération
+5. CROSS-VERTICAL: restaurant≠hôtel, électronique≠vêtement
 
-STRATÉGIES PAR VERTICALE - AUCUNE EXCEPTION:
-  * RESTAURANTS: SEULEMENT plateformes réservation (thefork.fr, opentable.fr) + site restaurant officiel
-    ❌ JAMAIS: liens hôtels, booking.com, expedia pour restaurants
-  * HÔTELS: SEULEMENT plateformes hébergement (booking.com, expedia.fr) + site hôtel officiel  
-    ❌ JAMAIS: liens restaurants, thefork, opentable pour hôtels
-  * PRODUITS ÉLECTRONIQUE: ${config.domains} avec termes de recherche spécifiques
-    ⚠️ FNAC: Utiliser format /search?q=[produit-exact] car URLs directes souvent cassées
-  * SPORT: Decathlon, Go Sport avec équipement spécifique (ex: "chaussures running Nike" pas "sport")
-  * AUTOMOBILES: Sites constructeurs officiels + lacentrale.fr/autoscout24.fr pour occasions
-  * LOGICIELS: Éditeur officiel + Microsoft Store/App Store si applicable
+CONTRÔLES DE QUALITÉ RENFORCÉS:
+1. TEST MENTAL: "Est-ce que cette URL fonctionne réellement?"
+2. SPÉCIFICITÉ: "iPhone 15 Pro 128GB" PAS "smartphone Apple"
+3. DOMAINE VALIDE: "amazon.fr/s?k=..." PAS "amazon.fr/dp/B0ABCD..."
+4. COHÉRENCE VERTICALE: Produits électro → sites électro, pas mode/maison
 
-FORMAT OBLIGATOIRE:
-- Titre: "[Produit exact] chez [Revendeur]" ou "Réserver [Restaurant exact]"  
-- URL: Format recherche si incertain: https://domaine.com/search?q=produit-specifique
-- Description: Préciser le type (officiel/revendeur/occasion/réservation)
-- Langue: Respecter la langue utilisateur dans titres et descriptions
-- Maximum 3-4 liens de haute qualité plutôt que beaucoup de liens médiocres
+STRATÉGIES PAR VERTICALE - ZÉRO EXCEPTION:
+  * RESTAURANTS: SEULEMENT réservation (thefork.fr/search, opentable.fr/search)
+    ❌ INTERDICTION: liens hôtels, e-commerce, booking.com
+  * HÔTELS: SEULEMENT hébergement (booking.com/search, expedia.fr/hotels)
+    ❌ INTERDICTION: restaurants, activités, transports
+  * ÉLECTRONIQUE: ${config.domains} format /search OU /category uniquement
+    🚫 FNAC: https://fnac.com/search?query=[produit] JAMAIS /p/[id]
+    🚫 SAMSUNG: https://samsung.com/search?q=[produit] JAMAIS /product/[model]
+  * SPORT: decathlon.fr/search, gosport.fr/search avec équipement précis
+  * AUTO: sites constructeurs /search OU lacentrale.fr/voitures-occasion
+  * LOGICIELS: site éditeur officiel OU store.microsoft.com/search
+
+FORMAT OBLIGATOIRE RENFORCÉ:
+- Titre: "[Produit EXACT marque+modèle] chez [Revendeur spécifique]"
+- URL: TOUJOURS format /search si moindre doute: https://site.com/search?q=marque-modele-exact
+- Description: Type précis + "recherche produit" si URL de recherche
+- DOUBLE VALIDATION: Chaque lien doit être mentalement testable
+- MAX 2-3 liens de TRÈS haute qualité plutôt qu'une liste longue
+- CANDIDATS: Proposez 2 URLs candidates par produit, choisissez la plus stable
 
 IMPORTANT: 
 - Analyse en profondeur la question posée

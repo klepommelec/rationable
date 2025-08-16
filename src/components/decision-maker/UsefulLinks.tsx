@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, ExternalLink } from 'lucide-react';
 import { ILink, ISocialContent } from '@/types/decision';
 import ValidatedLink from '../ValidatedLink';
 import YouTubeVideoCard from '../YouTubeVideoCard';
 import { I18nService } from '@/services/i18nService';
+import { LinkVerifierService } from '@/services/linkVerifierService';
 
 interface UsefulLinksProps {
   infoLinks?: ILink[];
@@ -24,6 +25,7 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
   const currentLanguage = I18nService.getCurrentLanguage();
   const contextText = `${dilemma || ''} ${recommendation || ''}`;
   const detectedVertical = I18nService.detectVertical(contextText, currentLanguage);
+  const [verifiedShoppingLinks, setVerifiedShoppingLinks] = useState<ILink[]>([]);
   
   // Enhanced relevance filtering with multiple scoring factors
   const filterRelevantLinks = (links: ILink[]) => {
@@ -66,11 +68,108 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
       .slice(0, 6); // Limit to most relevant links
   };
   
-  const filteredShoppingLinks = shoppingLinks ? filterRelevantLinks(shoppingLinks) : [];
-  const hasContent = (filteredShoppingLinks.length > 0) || 
+  // Server-side verification of shopping links
+  useEffect(() => {
+    const verifyLinks = async () => {
+      if (!shoppingLinks?.length) {
+        setVerifiedShoppingLinks([]);
+        return;
+      }
+
+      const filteredLinks = filterRelevantLinks(shoppingLinks);
+      
+      try {
+        console.log('🔍 Verifying shopping links...', filteredLinks.map(l => l.url));
+        const verificationResult = await LinkVerifierService.verifyLinks(filteredLinks);
+        
+        // Replace invalid links with merchant-specific search fallbacks
+        const enhancedLinks = filteredLinks.map(originalLink => {
+          const verification = [...verificationResult.invalidLinks].find(inv => inv.url === originalLink.url);
+          
+          if (verification && (verification.status === 'invalid' || verification.status === 'timeout')) {
+            console.log(`🔄 Replacing invalid link: ${originalLink.url}`);
+            
+            // Generate merchant-specific or vertical-specific fallback
+            const fallbackUrl = generateLinkFallback(originalLink, detectedVertical, currentLanguage);
+            
+            return {
+              ...originalLink,
+              url: fallbackUrl,
+              description: `${originalLink.description || originalLink.title} (recherche)`
+            };
+          }
+          
+          // Follow redirects for valid links
+          const validLink = verificationResult.validLinks.find(valid => 
+            valid.url === originalLink.url || valid.title === originalLink.title
+          );
+          
+          if (validLink && validLink.url !== originalLink.url) {
+            console.log(`➡️ Following redirect: ${originalLink.url} → ${validLink.url}`);
+            return {
+              ...originalLink,
+              url: validLink.url
+            };
+          }
+          
+          return originalLink;
+        });
+
+        console.log('✅ Link verification complete:', {
+          original: filteredLinks.length,
+          verified: enhancedLinks.length,
+          invalid: verificationResult.summary.invalid,
+          redirects: verificationResult.summary.redirects
+        });
+
+        setVerifiedShoppingLinks(enhancedLinks);
+      } catch (error) {
+        console.error('❌ Link verification failed, using original links:', error);
+        setVerifiedShoppingLinks(filterRelevantLinks(shoppingLinks));
+      }
+    };
+
+    verifyLinks();
+  }, [shoppingLinks, detectedVertical, currentLanguage]);
+
+  // Generate fallback URL for invalid links
+  const generateLinkFallback = (link: ILink, vertical: string | null, language: string): string => {
+    const query = I18nService.sanitizeProductQuery(link.title);
+    
+    // Try to extract domain for merchant-specific search
+    try {
+      const urlObj = new URL(link.url.startsWith('http') ? link.url : `https://${link.url}`);
+      const domain = urlObj.hostname.replace('www.', '');
+      
+      // Special handling for fragile merchants
+      if (domain.includes('fnac.') || domain.includes('samsung.')) {
+        return I18nService.buildMerchantSearchUrl(domain, query, language as any);
+      }
+      
+      // For other e-commerce sites, try merchant search
+      const merchantSearchUrl = I18nService.buildMerchantSearchUrl(domain, query, language as any);
+      if (merchantSearchUrl !== `https://www.google.com/search?q=${encodeURIComponent(query)}`) {
+        return merchantSearchUrl;
+      }
+    } catch {
+      // Fall through to vertical-specific search
+    }
+    
+    // Fallback to vertical-specific search
+    switch (vertical) {
+      case 'dining':
+        return I18nService.buildGoogleMapsSearchUrl(query, language as any);
+      case 'accommodation':
+        return I18nService.buildGoogleWebUrl(`${query} booking hotel`, language as any);
+      default:
+        return I18nService.buildGoogleShoppingUrl(query, language as any);
+    }
+  };
+
+  const hasContent = (verifiedShoppingLinks.length > 0) || 
                     (socialContent?.youtubeVideos && socialContent.youtubeVideos.length > 0);
   
-  const shouldShowFallbackSearch = filteredShoppingLinks.length === 0;
+  const shouldShowFallbackSearch = verifiedShoppingLinks.length === 0;
   
   if (!hasContent && !shouldShowFallbackSearch) {
     return null;
@@ -116,7 +215,7 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
         )}
 
         {/* Liens d'achat */}
-        {filteredShoppingLinks.length > 0 && (
+        {verifiedShoppingLinks.length > 0 && (
           <div className="space-y-3">
             <h4 
               className="font-medium text-sm sm:text-base text-gray-800 dark:text-gray-200 flex items-center gap-2"
@@ -149,7 +248,7 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
               role="list"
               aria-labelledby="shopping-links-heading"
             >
-              {filteredShoppingLinks.map((link, index) => (
+              {verifiedShoppingLinks.map((link, index) => (
                 <div 
                   key={index}
                   role="listitem"
