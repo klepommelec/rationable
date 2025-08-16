@@ -27,7 +27,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   const topOption = result.breakdown?.[0];
   const [actionLinks, setActionLinks] = useState<BestLinksResponse | null>(null);
   const [isLoadingAction, setIsLoadingAction] = useState(false);
-  const detectedLanguage = dilemma ? I18nService.detectLanguage(dilemma) : 'fr';
+  const detectedLanguage = 'fr'; // Force French for UI labels
   const detectedVertical = dilemma ? I18nService.detectVertical(dilemma) : null;
 
   // Load action button for top option

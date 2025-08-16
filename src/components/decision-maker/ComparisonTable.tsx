@@ -19,7 +19,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
 }) => {
   const [actionLinks, setActionLinks] = useState<Record<string, BestLinksResponse | null>>({});
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
-  const detectedLanguage = dilemma ? I18nService.detectLanguage(dilemma) : 'fr';
+  const detectedLanguage = 'fr'; // Force French for UI labels
   const detectedVertical = dilemma ? I18nService.detectVertical(dilemma) : null;
 
   useEffect(() => {
