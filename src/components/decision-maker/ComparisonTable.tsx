@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle, XCircle, ExternalLink, ShoppingBag, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { generateOptionSearchLinks } from '@/services/expandOptionsService';
-import { firstResultService, FirstResultResponse } from '@/services/firstResultService';
+import { firstResultService, BestLinksResponse } from '@/services/firstResultService';
 import { I18nService } from '@/services/i18nService';
 
 interface ComparisonTableProps {
@@ -16,7 +16,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   breakdown,
   dilemma
 }) => {
-  const [actionButtons, setActionButtons] = useState<Record<string, FirstResultResponse | null>>({});
+  const [actionLinks, setActionLinks] = useState<Record<string, BestLinksResponse | null>>({});
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
   const detectedLanguage = dilemma ? I18nService.detectLanguage(dilemma) : 'fr';
   const detectedVertical = dilemma ? I18nService.detectVertical(dilemma) : null;
@@ -30,17 +30,17 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
       setLoadingStates(prev => ({ ...prev, [optionKey]: true }));
 
       try {
-        const result = await firstResultService.getFirstResultUrl({
+        const result = await firstResultService.getBestLinks({
           optionName: option.option,
           dilemma: dilemma,
           language: detectedLanguage,
           vertical: detectedVertical as any
         });
 
-        setActionButtons(prev => ({ ...prev, [optionKey]: result }));
+        setActionLinks(prev => ({ ...prev, [optionKey]: result }));
       } catch (error) {
-        console.error(`Failed to get action button for ${optionKey}:`, error);
-        setActionButtons(prev => ({ ...prev, [optionKey]: null }));
+        console.error(`Failed to get action links for ${optionKey}:`, error);
+        setActionLinks(prev => ({ ...prev, [optionKey]: null }));
       } finally {
         setLoadingStates(prev => ({ ...prev, [optionKey]: false }));
       }
@@ -69,7 +69,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
               <TableHead className="w-[200px]">Option</TableHead>
               <TableHead>Avantages</TableHead>
               <TableHead>Inconvénients</TableHead>
-              <TableHead className="w-[120px]">Action</TableHead>
+              <TableHead className="w-[220px]">Action</TableHead>
               <TableHead className="w-[180px]">En savoir plus</TableHead>
             </TableRow>
           </TableHeader>
@@ -77,11 +77,8 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
             {sortedOptions.map((option, index) => {
               const searchLinks = generateOptionSearchLinks(option.option, dilemma || '');
               const optionKey = option.option;
-              const actionButton = actionButtons[optionKey];
+              const optionActionLinks = actionLinks[optionKey];
               const isLoading = loadingStates[optionKey];
-              const actionVerb = actionButton ? 
-                firstResultService.getActionVerb(detectedVertical as any, detectedLanguage) : 
-                firstResultService.getDiscoverVerb(detectedLanguage);
               
               return (
                 <TableRow key={index} className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''}>
@@ -118,25 +115,54 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                     </div>
                   </TableCell>
                   <TableCell className="align-top">
-                    <Button
-                      variant={actionButton && !actionButton.url.includes('google.') ? "default" : "secondary"}
-                      size="sm"
-                      onClick={() => actionButton && window.open(actionButton.url, '_blank')}
-                      disabled={isLoading || !actionButton}
-                      className="w-full text-xs"
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                          Recherche...
-                        </>
-                      ) : (
-                        <>
-                          <ShoppingBag className="h-3 w-3 mr-1" />
-                          {actionVerb}
-                        </>
-                      )}
-                    </Button>
+                    {isLoading ? (
+                      <Button variant="secondary" size="sm" disabled className="w-full text-xs">
+                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                        Recherche...
+                      </Button>
+                    ) : optionActionLinks ? (
+                      <div className="flex flex-wrap gap-2">
+                        {/* Primary button: Official site or first merchant */}
+                        {optionActionLinks.official ? (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => window.open(optionActionLinks.official!.url, '_blank')}
+                            className="text-xs"
+                          >
+                            <ShoppingBag className="h-3 w-3 mr-1" />
+                            {I18nService.getOfficialSiteLabel(detectedLanguage)}
+                          </Button>
+                        ) : optionActionLinks.merchants[0] ? (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => window.open(optionActionLinks.merchants[0].url, '_blank')}
+                            className="text-xs"
+                          >
+                            <ShoppingBag className="h-3 w-3 mr-1" />
+                            {firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)}
+                          </Button>
+                        ) : null}
+                        
+                        {/* Secondary buttons: Merchants */}
+                        {(optionActionLinks.official ? optionActionLinks.merchants : optionActionLinks.merchants.slice(1)).slice(0, 2).map((merchant, i) => (
+                          <Button
+                            key={i}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(merchant.url, '_blank')}
+                            className="text-xs"
+                          >
+                            {firstResultService.getDomainLabel(merchant.domain)}
+                          </Button>
+                        ))}
+                      </div>
+                    ) : (
+                      <Button variant="secondary" size="sm" disabled className="text-xs">
+                        Aucun lien
+                      </Button>
+                    )}
                   </TableCell>
                   <TableCell className="align-top">
                     <div className="space-y-1">

@@ -403,6 +403,18 @@ export class I18nService {
     return `https://www.google.${config.googleTLD}/search?q=${encodedQuery}&hl=${config.uiLanguage}&gl=${config.countryCode}`;
   }
 
+  static getOfficialSiteLabel(language?: SupportedLanguage): string {
+    const lang = language || this.getCurrentLanguage();
+    const labels = {
+      'fr': 'Site officiel',
+      'en': 'Official site',
+      'es': 'Sitio oficial',
+      'it': 'Sito ufficiale',
+      'de': 'Offizielle Seite'
+    };
+    return labels[lang] || labels.fr;
+  }
+
   // Vertical detection methods
   static getVerticalKeywords(): Record<SupportedLanguage, Record<string, string[]>> {
     return {

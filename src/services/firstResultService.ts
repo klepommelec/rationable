@@ -10,6 +10,13 @@ export interface FirstResultResponse {
   fromCache: boolean;
 }
 
+export interface BestLinksResponse {
+  official?: { url: string; title: string; domain: string };
+  merchants: Array<{ url: string; title: string; domain: string }>;
+  provider: 'google_cse' | 'serpapi' | 'tavily' | 'perplexity';
+  fromCache: boolean;
+}
+
 export interface FirstResultOptions {
   optionName: string;
   dilemma: string;
@@ -18,6 +25,152 @@ export interface FirstResultOptions {
 }
 
 class FirstResultService {
+  async getBestLinks({ optionName, dilemma, language, vertical }: FirstResultOptions): Promise<BestLinksResponse> {
+    // 1. Detect language and vertical
+    const detectedLanguage = language || I18nService.detectLanguage(dilemma + ' ' + optionName);
+    const detectedVertical = vertical || I18nService.detectVertical(dilemma + ' ' + optionName);
+    
+    // 2. Detect brand from option name
+    const brand = this.detectBrand(optionName);
+    console.log(`🏷️ Brand detected: ${brand || 'none'} for "${optionName}"`);
+    
+    // 3. Build search query
+    const query = this.buildOptimizedQuery(optionName, detectedVertical, detectedLanguage);
+    
+    // 4. Check cache for both official and merchants
+    const officialCacheKey = `${query}_${detectedLanguage}_${detectedVertical || 'general'}_official`;
+    const merchantsCacheKey = `${query}_${detectedLanguage}_${detectedVertical || 'general'}_merchants`;
+    
+    const cachedOfficial = searchCacheService.get(officialCacheKey);
+    const cachedMerchants = searchCacheService.get(merchantsCacheKey);
+    
+    if (cachedOfficial && cachedMerchants) {
+      console.log(`✅ Using cached results for: ${optionName}`);
+      return {
+        official: cachedOfficial.content.official,
+        merchants: cachedMerchants.content.merchants || [],
+        provider: cachedOfficial.provider as any,
+        fromCache: true
+      };
+    }
+    
+    try {
+      console.log(`🔍 Searching best links for: "${query}" (${detectedLanguage}, ${detectedVertical})`);
+      
+      // 5. Search for official site first if we have a brand
+      let officialResult = null;
+      if (brand) {
+        const officialQuery = `${brand} ${optionName} site officiel`;
+        const siteBias = this.getBrandDomains(brand);
+        
+        const { data: officialData, error: officialError } = await supabase.functions.invoke('first-web-result', {
+          body: {
+            query: officialQuery,
+            language: detectedLanguage,
+            vertical: detectedVertical,
+            numResults: 3,
+            siteBias
+          }
+        });
+        
+        if (!officialError && officialData?.results?.length) {
+          const officialResults = officialData.results.filter((r: any) => 
+            this.isOfficialDomain(r.url, brand)
+          );
+          
+          if (officialResults.length > 0) {
+            const verified = await LinkVerifierService.verifyLinks(
+              officialResults.slice(0, 1).map((r: any) => ({ url: r.url, title: r.title }))
+            );
+            
+            if (verified.validLinks.length > 0) {
+              const validLink = verified.validLinks[0];
+              officialResult = {
+                url: validLink.url,
+                title: validLink.title,
+                domain: this.extractDomain(validLink.url)
+              };
+              console.log(`✅ Official found: ${validLink.url}`);
+            }
+          }
+        }
+      }
+      
+      // 6. Search for general results (merchants)
+      const { data, error } = await supabase.functions.invoke('first-web-result', {
+        body: {
+          query,
+          language: detectedLanguage,
+          vertical: detectedVertical,
+          numResults: 8 // More results to find good merchants
+        }
+      });
+
+      if (error) {
+        console.error(`❌ Edge function error:`, error);
+        throw new Error(`Edge function error: ${error.message}`);
+      }
+
+      if (!data?.results?.length) {
+        console.log(`⚠️ No results returned from search provider: ${data?.provider}`);
+        throw new Error('No results returned from search');
+      }
+
+      // 7. Separate official vs merchants and prioritize
+      const { merchants } = this.separateOfficialAndMerchants(data.results, brand, officialResult);
+      
+      // 8. Verify merchant links
+      const merchantsToVerify = merchants.slice(0, 5).map((r: any) => ({ 
+        url: r.url, 
+        title: r.title,
+        description: r.snippet 
+      }));
+      
+      console.log(`🔍 Verifying merchant links:`, merchantsToVerify.map(l => l.url));
+      const verified = await LinkVerifierService.verifyLinks(merchantsToVerify);
+      console.log(`✅ Merchant verification complete:`, verified.summary);
+
+      // 9. Build final merchant list (max 3)
+      const finalMerchants = verified.validLinks.slice(0, 3).map(link => ({
+        url: link.url,
+        title: link.title,
+        domain: this.extractDomain(link.url)
+      }));
+
+      const result = {
+        official: officialResult,
+        merchants: finalMerchants,
+        provider: data.provider,
+        fromCache: false
+      };
+
+      // 10. Cache results
+      if (officialResult) {
+        searchCacheService.set(officialCacheKey, detectedVertical || 'general', { official: officialResult }, data.provider);
+      }
+      searchCacheService.set(merchantsCacheKey, detectedVertical || 'general', { merchants: finalMerchants }, data.provider);
+
+      console.log(`🎉 Best links found: ${officialResult ? 'official + ' : ''}${finalMerchants.length} merchants`);
+      return result;
+
+    } catch (error) {
+      console.error(`❌ getBestLinks error for "${optionName}":`, error);
+      
+      // Fallback to legacy method
+      const fallback = await this.getFirstResultUrl({ optionName, dilemma, language, vertical });
+      return {
+        official: null,
+        merchants: [{
+          url: fallback.url,
+          title: fallback.title,
+          domain: this.extractDomain(fallback.url)
+        }],
+        provider: fallback.sourceProvider,
+        fromCache: fallback.fromCache
+      };
+    }
+  }
+
   async getFirstResultUrl({ optionName, dilemma, language, vertical }: FirstResultOptions): Promise<FirstResultResponse> {
     // 1. Detect language if not provided
     const detectedLanguage = language || I18nService.detectLanguage(dilemma + ' ' + optionName);
@@ -353,6 +506,218 @@ class FirstResultService {
     
     const amazonDomain = amazonDomains[language] || amazonDomains.en;
     return `https://www.${amazonDomain}/s?k=${encodeURIComponent(cleanOptionName)}`;
+  }
+
+  private detectBrand(optionName: string): string | null {
+    const lowerOption = optionName.toLowerCase();
+    
+    // Known brands mapping
+    const brandMap = {
+      // Automotive
+      'toyota': 'toyota',
+      'honda': 'honda',
+      'ford': 'ford',
+      'bmw': 'bmw',
+      'mercedes': 'mercedes',
+      'audi': 'audi',
+      'volkswagen': 'volkswagen',
+      'peugeot': 'peugeot',
+      'renault': 'renault',
+      'citroën': 'citroen',
+      'dacia': 'dacia',
+      
+      // Technology
+      'samsung': 'samsung',
+      'apple': 'apple',
+      'iphone': 'apple',
+      'ipad': 'apple',
+      'macbook': 'apple',
+      'galaxy': 'samsung',
+      'pixel': 'google',
+      'oneplus': 'oneplus',
+      'xiaomi': 'xiaomi',
+      'huawei': 'huawei',
+      'sony': 'sony',
+      'dell': 'dell',
+      'hp': 'hp',
+      'lenovo': 'lenovo',
+      'microsoft': 'microsoft',
+      'surface': 'microsoft',
+      
+      // Other
+      'nike': 'nike',
+      'adidas': 'adidas',
+      'ikea': 'ikea',
+      'lego': 'lego'
+    };
+    
+    for (const [keyword, brand] of Object.entries(brandMap)) {
+      if (lowerOption.includes(keyword)) {
+        return brand;
+      }
+    }
+    
+    return null;
+  }
+
+  private getBrandDomains(brand: string): string[] {
+    const domainMap: Record<string, string[]> = {
+      'samsung': ['samsung.com', 'samsung.fr', 'samsung.es', 'samsung.it', 'samsung.de'],
+      'apple': ['apple.com', 'apple.fr', 'apple.es', 'apple.it', 'apple.de'],
+      'google': ['store.google.com', 'google.com'],
+      'toyota': ['toyota.fr', 'toyota.com', 'toyota.es', 'toyota.it', 'toyota.de'],
+      'honda': ['honda.fr', 'honda.com', 'honda.es', 'honda.it', 'honda.de'],
+      'ford': ['ford.fr', 'ford.com', 'ford.es', 'ford.it', 'ford.de'],
+      'bmw': ['bmw.fr', 'bmw.com', 'bmw.es', 'bmw.it', 'bmw.de'],
+      'mercedes': ['mercedes-benz.fr', 'mercedes-benz.com'],
+      'audi': ['audi.fr', 'audi.com', 'audi.es', 'audi.it', 'audi.de'],
+      'peugeot': ['peugeot.fr', 'peugeot.com'],
+      'renault': ['renault.fr', 'renault.com'],
+      'dacia': ['dacia.fr', 'dacia.com'],
+      'nike': ['nike.com', 'nike.fr'],
+      'adidas': ['adidas.com', 'adidas.fr']
+    };
+    
+    return domainMap[brand] || [`${brand}.com`, `${brand}.fr`];
+  }
+
+  private isOfficialDomain(url: string, brand: string): boolean {
+    const domain = this.extractDomain(url).toLowerCase();
+    const brandDomains = this.getBrandDomains(brand);
+    
+    // Check if domain contains the brand
+    const containsBrand = brandDomains.some(brandDomain => 
+      domain.includes(brandDomain.toLowerCase()) || 
+      domain.includes(brand.toLowerCase())
+    );
+    
+    // Exclude marketplaces
+    const isMarketplace = ['amazon', 'fnac', 'cdiscount', 'darty', 'boulanger', 'leboncoin', 'ebay', 'rakuten'].some(
+      marketplace => domain.includes(marketplace)
+    );
+    
+    return containsBrand && !isMarketplace;
+  }
+
+  private extractDomain(url: string): string {
+    try {
+      return new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+      return url;
+    }
+  }
+
+  private separateOfficialAndMerchants(results: any[], brand: string | null, existingOfficial: any) {
+    const merchants: any[] = [];
+    let official = existingOfficial;
+    
+    for (const result of results) {
+      const domain = this.extractDomain(result.url);
+      
+      // Skip if we already have this domain
+      if (merchants.some(m => m.domain === domain) || (official && official.domain === domain)) {
+        continue;
+      }
+      
+      // If no official yet and this looks official
+      if (!official && brand && this.isOfficialDomain(result.url, brand)) {
+        official = {
+          url: result.url,
+          title: result.title,
+          domain
+        };
+        continue;
+      }
+      
+      // Add to merchants if it's a known e-commerce site
+      if (this.isMerchantDomain(domain)) {
+        merchants.push({
+          ...result,
+          domain,
+          _score: this.scoreMerchant(domain, result.title)
+        });
+      }
+    }
+    
+    // Sort merchants by score and return top ones
+    merchants.sort((a, b) => b._score - a._score);
+    
+    return {
+      official,
+      merchants: merchants.slice(0, 5) // Get top 5 for verification
+    };
+  }
+
+  private isMerchantDomain(domain: string): boolean {
+    const merchantDomains = [
+      'amazon', 'fnac', 'cdiscount', 'darty', 'boulanger', 'leboncoin',
+      'rueducommerce', 'ldlc', 'materiel', 'grosbill', 'topachat',
+      'conforama', 'but', 'castorama', 'leroy-merlin'
+    ];
+    
+    return merchantDomains.some(merchant => domain.includes(merchant));
+  }
+
+  private scoreMerchant(domain: string, title: string): number {
+    let score = 0;
+    
+    // Premium merchants
+    if (domain.includes('amazon')) score += 10;
+    if (domain.includes('fnac')) score += 9;
+    if (domain.includes('darty')) score += 8;
+    if (domain.includes('boulanger')) score += 7;
+    
+    // Standard merchants
+    if (domain.includes('cdiscount')) score += 6;
+    if (domain.includes('rueducommerce')) score += 5;
+    if (domain.includes('ldlc')) score += 5;
+    
+    // Bonus for title containing price or buy keywords
+    const lowerTitle = title.toLowerCase();
+    if (lowerTitle.includes('prix') || lowerTitle.includes('price')) score += 2;
+    if (lowerTitle.includes('acheter') || lowerTitle.includes('buy')) score += 2;
+    
+    return score;
+  }
+
+  getDomainLabel(domain: string): string {
+    const labelMap: Record<string, string> = {
+      'amazon.fr': 'Amazon',
+      'amazon.com': 'Amazon',
+      'fnac.com': 'Fnac',
+      'cdiscount.com': 'Cdiscount',
+      'darty.com': 'Darty',
+      'boulanger.com': 'Boulanger',
+      'ldlc.com': 'LDLC',
+      'materiel.net': 'Materiel.net',
+      'rueducommerce.fr': 'Rue du Commerce',
+      'topachat.com': 'TopAchat',
+      'grosbill.com': 'Grosbill',
+      'samsung.com': 'Samsung',
+      'samsung.fr': 'Samsung',
+      'apple.com': 'Apple',
+      'apple.fr': 'Apple',
+      'toyota.fr': 'Toyota',
+      'honda.fr': 'Honda',
+      'peugeot.fr': 'Peugeot'
+    };
+    
+    // Try exact match first
+    const cleanDomain = domain.replace(/^www\./, '');
+    if (labelMap[cleanDomain]) {
+      return labelMap[cleanDomain];
+    }
+    
+    // Try partial matches
+    for (const [key, label] of Object.entries(labelMap)) {
+      if (cleanDomain.includes(key.split('.')[0])) {
+        return label;
+      }
+    }
+    
+    // Fallback: capitalize first letter of domain name
+    const domainName = cleanDomain.split('.')[0];
+    return domainName.charAt(0).toUpperCase() + domainName.slice(1);
   }
 }
 

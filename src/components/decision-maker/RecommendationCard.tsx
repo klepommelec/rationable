@@ -11,7 +11,7 @@ import { AIProviderIndicator } from './AIProviderIndicator';
 import ValidatedLink from '@/components/ValidatedLink';
 import { ExternalLink, Lightbulb, CheckCircle, ShoppingBag, Loader2 } from 'lucide-react';
 import { ExpandableText } from '@/components/ExpandableText';
-import { firstResultService, FirstResultResponse } from '@/services/firstResultService';
+import { firstResultService, BestLinksResponse } from '@/services/firstResultService';
 import { I18nService } from '@/services/i18nService';
 interface RecommendationCardProps {
   result: IResult;
@@ -24,7 +24,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   currentDecision
 }) => {
   const topOption = result.breakdown?.[0];
-  const [actionButton, setActionButton] = useState<FirstResultResponse | null>(null);
+  const [actionLinks, setActionLinks] = useState<BestLinksResponse | null>(null);
   const [isLoadingAction, setIsLoadingAction] = useState(false);
   const detectedLanguage = dilemma ? I18nService.detectLanguage(dilemma) : 'fr';
   const detectedVertical = dilemma ? I18nService.detectVertical(dilemma) : null;
@@ -36,16 +36,16 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     const loadActionButton = async () => {
       setIsLoadingAction(true);
       try {
-        const result = await firstResultService.getFirstResultUrl({
+        const result = await firstResultService.getBestLinks({
           optionName: topOption.option,
           dilemma: dilemma,
           language: detectedLanguage,
           vertical: detectedVertical as any
         });
-        setActionButton(result);
+        setActionLinks(result);
       } catch (error) {
-        console.error(`Failed to get action button for ${topOption.option}:`, error);
-        setActionButton(null);
+        console.error(`Failed to get action links for ${topOption.option}:`, error);
+        setActionLinks(null);
       } finally {
         setIsLoadingAction(false);
       }
@@ -65,9 +65,6 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     titleColor: 'text-primary'
   };
 
-  const actionVerb = actionButton ? 
-    firstResultService.getActionVerb(detectedVertical, detectedLanguage) : 
-    firstResultService.getDiscoverVerb(detectedLanguage);
   return <Card className={`border-2 ${config.borderColor} ${config.bgGradient} w-full`}>
       <CardContent className="space-y-6 pt-4 sm:pt-2">
         <div className="flex flex-col gap-6">
@@ -98,28 +95,53 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               <ExpandableText text={result.description} />
             </div>
 
-            {/* Action button for top option */}
+            {/* Action buttons for top option */}
             {topOption?.option && (
               <div className="w-full">
-                <Button
-                  variant={actionButton && !actionButton.url.includes('google.') ? "default" : "secondary"}
-                  size="lg"
-                  onClick={() => actionButton && window.open(actionButton.url, '_blank')}
-                  disabled={isLoadingAction || !actionButton}
-                  className="w-full sm:w-auto"
-                >
-                  {isLoadingAction ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Recherche...
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingBag className="h-4 w-4 mr-2" />
-                      {actionVerb} {topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
-                    </>
-                  )}
-                </Button>
+                {isLoadingAction ? (
+                  <Button variant="secondary" size="lg" disabled className="w-full sm:w-auto">
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Recherche...
+                  </Button>
+                ) : actionLinks ? (
+                  <div className="flex flex-wrap gap-3">
+                    {/* Primary button: Official site or first merchant */}
+                    {actionLinks.official ? (
+                      <Button
+                        variant="default"
+                        size="lg"
+                        onClick={() => window.open(actionLinks.official!.url, '_blank')}
+                        className="flex-1 min-w-[200px]"
+                      >
+                        <ShoppingBag className="h-4 w-4 mr-2" />
+                        {I18nService.getOfficialSiteLabel(detectedLanguage)} - {topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
+                      </Button>
+                    ) : actionLinks.merchants[0] ? (
+                      <Button
+                        variant="default"
+                        size="lg"
+                        onClick={() => window.open(actionLinks.merchants[0].url, '_blank')}
+                        className="flex-1 min-w-[200px]"
+                      >
+                        <ShoppingBag className="h-4 w-4 mr-2" />
+                        {firstResultService.getActionVerb(detectedVertical, detectedLanguage)} {topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
+                      </Button>
+                    ) : null}
+                    
+                    {/* Secondary buttons: Merchants */}
+                    {(actionLinks.official ? actionLinks.merchants : actionLinks.merchants.slice(1)).slice(0, 2).map((merchant, i) => (
+                      <Button
+                        key={i}
+                        variant="outline"
+                        size="lg"
+                        onClick={() => window.open(merchant.url, '_blank')}
+                        className="min-w-[120px]"
+                      >
+                        {firstResultService.getDomainLabel(merchant.domain)}
+                      </Button>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             )}
 
