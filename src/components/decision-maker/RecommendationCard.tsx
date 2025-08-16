@@ -142,7 +142,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     {I18nService.getSearchingLabel(detectedLanguage)}
                   </Button>
-                ) : actionLinks ? (
+                ) : actionLinks && (actionLinks.official || (actionLinks.merchants && actionLinks.merchants.length > 0) || actionLinks.maps) ? (
                   <div className="flex flex-wrap gap-3">
                     {/* Primary button: Based on action type */}
                     {actionLinks.actionType === 'directions' && actionLinks.maps ? (
