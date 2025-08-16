@@ -28,27 +28,27 @@ const App = () => (
           <AuthProvider>
             <DecisionMakerProvider>
               <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/shared/:publicId" element={<SharedDecision />} />
-              <Route element={<Layout />}>
-                <Route path="/" element={
-                  <ProtectedRoute>
-                    <Index />
-                  </ProtectedRoute>
-                } />
-                <Route path="/templates" element={
-                  <ProtectedRoute>
-                    <CommunityTemplates />
-                  </ProtectedRoute>
-                } />
-                <Route path="/settings" element={
-                  <ProtectedRoute>
-                    <Settings />
-                  </ProtectedRoute>
-                } />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/shared/:publicId" element={<SharedDecision />} />
+                <Route element={<Layout />}>
+                  <Route path="/" element={
+                    <ProtectedRoute>
+                      <Index />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/templates" element={
+                    <ProtectedRoute>
+                      <CommunityTemplates />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/settings" element={
+                    <ProtectedRoute>
+                      <Settings />
+                    </ProtectedRoute>
+                  } />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
             </DecisionMakerProvider>
           </AuthProvider>
         </BrowserRouter>
