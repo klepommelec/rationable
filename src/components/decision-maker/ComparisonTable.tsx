@@ -99,7 +99,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                             Recherche...
                           </Button>
                          ) : optionActionLinks && (optionActionLinks.official || (optionActionLinks.merchants && optionActionLinks.merchants.length > 0)) ? (
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-col gap-2">
                               {/* Primary button: Based on action type */}
                               {optionActionLinks.actionType === 'directions' && optionActionLinks.maps ? (
                                 <Button
