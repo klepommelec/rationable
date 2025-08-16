@@ -49,12 +49,20 @@ const Navbar: React.FC<NavbarProps> = ({
           to="/" 
           className="flex items-center gap-2 mr-auto hover:underline transition-all duration-200"
           onClick={(e) => {
+            console.log('Logo clicked with currentDecision:', currentDecision);
+            console.log('clearSession available:', !!clearSession);
+            
             // Seulement réinitialiser si on est dans une décision en cours
             if (currentDecision && clearSession) {
-              console.log('Logo clicked - clearing session');
+              e.preventDefault();
+              console.log('Logo clicked - clearing session and navigating');
               clearSession();
+              // Force navigation après clear
+              setTimeout(() => {
+                window.location.href = '/';
+              }, 100);
             } else {
-              console.log('Logo clicked - normal navigation', { currentDecision: !!currentDecision, clearSession: !!clearSession });
+              console.log('Logo clicked - normal navigation');
             }
           }}
         >

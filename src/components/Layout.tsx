@@ -11,15 +11,21 @@ const Layout = () => {
     getCurrentDecision,
     clearSession,
     result,
-    analysisStep
+    analysisStep,
+    dilemma
   } = useDecisionMaker();
   const {
     user
   } = useAuth();
 
-  // Détecter une décision en cours : soit une décision existante, soit un résultat présent
+  // Détecter une décision en cours : soit une décision sauvée, soit un processus en cours
   const currentDecision = location.pathname === '/' && user ? (
-    getCurrentDecision() || (result && analysisStep === 'done' ? { result, dilemma: 'Decision in progress' } : null)
+    // 1. Décision sauvée avec ID
+    getCurrentDecision() || 
+    // 2. Analyse en cours ou terminée (result existe)
+    (result ? { result, dilemma: dilemma || 'Décision en cours' } : null) ||
+    // 3. Processus démarré (pas idle et dilemma existe) 
+    (analysisStep !== 'idle' && dilemma ? { dilemma, result: null } : null)
   ) : null;
 
   // Check if we're on the home page
