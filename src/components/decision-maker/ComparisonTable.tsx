@@ -98,7 +98,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                             <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                             {I18nService.getSearchingLabel(detectedLanguage)}
                           </Button>
-                         ) : optionActionLinks && (optionActionLinks.official || (optionActionLinks.merchants && optionActionLinks.merchants.length > 0)) ? (
+                         ) : optionActionLinks && (optionActionLinks.official || (optionActionLinks.merchants && optionActionLinks.merchants.length > 0) || optionActionLinks.maps) ? (
                             <div className="flex flex-col gap-2">
                               {/* Primary button: Based on action type */}
                               {optionActionLinks.actionType === 'directions' && optionActionLinks.maps ? (
@@ -150,11 +150,11 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                  </Button>
                               ))}
                            </div>
-                         ) : (
-                            <Button variant="secondary" size="sm" disabled className="text-xs max-w-[140px] truncate">
-                              {I18nService.getNoLinkLabel(detectedLanguage)}
-                            </Button>
-                         )}
+                          ) : !optionActionLinks?.maps ? (
+                             <Button variant="secondary" size="sm" disabled className="text-xs max-w-[140px] truncate">
+                               {I18nService.getNoLinkLabel(detectedLanguage)}
+                             </Button>
+                          ) : null}
                       </div>
                     </div>
                   </TableCell>

@@ -207,7 +207,19 @@ class FirstResultService {
     } catch (error) {
       console.error(`❌ getBestLinks error for "${optionName}":`, error);
       
-      // Fallback to legacy method
+      // For directions (local queries), don't add generic fallback merchants
+      if (actionType === 'directions') {
+        return {
+          official: null,
+          merchants: [],
+          maps: mapsResult,
+          actionType,
+          provider: 'perplexity',
+          fromCache: false
+        };
+      }
+      
+      // Fallback to legacy method for non-local queries
       const fallback = await this.getFirstResultUrl({ optionName, dilemma, language, vertical });
       return {
         official: null,
@@ -342,6 +354,12 @@ class FirstResultService {
     } catch (error) {
       console.error(`❌ FirstResultService error for "${optionName}":`, error);
       
+      // For local queries, don't provide generic fallbacks
+      const actionType = this.classifyActionType(optionName, dilemma, detectedVertical);
+      if (actionType === 'directions') {
+        throw new Error('No valid local results found');
+      }
+      
       // Enhanced fallback: try to construct a merchant-specific search URL
       const merchantFallback = this.buildMerchantFallbackUrl(optionName, detectedLanguage);
       if (merchantFallback) {
@@ -354,7 +372,7 @@ class FirstResultService {
         };
       }
       
-      // Final fallback to Google search page
+      // Final fallback to Google search page (only for non-local queries)
       const fallbackUrl = I18nService.buildGoogleWebUrl(query, detectedLanguage);
       console.log(`🔄 Using Google fallback: ${fallbackUrl}`);
       return {
@@ -825,13 +843,22 @@ class FirstResultService {
       
       // Travel platforms
       'sncf-connect', 'trainline', 'omio', 'flixbus', 'ouibus',
-      'blablacar', 'europcar', 'hertz', 'avis', 'sixt',
-      
-      // Google services (for local businesses)
-      'google', 'maps.google'
+      'blablacar', 'europcar', 'hertz', 'avis', 'sixt'
     ];
     
-    return merchantDomains.some(merchant => domain.includes(merchant));
+    // Check if it's a merchant domain but exclude non-Maps Google links
+    const isMerchant = merchantDomains.some(merchant => domain.includes(merchant));
+    
+    // Filter out generic Google links (keep only Maps-related Google links)
+    if (domain.includes('google')) {
+      // Only allow Google Maps related URLs, not generic Google search
+      return domain.includes('maps.google') || 
+             domain.includes('google.com/maps') || 
+             domain.includes('g.page') || 
+             (domain.includes('goo.gl') && domain.includes('maps'));
+    }
+    
+    return isMerchant;
   }
 
   private scoreMerchant(domain: string, title: string): number {
