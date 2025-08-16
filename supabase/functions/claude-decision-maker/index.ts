@@ -71,26 +71,34 @@ RÈGLES CRITIQUES POUR LA DESCRIPTION:
 5. Concentrez-vous sur la VALEUR AJOUTÉE et l'UTILITÉ concrète
 6. Maximum 150 mots pour la description
 
-RÈGLES CRITIQUES POUR LES LIENS D'ACHAT (shoppingLinks):
+RÈGLES CRITIQUES POUR LES LIENS D'ACHAT - CONFORMITÉ STRICTE REQUISE:
 - Langue détectée: ${detectedLanguage.toUpperCase()} - Pays: ${config.country}
-- Pour les produits/services recommandés, fournir 2-4 liens d'achat PRIORITAIRES:
-  1. Page officielle du produit/marque (si applicable)
-  2. 1-2 revendeurs officiels majeurs (${config.domains})
-  3. 1 option d'occasion certifiée (si pertinent)
-- URLs RÉELLES et FONCTIONNELLES uniquement - pas d'exemples
-- Si un produit n'est plus vendu neuf, omettre ce type de lien
-- ADAPTER PRÉCISÉMENT au contexte par verticale:
-  * RESTAURANTS/DINING: 1 site officiel restaurant + 1-2 plateformes de réservation (thefork.fr, opentable.fr, etc.) - JAMAIS de liens hôtels
-  * HÉBERGEMENT: 1 site officiel hôtel + 1-2 plateformes de réservation (booking.com, expedia.fr, etc.) - JAMAIS de liens restaurants
-  * AUTOMOBILES: 1 lien officiel constructeur + 1-2 concessionnaires/revendeurs + 1-2 occasions certifiées (lacentrale.fr, autoscout24.fr, etc.)
-  * VOYAGES/TRANSPORT: 1 lien officiel compagnie + 1-2 plateformes de réservation transport (trainline.com, etc.)
-  * ÉLECTRONIQUE: 1 lien constructeur + 1-2 revendeurs tech certifiés + éviter fnac.com (URLs souvent cassées)
-  * LOGICIELS: 1 lien éditeur officiel + 1-2 revendeurs de licences certifiés
-- VÉRIFICATION DE COHÉRENCE: Si la question porte sur un restaurant, NE JAMAIS proposer de liens hôtels ou inversement
-- Format titre: "Nom exact du produit/service chez [Revendeur]"
-- Description: "Page officielle" ou "Revendeur certifié" ou "Marché d'occasion" ou "Plateforme de réservation"
-- Respecter la langue de l'utilisateur dans les titres et descriptions
-- Utiliser les domaines locaux appropriés au pays/langue (ex: .fr pour français, .de pour allemand)
+- DOMAINES AUTORISÉS UNIQUEMENT: ${config.domains}
+
+CONTRÔLES DE QUALITÉ OBLIGATOIRES:
+1. AVANT de générer un lien, VALIDEZ mentalement: "Ce domaine vend-il réellement ce produit?"
+2. INTERDICTION ABSOLUE: liens génériques, placeholder, example.com, ou domaines inexistants
+3. VÉRIFICATION VERTICALE: restaurant≠hôtel, voiture≠téléphone, sport≠livre
+4. TERMES SPÉCIFIQUES: "iPhone 15" PAS "téléphone", "Nike Air Max" PAS "chaussures"
+5. LIENS TESTABLES: utilisez des URL avec structure logique (ex: /search?q=produit-specifique)
+
+STRATÉGIES PAR VERTICALE - AUCUNE EXCEPTION:
+  * RESTAURANTS: SEULEMENT plateformes réservation (thefork.fr, opentable.fr) + site restaurant officiel
+    ❌ JAMAIS: liens hôtels, booking.com, expedia pour restaurants
+  * HÔTELS: SEULEMENT plateformes hébergement (booking.com, expedia.fr) + site hôtel officiel  
+    ❌ JAMAIS: liens restaurants, thefork, opentable pour hôtels
+  * PRODUITS ÉLECTRONIQUE: ${config.domains} avec termes de recherche spécifiques
+    ⚠️ FNAC: Utiliser format /search?q=[produit-exact] car URLs directes souvent cassées
+  * SPORT: Decathlon, Go Sport avec équipement spécifique (ex: "chaussures running Nike" pas "sport")
+  * AUTOMOBILES: Sites constructeurs officiels + lacentrale.fr/autoscout24.fr pour occasions
+  * LOGICIELS: Éditeur officiel + Microsoft Store/App Store si applicable
+
+FORMAT OBLIGATOIRE:
+- Titre: "[Produit exact] chez [Revendeur]" ou "Réserver [Restaurant exact]"  
+- URL: Format recherche si incertain: https://domaine.com/search?q=produit-specifique
+- Description: Préciser le type (officiel/revendeur/occasion/réservation)
+- Langue: Respecter la langue utilisateur dans titres et descriptions
+- Maximum 3-4 liens de haute qualité plutôt que beaucoup de liens médiocres
 
 IMPORTANT: 
 - Analyse en profondeur la question posée

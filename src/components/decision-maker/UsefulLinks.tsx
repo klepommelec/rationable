@@ -25,20 +25,45 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
   const contextText = `${dilemma || ''} ${recommendation || ''}`;
   const detectedVertical = I18nService.detectVertical(contextText, currentLanguage);
   
-  // Filter and sort links by relevance
+  // Enhanced relevance filtering with multiple scoring factors
   const filterRelevantLinks = (links: ILink[]) => {
-    if (!detectedVertical) return links;
-    
     return links
       .map(link => {
         const linkText = `${link.title} ${link.description || ''}`;
         const linkVertical = I18nService.detectVertical(linkText, currentLanguage);
-        const isRelevant = !linkVertical || linkVertical === detectedVertical;
-        return { ...link, relevanceScore: isRelevant ? 1 : 0 };
+        
+        let relevanceScore = 0;
+        
+        // Base relevance: vertical match or no vertical detected
+        if (!detectedVertical || !linkVertical || linkVertical === detectedVertical) {
+          relevanceScore += 5;
+        }
+        
+        // Boost for exact vertical match
+        if (detectedVertical && linkVertical === detectedVertical) {
+          relevanceScore += 10;
+        }
+        
+        // Quality indicators
+        if (link.url && link.url.includes('https://')) relevanceScore += 2;
+        if (link.description && link.description.length > 20) relevanceScore += 1;
+        if (link.title && link.title.length > 10) relevanceScore += 1;
+        
+        // Penalize obviously broken links
+        if (link.url.includes('example.com') || link.url.includes('placeholder')) {
+          relevanceScore = 0;
+        }
+        
+        // Sports merchandise boost
+        if (I18nService.detectSportsMerch(linkText, currentLanguage)) {
+          relevanceScore += 3;
+        }
+        
+        return { ...link, relevanceScore };
       })
       .filter(link => link.relevanceScore > 0)
       .sort((a, b) => b.relevanceScore - a.relevanceScore)
-      .slice(0, 8); // Limit to most relevant links
+      .slice(0, 6); // Limit to most relevant links
   };
   
   const filteredShoppingLinks = shoppingLinks ? filterRelevantLinks(shoppingLinks) : [];

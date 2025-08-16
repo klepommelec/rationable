@@ -181,7 +181,8 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
 
   const generateFallbackUrl = (title: string, query?: string, originalUrl?: string): string => {
     const searchQuery = query || title;
-    let finalQuery = searchQuery;
+    const sanitizedQuery = I18nService.sanitizeProductQuery(searchQuery);
+    let finalQuery = sanitizedQuery;
     let extractedDomain = null;
     
     // Extract domain from original URL for site-specific search
@@ -189,7 +190,6 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
       try {
         const urlObj = new URL(originalUrl.startsWith('http') ? originalUrl : `https://${originalUrl}`);
         extractedDomain = urlObj.hostname.replace('www.', '');
-        finalQuery = `${searchQuery} site:${extractedDomain}`;
       } catch {
         // Use original query if domain extraction fails
       }
@@ -198,48 +198,84 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
     // Detect vertical category with context
     const fullText = `${title} ${query || ''} ${contextText || ''}`;
     const detectedVertical = I18nService.detectVertical(fullText, currentLanguage);
-    const isAutomotive = detectedVertical === 'automotive';
-    const isDining = detectedVertical === 'dining';
-    const isAccommodation = detectedVertical === 'accommodation';
-    const isTravel = detectedVertical === 'travel';
-    const isSoftware = detectedVertical === 'software';
+    const isSportsMerch = I18nService.detectSportsMerch(fullText, currentLanguage);
     const isShoppingRelated = I18nService.isShoppingRelated(fullText, currentLanguage);
     
-    // For site-specific searches with known domains
-    if (extractedDomain) {
-      const isTrustedEcommerce = isTrustedMerchant(`https://${extractedDomain}`);
+    // Multi-step fallback system
+    const fallbackStrategies = [
+      // Strategy 1: Site-specific search for known domains
+      () => {
+        if (!extractedDomain) return null;
+        
+        const isTrustedEcommerce = isTrustedMerchant(`https://${extractedDomain}`);
+        
+        // Special handling for Fnac - always use merchant search
+        if (extractedDomain.includes('fnac.')) {
+          return I18nService.buildMerchantSearchUrl(extractedDomain, sanitizedQuery, currentLanguage);
+        }
+        
+        // For sports merchandise on trusted e-commerce sites
+        if (isSportsMerch && isTrustedEcommerce) {
+          return I18nService.buildMerchantSearchUrl(extractedDomain, `${sanitizedQuery} equipment`, currentLanguage);
+        }
+        
+        // For trusted e-commerce domains, use site-specific search
+        if (isTrustedEcommerce) {
+          return I18nService.buildMerchantSearchUrl(extractedDomain, sanitizedQuery, currentLanguage);
+        }
+        
+        // For unknown domains, use web search with site filter
+        const siteQuery = `${sanitizedQuery} site:${extractedDomain}`;
+        return I18nService.buildGoogleWebUrl(siteQuery, currentLanguage);
+      },
       
-      // Special handling for Fnac - use merchant search instead of direct links
-      if (extractedDomain.includes('fnac.')) {
-        return I18nService.buildMerchantSearchUrl(extractedDomain, query || title, currentLanguage);
-      }
+      // Strategy 2: Vertical-specific search
+      () => {
+        switch (detectedVertical) {
+          case 'dining':
+            return I18nService.buildGoogleMapsSearchUrl(
+              I18nService.buildVerticalQuery(finalQuery, 'dining', currentLanguage), 
+              currentLanguage
+            );
+          case 'accommodation':
+            return I18nService.buildGoogleWebUrl(
+              I18nService.buildVerticalQuery(finalQuery, 'accommodation', currentLanguage), 
+              currentLanguage
+            );
+          case 'automotive':
+          case 'travel':
+          case 'software':
+            return I18nService.buildGoogleWebUrl(
+              I18nService.buildVerticalQuery(finalQuery, detectedVertical, currentLanguage), 
+              currentLanguage
+            );
+          default:
+            return null;
+        }
+      },
       
-      // If it's not a trusted e-commerce domain, use Web search (not Shopping)
-      if (!isTrustedEcommerce) {
+      // Strategy 3: Product/shopping search
+      () => {
+        if (isShoppingRelated || isSportsMerch) {
+          const enhancedQuery = isSportsMerch ? `${sanitizedQuery} equipment gear` : sanitizedQuery;
+          return I18nService.buildGoogleShoppingUrl(enhancedQuery, currentLanguage);
+        }
+        return null;
+      },
+      
+      // Strategy 4: Default web search
+      () => {
         return I18nService.buildGoogleWebUrl(finalQuery, currentLanguage);
       }
+    ];
+    
+    // Execute strategies in order until one succeeds
+    for (const strategy of fallbackStrategies) {
+      const result = strategy();
+      if (result) return result;
     }
     
-    // Vertical-specific fallback logic
-    if (isDining) {
-      return I18nService.buildGoogleMapsSearchUrl(I18nService.buildVerticalQuery(finalQuery, 'dining', currentLanguage), currentLanguage);
-    }
-    
-    if (isAccommodation) {
-      return I18nService.buildGoogleWebUrl(I18nService.buildVerticalQuery(finalQuery, 'accommodation', currentLanguage), currentLanguage);
-    }
-    
-    // For specific verticals that work better with Web search
-    if (isAutomotive || isTravel || isSoftware) {
-      return I18nService.buildGoogleWebUrl(finalQuery, currentLanguage);
-    }
-    
-    // For retail/e-commerce, use Shopping search
-    if (isShoppingRelated) {
-      return I18nService.buildGoogleShoppingUrl(finalQuery, currentLanguage);
-    }
-    
-    // Default to regular localized Google Web search
+    // Final fallback (should never reach here)
     return I18nService.buildGoogleWebUrl(finalQuery, currentLanguage);
   };
 

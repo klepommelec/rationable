@@ -523,9 +523,88 @@ export class I18nService {
     return `https://www.google.${config.googleTLD}/maps/search/${encodedQuery}/@0,0,15z?hl=${config.uiLanguage}&gl=${config.countryCode}`;
   }
 
+  static sanitizeProductQuery(query: string): string {
+    return query
+      .replace(/["']/g, '') // Remove quotes
+      .replace(/\b(le|la|les|un|une|des|the|a|an|el|il|der|die|das)\b/gi, '') // Remove articles
+      .replace(/\s+/g, ' ') // Normalize spaces
+      .trim();
+  }
+
+  static normalizeProductTermsToEN(text: string, language?: SupportedLanguage): string {
+    const lang = language || this.currentLanguage;
+    
+    const translations: Record<SupportedLanguage, Record<string, string>> = {
+      fr: {
+        'téléphone': 'phone', 'ordinateur': 'computer', 'voiture': 'car',
+        'chaussures': 'shoes', 'vêtements': 'clothing', 'livre': 'book',
+        'sport': 'sports', 'équipement': 'equipment'
+      },
+      es: {
+        'teléfono': 'phone', 'ordenador': 'computer', 'coche': 'car',
+        'zapatos': 'shoes', 'ropa': 'clothing', 'libro': 'book',
+        'deporte': 'sports', 'equipo': 'equipment'
+      },
+      it: {
+        'telefono': 'phone', 'computer': 'computer', 'macchina': 'car',
+        'scarpe': 'shoes', 'vestiti': 'clothing', 'libro': 'book',
+        'sport': 'sports', 'attrezzatura': 'equipment'
+      },
+      de: {
+        'telefon': 'phone', 'computer': 'computer', 'auto': 'car',
+        'schuhe': 'shoes', 'kleidung': 'clothing', 'buch': 'book',
+        'sport': 'sports', 'ausrüstung': 'equipment'
+      },
+      en: {} // No translation needed
+    };
+
+    let normalizedText = text.toLowerCase();
+    const langTranslations = translations[lang] || {};
+    
+    Object.entries(langTranslations).forEach(([original, english]) => {
+      const regex = new RegExp(`\\b${original}\\b`, 'gi');
+      normalizedText = normalizedText.replace(regex, english);
+    });
+    
+    return normalizedText;
+  }
+
+  static detectSportsMerch(text: string, language?: SupportedLanguage): boolean {
+    const lang = language || this.currentLanguage;
+    const sportsKeywords = {
+      fr: ['sport', 'équipement', 'fitness', 'course', 'tennis', 'football', 'basket', 'vélo', 'natation'],
+      en: ['sports', 'equipment', 'fitness', 'running', 'tennis', 'football', 'basketball', 'cycling', 'swimming'],
+      es: ['deporte', 'equipo', 'fitness', 'correr', 'tenis', 'fútbol', 'baloncesto', 'ciclismo', 'natación'],
+      it: ['sport', 'attrezzatura', 'fitness', 'corsa', 'tennis', 'calcio', 'pallacanestro', 'ciclismo', 'nuoto'],
+      de: ['sport', 'ausrüstung', 'fitness', 'laufen', 'tennis', 'fußball', 'basketball', 'radfahren', 'schwimmen']
+    };
+    
+    const keywords = sportsKeywords[lang] || sportsKeywords.en;
+    const lowerText = text.toLowerCase();
+    return keywords.some(keyword => lowerText.includes(keyword));
+  }
+
   static buildMerchantSearchUrl(merchantDomain: string, query: string, language?: SupportedLanguage): string {
     const config = this.getShoppingConfig(language);
-    const searchQuery = `site:${merchantDomain} ${query}`;
+    const sanitizedQuery = this.sanitizeProductQuery(query);
+    const normalizedQuery = this.normalizeProductTermsToEN(sanitizedQuery, language);
+    
+    // Special handling for specific merchants
+    if (merchantDomain.includes('fnac.')) {
+      const searchQuery = `site:${merchantDomain} ${normalizedQuery}`;
+      const encodedQuery = encodeURIComponent(searchQuery);
+      return `https://www.google.${config.googleTLD}/search?q=${encodedQuery}&hl=${config.uiLanguage}&gl=${config.countryCode}`;
+    }
+    
+    // For sports merchandise, use more specific terms
+    if (this.detectSportsMerch(query, language)) {
+      const sportsQuery = `site:${merchantDomain} ${normalizedQuery} equipment gear`;
+      const encodedQuery = encodeURIComponent(sportsQuery);
+      return `https://www.google.${config.googleTLD}/search?q=${encodedQuery}&hl=${config.uiLanguage}&gl=${config.countryCode}`;
+    }
+    
+    // Default merchant search
+    const searchQuery = `site:${merchantDomain} ${normalizedQuery}`;
     const encodedQuery = encodeURIComponent(searchQuery);
     return `https://www.google.${config.googleTLD}/search?q=${encodedQuery}&hl=${config.uiLanguage}&gl=${config.countryCode}`;
   }
