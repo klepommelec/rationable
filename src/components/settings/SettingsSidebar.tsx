@@ -1,5 +1,5 @@
 
-import { User, Lightbulb, Bell, Shield, Database, LogOut, Building2, FileText } from 'lucide-react';
+import { User, Lightbulb, Bell, Shield, Database, LogOut, Building2, FileText, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -36,6 +36,10 @@ const settingsSections = [{
   id: 'data',
   label: 'Gestion des données',
   icon: Database
+}, {
+  id: 'admin',
+  label: 'Administration',
+  icon: Settings
 }];
 
 const SettingsSidebar = ({

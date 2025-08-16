@@ -275,7 +275,7 @@ const DecisionMaker = () => {
         
         {displayStep === 'loading-options' && <OptionsLoadingSkeleton />}
         
-        {displayStep === 'done' && <AnalysisResult result={displayResult} isUpdating={isUpdating} clearSession={clearAll} analysisStep={displayStep} currentDecision={getCurrentDecision()} dilemma={displayDilemma} onUpdateDecision={updatedDecision => {
+        {displayStep === 'done' && <AnalysisResult result={displayResult} isUpdating={isUpdating} analysisStep={displayStep} currentDecision={getCurrentDecision()} dilemma={displayDilemma} onUpdateDecision={updatedDecision => {
         // Mettre à jour la décision dans l'état global
         console.log('Decision updated:', updatedDecision);
       }} onFollowUpQuestion={handleFollowUpQuestion} />}

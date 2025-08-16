@@ -14,7 +14,6 @@ import { DataAccuracyIndicator } from './DataAccuracyIndicator';
 interface AnalysisResultProps {
   result: IResult | null;
   isUpdating: boolean;
-  clearSession: () => void;
   analysisStep: string;
   currentDecision: IDecision | null;
   dilemma: string;
@@ -25,7 +24,6 @@ interface AnalysisResultProps {
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
   result,
   isUpdating,
-  clearSession,
   analysisStep,
   currentDecision,
   dilemma,
@@ -63,7 +61,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         result={result}
         dilemma={dilemma}
         currentDecision={currentDecision}
-        clearSession={clearSession}
       />
       
       <UsefulLinks 

@@ -9,23 +9,17 @@ import { DataAccuracyIndicator } from './DataAccuracyIndicator';
 import { WorkspaceDocumentIndicator } from './WorkspaceDocumentIndicator';
 import { AIProviderIndicator } from './AIProviderIndicator';
 import ValidatedLink from '@/components/ValidatedLink';
-import { ExternalLink, RotateCcw, Lightbulb, BarChart3, Activity, CheckCircle, Target, Zap } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AIProviderDashboard } from './AIProviderDashboard';
-import { AIProviderMonitor } from './AIProviderMonitor';
+import { ExternalLink, Lightbulb, CheckCircle } from 'lucide-react';
 import { ExpandableText } from '@/components/ExpandableText';
 interface RecommendationCardProps {
   result: IResult;
   dilemma: string;
   currentDecision: any;
-  clearSession: () => void;
 }
 export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   result,
   dilemma,
-  currentDecision,
-  clearSession
+  currentDecision
 }) => {
   const topOption = result.breakdown?.[0];
   
@@ -43,96 +37,18 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
       <CardContent className="space-y-6 pt-6">
         <div className="flex flex-col gap-6">
           <div className="w-full space-y-4">
-            {/* Layout mobile : boutons sur plusieurs lignes */}
-            <div className="sm:hidden space-y-3">
+            {/* Layout mobile : badge centré */}
+            <div className="sm:hidden">
               <Badge variant="secondary" className={`${config.badgeColor} w-fit`}>
                 {config.badge}
               </Badge>
-              
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" onClick={clearSession} className="flex items-center gap-2">
-                  <RotateCcw className="h-4 w-4" />
-                  Nouvelle analyse
-                </Button>
-                
-                {import.meta.env.DEV && <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4" />
-                        Dashboard AI
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Dashboard AI Providers</DialogTitle>
-                      </DialogHeader>
-                      <Tabs defaultValue="dashboard" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2">
-                          <TabsTrigger value="dashboard">
-                            <BarChart3 className="h-4 w-4 mr-2" />
-                            Statistiques
-                          </TabsTrigger>
-                          <TabsTrigger value="monitoring">
-                            <Activity className="h-4 w-4 mr-2" />
-                            Monitoring
-                          </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="dashboard" className="mt-4">
-                          <AIProviderDashboard />
-                        </TabsContent>
-                        <TabsContent value="monitoring" className="mt-4">
-                          <AIProviderMonitor />
-                        </TabsContent>
-                      </Tabs>
-                    </DialogContent>
-                  </Dialog>}
-              </div>
             </div>
             
-            {/* Layout desktop : badge et boutons sur la même ligne */}
-            <div className="hidden sm:flex items-start justify-between gap-4 w-full">
+            {/* Layout desktop : badge simple */}
+            <div className="hidden sm:block">
               <Badge variant="secondary" className={`${config.badgeColor}`}>
                 {config.badge}
               </Badge>
-              
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <Button variant="outline" size="sm" onClick={clearSession} className="flex items-center gap-2">
-                  <RotateCcw className="h-4 w-4" />
-                  Nouvelle analyse
-                </Button>
-                
-                {import.meta.env.DEV && <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4" />
-                        Dashboard AI
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Dashboard AI Providers</DialogTitle>
-                      </DialogHeader>
-                      <Tabs defaultValue="dashboard" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2">
-                          <TabsTrigger value="dashboard">
-                            <BarChart3 className="h-4 w-4 mr-2" />
-                            Statistiques
-                          </TabsTrigger>
-                          <TabsTrigger value="monitoring">
-                            <Activity className="h-4 w-4 mr-2" />
-                            Monitoring
-                          </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="dashboard" className="mt-4">
-                          <AIProviderDashboard />
-                        </TabsContent>
-                        <TabsContent value="monitoring" className="mt-4">
-                          <AIProviderMonitor />
-                        </TabsContent>
-                      </Tabs>
-                    </DialogContent>
-                  </Dialog>}
-              </div>
             </div>
             
             <h2 className={`text-2xl font-semibold leading-snug ${config.titleColor} w-full max-w-full sm:max-w-[75%]`}>

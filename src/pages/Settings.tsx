@@ -8,8 +8,8 @@ import AppPreferencesSettings from '@/components/settings/AppPreferencesSettings
 import DataManagementSettings from '@/components/settings/DataManagementSettings';
 import { WorkspacesSettings } from '@/components/settings/WorkspacesSettings';
 import DocumentsSettings from '@/components/workspace/DocumentsSettings';
+import AdminSettings from '@/components/settings/AdminSettings';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
-import { SecurityNotice } from '@/components/SecurityNotice';
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState('profile');
@@ -31,6 +31,8 @@ const Settings = () => {
         return <AppPreferencesSettings />;
       case 'data':
         return <DataManagementSettings />;
+      case 'admin':
+        return <AdminSettings />;
       default:
         return <ProfileSettings />;
     }
@@ -44,7 +46,8 @@ const Settings = () => {
       appearance: 'Apparence',
       notifications: 'Notifications',
       preferences: 'Préférences de l\'application',
-      data: 'Gestion des données'
+      data: 'Gestion des données',
+      admin: 'Administration'
     };
     return titles[activeSection as keyof typeof titles] || 'Paramètres';
   };
@@ -64,10 +67,6 @@ const Settings = () => {
             </p>
           </div>
           
-          {/* Security notice for admin users */}
-          <div className="mb-6">
-            <SecurityNotice />
-          </div>
           {renderActiveSection()}
         </div>
       </div>
