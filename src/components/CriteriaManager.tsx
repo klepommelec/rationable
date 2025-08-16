@@ -15,6 +15,7 @@ interface CriteriaManagerProps {
   onUpdateAnalysis?: () => void;
   hasChanges?: boolean;
   currentDecisionId?: string | null;
+  isNewDecision?: boolean;
 }
 export const CriteriaManager = ({
   criteria,
@@ -22,7 +23,8 @@ export const CriteriaManager = ({
   isInteractionDisabled,
   onUpdateAnalysis,
   hasChanges = false,
-  currentDecisionId
+  currentDecisionId,
+  isNewDecision = false
 }: CriteriaManagerProps) => {
   const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
   const [lastCriteriaCount, setLastCriteriaCount] = useState(0);
@@ -100,7 +102,7 @@ export const CriteriaManager = ({
     setCriteria(items => [...items, newCriterion]);
     toast.success("Nouveau critère ajouté.");
   };
-  return <Collapsible defaultOpen className="p-4 animate-fade-in shadow-neutral-500 rounded-xl border shadow-200 bg-background ">
+  return <Collapsible defaultOpen={isNewDecision} className="p-4 animate-fade-in shadow-neutral-500 rounded-xl border shadow-200 bg-background ">
       <CollapsibleTrigger className="flex justify-between items-center w-full group">
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-lg text-left">

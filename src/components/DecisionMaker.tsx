@@ -262,7 +262,7 @@ const DecisionMaker = () => {
             
             {/* Afficher les critères uniquement pour les questions comparatives */}
             {shouldShowCriteria && <div className="w-full mb-6 px-0">
-                <CriteriaManager criteria={displayCriteria} setCriteria={setCriteria} isInteractionDisabled={displayStep === 'loading-options' || isLoading || isUpdating || Boolean(isLockedToOther)} onUpdateAnalysis={handleManualUpdate} hasChanges={hasChanges} currentDecisionId={currentDecision?.id} />
+                <CriteriaManager criteria={displayCriteria} setCriteria={setCriteria} isInteractionDisabled={displayStep === 'loading-options' || isLoading || isUpdating || Boolean(isLockedToOther)} onUpdateAnalysis={handleManualUpdate} hasChanges={hasChanges} currentDecisionId={currentDecision?.id} isNewDecision={displayStep === 'criteria-loaded' && !currentDecision?.id} />
               </div>}
           </>}
 
