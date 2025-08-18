@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Upload, X, Camera } from 'lucide-react';
 import { toast } from "sonner";
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface AvatarUploadProps {
   currentAvatarUrl?: string | null;
@@ -23,6 +24,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
 }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const { t } = useI18nUI();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (disabled || acceptedFiles.length === 0) return;
@@ -31,7 +33,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
     
     // Validation de la taille (2MB max pour les avatars)
     if (file.size > 2 * 1024 * 1024) {
-      toast.error('L\'image est trop volumineuse (max 2MB)');
+      toast.error(t('profile.avatar.tooBig'));
       return;
     }
 
@@ -45,10 +47,10 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
       // Uploader le fichier
       await onAvatarChange(file);
       
-      toast.success('Avatar mis à jour avec succès');
+      toast.success(t('profile.avatar.uploadSuccess'));
     } catch (error) {
       console.error('Erreur lors de l\'upload de l\'avatar:', error);
-      toast.error('Erreur lors de la mise à jour de l\'avatar');
+      toast.error(t('profile.avatar.uploadError'));
       setPreviewUrl(null);
     } finally {
       setIsUploading(false);
@@ -72,10 +74,10 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
     try {
       await onAvatarDelete();
       setPreviewUrl(null);
-      toast.success('Avatar supprimé avec succès');
+      toast.success(t('profile.avatar.deleteSuccess'));
     } catch (error) {
       console.error('Erreur lors de la suppression de l\'avatar:', error);
-      toast.error('Erreur lors de la suppression de l\'avatar');
+      toast.error(t('profile.avatar.deleteError'));
     } finally {
       setIsUploading(false);
     }
@@ -141,11 +143,11 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
           )}
           <div className="text-sm">
             {isDragActive ? (
-              <p className="text-primary">Déposez l'image ici...</p>
+              <p className="text-primary">{t('profile.avatar.dropHere')}</p>
             ) : (
               <div>
-                <p className="font-medium">Changer l'avatar</p>
-                <p className="text-muted-foreground text-xs">PNG, JPG, WebP (max 2MB)</p>
+                <p className="font-medium">{t('profile.avatar.change')}</p>
+                <p className="text-muted-foreground text-xs">{t('profile.avatar.formatSupport')}</p>
               </div>
             )}
           </div>

@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import SettingsSidebar from '@/components/settings/SettingsSidebar';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 import ProfileSettings from '@/components/settings/ProfileSettings';
 import AppearanceSettings from '@/components/settings/AppearanceSettings';
 import NotificationSettings from '@/components/settings/NotificationSettings';
@@ -14,6 +15,7 @@ import { useWorkspaces } from '@/hooks/useWorkspaces';
 const Settings = () => {
   const [activeSection, setActiveSection] = useState('profile');
   const { currentWorkspace } = useWorkspaces();
+  const { t } = useI18nUI();
 
   const renderActiveSection = () => {
     switch (activeSection) {
@@ -22,7 +24,7 @@ const Settings = () => {
       case 'workspaces':
         return <WorkspacesSettings />;
       case 'documents':
-        return currentWorkspace ? <DocumentsSettings workspaceId={currentWorkspace.id} /> : <div>Sélectionnez un workspace</div>;
+        return currentWorkspace ? <DocumentsSettings workspaceId={currentWorkspace.id} /> : <div>{t('settings.header.selectWorkspace')}</div>;
       case 'appearance':
         return <AppearanceSettings />;
       case 'notifications':
@@ -39,17 +41,18 @@ const Settings = () => {
   };
 
   const getSectionTitle = () => {
-    const titles = {
-      profile: 'Profil',
-      workspaces: 'Workspaces',
-      documents: 'Documents',
-      appearance: 'Apparence',
-      notifications: 'Notifications',
-      preferences: 'Préférences de l\'application',
-      data: 'Gestion des données',
-      admin: 'Administration'
+    const titleKeys = {
+      profile: 'settings.sidebar.profile',
+      workspaces: 'settings.sidebar.workspaces',
+      documents: 'settings.sidebar.documents',
+      appearance: 'settings.sidebar.appearance',
+      notifications: 'settings.sidebar.notifications',
+      preferences: 'settings.sidebar.preferences',
+      data: 'settings.sidebar.data',
+      admin: 'settings.sidebar.admin'
     };
-    return titles[activeSection as keyof typeof titles] || 'Paramètres';
+    const titleKey = titleKeys[activeSection as keyof typeof titleKeys];
+    return titleKey ? t(titleKey) : t('settings.sidebar.profile');
   };
 
   return (
@@ -63,7 +66,7 @@ const Settings = () => {
           <div className="mb-6">
             <h1 className="text-3xl font-bold">{getSectionTitle()}</h1>
             <p className="text-muted-foreground">
-              Gérez vos préférences et paramètres de compte
+              {t('settings.header.subtitle')}
             </p>
           </div>
           

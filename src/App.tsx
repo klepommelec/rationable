@@ -13,6 +13,7 @@ import Auth from "./pages/Auth";
 import { ThemeProvider } from "./components/theme-provider";
 import { AuthProvider } from "./hooks/useAuth";
 import { DecisionMakerProvider } from "./contexts/DecisionMakerContext";
+import { I18nUIProvider } from "./contexts/I18nUIContext";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -26,8 +27,9 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            <DecisionMakerProvider>
-              <Routes>
+            <I18nUIProvider>
+              <DecisionMakerProvider>
+                <Routes>
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/shared/:publicId" element={<SharedDecision />} />
                 <Route element={<Layout />}>
@@ -48,8 +50,9 @@ const App = () => (
                   } />
                 </Route>
                 <Route path="*" element={<NotFound />} />
-              </Routes>
-            </DecisionMakerProvider>
+                </Routes>
+              </DecisionMakerProvider>
+            </I18nUIProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

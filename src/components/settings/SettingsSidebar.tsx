@@ -2,43 +2,44 @@
 import { User, Lightbulb, Bell, Shield, Database, LogOut, Building2, FileText, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface SettingsSidebarProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
 }
 
-const settingsSections = [{
+const getSettingsSections = (t: (key: string) => string) => [{
   id: 'profile',
-  label: 'Profil',
+  label: t('settings.sidebar.profile'),
   icon: User
 }, {
   id: 'workspaces',
-  label: 'Workspaces',
+  label: t('settings.sidebar.workspaces'),
   icon: Building2
 }, {
   id: 'appearance',
-  label: 'Apparence',
+  label: t('settings.sidebar.appearance'),
   icon: Lightbulb
 }, {
   id: 'notifications',
-  label: 'Notifications',
+  label: t('settings.sidebar.notifications'),
   icon: Bell
 }, {
   id: 'preferences',
-  label: 'Préférences',
+  label: t('settings.sidebar.preferences'),
   icon: Shield
 }, {
   id: 'documents',
-  label: 'Documents',
+  label: t('settings.sidebar.documents'),
   icon: FileText
 }, {
   id: 'data',
-  label: 'Gestion des données',
+  label: t('settings.sidebar.data'),
   icon: Database
 }, {
   id: 'admin',
-  label: 'Administration',
+  label: t('settings.sidebar.admin'),
   icon: Settings
 }];
 
@@ -47,6 +48,8 @@ const SettingsSidebar = ({
   onSectionChange
 }: SettingsSidebarProps) => {
   const { signOut } = useAuth();
+  const { t } = useI18nUI();
+  const settingsSections = getSettingsSections(t);
 
   const handleSignOut = async () => {
     await signOut();

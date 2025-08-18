@@ -10,10 +10,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import AvatarUpload from '@/components/AvatarUpload';
 import { I18nService, SupportedLanguage } from '@/services/i18nService';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 const ProfileSettings = () => {
   const { user, profile, updateProfile, updateAvatar, deleteAvatar } = useAuth();
   const { toast } = useToast();
+  const { t } = useI18nUI();
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>('fr');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -34,19 +36,19 @@ const ProfileSettings = () => {
       if (error) {
         toast({
           title: "Erreur",
-          description: "Une erreur est survenue lors de la mise à jour du profil.",
+          description: t('profile.info.savedError'),
           variant: "destructive",
         });
       } else {
         toast({
           title: "Profil mis à jour",
-          description: "Vos modifications ont été enregistrées avec succès.",
+          description: t('profile.info.savedSuccess'),
         });
       }
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la mise à jour du profil.",
+        description: t('profile.info.savedError'),
         variant: "destructive",
       });
     } finally {
@@ -75,8 +77,8 @@ const ProfileSettings = () => {
     I18nService.setLanguage(language);
     setCurrentLanguage(language);
     toast({
-      title: "Langue mise à jour",
-      description: "La langue de l'interface a été modifiée.",
+      title: t('profile.language.toastTitle'),
+      description: t('profile.language.toastDesc'),
     });
     // Rechargement pour appliquer la langue partout
     setTimeout(() => window.location.reload(), 100);
@@ -91,10 +93,10 @@ const ProfileSettings = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Photo de profil
+            {t('profile.avatar.title')}
           </CardTitle>
           <CardDescription>
-            Téléchargez une photo de profil pour personnaliser votre compte
+            {t('profile.avatar.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -114,16 +116,16 @@ const ProfileSettings = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Informations personnelles
+            {t('profile.info.title')}
           </CardTitle>
           <CardDescription>
-            Informations de votre compte
+            {t('profile.info.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('profile.info.email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -133,12 +135,12 @@ const ProfileSettings = () => {
               />
             </div>
             <div>
-              <Label htmlFor="fullName">Nom complet</Label>
+              <Label htmlFor="fullName">{t('profile.info.fullName')}</Label>
               <Input
                 id="fullName"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Votre nom complet"
+                placeholder={t('profile.info.fullNamePlaceholder')}
                 className="mt-1"
               />
             </div>
@@ -147,7 +149,7 @@ const ProfileSettings = () => {
             onClick={handleSaveProfile}
             disabled={isUpdating || !hasChanges}
           >
-            {isUpdating ? 'Sauvegarde...' : 'Sauvegarder le profil'}
+            {isUpdating ? t('profile.info.saving') : t('profile.info.save')}
           </Button>
         </CardContent>
       </Card>
@@ -157,18 +159,18 @@ const ProfileSettings = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Globe className="h-5 w-5" />
-            Langue de l'interface
+            {t('profile.language.title')}
           </CardTitle>
           <CardDescription>
-            Choisissez la langue d'affichage de l'application
+            {t('profile.language.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <Label htmlFor="language">Langue</Label>
+            <Label htmlFor="language">{t('profile.language.label')}</Label>
             <Select value={currentLanguage} onValueChange={handleLanguageChange}>
               <SelectTrigger className="w-full max-w-xs">
-                <SelectValue placeholder="Sélectionnez une langue" />
+                <SelectValue placeholder={t('profile.language.placeholder')} />
               </SelectTrigger>
               <SelectContent>
                 {languages.map((language) => (
@@ -179,7 +181,7 @@ const ProfileSettings = () => {
               </SelectContent>
             </Select>
             <p className="text-sm text-muted-foreground">
-              La langue s'applique immédiatement à toute l'interface.
+              {t('profile.language.helpText')}
             </p>
           </div>
         </CardContent>
