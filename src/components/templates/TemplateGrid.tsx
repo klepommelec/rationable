@@ -4,6 +4,7 @@ import { User, Briefcase } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import TemplateCard from './TemplateCard';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface TemplateGridProps {
   templates: any[];
@@ -24,6 +25,7 @@ const TemplateGrid = ({
   onResetFilters,
   userContext
 }: TemplateGridProps) => {
+  const { t } = useI18nUI();
   if (showPredefined) {
     // Afficher les templates dans l'ordre basé sur le contexte utilisateur
     const isPersonalContext = userContext === 'personal';
@@ -31,8 +33,8 @@ const TemplateGrid = ({
     const secondaryTemplates = isPersonalContext ? filteredProfessionalTemplates : filteredPersonalTemplates;
     const primaryIcon = isPersonalContext ? User : Briefcase;
     const secondaryIcon = isPersonalContext ? Briefcase : User;
-    const primaryTitle = isPersonalContext ? "Usage Personnel" : "Usage Professionnel";
-    const secondaryTitle = isPersonalContext ? "Usage Professionnel" : "Usage Personnel";
+    const primaryTitle = isPersonalContext ? t('templates.grid.personalTitle') : t('templates.grid.professionalTitle');
+    const secondaryTitle = isPersonalContext ? t('templates.grid.professionalTitle') : t('templates.grid.personalTitle');
     const primaryColor = isPersonalContext ? "text-blue-600" : "text-green-600";
     const secondaryColor = isPersonalContext ? "text-green-600" : "text-blue-600";
 
@@ -45,7 +47,7 @@ const TemplateGrid = ({
               {React.createElement(primaryIcon, { className: `h-5 w-5 ${primaryColor}` })}
               <h2 className="text-xl font-semibold">{primaryTitle}</h2>
               <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-md">
-                Recommandé pour vous
+                {t('templates.grid.recommendedBadge')}
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -83,10 +85,10 @@ const TemplateGrid = ({
           <Card className="text-center py-12">
             <CardContent>
               <p className="text-muted-foreground text-lg mb-4">
-                Aucun template trouvé pour vos critères de recherche.
+                {t('templates.grid.emptyMessage')}
               </p>
               <Button onClick={onResetFilters}>
-                Réinitialiser les filtres
+                {t('templates.grid.resetFilters')}
               </Button>
             </CardContent>
           </Card>
@@ -100,10 +102,10 @@ const TemplateGrid = ({
       <Card className="text-center py-12">
         <CardContent>
           <p className="text-muted-foreground text-lg mb-4">
-            Aucun template trouvé pour vos critères de recherche.
+            {t('templates.grid.emptyMessage')}
           </p>
           <Button onClick={onResetFilters}>
-            Réinitialiser les filtres
+            {t('templates.grid.resetFilters')}
           </Button>
         </CardContent>
       </Card>

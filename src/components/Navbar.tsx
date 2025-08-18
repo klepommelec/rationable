@@ -8,11 +8,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { useDecisionMakerContext } from '@/contexts/DecisionMakerContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { WorkspaceSelector } from '@/components/workspace/WorkspaceSelector';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useI18nUI();
   const {
     user,
     profile,
@@ -58,12 +60,12 @@ const Navbar: React.FC = () => {
     await signOut();
   };
   const getUserDisplayName = () => {
-    const fullName = profile?.full_name || user?.email?.split('@')[0] || 'Utilisateur';
+    const fullName = profile?.full_name || user?.email?.split('@')[0] || t('navbar.userFallback');
     // Extraire seulement le prénom (premier mot)
     return fullName.split(' ')[0];
   };
   const getUserInitials = () => {
-    const fullName = profile?.full_name || user?.email?.split('@')[0] || 'Utilisateur';
+    const fullName = profile?.full_name || user?.email?.split('@')[0] || t('navbar.userFallback');
     return fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
   return <header className={`sticky top-0 z-50 w-full transition-all duration-150 ${isScrolled ? 'bg-background/95 backdrop-blur border-b border-border supports-[backdrop-filter]:bg-background/90' : isSettingsPage ? 'bg-transparent border-b border-border' : 'bg-transparent'}`}>
@@ -88,7 +90,7 @@ const Navbar: React.FC = () => {
                 <Link to="/templates">
                   <Button variant="ghost" size="sm">
                     <Users className="h-4 w-4 mr-2" />
-                    <span className="hidden sm:inline">Templates</span>
+                    <span className="hidden sm:inline">{t('navbar.templates')}</span>
                   </Button>
                 </Link>
               )}
@@ -116,7 +118,7 @@ const Navbar: React.FC = () => {
                   <DropdownMenuItem asChild>
                     <Link to="/settings">
                       <Settings className="h-4 w-4 mr-2" />
-                      Paramètres
+                      {t('navbar.settings')}
                     </Link>
                   </DropdownMenuItem>
                   
@@ -124,7 +126,7 @@ const Navbar: React.FC = () => {
                   
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="h-4 w-4 mr-2" />
-                    Se déconnecter
+                    {t('navbar.signOut')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -133,7 +135,7 @@ const Navbar: React.FC = () => {
               {currentDecision && <ShareButton decision={currentDecision} />}
             </> : <Link to="/auth">
               <Button variant="default" size="sm">
-                Se connecter
+                {t('navbar.signIn')}
               </Button>
             </Link>}
         </div>

@@ -49,6 +49,75 @@ export interface UITranslations {
       toastDesc: string;
     };
   };
+  navbar: {
+    templates: string;
+    settings: string;
+    signIn: string;
+    signOut: string;
+    userFallback: string;
+  };
+  footer: {
+    allRightsReserved: string;
+  };
+  templates: {
+    page: {
+      title: string;
+      description: string;
+    };
+    filters: {
+      searchPlaceholder: string;
+      categoryAll: string;
+      sort: {
+        newest: string;
+        popular: string;
+        mostCopied: string;
+      };
+    };
+    grid: {
+      personalTitle: string;
+      professionalTitle: string;
+      recommendedBadge: string;
+      emptyMessage: string;
+      resetFilters: string;
+    };
+    card: {
+      byAuthor: string;
+      open: string;
+    };
+    errors: {
+      loadError: string;
+      openError: string;
+    };
+  };
+  auth: {
+    title: string;
+    description: string;
+    tabs: {
+      signIn: string;
+      signUp: string;
+    };
+    fields: {
+      email: string;
+      password: string;
+      fullName: string;
+      confirmPassword: string;
+    };
+    actions: {
+      signIn: string;
+      signUp: string;
+      createAccount: string;
+    };
+    errors: {
+      passwordsMismatch: string;
+      passwordTooShort: string;
+    };
+    messages: {
+      accountCreated: string;
+    };
+  };
+  sharedDecision: {
+    signIn: string;
+  };
 }
 
 export const translations: Record<'fr' | 'en', UITranslations> = {
@@ -103,6 +172,75 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         toastDesc: 'La langue de l\'interface a été modifiée.',
       },
     },
+    navbar: {
+      templates: 'Templates',
+      settings: 'Paramètres',
+      signIn: 'Se connecter',
+      signOut: 'Se déconnecter',
+      userFallback: 'Utilisateur',
+    },
+    footer: {
+      allRightsReserved: 'Tous droits réservés.',
+    },
+    templates: {
+      page: {
+        title: 'Templates Communautaires',
+        description: 'Découvrez et utilisez des templates créés par la communauté pour vous aider dans vos décisions.',
+      },
+      filters: {
+        searchPlaceholder: 'Rechercher des templates...',
+        categoryAll: 'Toutes les catégories',
+        sort: {
+          newest: 'Plus récents',
+          popular: 'Plus populaires',
+          mostCopied: 'Plus copiés',
+        },
+      },
+      grid: {
+        personalTitle: 'Usage Personnel',
+        professionalTitle: 'Usage Professionnel',
+        recommendedBadge: 'Recommandé pour vous',
+        emptyMessage: 'Aucun template trouvé pour vos critères de recherche.',
+        resetFilters: 'Réinitialiser les filtres',
+      },
+      card: {
+        byAuthor: 'par',
+        open: 'Ouvrir',
+      },
+      errors: {
+        loadError: 'Erreur lors du chargement des templates',
+        openError: 'Erreur lors de l\'ouverture du template',
+      },
+    },
+    auth: {
+      title: 'Bienvenue',
+      description: 'Connectez-vous ou créez un compte pour commencer à prendre des décisions éclairées',
+      tabs: {
+        signIn: 'Connexion',
+        signUp: 'Inscription',
+      },
+      fields: {
+        email: 'Email',
+        password: 'Mot de passe',
+        fullName: 'Nom complet',
+        confirmPassword: 'Confirmer le mot de passe',
+      },
+      actions: {
+        signIn: 'Se connecter',
+        signUp: 'Créer un compte',
+        createAccount: 'Créer un compte',
+      },
+      errors: {
+        passwordsMismatch: 'Les mots de passe ne correspondent pas',
+        passwordTooShort: 'Le mot de passe doit contenir au moins 6 caractères',
+      },
+      messages: {
+        accountCreated: 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.',
+      },
+    },
+    sharedDecision: {
+      signIn: 'Se connecter',
+    },
   },
   en: {
     settings: {
@@ -154,6 +292,75 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         toastTitle: 'Language updated',
         toastDesc: 'The interface language has been changed.',
       },
+    },
+    navbar: {
+      templates: 'Templates',
+      settings: 'Settings',
+      signIn: 'Sign In',
+      signOut: 'Sign Out',
+      userFallback: 'User',
+    },
+    footer: {
+      allRightsReserved: 'All rights reserved.',
+    },
+    templates: {
+      page: {
+        title: 'Community Templates',
+        description: 'Discover and use templates created by the community to help you with your decisions.',
+      },
+      filters: {
+        searchPlaceholder: 'Search templates...',
+        categoryAll: 'All categories',
+        sort: {
+          newest: 'Newest',
+          popular: 'Most popular',
+          mostCopied: 'Most copied',
+        },
+      },
+      grid: {
+        personalTitle: 'Personal Use',
+        professionalTitle: 'Professional Use',
+        recommendedBadge: 'Recommended for you',
+        emptyMessage: 'No templates found for your search criteria.',
+        resetFilters: 'Reset filters',
+      },
+      card: {
+        byAuthor: 'by',
+        open: 'Open',
+      },
+      errors: {
+        loadError: 'Error loading templates',
+        openError: 'Error opening template',
+      },
+    },
+    auth: {
+      title: 'Welcome',
+      description: 'Sign in or create an account to start making informed decisions',
+      tabs: {
+        signIn: 'Sign In',
+        signUp: 'Sign Up',
+      },
+      fields: {
+        email: 'Email',
+        password: 'Password',
+        fullName: 'Full Name',
+        confirmPassword: 'Confirm Password',
+      },
+      actions: {
+        signIn: 'Sign In',
+        signUp: 'Create Account',
+        createAccount: 'Create Account',
+      },
+      errors: {
+        passwordsMismatch: 'Passwords do not match',
+        passwordTooShort: 'Password must be at least 6 characters long',
+      },
+      messages: {
+        accountCreated: 'Account created successfully! You can now sign in.',
+      },
+    },
+    sharedDecision: {
+      signIn: 'Sign In',
     },
   },
 };

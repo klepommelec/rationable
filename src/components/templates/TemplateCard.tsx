@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Eye } from "lucide-react";
 import { DEFAULT_CATEGORIES } from '@/types/decision';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface TemplateCardProps {
   template: {
@@ -20,6 +21,8 @@ interface TemplateCardProps {
 }
 
 const TemplateCard = ({ template, onOpen }: TemplateCardProps) => {
+  const { t } = useI18nUI();
+  
   const getCategoryInfo = (categoryId: string) => {
     return DEFAULT_CATEGORIES.find(cat => cat.id === categoryId) || { name: categoryId, emoji: '🤔' };
   };
@@ -38,7 +41,7 @@ const TemplateCard = ({ template, onOpen }: TemplateCardProps) => {
               </Badge>
               {template.author_name && (
                 <span className="text-sm text-muted-foreground">
-                  par {template.author_name}
+                  {t('templates.card.byAuthor')} {template.author_name}
                 </span>
               )}
             </div>
@@ -84,7 +87,7 @@ const TemplateCard = ({ template, onOpen }: TemplateCardProps) => {
               onClick={() => onOpen(template)}
             >
               <Eye className="h-4 w-4 mr-2" />
-              Ouvrir
+              {t('templates.card.open')}
             </Button>
           </div>
         </div>

@@ -7,6 +7,7 @@ import { PERSONAL_TEMPLATES, PROFESSIONAL_TEMPLATES } from '@/data/predefinedTem
 import { useContextualContent } from '@/hooks/useContextualContent';
 import TemplateFilters from '@/components/templates/TemplateFilters';
 import TemplateGrid from '@/components/templates/TemplateGrid';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 const CommunityTemplates = () => {
   const [templates, setTemplates] = useState<any[]>([]);
@@ -16,6 +17,7 @@ const CommunityTemplates = () => {
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'most_copied'>('newest');
   const [showPredefined, setShowPredefined] = useState(false);
   const { context } = useContextualContent();
+  const { t } = useI18nUI();
 
   const loadTemplates = async () => {
     try {
@@ -31,7 +33,7 @@ const CommunityTemplates = () => {
       setShowPredefined(data.length === 0);
     } catch (error) {
       console.error('Error loading templates:', error);
-      toast.error("Erreur lors du chargement des templates");
+      toast.error(t('templates.errors.loadError'));
       // En cas d'erreur, afficher les templates prédéfinis
       setShowPredefined(true);
     } finally {
@@ -57,7 +59,7 @@ const CommunityTemplates = () => {
       
     } catch (error) {
       console.error('❌ Error opening template:', error);
-      toast.error("Erreur lors de l'ouverture du template");
+      toast.error(t('templates.errors.openError'));
     }
   };
 
@@ -85,9 +87,9 @@ const CommunityTemplates = () => {
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Templates Communautaires</h1>
+        <h1 className="text-3xl font-bold mb-2">{t('templates.page.title')}</h1>
         <p className="text-muted-foreground">
-          Découvrez et utilisez des templates créés par la communauté pour vous aider dans vos décisions.
+          {t('templates.page.description')}
         </p>
       </div>
 

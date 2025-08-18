@@ -5,9 +5,12 @@ import { Button } from '@/components/ui/button';
 import { LogIn } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import SharedDecisionView from '@/components/SharedDecisionView';
+import { I18nUIProvider } from '@/contexts/I18nUIContext';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
-const SharedDecision: React.FC = () => {
+const SharedDecisionContent: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useI18nUI();
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
@@ -27,7 +30,7 @@ const SharedDecision: React.FC = () => {
               className="flex items-center gap-2"
             >
               <LogIn className="h-4 w-4" />
-              Se connecter
+              {t('sharedDecision.signIn')}
             </Button>
           </div>
         </div>
@@ -35,6 +38,14 @@ const SharedDecision: React.FC = () => {
         <SharedDecisionView />
       </div>
     </ThemeProvider>
+  );
+};
+
+const SharedDecision: React.FC = () => {
+  return (
+    <I18nUIProvider>
+      <SharedDecisionContent />
+    </I18nUIProvider>
   );
 };
 

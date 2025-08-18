@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -15,6 +16,7 @@ const Auth = () => {
   const [message, setMessage] = useState<string | null>(null);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+  const { t } = useI18nUI();
 
   const [signInData, setSignInData] = useState({
     email: '',
@@ -51,13 +53,13 @@ const Auth = () => {
     setMessage(null);
 
     if (signUpData.password !== signUpData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+      setError(t('auth.errors.passwordsMismatch'));
       setLoading(false);
       return;
     }
 
     if (signUpData.password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères');
+      setError(t('auth.errors.passwordTooShort'));
       setLoading(false);
       return;
     }
@@ -67,7 +69,7 @@ const Auth = () => {
     if (error) {
       setError(error.message);
     } else {
-      setMessage('Compte créé avec succès ! Vous pouvez maintenant vous connecter.');
+      setMessage(t('auth.messages.accountCreated'));
       setSignUpData({ email: '', password: '', fullName: '', confirmPassword: '' });
     }
     
@@ -86,9 +88,9 @@ const Auth = () => {
             />
             <span className="font-bold text-xl">Rationable</span>
           </div>
-          <CardTitle>Bienvenue</CardTitle>
+          <CardTitle>{t('auth.title')}</CardTitle>
           <CardDescription>
-            Connectez-vous ou créez un compte pour commencer à prendre des décisions éclairées
+            {t('auth.description')}
           </CardDescription>
         </CardHeader>
         
@@ -107,8 +109,8 @@ const Auth = () => {
 
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Connexion</TabsTrigger>
-              <TabsTrigger value="signup">Inscription</TabsTrigger>
+              <TabsTrigger value="signin">{t('auth.tabs.signIn')}</TabsTrigger>
+              <TabsTrigger value="signup">{t('auth.tabs.signUp')}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin" className="space-y-4">
@@ -116,7 +118,7 @@ const Auth = () => {
                 <div>
                   <Input
                     type="email"
-                    placeholder="Email"
+                    placeholder={t('auth.fields.email')}
                     value={signInData.email}
                     onChange={(e) => setSignInData(prev => ({ ...prev, email: e.target.value }))}
                     required
@@ -125,7 +127,7 @@ const Auth = () => {
                 <div>
                   <Input
                     type="password"
-                    placeholder="Mot de passe"
+                    placeholder={t('auth.fields.password')}
                     value={signInData.password}
                     onChange={(e) => setSignInData(prev => ({ ...prev, password: e.target.value }))}
                     required
@@ -133,7 +135,7 @@ const Auth = () => {
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Se connecter
+                  {t('auth.actions.signIn')}
                 </Button>
               </form>
             </TabsContent>
@@ -143,7 +145,7 @@ const Auth = () => {
                 <div>
                   <Input
                     type="text"
-                    placeholder="Nom complet"
+                    placeholder={t('auth.fields.fullName')}
                     value={signUpData.fullName}
                     onChange={(e) => setSignUpData(prev => ({ ...prev, fullName: e.target.value }))}
                     required
@@ -152,7 +154,7 @@ const Auth = () => {
                 <div>
                   <Input
                     type="email"
-                    placeholder="Email"
+                    placeholder={t('auth.fields.email')}
                     value={signUpData.email}
                     onChange={(e) => setSignUpData(prev => ({ ...prev, email: e.target.value }))}
                     required
@@ -161,7 +163,7 @@ const Auth = () => {
                 <div>
                   <Input
                     type="password"
-                    placeholder="Mot de passe"
+                    placeholder={t('auth.fields.password')}
                     value={signUpData.password}
                     onChange={(e) => setSignUpData(prev => ({ ...prev, password: e.target.value }))}
                     required
@@ -170,7 +172,7 @@ const Auth = () => {
                 <div>
                   <Input
                     type="password"
-                    placeholder="Confirmer le mot de passe"
+                    placeholder={t('auth.fields.confirmPassword')}
                     value={signUpData.confirmPassword}
                     onChange={(e) => setSignUpData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                     required
@@ -178,7 +180,7 @@ const Auth = () => {
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Créer un compte
+                  {t('auth.actions.createAccount')}
                 </Button>
               </form>
             </TabsContent>
