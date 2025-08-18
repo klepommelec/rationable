@@ -104,7 +104,7 @@ const Navbar: React.FC = () => {
                         {getUserInitials()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="hidden sm:inline flex items-center gap-1">
+                    <span className="hidden sm:flex items-center gap-1">
                       {getUserDisplayName()}
                       <ChevronDown className="h-3 w-3" />
                     </span>
