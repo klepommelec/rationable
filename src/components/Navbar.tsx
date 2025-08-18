@@ -1,4 +1,4 @@
-import { Users, LogOut, User, Settings } from 'lucide-react';
+import { Users, LogOut, User, Settings, ChevronDown } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import ShareButton from './ShareButton';
@@ -58,11 +58,13 @@ const Navbar: React.FC = () => {
     await signOut();
   };
   const getUserDisplayName = () => {
-    return profile?.full_name || user?.email?.split('@')[0] || 'Utilisateur';
+    const fullName = profile?.full_name || user?.email?.split('@')[0] || 'Utilisateur';
+    // Extraire seulement le prénom (premier mot)
+    return fullName.split(' ')[0];
   };
   const getUserInitials = () => {
-    const name = getUserDisplayName();
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    const fullName = profile?.full_name || user?.email?.split('@')[0] || 'Utilisateur';
+    return fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
   return <header className={`sticky top-0 z-50 w-full transition-all duration-150 ${isScrolled ? 'bg-background/95 backdrop-blur border-b border-border supports-[backdrop-filter]:bg-background/90' : isSettingsPage ? 'bg-transparent border-b border-border' : 'bg-transparent'}`}>
       <div className="container flex h-16 items-center">
@@ -102,8 +104,9 @@ const Navbar: React.FC = () => {
                         {getUserInitials()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="hidden sm:inline">
+                    <span className="hidden sm:inline flex items-center gap-1">
                       {getUserDisplayName()}
+                      <ChevronDown className="h-3 w-3" />
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
