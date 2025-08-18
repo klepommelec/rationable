@@ -5,30 +5,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 const NotificationSettings = () => {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(false);
+  const { t } = useI18nUI();
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bell className="h-5 w-5" />
-          Notifications
+          {t('settings.notifications.title')}
         </CardTitle>
         <CardDescription>
-          Gérez vos préférences de notification
+          {t('settings.notifications.description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <Label htmlFor="email-notifications" className="font-medium">
-              Notifications par email
+              {t('settings.notifications.email.title')}
             </Label>
             <p className="text-sm text-muted-foreground">
-              Recevez des emails pour les nouvelles fonctionnalités
+              {t('settings.notifications.email.desc')}
             </p>
           </div>
           <Switch
@@ -41,10 +43,10 @@ const NotificationSettings = () => {
         <div className="flex items-center justify-between">
           <div>
             <Label htmlFor="push-notifications" className="font-medium">
-              Notifications push
+              {t('settings.notifications.push.title')}
             </Label>
             <p className="text-sm text-muted-foreground">
-              Notifications dans le navigateur
+              {t('settings.notifications.push.desc')}
             </p>
           </div>
           <Switch

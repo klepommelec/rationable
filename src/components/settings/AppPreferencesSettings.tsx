@@ -5,30 +5,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 const AppPreferencesSettings = () => {
   const [autoSave, setAutoSave] = useState(true);
   const [showConfidence, setShowConfidence] = useState(true);
+  const { t } = useI18nUI();
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Shield className="h-5 w-5" />
-          Préférences de l'application
+          {t('settings.preferences.title')}
         </CardTitle>
         <CardDescription>
-          Configurez le comportement de l'application
+          {t('settings.preferences.description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <Label htmlFor="auto-save" className="font-medium">
-              Sauvegarde automatique
+              {t('settings.preferences.autoSave.title')}
             </Label>
             <p className="text-sm text-muted-foreground">
-              Sauvegarde automatique de vos décisions
+              {t('settings.preferences.autoSave.desc')}
             </p>
           </div>
           <Switch
@@ -41,10 +43,10 @@ const AppPreferencesSettings = () => {
         <div className="flex items-center justify-between">
           <div>
             <Label htmlFor="show-confidence" className="font-medium">
-              Afficher le niveau de confiance
+              {t('settings.preferences.showConfidence.title')}
             </Label>
             <p className="text-sm text-muted-foreground">
-              Affiche l'indicateur de confiance de l'IA
+              {t('settings.preferences.showConfidence.desc')}
             </p>
           </div>
           <Switch

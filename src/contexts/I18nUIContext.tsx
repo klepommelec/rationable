@@ -1,10 +1,13 @@
 import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
 import { I18nService, SupportedLanguage } from '@/services/i18nService';
 import { translations, UITranslations } from '@/i18n/ui';
+import { getDateFnsLocale, getLocaleTag } from '@/utils/i18nHelpers';
 
 interface I18nUIContextType {
   currentLanguage: SupportedLanguage;
   t: (key: string) => string;
+  getLocaleTag: () => string;
+  getDateFnsLocale: () => import('date-fns').Locale;
 }
 
 const I18nUIContext = createContext<I18nUIContextType | undefined>(undefined);
@@ -57,7 +60,12 @@ export const I18nUIProvider = ({ children }: I18nUIProviderProps) => {
   };
 
   return (
-    <I18nUIContext.Provider value={{ currentLanguage, t }}>
+    <I18nUIContext.Provider value={{ 
+      currentLanguage, 
+      t,
+      getLocaleTag: () => getLocaleTag(currentLanguage),
+      getDateFnsLocale: () => getDateFnsLocale(currentLanguage),
+    }}>
       {children}
     </I18nUIContext.Provider>
   );

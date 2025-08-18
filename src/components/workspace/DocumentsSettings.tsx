@@ -10,7 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useDropzone } from 'react-dropzone';
 import { useWorkspaceDocuments, WorkspaceDocument } from '@/hooks/useWorkspaceDocuments';
 import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface DocumentsSettingsProps {
   workspaceId: string;
@@ -20,6 +20,7 @@ const DocumentsSettings = ({ workspaceId }: DocumentsSettingsProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [documentToDelete, setDocumentToDelete] = useState<WorkspaceDocument | null>(null);
+  const { t, getDateFnsLocale } = useI18nUI();
   
   const { 
     documents, 
@@ -87,9 +88,9 @@ const DocumentsSettings = ({ workspaceId }: DocumentsSettingsProps) => {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Documents du workspace</h3>
+        <h3 className="text-lg font-semibold mb-2">{t('settings.documents.title')}</h3>
         <p className="text-sm text-muted-foreground">
-          Gérez les documents qui seront utilisés par l'IA pour enrichir les analyses de décision.
+          {t('settings.documents.description')}
         </p>
       </div>
 
@@ -185,15 +186,15 @@ const DocumentsSettings = ({ workspaceId }: DocumentsSettingsProps) => {
                         <span>{formatFileSize(document.file_size)}</span>
                         <span>•</span>
                         <span>
-                          Ajouté {formatDistanceToNow(new Date(document.uploaded_at), { 
+                          {t('settings.documents.added')} {formatDistanceToNow(new Date(document.uploaded_at), { 
                             addSuffix: true, 
-                            locale: fr 
+                            locale: getDateFnsLocale()
                           })}
                         </span>
                         {document.usage_count > 0 && (
                           <>
                             <span>•</span>
-                            <span>Utilisé {document.usage_count} fois</span>
+                            <span>{t('settings.documents.usage')} {document.usage_count} fois</span>
                           </>
                         )}
                       </div>

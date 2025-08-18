@@ -4,14 +4,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 const DataManagementSettings = () => {
   const { toast } = useToast();
+  const { t } = useI18nUI();
 
   const handleClearHistory = () => {
     toast({
-      title: "Historique vidé",
-      description: "Toutes vos décisions ont été supprimées.",
+      title: t('settings.data.toast.cleared'),
+      description: t('settings.data.toast.clearedDesc'),
       variant: "destructive",
     });
   };
@@ -21,23 +23,23 @@ const DataManagementSettings = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Database className="h-5 w-5" />
-          Gestion des données
+          {t('settings.data.title')}
         </CardTitle>
         <CardDescription>
-          Gérez vos données personnelles
+          {t('settings.data.description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <Label className="font-medium">Historique des décisions</Label>
+            <Label className="font-medium">{t('settings.data.history.title')}</Label>
             <p className="text-sm text-muted-foreground">
-              Supprime toutes vos décisions sauvegardées
+              {t('settings.data.history.desc')}
             </p>
           </div>
           <Button variant="destructive" size="sm" onClick={handleClearHistory}>
             <Trash2 className="h-4 w-4 mr-2" />
-            Vider l'historique
+            {t('settings.data.clearHistory')}
           </Button>
         </div>
       </CardContent>

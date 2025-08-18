@@ -14,6 +14,87 @@ export interface UITranslations {
       subtitle: string;
       selectWorkspace: string;
     };
+    appearance: {
+      title: string;
+      description: string;
+      themeLabel: string;
+      light: string;
+      dark: string;
+      system: string;
+    };
+    notifications: {
+      title: string;
+      description: string;
+      email: {
+        title: string;
+        desc: string;
+      };
+      push: {
+        title: string;
+        desc: string;
+      };
+    };
+    preferences: {
+      title: string;
+      description: string;
+      autoSave: {
+        title: string;
+        desc: string;
+      };
+      showConfidence: {
+        title: string;
+        desc: string;
+      };
+    };
+    data: {
+      title: string;
+      description: string;
+      history: {
+        title: string;
+        desc: string;
+      };
+      clearHistory: string;
+      toast: {
+        cleared: string;
+        clearedDesc: string;
+      };
+    };
+    documents: {
+      title: string;
+      description: string;
+      drop: {
+        title: string;
+        titleActive: string;
+        desc: string;
+        button: string;
+        buttonUploading: string;
+      };
+      loading: string;
+      empty: {
+        title: string;
+        desc: string;
+        filtered: string;
+      };
+      search: {
+        placeholder: string;
+      };
+      filter: {
+        allCategories: string;
+      };
+      actions: {
+        view: string;
+        download: string;
+        delete: string;
+      };
+      confirm: {
+        title: string;
+        desc: string;
+        cancel: string;
+        confirm: string;
+      };
+      usage: string;
+      added: string;
+    };
   };
   profile: {
     avatar: {
@@ -118,6 +199,148 @@ export interface UITranslations {
   sharedDecision: {
     signIn: string;
   };
+  decision: {
+    home: {
+      hero: {
+        titleLine1: string;
+        titleLine2: string;
+        subtitle: string;
+      };
+      textarea: {
+        drop: string;
+        helper: string;
+      };
+      attachFile: string;
+      startAnalysis: string;
+      analysisStarted: string;
+      fileToast: string;
+      history: {
+        title: string;
+        subtitle: string;
+      };
+    };
+  };
+  history: {
+    search: {
+      placeholder: string;
+    };
+    filter: {
+      button: string;
+      categoryLabel: string;
+      sortByLabel: string;
+      sort: {
+        date: string;
+        category: string;
+      };
+    };
+    more: {
+      button: string;
+    };
+    empty: string;
+    copy: {
+      success: string;
+      error: string;
+    };
+    export: {
+      json: {
+        success: string;
+        error: string;
+      };
+      success: string;
+      error: string;
+    };
+    confirm: {
+      title: string;
+      desc: string;
+      cancel: string;
+      ok: string;
+    };
+    followUp: string;
+    followUpPlural: string;
+    share: string;
+    delete: string;
+    clearAll: string;
+  };
+  share: {
+    menu: {
+      share: string;
+      simpleShare: string;
+      collaborate: string;
+      shareAsTemplate: string;
+      copied: {
+        success: string;
+        error: string;
+      };
+    };
+    dialog: {
+      title: string;
+      description1: string;
+      description2: string;
+      form: {
+        title: {
+          label: string;
+          placeholder: string;
+        };
+        description: {
+          label: string;
+          placeholder: string;
+        };
+        author: {
+          label: string;
+          placeholder: string;
+        };
+        category: {
+          label: string;
+          placeholder: string;
+        };
+        tags: {
+          label: string;
+          placeholder: string;
+          add: string;
+        };
+      };
+      cancel: string;
+      submit: string;
+      submitting: string;
+      success: string;
+      error: string;
+      required: string;
+    };
+  };
+  categories: {
+    tech: string;
+    travel: string;
+    career: string;
+    lifestyle: string;
+    finance: string;
+    health: string;
+    education: string;
+    other: string;
+    all: string;
+    uncategorized: string;
+    none: string;
+  };
+  common: {
+    view: string;
+    download: string;
+    delete: string;
+    cancel: string;
+    confirm: string;
+    loading: string;
+    search: string;
+    upload: string;
+    browseFiles: string;
+    supportedFormats: string;
+    none: string;
+    yes: string;
+    no: string;
+    email: string;
+    password: string;
+    save: string;
+    actions: {
+      ok: string;
+    };
+  };
 }
 
 export const translations: Record<'fr' | 'en', UITranslations> = {
@@ -136,6 +359,87 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       header: {
         subtitle: 'Gérez vos préférences et paramètres de compte',
         selectWorkspace: 'Sélectionnez un workspace',
+      },
+      appearance: {
+        title: 'Apparence',
+        description: 'Personnalisez l\'apparence de l\'application',
+        themeLabel: 'Thème',
+        light: 'Clair',
+        dark: 'Sombre',
+        system: 'Système',
+      },
+      notifications: {
+        title: 'Notifications',
+        description: 'Gérez vos préférences de notification',
+        email: {
+          title: 'Notifications par email',
+          desc: 'Recevez des emails pour les nouvelles fonctionnalités',
+        },
+        push: {
+          title: 'Notifications push',
+          desc: 'Notifications dans le navigateur',
+        },
+      },
+      preferences: {
+        title: 'Préférences de l\'application',
+        description: 'Configurez le comportement de l\'application',
+        autoSave: {
+          title: 'Sauvegarde automatique',
+          desc: 'Sauvegarde automatique de vos décisions',
+        },
+        showConfidence: {
+          title: 'Afficher le niveau de confiance',
+          desc: 'Affiche l\'indicateur de confiance de l\'IA',
+        },
+      },
+      data: {
+        title: 'Gestion des données',
+        description: 'Gérez vos données personnelles',
+        history: {
+          title: 'Historique des décisions',
+          desc: 'Supprime toutes vos décisions sauvegardées',
+        },
+        clearHistory: 'Vider l\'historique',
+        toast: {
+          cleared: 'Historique vidé',
+          clearedDesc: 'Toutes vos décisions ont été supprimées.',
+        },
+      },
+      documents: {
+        title: 'Documents du workspace',
+        description: 'Gérez les documents qui seront utilisés par l\'IA pour enrichir les analyses de décision.',
+        drop: {
+          title: 'Télécharger des documents',
+          titleActive: 'Déposez vos fichiers ici',
+          desc: 'Formats supportés: PDF, Word, Excel, CSV, TXT',
+          button: 'Parcourir les fichiers',
+          buttonUploading: 'Téléchargement...',
+        },
+        loading: 'Chargement des documents...',
+        empty: {
+          title: 'Aucun document',
+          desc: 'Commencez par télécharger des documents pour enrichir les analyses de l\'IA.',
+          filtered: 'Aucun document ne correspond à vos critères de recherche.',
+        },
+        search: {
+          placeholder: 'Rechercher dans les documents...',
+        },
+        filter: {
+          allCategories: 'Toutes les catégories',
+        },
+        actions: {
+          view: 'Visualiser',
+          download: 'Télécharger',
+          delete: 'Supprimer',
+        },
+        confirm: {
+          title: 'Supprimer le document',
+          desc: 'Êtes-vous sûr de vouloir supprimer ce document ? Cette action est irréversible.',
+          cancel: 'Annuler',
+          confirm: 'Supprimer',
+        },
+        usage: 'Utilisé',
+        added: 'Ajouté',
       },
     },
     profile: {
@@ -241,6 +545,148 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
     sharedDecision: {
       signIn: 'Se connecter',
     },
+    decision: {
+      home: {
+        hero: {
+          titleLine1: 'Vos décisions seront',
+          titleLine2: 'Rationable',
+          subtitle: 'De l\'incertitude à la clarté : exploitez la puissance de l\'IA',
+        },
+        textarea: {
+          drop: 'Déposez vos fichiers ici',
+          helper: 'Décrivez le problème ou la décision que vous devez prendre. Vous pouvez aussi glisser-déposer des documents directement dans cette zone.',
+        },
+        attachFile: 'Joindre un fichier',
+        startAnalysis: 'Lancer l\'analyse',
+        analysisStarted: 'Analyse démarrée !',
+        fileToast: 'fichier(s) ajouté(s)',
+        history: {
+          title: 'Historique des décisions',
+          subtitle: 'Chargez ou supprimez vos analyses passées.',
+        },
+      },
+    },
+    history: {
+      search: {
+        placeholder: 'Rechercher...',
+      },
+      filter: {
+        button: 'Filtrer',
+        categoryLabel: 'Catégorie',
+        sortByLabel: 'Trier par',
+        sort: {
+          date: 'Par date',
+          category: 'Par catégorie',
+        },
+      },
+      more: {
+        button: 'Plus',
+      },
+      empty: 'Aucun historique',
+      copy: {
+        success: 'Données copiées dans le presse-papiers !',
+        error: 'Erreur lors de la copie',
+      },
+      export: {
+        json: {
+          success: 'Export JSON réussi !',
+          error: 'Erreur lors de l\'export JSON',
+        },
+        success: 'Export réussi ! (format JSON pour le moment)',
+        error: 'Erreur lors de l\'export',
+      },
+      confirm: {
+        title: 'Êtes-vous sûr ?',
+        desc: 'Cette action est irréversible et supprimera tout votre historique de décisions.',
+        cancel: 'Annuler',
+        ok: 'Confirmer',
+      },
+      followUp: 'question de suivi',
+      followUpPlural: 'questions de suivi',
+      share: 'Partager',
+      delete: 'Supprimer',
+      clearAll: 'Tout effacer',
+    },
+    share: {
+      menu: {
+        share: 'Partager',
+        simpleShare: 'Partage simple',
+        collaborate: 'Collaborer',
+        shareAsTemplate: 'Partager comme template',
+        copied: {
+          success: 'Lien de partage copié dans le presse-papier !',
+          error: 'Erreur lors du partage',
+        },
+      },
+      dialog: {
+        title: 'Partager comme template communautaire',
+        description1: 'Partagez votre décision avec la communauté pour aider d\'autres utilisateurs.',
+        description2: 'Votre template sera examiné avant publication.',
+        form: {
+          title: {
+            label: 'Titre *',
+            placeholder: 'Titre descriptif du template...',
+          },
+          description: {
+            label: 'Description',
+            placeholder: 'Décrivez brièvement ce template et quand l\'utiliser...',
+          },
+          author: {
+            label: 'Nom d\'auteur (optionnel)',
+            placeholder: 'Votre nom ou pseudo (ou laissez vide pour rester anonyme)',
+          },
+          category: {
+            label: 'Catégorie',
+            placeholder: 'Sélectionner une catégorie',
+          },
+          tags: {
+            label: 'Tags',
+            placeholder: 'Ajouter un tag...',
+            add: 'Ajouter un tag',
+          },
+        },
+        cancel: 'Annuler',
+        submit: 'Partager',
+        submitting: 'Partage en cours...',
+        success: 'Template partagé avec succès ! Il sera visible après modération.',
+        error: 'Erreur lors du partage du template',
+        required: 'Le titre est requis',
+      },
+    },
+    categories: {
+      tech: 'Technologie',
+      travel: 'Voyage',
+      career: 'Carrière',
+      lifestyle: 'Mode de vie',
+      finance: 'Finance',
+      health: 'Santé',
+      education: 'Éducation',
+      other: 'Autre',
+      all: 'Toutes les catégories',
+      uncategorized: 'Non catégorisées',
+      none: 'Aucune catégorie',
+    },
+    common: {
+      view: 'Voir',
+      download: 'Télécharger',
+      delete: 'Supprimer',
+      cancel: 'Annuler',
+      confirm: 'Confirmer',
+      loading: 'Chargement...',
+      search: 'Rechercher',
+      upload: 'Télécharger',
+      browseFiles: 'Parcourir les fichiers',
+      supportedFormats: 'Formats supportés',
+      none: 'Aucun',
+      yes: 'Oui',
+      no: 'Non',
+      email: 'Email',
+      password: 'Mot de passe',
+      save: 'Sauvegarder',
+      actions: {
+        ok: 'OK',
+      },
+    },
   },
   en: {
     settings: {
@@ -257,6 +703,87 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       header: {
         subtitle: 'Manage your preferences and account settings',
         selectWorkspace: 'Select a workspace',
+      },
+      appearance: {
+        title: 'Appearance',
+        description: 'Customize the appearance of the application',
+        themeLabel: 'Theme',
+        light: 'Light',
+        dark: 'Dark',
+        system: 'System',
+      },
+      notifications: {
+        title: 'Notifications',
+        description: 'Manage your notification preferences',
+        email: {
+          title: 'Email notifications',
+          desc: 'Receive emails for new features',
+        },
+        push: {
+          title: 'Push notifications',
+          desc: 'Browser notifications',
+        },
+      },
+      preferences: {
+        title: 'Application preferences',
+        description: 'Configure application behavior',
+        autoSave: {
+          title: 'Auto-save',
+          desc: 'Automatically save your decisions',
+        },
+        showConfidence: {
+          title: 'Show confidence level',
+          desc: 'Display AI confidence indicator',
+        },
+      },
+      data: {
+        title: 'Data Management',
+        description: 'Manage your personal data',
+        history: {
+          title: 'Decision history',
+          desc: 'Delete all your saved decisions',
+        },
+        clearHistory: 'Clear history',
+        toast: {
+          cleared: 'History cleared',
+          clearedDesc: 'All your decisions have been deleted.',
+        },
+      },
+      documents: {
+        title: 'Workspace documents',
+        description: 'Manage documents that will be used by AI to enrich decision analysis.',
+        drop: {
+          title: 'Upload documents',
+          titleActive: 'Drop your files here',
+          desc: 'Supported formats: PDF, Word, Excel, CSV, TXT',
+          button: 'Browse files',
+          buttonUploading: 'Uploading...',
+        },
+        loading: 'Loading documents...',
+        empty: {
+          title: 'No documents',
+          desc: 'Start by uploading documents to enrich AI analysis.',
+          filtered: 'No documents match your search criteria.',
+        },
+        search: {
+          placeholder: 'Search in documents...',
+        },
+        filter: {
+          allCategories: 'All categories',
+        },
+        actions: {
+          view: 'View',
+          download: 'Download',
+          delete: 'Delete',
+        },
+        confirm: {
+          title: 'Delete document',
+          desc: 'Are you sure you want to delete this document? This action cannot be undone.',
+          cancel: 'Cancel',
+          confirm: 'Delete',
+        },
+        usage: 'Used',
+        added: 'Added',
       },
     },
     profile: {
@@ -361,6 +888,148 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
     },
     sharedDecision: {
       signIn: 'Sign In',
+    },
+    decision: {
+      home: {
+        hero: {
+          titleLine1: 'Your decisions will be',
+          titleLine2: 'Rationable',
+          subtitle: 'From uncertainty to clarity: harness the power of AI',
+        },
+        textarea: {
+          drop: 'Drop your files here',
+          helper: 'Describe the problem or decision you need to make. You can also drag and drop documents directly into this area.',
+        },
+        attachFile: 'Attach file',
+        startAnalysis: 'Start analysis',
+        analysisStarted: 'Analysis started!',
+        fileToast: 'file(s) added',
+        history: {
+          title: 'Decision history',
+          subtitle: 'Load or delete your past analysis.',
+        },
+      },
+    },
+    history: {
+      search: {
+        placeholder: 'Search...',
+      },
+      filter: {
+        button: 'Filter',
+        categoryLabel: 'Category',
+        sortByLabel: 'Sort by',
+        sort: {
+          date: 'By date',
+          category: 'By category',
+        },
+      },
+      more: {
+        button: 'More',
+      },
+      empty: 'No history',
+      copy: {
+        success: 'Data copied to clipboard!',
+        error: 'Error copying data',
+      },
+      export: {
+        json: {
+          success: 'JSON export successful!',
+          error: 'Error exporting JSON',
+        },
+        success: 'Export successful! (JSON format for now)',
+        error: 'Export error',
+      },
+      confirm: {
+        title: 'Are you sure?',
+        desc: 'This action is irreversible and will delete all your decision history.',
+        cancel: 'Cancel',
+        ok: 'Confirm',
+      },
+      followUp: 'follow-up question',
+      followUpPlural: 'follow-up questions',
+      share: 'Share',
+      delete: 'Delete',
+      clearAll: 'Clear all',
+    },
+    share: {
+      menu: {
+        share: 'Share',
+        simpleShare: 'Simple share',
+        collaborate: 'Collaborate',
+        shareAsTemplate: 'Share as template',
+        copied: {
+          success: 'Share link copied to clipboard!',
+          error: 'Error sharing',
+        },
+      },
+      dialog: {
+        title: 'Share as community template',
+        description1: 'Share your decision with the community to help other users.',
+        description2: 'Your template will be reviewed before publication.',
+        form: {
+          title: {
+            label: 'Title *',
+            placeholder: 'Descriptive title of the template...',
+          },
+          description: {
+            label: 'Description',
+            placeholder: 'Briefly describe this template and when to use it...',
+          },
+          author: {
+            label: 'Author name (optional)',
+            placeholder: 'Your name or username (or leave blank to remain anonymous)',
+          },
+          category: {
+            label: 'Category',
+            placeholder: 'Select a category',
+          },
+          tags: {
+            label: 'Tags',
+            placeholder: 'Add a tag...',
+            add: 'Add tag',
+          },
+        },
+        cancel: 'Cancel',
+        submit: 'Share',
+        submitting: 'Sharing...',
+        success: 'Template shared successfully! It will be visible after moderation.',
+        error: 'Error sharing template',
+        required: 'Title is required',
+      },
+    },
+    categories: {
+      tech: 'Technology',
+      travel: 'Travel',
+      career: 'Career',
+      lifestyle: 'Lifestyle',
+      finance: 'Finance',
+      health: 'Health',
+      education: 'Education',
+      other: 'Other',
+      all: 'All categories',
+      uncategorized: 'Uncategorized',
+      none: 'No category',
+    },
+    common: {
+      view: 'View',
+      download: 'Download',
+      delete: 'Delete',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      loading: 'Loading...',
+      search: 'Search',
+      upload: 'Upload',
+      browseFiles: 'Browse files',
+      supportedFormats: 'Supported formats',
+      none: 'None',
+      yes: 'Yes',
+      no: 'No',
+      email: 'Email',
+      password: 'Password',
+      save: 'Save',
+      actions: {
+        ok: 'OK',
+      },
     },
   },
 };
