@@ -14,6 +14,7 @@ import { ExpandableText } from '@/components/ExpandableText';
 import { firstResultService, BestLinksResponse } from '@/services/firstResultService';
 import { I18nService } from '@/services/i18nService';
 import { MerchantLogo } from '@/components/MerchantLogo';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 interface RecommendationCardProps {
   result: IResult;
   dilemma: string;
@@ -24,6 +25,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   dilemma,
   currentDecision
 }) => {
+  const { t } = useI18nUI();
   const topOption = result.breakdown?.[0];
   const [actionLinks, setActionLinks] = useState<BestLinksResponse | null>(null);
   const [isLoadingAction, setIsLoadingAction] = useState(false);
@@ -58,8 +60,8 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   // Configuration unifiée pour tous les types de résultats
   const config = {
     icon: <Lightbulb className="h-5 w-5 text-primary" />,
-    title: 'Recommandation',
-    badge: 'Recommandé',
+    title: t('decision.title'),
+    badge: t('decision.recommended'),
     borderColor: 'border-primary/20',
     bgGradient: 'bg-gradient-to-r from-primary/5 to-secondary/5',
     badgeColor: 'bg-primary/10 text-primary',
@@ -102,7 +104,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   <div className="space-y-2">
                     <h4 className="font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
                       <CheckCircle className="h-4 w-4" />
-                      Avantages
+                      {t('decision.advantages')}
                     </h4>
                     <ul className="space-y-1">
                       {topOption.pros.map((pro, index) => (
@@ -119,7 +121,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   <div className="space-y-2">
                     <h4 className="font-medium text-orange-700 dark:text-orange-300 flex items-center gap-2">
                       <ExternalLink className="h-4 w-4" />
-                      Points d'attention
+                      {t('decision.pointsOfAttention')}
                     </h4>
                     <ul className="space-y-1">
                       {topOption.cons.map((con, index) => (

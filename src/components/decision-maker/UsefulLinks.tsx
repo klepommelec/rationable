@@ -6,6 +6,7 @@ import ValidatedLink from '../ValidatedLink';
 import YouTubeVideoCard from '../YouTubeVideoCard';
 import { I18nService } from '@/services/i18nService';
 import { LinkVerifierService } from '@/services/linkVerifierService';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface UsefulLinksProps {
   infoLinks?: ILink[];
@@ -22,6 +23,7 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
   dilemma,
   recommendation
 }) => {
+  const { t } = useI18nUI();
   const currentLanguage = I18nService.getCurrentLanguage();
   const contextText = `${dilemma || ''} ${recommendation || ''}`;
   const detectedVertical = I18nService.detectVertical(contextText, currentLanguage);
@@ -185,7 +187,7 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
         className="flex items-center gap-2 text-base sm:text-lg font-semibold mb-4 text-gray-900 dark:text-white"
       >
         <Link className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" aria-hidden="true" />
-        Liens utiles
+        {t('decision.usefulLinks')}
       </h3>
       
       <div className="space-y-6">
@@ -197,7 +199,7 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
               id="youtube-videos-heading"
             >
               <span className="text-base sm:text-lg" aria-hidden="true">📺</span>
-              Vidéos populaires
+              {t('decision.popularVideos')}
             </h4>
             <div 
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"

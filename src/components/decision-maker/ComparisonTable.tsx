@@ -8,6 +8,7 @@ import { generateOptionSearchLinks } from '@/services/expandOptionsService';
 import { firstResultService, BestLinksResponse } from '@/services/firstResultService';
 import { I18nService } from '@/services/i18nService';
 import { MerchantLogo } from '@/components/MerchantLogo';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface ComparisonTableProps {
   breakdown: IBreakdownItem[];
@@ -17,6 +18,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   breakdown,
   dilemma
 }) => {
+  const { t } = useI18nUI();
   const [actionLinks, setActionLinks] = useState<Record<string, BestLinksResponse | null>>({});
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
   const detectedLanguage = I18nService.getCurrentLanguage();
@@ -49,7 +51,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   }, [breakdown, dilemma, detectedLanguage, detectedVertical]);
   if (!breakdown || breakdown.length === 0) {
     return <div className="flex items-center justify-center p-8 text-muted-foreground">
-        <p>Aucune donnée disponible pour le tableau comparatif</p>
+        <p>{t('decision.noResults')}</p>
       </div>;
   }
 
@@ -59,7 +61,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   // Afficher le tableau même avec une seule option
   if (sortedOptions.length === 0) {
     return <div className="flex items-center justify-center p-8 text-muted-foreground">
-        <p>Aucune donnée disponible pour le tableau comparatif</p>
+        <p>{t('decision.noResults')}</p>
       </div>;
   }
   return <div className="space-y-4">
@@ -68,9 +70,9 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
           <TableHeader>
             <TableRow>
               <TableHead className="w-[280px]">Option</TableHead>
-              <TableHead>Avantages</TableHead>
-              <TableHead>Inconvénients</TableHead>
-              <TableHead className="w-[180px]">En savoir plus</TableHead>
+              <TableHead>{t('decision.advantages')}</TableHead>
+              <TableHead>{t('decision.disadvantages')}</TableHead>
+              <TableHead className="w-[180px]">{t('decision.learnMore')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -81,12 +83,17 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
               const isLoading = loadingStates?.[optionKey] || false;
               
               return (
-                <TableRow key={index} className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''}>
-                  <TableCell className="font-medium align-top">
-                    <div className="flex flex-col gap-3">
-                      {index === 0 && <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 w-fit">
-                          Recommandé
-                        </Badge>}
+                 <TableRow key={index} className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''}>
+                   <TableCell className="font-medium align-top">
+                     <div className="flex flex-col gap-3">
+                       {index === 0 && (
+                         <Badge 
+                           variant="default" 
+                           className="bg-green-500 hover:bg-green-600 text-white whitespace-nowrap"
+                         >
+                           {t('decision.recommended')}
+                         </Badge>
+                       )}
                       <span className="text-sm font-medium">
                         {option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
                       </span>
@@ -165,7 +172,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                           <span className="text-muted-foreground">{pro}</span>
                         </div>)}
                       {option.pros?.length > 3 && <p className="text-xs text-muted-foreground italic">
-                          +{option.pros.length - 3} autres avantages
+                          +{option.pros.length - 3} {t('decision.moreAdvantages')}
                         </p>}
                     </div>
                   </TableCell>
@@ -176,7 +183,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                           <span className="text-muted-foreground">{con}</span>
                         </div>)}
                       {option.cons?.length > 3 && <p className="text-xs text-muted-foreground italic">
-                          +{option.cons.length - 3} autres inconvénients
+                          +{option.cons.length - 3} {t('decision.moreDisadvantages')}
                         </p>}
                     </div>
                   </TableCell>
@@ -192,7 +199,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                         >
                           <Button variant="outline" size="sm" className="w-full text-xs">
                             <ExternalLink className="h-3 w-3 mr-1" />
-                            {link.title.replace(`"${option.option}"`, '').trim() || 'Rechercher'}
+                            {link.title.replace(`"${option.option}"`, '').trim() || t('decision.search')}
                           </Button>
                         </a>
                       ))}
@@ -206,7 +213,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
       </div>
       
       <div className="text-xs text-muted-foreground text-center">
-        Tableau comparatif des {sortedOptions.length} options analysées
+        {t('decision.comparisonTableCaption').replace('{count}', sortedOptions.length.toString())}
       </div>
     </div>;
 };

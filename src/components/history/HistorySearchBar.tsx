@@ -262,7 +262,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
-              Filtrer
+{t('history.filter')}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-64">
@@ -275,7 +275,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
                     <SelectValue placeholder="Catégorie" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Toutes les catégories</SelectItem>
+                    <SelectItem value="all">{t('history.allCategories')}</SelectItem>
                     <SelectItem value="uncategorized">
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">
@@ -333,7 +333,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 <FileDown className="mr-2 h-4 w-4" />
-                <span>Exporter</span>
+                <span>{t('history.export')}</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
                 <DropdownMenuItem onClick={exportToPDF}>

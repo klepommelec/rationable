@@ -25,6 +25,17 @@ export const useContextualContent = () => {
       ];
     }
     
+    const language = I18nService.getCurrentLanguage();
+    if (language === 'en') {
+      return [
+        "Ex: Which smartphone should I buy?",
+        "Ex: Should I change my career?",
+        "Ex: Which city to choose for my studies?",
+        "Ex: Invest in stocks or real estate?",
+        "Ex: Go on vacation or save money?",
+        "Ex: Accept this job offer or keep looking?"
+      ];
+    }
     return [
       "Ex: Quel smartphone devrais-je acheter ?",
       "Ex: Dois-je changer de carrière professionnelle ?",
@@ -75,6 +86,23 @@ export const useContextualContent = () => {
       ];
     }
     
+    const language = I18nService.getCurrentLanguage();
+    if (language === 'en') {
+      return [
+        {
+          name: "💻 Choose a Computer",
+          dilemma: "Which new laptop should I buy?",
+        },
+        {
+          name: "✈️ Choose Vacation",
+          dilemma: "Where should I go for my next vacation?",
+        },
+        {
+          name: "🚗 Buy a Car",
+          dilemma: "Which car should I buy according to my budget and needs?",
+        },
+      ];
+    }
     return [
       {
         name: "💻 Choisir un ordinateur",

@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useExpandableText } from '@/hooks/useExpandableText';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface ExpandableTextProps {
   text: string;
@@ -15,6 +16,7 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
   maxLength = 300,
   className = ""
 }) => {
+  const { t } = useI18nUI();
   const [isExpanded, setIsExpanded] = useState(false);
   const [shouldTruncate, setShouldTruncate] = useState(false);
   const textRef = useRef<HTMLParagraphElement>(null);
@@ -57,7 +59,7 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
           ) : (
             <>
               <ChevronDown className="h-4 w-4 mr-1" />
-              Voir plus
+              {t('decision.seeMore')}
             </>
           )}
         </Button>

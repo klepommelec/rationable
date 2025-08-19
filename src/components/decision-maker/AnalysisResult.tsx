@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Table2, ChevronDown, ChevronUp } from 'lucide-react';
 import FollowUpQuestions from './FollowUpQuestions';
 import { DataAccuracyIndicator } from './DataAccuracyIndicator';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface AnalysisResultProps {
   result: IResult | null;
@@ -30,6 +31,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   onUpdateDecision,
   onFollowUpQuestion
 }) => {
+  const { t } = useI18nUI();
   const [showAllOptions, setShowAllOptions] = useState(false);
   
   // Nombre d'options à afficher initialement (3-4)
@@ -76,7 +78,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <CardTitle className="flex items-center gap-2">
                 <Table2 className="h-5 w-5" />
-                Tableau comparatif
+                {t('decision.comparisonTable')}
               </CardTitle>
               <Badge variant="outline" className="self-start sm:self-center">
                 {result.breakdown?.length || 0} options
@@ -103,7 +105,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                   ) : (
                     <>
                       <ChevronDown className="h-4 w-4" />
-                      Voir plus d'options ({allOptions.length - initialOptionsCount} autres)
+                      {t('decision.seeMoreOptions')} ({allOptions.length - initialOptionsCount} autres)
                     </>
                   )}
                 </Button>
