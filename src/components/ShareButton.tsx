@@ -14,6 +14,7 @@ import { shareDecision } from '@/services/sharedDecisionService';
 import { toast } from "sonner";
 import ShareAsTemplateDialog from './ShareAsTemplateDialog';
 import CollaborationDialog from './CollaborationDialog';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface ShareButtonProps {
   decision: IDecision;
@@ -22,6 +23,7 @@ interface ShareButtonProps {
 const ShareButton: React.FC<ShareButtonProps> = ({ decision }) => {
   const [isSharing, setIsSharing] = useState(false);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const { t } = useI18nUI();
 
   const handleShareAsLink = async () => {
     setIsSharing(true);
@@ -30,10 +32,10 @@ const ShareButton: React.FC<ShareButtonProps> = ({ decision }) => {
       const shareUrl = `${window.location.origin}/shared/${publicId}`;
       
       await navigator.clipboard.writeText(shareUrl);
-      toast.success("Lien de partage copié dans le presse-papier !");
+      toast.success(t('share.toasts.linkCopied'));
     } catch (error) {
       console.error('Error sharing decision:', error);
-      toast.error("Erreur lors du partage");
+      toast.error(t('share.toasts.shareError'));
     } finally {
       setIsSharing(false);
     }
@@ -53,24 +55,24 @@ const ShareButton: React.FC<ShareButtonProps> = ({ decision }) => {
             ) : (
               <Share2 className="h-4 w-4 mr-2" />
             )}
-            Partager
+            {t('share.button.share')}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={handleShareAsLink}>
             <Link className="h-4 w-4 mr-2" />
-            Partage simple
+            {t('share.button.simpleShare')}
           </DropdownMenuItem>
           <CollaborationDialog decision={decision}>
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
               <Users className="h-4 w-4 mr-2" />
-              Collaborer
+              {t('share.button.collaborate')}
             </DropdownMenuItem>
           </CollaborationDialog>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleShareAsTemplate}>
             <Users className="h-4 w-4 mr-2" />
-            Partager comme template
+            {t('share.button.shareAsTemplate')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

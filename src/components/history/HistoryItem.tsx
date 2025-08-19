@@ -8,6 +8,7 @@ import { IDecision } from '@/types/decision';
 import { CategoryBadge } from '../CategorySelector';
 import { shareDecision } from '@/services/sharedDecisionService';
 import { toast } from "sonner";
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface HistoryItemProps {
   decision: IDecision;
@@ -31,6 +32,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
   rootRecommendation
 }) => {
   const [isSharing, setIsSharing] = useState(false);
+  const { t, getLocaleTag } = useI18nUI();
   
   const handleLoad = () => {
     console.log('Loading decision:', decision.id);
@@ -51,10 +53,10 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
       const shareUrl = `${window.location.origin}/shared/${publicId}`;
       
       await navigator.clipboard.writeText(shareUrl);
-      toast.success("Lien de partage copié dans le presse-papier !");
+      toast.success(t('history.item.share'));
     } catch (error) {
       console.error('Error sharing decision:', error);
-      toast.error("Erreur lors du partage");
+      toast.error(t('share.toasts.shareError'));
     } finally {
       setIsSharing(false);
     }
@@ -79,9 +81,9 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
                     {typeof followUpCount === 'number' && followUpCount > 0 && (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className="text-xs text-muted-foreground whitespace-nowrap cursor-help hover:text-foreground transition-colors ml-2">
-                            + {followUpCount} question{followUpCount > 1 ? 's' : ''} de suivi
-                          </span>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap cursor-help hover:text-foreground transition-colors ml-2">
+                      + {followUpCount} {followUpCount > 1 ? t('history.item.followUp.plural') : t('history.item.followUp.singular')}
+                    </span>
                         </TooltipTrigger>
                         <TooltipContent className="max-w-md max-h-64 overflow-y-auto">
                           <div className="space-y-3">
@@ -99,7 +101,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
                             ))}
                             {followUpCount > 5 && (
                               <p className="text-xs text-muted-foreground italic pt-2 border-t">
-                                ... et {followUpCount - 5} autre{followUpCount - 5 > 1 ? 's' : ''}
+                                ... et {followUpCount - 5} {followUpCount - 5 > 1 ? t('history.item.more.plural') : t('history.item.more.singular')}
                               </p>
                             )}
                           </div>
@@ -117,16 +119,16 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
               
               {/* Date avec espacement */}
               <div className="pt-2">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <p className="text-xs text-muted-foreground cursor-help">
-                      {new Date(decision.timestamp).toLocaleDateString('fr-FR')}
-                    </p>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{new Date(decision.timestamp).toLocaleString('fr-FR')}</p>
-                  </TooltipContent>
-                </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-xs text-muted-foreground cursor-help">
+                        {new Date(decision.timestamp).toLocaleDateString(getLocaleTag())}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{new Date(decision.timestamp).toLocaleString(getLocaleTag())}</p>
+                    </TooltipContent>
+                  </Tooltip>
               </div>
             </div>
 
@@ -147,9 +149,9 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
                 <div className="-mt-0.5">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="text-xs text-muted-foreground cursor-help hover:text-foreground transition-colors">
-                        + {followUpCount} question{followUpCount > 1 ? 's' : ''} de suivi
-                      </span>
+                  <span className="text-xs text-muted-foreground cursor-help hover:text-foreground transition-colors">
+                    + {followUpCount} {followUpCount > 1 ? t('history.item.followUp.plural') : t('history.item.followUp.singular')}
+                  </span>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-md max-h-64 overflow-y-auto">
                       <div className="space-y-3">
@@ -167,7 +169,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
                         ))}
                         {followUpCount > 5 && (
                           <p className="text-xs text-muted-foreground italic pt-2 border-t">
-                            ... et {followUpCount - 5} autre{followUpCount - 5 > 1 ? 's' : ''}
+                            ... et {followUpCount - 5} {followUpCount - 5 > 1 ? t('history.item.more.plural') : t('history.item.more.singular')}
                           </p>
                         )}
                       </div>
@@ -183,16 +185,16 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
               
               {/* 5ème niveau: Date */}
               <div className="pt-3">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <p className="text-xs text-muted-foreground cursor-help">
-                      {new Date(decision.timestamp).toLocaleDateString('fr-FR')}
-                    </p>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{new Date(decision.timestamp).toLocaleString('fr-FR')}</p>
-                  </TooltipContent>
-                </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-xs text-muted-foreground cursor-help">
+                        {new Date(decision.timestamp).toLocaleDateString(getLocaleTag())}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{new Date(decision.timestamp).toLocaleString(getLocaleTag())}</p>
+                    </TooltipContent>
+                  </Tooltip>
               </div>
             </div>
           </div>
@@ -214,14 +216,14 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
                 ) : (
                   <Share2 className="h-4 w-4 mr-2" />
                 )}
-                Partager
+                {t('history.item.share')}
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={handleDelete}
                 className="text-destructive focus:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Supprimer
+                {t('history.item.delete')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

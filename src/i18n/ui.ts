@@ -971,6 +971,80 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       analyzing: 'Analyse en cours...',
     },
     share: {
+      button: {
+        share: 'Partager',
+        simpleShare: 'Partage simple',
+        collaborate: 'Collaborer',
+        shareAsTemplate: 'Partager comme template',
+      },
+      toasts: {
+        linkCreated: 'Lien de partage créé !',
+        linkCopied: 'Lien de partage copié dans le presse-papier !',
+        shareError: 'Erreur lors du partage',
+        copyError: 'Erreur lors de la copie',
+      },
+      collaborateDialog: {
+        title: 'Collaborer sur cette décision',
+        description: 'Partagez cette décision pour obtenir des commentaires et collaborer.',
+        tabs: {
+          public: 'Lien public',
+          invite: 'Inviter',
+        },
+        public: {
+          label: 'Créer un lien public',
+          help: 'Créez un lien que vous pouvez partager avec n\'importe qui.',
+          create: 'Créer le lien',
+          creating: 'Création...',
+          createdHint: 'Lien créé ! Vous pouvez maintenant le copier et le partager.',
+        },
+        invite: {
+          label: 'Invitation par email',
+          help: 'Invitez des personnes spécifiques à collaborer sur cette décision.',
+          emailPlaceholder: 'email@exemple.com',
+          send: 'Envoyer l\'invitation',
+          missingEmail: 'Veuillez saisir une adresse email.',
+          needPublicLink: 'Vous devez d\'abord créer un lien public.',
+          emailClientOpened: 'Votre client email s\'est ouvert avec l\'invitation pré-remplie.',
+        },
+      },
+      templateDialog: {
+        title: 'Partager comme template communautaire',
+        desc1: 'Partagez cette décision avec la communauté pour aider d\'autres utilisateurs.',
+        desc2: 'Votre template sera visible publiquement et pourra être utilisé par d\'autres.',
+        form: {
+          title: {
+            label: 'Titre du template',
+            placeholder: 'Un titre accrocheur pour votre template',
+          },
+          description: {
+            label: 'Description',
+            placeholder: 'Décrivez ce que ce template peut aider à résoudre',
+          },
+          author: {
+            label: 'Nom de l\'auteur',
+            placeholder: 'Votre nom ou pseudonyme',
+          },
+          category: {
+            label: 'Catégorie',
+            placeholder: 'Sélectionnez une catégorie',
+          },
+          tags: {
+            label: 'Tags',
+            placeholder: 'Ajoutez des mots-clés...',
+          },
+        },
+        tags: {
+          add: 'Ajouter',
+        },
+        cancel: 'Annuler',
+        submit: 'Partager le template',
+        submitting: 'Partage en cours...',
+        success: 'Template partagé avec succès !',
+        error: 'Erreur lors du partage du template',
+      },
+      sharedView: {
+        sharedOn: 'Partagé le',
+      },
       menu: {
         share: 'Partager',
         simpleShare: 'Partage simple',
@@ -1016,6 +1090,89 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         required: 'Le titre est requis',
       },
     },
+    export: {
+      menuButton: {
+        idle: 'Exporter',
+        busy: 'Export...',
+      },
+      menu: {
+        pdf: 'PDF',
+        pdfStandard: 'PDF standard',
+        pdfCustom: 'PDF personnalisé',
+        image: 'Image',
+        json: 'JSON',
+        copy: 'Copier',
+      },
+      pdfDialog: {
+        title: 'Options d\'export PDF',
+        includeCharts: 'Inclure les graphiques',
+        includeLinks: 'Inclure les liens',
+        includeBreakdown: 'Inclure le détail',
+        pageFormat: 'Format de page',
+        orientation: 'Orientation',
+        orientationPortrait: 'Portrait',
+        orientationLandscape: 'Paysage',
+        generatePdf: 'Générer le PDF',
+        toasts: {
+          pdfOnlySingle: 'L\'export PDF n\'est disponible que pour une seule décision.',
+          launchSuccess: 'Génération PDF lancée !',
+          pdfError: 'Erreur lors de la génération PDF',
+          jsonSuccess: 'Export JSON réussi !',
+          jsonError: 'Erreur lors de l\'export JSON',
+          imageOnlySingle: 'L\'export image n\'est disponible que pour une seule décision.',
+          imageDev: 'Export image en développement',
+          copySuccess: 'Données copiées !',
+          copyError: 'Erreur lors de la copie',
+        },
+      },
+    },
+    comments: {
+      section: {
+        titleDefault: 'Commentaires',
+        placeholderDefault: 'Ajoutez un commentaire...',
+        loading: 'Chargement des commentaires...',
+        empty: 'Aucun commentaire pour le moment.',
+        add: 'Ajouter',
+        cancel: 'Annuler',
+        addButton: 'Ajouter un commentaire',
+        toasts: {
+          emptyError: 'Le commentaire ne peut pas être vide',
+          loadError: 'Erreur lors du chargement des commentaires',
+          addSuccess: 'Commentaire ajouté avec succès',
+          addError: 'Erreur lors de l\'ajout du commentaire',
+          updateSuccess: 'Commentaire mis à jour avec succès',
+          updateError: 'Erreur lors de la mise à jour du commentaire',
+          deleteSuccess: 'Commentaire supprimé avec succès',
+          deleteError: 'Erreur lors de la suppression du commentaire',
+        },
+      },
+      item: {
+        types: {
+          criteria: 'Critère',
+          option: 'Option',
+          recommendation: 'Recommandation',
+          general: 'Général',
+        },
+        createdOn: 'Créé le',
+        modifiedOn: 'Modifié le',
+      },
+    },
+    dataAccuracy: {
+      createdOn: 'Créé le',
+      by: 'par',
+      updatedOn: 'mis à jour le',
+      sources: {
+        zero: 'sources',
+        one: 'source',
+        other: 'sources',
+      },
+      noExternalSources: 'Aucune source externe utilisée',
+      unknown: {
+        author: 'Auteur inconnu',
+        date: 'Date inconnue',
+        datetime: 'Date inconnue',
+      },
+    },
     categories: {
       tech: 'Technologie',
       travel: 'Voyage',
@@ -1028,6 +1185,18 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       all: 'Toutes les catégories',
       uncategorized: 'Non catégorisées',
       none: 'Aucune catégorie',
+    },
+    emoji: {
+      searchPlaceholder: 'Rechercher un emoji...',
+      tabs: {
+        popular: 'Populaires',
+        emotions: 'Émotions',
+        activities: 'Activités',
+        objects: 'Objets',
+        nature: 'Nature',
+        food: 'Nourriture',
+        symbols: 'Symboles',
+      },
     },
     common: {
       view: 'Voir',
@@ -1252,7 +1421,145 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
     sharedDecision: {
       signIn: 'Sign In',
     },
+    categorySelector: {
+      placeholder: 'Select a category...',
+      searchPlaceholder: 'Search...',
+      empty: 'No category found.',
+      none: 'No category',
+    },
+    history: {
+      title: 'Decision History',
+      subtitle: 'Load or delete your past analyses.',
+      searchBar: {
+        searchPlaceholder: 'Search...',
+        filter: 'Filter',
+        categoryLabel: 'Category',
+        allCategories: 'All categories',
+        uncategorized: 'Uncategorized',
+        sortBy: 'Sort by',
+        sort: {
+          date: 'By date',
+          category: 'By category',
+        },
+        more: 'More',
+        export: 'Export',
+        exportPdf: 'Export as PDF',
+        exportJson: 'Export as JSON',
+        copyText: 'Copy text',
+        clearAll: 'Clear all',
+        confirm: {
+          title: 'Are you sure?',
+          desc: 'This action is irreversible and will delete your entire decision history.',
+          cancel: 'Cancel',
+          ok: 'Confirm',
+        },
+        toasts: {
+          export: {
+            success: 'Export successful! (JSON format for now)',
+            error: 'Export error',
+          },
+          json: {
+            success: 'JSON export successful!',
+            error: 'JSON export error',
+          },
+          copy: {
+            success: 'Data copied to clipboard!',
+            error: 'Copy error',
+          },
+        },
+      },
+      list: {
+        emptyMessage: 'No decisions match the search criteria.',
+        seeMore: 'See more',
+      },
+      item: {
+        share: 'Share',
+        delete: 'Delete',
+        followUp: {
+          singular: 'follow-up question',
+          plural: 'follow-up questions',
+        },
+        more: {
+          singular: 'more',
+          plural: 'more',
+        },
+      },
+      search: {
+        placeholder: 'Search...',
+      },
+      filter: {
+        button: 'Filter',
+        categoryLabel: 'Category',
+        sortByLabel: 'Sort by',
+        sort: {
+          date: 'By date',
+          category: 'By category',
+        },
+      },
+      more: {
+        button: 'More',
+      },
+      empty: 'No decisions match the search criteria.',
+      copy: {
+        success: 'Data copied to clipboard!',
+        error: 'Copy error',
+      },
+      export: {
+        json: {
+          success: 'JSON export successful!',
+          error: 'JSON export error',
+        },
+        success: 'Export successful! (JSON format for now)',
+        error: 'Export error',
+      },
+      confirm: {
+        title: 'Are you sure?',
+        desc: 'This action is irreversible and will delete your entire decision history.',
+        cancel: 'Cancel',
+        ok: 'Confirm',
+      },
+      followUp: 'follow-up question',
+      followUpPlural: 'follow-up questions',
+      share: 'Share',
+      delete: 'Delete',
+      clearAll: 'Clear all',
+    },
+    dilemmaSetup: {
+      hero: {
+        titleLine1: 'Your decisions will be',
+        brand: 'Rationable',
+        subtitle: 'From uncertainty to clarity: harness the power of AI',
+      },
+      dropHere: 'Drop your files here',
+      attachFile: 'Attach file',
+      launchAnalysis: 'Launch analysis',
+      helpText: 'Describe the problem or decision you need to make. You can also drag and drop documents directly in this area.',
+      attachedDocs: 'Attached documents',
+      history: {
+        title: 'Decision History',
+        description: 'Load or delete your past analyses.',
+      },
+      analysisStarted: 'Analysis started!',
+      fileTooLarge: 'is too large (max 10MB)',
+    },
+    optionsLoading: {
+      title: 'Analyzing options...',
+      subtitle: 'AI is evaluating the best solutions according to your criteria',
+    },
+    mainActionButton: {
+      analyzing: 'Analyzing...',
+    },
     decision: {
+      a11y: {
+        skipToMain: 'Skip to main content',
+        mainLabel: 'Decision assistant',
+      },
+      toasts: {
+        alreadyRunning: 'An analysis is already in progress, please wait...',
+        followup: {
+          error: 'Error processing the follow-up question',
+        },
+      },
       home: {
         hero: {
           titleLine1: 'Your decisions will be',
@@ -1273,74 +1580,59 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         },
       },
     },
-    history: {
-      search: {
-        placeholder: 'Search...',
-      },
-      filter: {
-        button: 'Filter',
-        categoryLabel: 'Category',
-        sortByLabel: 'Sort by',
-        sort: {
-          date: 'By date',
-          category: 'By category',
-        },
-      },
-      more: {
-        button: 'More',
-      },
-      empty: 'No history',
-      copy: {
-        success: 'Data copied to clipboard!',
-        error: 'Error copying data',
-      },
-      export: {
-        json: {
-          success: 'JSON export successful!',
-          error: 'Error exporting JSON',
-        },
-        success: 'Export successful! (JSON format for now)',
-        error: 'Export error',
-      },
-      confirm: {
-        title: 'Are you sure?',
-        desc: 'This action is irreversible and will delete all your decision history.',
-        cancel: 'Cancel',
-        ok: 'Confirm',
-      },
-      followUp: 'follow-up question',
-      followUpPlural: 'follow-up questions',
-      share: 'Share',
-      delete: 'Delete',
-      clearAll: 'Clear all',
-    },
     share: {
-      menu: {
+      button: {
         share: 'Share',
         simpleShare: 'Simple share',
         collaborate: 'Collaborate',
         shareAsTemplate: 'Share as template',
-        copied: {
-          success: 'Share link copied to clipboard!',
-          error: 'Error sharing',
+      },
+      toasts: {
+        linkCreated: 'Share link created!',
+        linkCopied: 'Share link copied to clipboard!',
+        shareError: 'Share error',
+        copyError: 'Copy error',
+      },
+      collaborateDialog: {
+        title: 'Collaborate on this decision',
+        description: 'Share this decision to get feedback and collaborate.',
+        tabs: {
+          public: 'Public link',
+          invite: 'Invite',
+        },
+        public: {
+          label: 'Create public link',
+          help: 'Create a link you can share with anyone.',
+          create: 'Create link',
+          creating: 'Creating...',
+          createdHint: 'Link created! You can now copy and share it.',
+        },
+        invite: {
+          label: 'Email invitation',
+          help: 'Invite specific people to collaborate on this decision.',
+          emailPlaceholder: 'email@example.com',
+          send: 'Send invitation',
+          missingEmail: 'Please enter an email address.',
+          needPublicLink: 'You must first create a public link.',
+          emailClientOpened: 'Your email client opened with the pre-filled invitation.',
         },
       },
-      dialog: {
+      templateDialog: {
         title: 'Share as community template',
-        description1: 'Share your decision with the community to help other users.',
-        description2: 'Your template will be reviewed before publication.',
+        desc1: 'Share this decision with the community to help other users.',
+        desc2: 'Your template will be publicly visible and can be used by others.',
         form: {
           title: {
-            label: 'Title *',
-            placeholder: 'Descriptive title of the template...',
+            label: 'Template title',
+            placeholder: 'A catchy title for your template',
           },
           description: {
             label: 'Description',
-            placeholder: 'Briefly describe this template and when to use it...',
+            placeholder: 'Describe what this template can help solve',
           },
           author: {
-            label: 'Author name (optional)',
-            placeholder: 'Your name or username (or leave blank to remain anonymous)',
+            label: 'Author name',
+            placeholder: 'Your name or username',
           },
           category: {
             label: 'Category',
@@ -1348,16 +1640,147 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
           },
           tags: {
             label: 'Tags',
-            placeholder: 'Add a tag...',
-            add: 'Add tag',
+            placeholder: 'Add keywords...',
+          },
+        },
+        tags: {
+          add: 'Add',
+        },
+        cancel: 'Cancel',
+        submit: 'Share template',
+        submitting: 'Sharing...',
+        success: 'Template shared successfully!',
+        error: 'Template sharing error',
+      },
+      sharedView: {
+        sharedOn: 'Shared on',
+      },
+      menu: {
+        share: 'Share',
+        simpleShare: 'Simple share',
+        collaborate: 'Collaborate',
+        shareAsTemplate: 'Share as template',
+        copied: {
+          success: 'Share link copied to clipboard!',
+          error: 'Share error',
+        },
+      },
+      dialog: {
+        title: 'Share as community template',
+        description1: 'Share this decision with the community to help other users.',
+        description2: 'Your template will be publicly visible and can be used by others.',
+        form: {
+          title: {
+            label: 'Template title',
+            placeholder: 'A catchy title for your template',
+          },
+          description: {
+            label: 'Description',
+            placeholder: 'Describe what this template can help solve',
+          },
+          author: {
+            label: 'Author name',
+            placeholder: 'Your name or username',
+          },
+          category: {
+            label: 'Category',
+            placeholder: 'Select a category',
+          },
+          tags: {
+            label: 'Tags',
+            placeholder: 'Add keywords...',
+            add: 'Add',
           },
         },
         cancel: 'Cancel',
-        submit: 'Share',
+        submit: 'Share template',
         submitting: 'Sharing...',
-        success: 'Template shared successfully! It will be visible after moderation.',
-        error: 'Error sharing template',
+        success: 'Template shared successfully!',
+        error: 'Template sharing error',
         required: 'Title is required',
+      },
+    },
+    export: {
+      menuButton: {
+        idle: 'Export',
+        busy: 'Exporting...',
+      },
+      menu: {
+        pdf: 'PDF',
+        pdfStandard: 'Standard PDF',
+        pdfCustom: 'Custom PDF',
+        image: 'Image',
+        json: 'JSON',
+        copy: 'Copy',
+      },
+      pdfDialog: {
+        title: 'PDF Export Options',
+        includeCharts: 'Include charts',
+        includeLinks: 'Include links',
+        includeBreakdown: 'Include breakdown',
+        pageFormat: 'Page format',
+        orientation: 'Orientation',
+        orientationPortrait: 'Portrait',
+        orientationLandscape: 'Landscape',
+        generatePdf: 'Generate PDF',
+        toasts: {
+          pdfOnlySingle: 'PDF export is only available for a single decision.',
+          launchSuccess: 'PDF generation started!',
+          pdfError: 'PDF generation error',
+          jsonSuccess: 'JSON export successful!',
+          jsonError: 'JSON export error',
+          imageOnlySingle: 'Image export is only available for a single decision.',
+          imageDev: 'Image export in development',
+          copySuccess: 'Data copied!',
+          copyError: 'Copy error',
+        },
+      },
+    },
+    comments: {
+      section: {
+        titleDefault: 'Comments',
+        placeholderDefault: 'Add a comment...',
+        loading: 'Loading comments...',
+        empty: 'No comments yet.',
+        add: 'Add',
+        cancel: 'Cancel',
+        addButton: 'Add comment',
+        toasts: {
+          emptyError: 'Comment cannot be empty',
+          loadError: 'Error loading comments',
+          addSuccess: 'Comment added successfully',
+          addError: 'Error adding comment',
+          updateSuccess: 'Comment updated successfully',
+          updateError: 'Error updating comment',
+          deleteSuccess: 'Comment deleted successfully',
+          deleteError: 'Error deleting comment',
+        },
+      },
+      item: {
+        types: {
+          criteria: 'Criteria',
+          option: 'Option',
+          recommendation: 'Recommendation',
+          general: 'General',
+        },
+        createdOn: 'Created on',
+        modifiedOn: 'Modified on',
+      },
+    },
+    dataAccuracy: {
+      createdOn: 'Created on',
+      by: 'by',
+      updatedOn: 'updated on',
+      sources: {
+        zero: 'sources',
+        one: 'source',
+        other: 'sources',
+      },
+      noExternalSources: 'No external sources used',
+      unknown: {
+        author: 'Unknown author',
+        date: 'Unknown date',
+        datetime: 'Unknown date',
       },
     },
     categories: {
@@ -1372,6 +1795,18 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       all: 'All categories',
       uncategorized: 'Uncategorized',
       none: 'No category',
+    },
+    emoji: {
+      searchPlaceholder: 'Search emoji...',
+      tabs: {
+        popular: 'Popular',
+        emotions: 'Emotions',
+        activities: 'Activities',
+        objects: 'Objects',
+        nature: 'Nature',
+        food: 'Food',
+        symbols: 'Symbols',
+      },
     },
     common: {
       view: 'View',

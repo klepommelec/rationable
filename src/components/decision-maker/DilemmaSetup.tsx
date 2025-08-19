@@ -164,7 +164,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   const isMainButtonDisabled = dilemma.trim() === '' || isLoading || isAnalysisStarting;
   const handleAnalysisClick = async () => {
     setIsAnalysisStarting(true);
-    toast.success("Analyse démarrée !");
+    toast.success(t('dilemmaSetup.analysisStarted'));
     try {
       await handleStartAnalysis();
     } finally {
@@ -176,14 +176,14 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             <div className="h-[72vh] flex items-center justify-center">
                 <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none shadow-none bg-transparent">
                     <CardHeader className="text-center pt-12 px-4 sm:px-6">
-                        <h2 className="font-bold text-4xl sm:text-4xl md:text-5xl lg:text-6xl">
-                            <div className="font-semibold ">Vos décisions seront </div>
+        <h2 className="font-bold text-4xl sm:text-4xl md:text-5xl lg:text-6xl">
+                            <div className="font-semibold ">{t('dilemmaSetup.hero.titleLine1')} </div>
                             <div className="flex items-center justify-center gap-3">
                                 <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 xl:h-16 xl:w-16" />
-                                <span className="font-semibold ">Rationable</span>
+                                <span className="font-semibold ">{t('dilemmaSetup.hero.brand')}</span>
                             </div>
                         </h2>
-                        <CardDescription className="text-muted-foreground text-sm:text-base">De l'incertitude à la clarté : exploitez la puissance de l'IA</CardDescription>
+                        <CardDescription className="text-muted-foreground text-sm:text-base">{t('dilemmaSetup.hero.subtitle')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6 px-4 sm:px-6">
                         <div className="space-y-2">
@@ -201,18 +201,18 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                     </div>}
                                 {isDragOver && <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                         <div className="text-primary font-medium">
-                                            Déposez vos fichiers ici
+                                            {t('dilemmaSetup.dropHere')}
                                         </div>
                                     </div>}
                                 {/* Boutons d'action à droite */}
                                 <div className="absolute bottom-3 right-3 flex gap-1">
                                     {/* Bouton d'attachement de fichier */}
-                                    <button type="button" onClick={handleFileButtonClick} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-label="Joindre un fichier" title="Joindre un fichier" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-full">
+                                    <button type="button" onClick={handleFileButtonClick} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-label={t('dilemmaSetup.attachFile')} title={t('dilemmaSetup.attachFile')} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-full">
                                         <Paperclip className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                                     </button>
                                     
                                     {/* Bouton d'analyse avec feedback visuel */}
-                                    {analysisStep === 'idle' && <button type="button" onClick={handleAnalysisClick} disabled={isMainButtonDisabled} aria-label="Lancer l'analyse" title="Lancer l'analyse" className="p-2 bg-cyan-500 hover:bg-cyan-600 text-slate-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full hover:scale-105 active:scale-95">
+                                    {analysisStep === 'idle' && <button type="button" onClick={handleAnalysisClick} disabled={isMainButtonDisabled} aria-label={t('dilemmaSetup.launchAnalysis')} title={t('dilemmaSetup.launchAnalysis')} className="p-2 bg-cyan-500 hover:bg-cyan-600 text-slate-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full hover:scale-105 active:scale-95">
                                             {isAnalysisStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
                                         </button>}
                                 </div>
@@ -221,14 +221,14 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 <input ref={fileInputRef} type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt" onChange={handleFileSelect} className="hidden" aria-hidden="true" />
                             </div>
                             <p id="dilemma-help" className="sr-only">
-                                Décrivez le problème ou la décision que vous devez prendre. Vous pouvez aussi glisser-déposer des documents directement dans cette zone.
+                                {t('dilemmaSetup.helpText')}
                             </p>
                         </div>
 
                         {/* Liste des fichiers uploadés */}
                         {uploadedFiles.length > 0 && <div className="space-y-2">
                                 <label className="font-medium text-sm sm:text-base">
-                                    Documents joints ({uploadedFiles.length})
+                                    {t('dilemmaSetup.attachedDocs')} ({uploadedFiles.length})
                                 </label>
                                 <div className="space-y-2 max-h-32 overflow-y-auto">
                                     {uploadedFiles.map(uploadedFile => <Card key={uploadedFile.id} className="p-3">
@@ -266,9 +266,9 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             {/* Historique intégré directement dans la page */}
             <Card className="backdrop-blur-sm">
                 <CardHeader className="pb-4">
-                    <CardTitle className="font-semibold text-2xl">Historique des décisions</CardTitle>
+                    <CardTitle className="font-semibold text-2xl">{t('dilemmaSetup.history.title')}</CardTitle>
                     <CardDescription className="text-muted-foreground">
-                        Chargez ou supprimez vos analyses passées.
+                        {t('dilemmaSetup.history.description')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">

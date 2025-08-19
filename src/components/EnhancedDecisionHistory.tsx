@@ -7,6 +7,7 @@ import { HistorySearchBar } from './history/HistorySearchBar';
 import { HistoryActions } from './history/HistoryActions';
 import { HistoryItem } from './history/HistoryItem';
 import { EmptyHistoryState } from './history/EmptyHistoryState';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface EnhancedDecisionHistoryProps {
   history: IDecision[];
@@ -29,6 +30,7 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'date' | 'category'>('date');
   const [visibleCount, setVisibleCount] = useState(10);
+  const { t } = useI18nUI();
 
   console.log('EnhancedDecisionHistory - onLoad function:', typeof onLoad);
 
@@ -134,7 +136,7 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
         <div className="space-y-3">
           {filteredAndSortedHistory.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
-              <p>Aucune décision ne correspond à vos critères de recherche.</p>
+              <p>{t('history.list.emptyMessage')}</p>
             </div>
           ) : (
             visibleThreads.map(item => (
@@ -159,7 +161,7 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
                 onClick={loadMoreItems}
                 className="min-w-[120px]"
               >
-                Voir plus
+                {t('history.list.seeMore')}
               </Button>
             </div>
           )}

@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Edit2, Trash2, Save, X } from 'lucide-react';
 import { IComment } from '@/types/comment';
 import { toast } from 'sonner';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface CommentItemProps {
   comment: IComment;
@@ -21,6 +22,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
   const [isLoading, setIsLoading] = useState(false);
+  const { t, getLocaleTag } = useI18nUI();
 
   const handleSave = async () => {
     if (!editContent.trim()) {
@@ -58,7 +60,8 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('fr-FR', {
+    const locale = getLocaleTag();
+    return new Date(dateString).toLocaleString(locale, {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -68,12 +71,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   };
 
   const getTypeLabel = (type: string) => {
-    switch (type) {
-      case 'criteria': return 'Critère';
-      case 'option': return 'Option';
-      case 'recommendation': return 'Recommandation';
-      default: return 'Général';
-    }
+    return t(`comments.item.types.${type}` as any) || t('comments.item.types.general');
   };
 
   return (
@@ -148,9 +146,9 @@ export const CommentItem: React.FC<CommentItemProps> = ({
       )}
 
       <div className="flex justify-between items-center text-xs text-muted-foreground">
-        <span>Créé le {formatDate(comment.created_at)}</span>
+        <span>{t('comments.item.createdOn')} {formatDate(comment.created_at)}</span>
         {comment.updated_at !== comment.created_at && (
-          <span>Modifié le {formatDate(comment.updated_at)}</span>
+          <span>{t('comments.item.modifiedOn')} {formatDate(comment.updated_at)}</span>
         )}
       </div>
     </Card>

@@ -7,6 +7,7 @@ import { CommentItem } from './CommentItem';
 import { commentService } from '@/services/commentService';
 import { IComment, ICommentCreate } from '@/types/comment';
 import { toast } from 'sonner';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface CommentSectionProps {
   decisionId: string;
@@ -20,13 +21,17 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   decisionId,
   commentType,
   stepContext,
-  title = "Commentaires",
-  placeholder = "Ajoutez un commentaire..."
+  title,
+  placeholder
 }) => {
   const [comments, setComments] = useState<IComment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isAddingComment, setIsAddingComment] = useState(false);
+  const { t } = useI18nUI();
+  
+  const actualTitle = title || t('comments.section.titleDefault');
+  const actualPlaceholder = placeholder || t('comments.section.placeholderDefault');
 
   const filteredComments = comments.filter(comment => 
     comment.comment_type === commentType &&
@@ -45,7 +50,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
       const fetchedComments = await commentService.getComments(decisionId);
       setComments(fetchedComments);
     } catch (error) {
-      toast.error("Erreur lors du chargement des commentaires");
+      toast.error(t('comments.section.toasts.loadError'));
     } finally {
       setIsLoading(false);
     }
@@ -53,7 +58,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
 
   const handleAddComment = async () => {
     if (!newComment.trim()) {
-      toast.error("Le commentaire ne peut pas être vide");
+      toast.error(t('comments.section.toasts.emptyError'));
       return;
     }
 
@@ -71,10 +76,10 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
         setComments(prev => [...prev, createdComment]);
         setNewComment('');
         setIsAddingComment(false);
-        toast.success("Commentaire ajouté");
+        toast.success(t('comments.section.toasts.addSuccess'));
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Erreur lors de l'ajout du commentaire";
+      const errorMessage = error instanceof Error ? error.message : t('comments.section.toasts.addError');
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -116,12 +121,12 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
       <div className="space-y-3">
         {isLoading && filteredComments.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            Chargement des commentaires...
+            {t('comments.section.loading')}
           </div>
         ) : filteredComments.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground flex flex-col items-center gap-2">
             <MessageSquare className="h-8 w-8 text-muted-foreground/50" />
-            <span>Aucun commentaire pour le moment</span>
+            <span>{t('comments.section.empty')}</span>
           </div>
         ) : (
           <div className="space-y-3">
@@ -141,7 +146,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
             <Textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder={placeholder}
+              placeholder={actualPlaceholder}
               className="min-h-[80px]"
               disabled={isLoading}
             />
@@ -151,7 +156,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
                 disabled={isLoading || !newComment.trim()}
                 size="sm"
               >
-                Ajouter
+                {t('comments.section.add')}
               </Button>
               <Button
                 variant="outline"
@@ -162,7 +167,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
                 disabled={isLoading}
                 size="sm"
               >
-                Annuler
+                {t('comments.section.cancel')}
               </Button>
             </div>
           </Card>
@@ -174,7 +179,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
             className="w-full"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Ajouter un commentaire
+            {t('comments.section.addButton')}
           </Button>
         )}
       </div>
