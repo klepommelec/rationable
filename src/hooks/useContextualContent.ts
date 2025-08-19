@@ -1,6 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
 import { PERSONAL_TEMPLATES, PROFESSIONAL_TEMPLATES } from '@/data/predefinedTemplates';
+import { I18nService } from '@/services/i18nService';
 
 export const useContextualContent = () => {
   const { profile } = useAuth();
