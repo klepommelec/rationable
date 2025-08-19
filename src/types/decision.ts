@@ -86,6 +86,7 @@ export interface IDecision {
   updatedAt?: number;
   updatedById?: string;
   updatedByName?: string;
+  language?: 'fr' | 'en' | 'es' | 'it' | 'de';
 }
 
 export interface IDecisionCategory {

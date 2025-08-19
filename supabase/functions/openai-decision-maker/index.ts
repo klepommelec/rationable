@@ -23,12 +23,12 @@ serve(async (req) => {
 
   try {
     console.log('🚀 Edge Function called');
-    const { prompt, files, requestType, ...otherPayload } = await req.json()
+    const { prompt, files, requestType, language, ...otherPayload } = await req.json()
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
 
     // Gérer les requêtes d'expansion d'options
     if (requestType === 'expand-options') {
-      return await handleExpandOptions(otherPayload, openAIApiKey);
+      return await handleExpandOptions(otherPayload, openAIApiKey, language);
     }
 
     if (!prompt) {
@@ -51,8 +51,18 @@ serve(async (req) => {
     console.log('📁 Files to analyze:', files?.length || 0);
     const startTime = Date.now();
 
+    // Get language-specific system prompt
+    const contentLanguage = language || 'fr';
+    const languageInstructions: Record<string, string> = {
+      fr: "Vous répondez toujours en français.",
+      en: "You always respond in English.",
+      es: "Siempre respondes en español.",
+      it: "Rispondi sempre in italiano.",
+      de: "Du antwortest immer auf Deutsch."
+    };
+    
     // Préparer les messages pour OpenAI avec prompt amélioré
-    const systemPrompt = `You are a world-class decision making assistant. Your responses must be in French and in a valid JSON object format.
+    const systemPrompt = `You are a world-class decision making assistant. ${languageInstructions[contentLanguage]} Your responses must be in a valid JSON object format.
 
 RÈGLES CRITIQUES POUR LA DESCRIPTION:
 1. Soyez ULTRA-SPÉCIFIQUE au dilemme posé - pas de texte générique
@@ -255,7 +265,7 @@ INSTRUCTIONS POUR LES NOMS D'OPTIONS:
 })
 
 // Handler pour l'expansion d'options
-async function handleExpandOptions(payload: any, openAIApiKey: string) {
+async function handleExpandOptions(payload: any, openAIApiKey: string, language: string = 'fr') {
   const { dilemma, criteria, currentOptions, category, maxNewOptions = 5 } = payload;
   
   if (!openAIApiKey) {
@@ -265,17 +275,48 @@ async function handleExpandOptions(payload: any, openAIApiKey: string) {
     });
   }
 
-  const systemPrompt = `Tu es un expert en génération d'alternatives créatives pour des décisions.
+  // Get language-specific instructions
+  const languageInstructions: Record<string, any> = {
+    fr: {
+      system: "Tu es un expert en génération d'alternatives créatives pour des décisions. Tu réponds en français.",
+      rules: "RÈGLES STRICTES",
+      format: "FORMAT REQUIS (JSON uniquement)"
+    },
+    en: {
+      system: "You are an expert in generating creative alternatives for decisions. You respond in English.",
+      rules: "STRICT RULES",
+      format: "REQUIRED FORMAT (JSON only)"
+    },
+    es: {
+      system: "Eres un experto en generar alternativas creativas para decisiones. Respondes en español.",
+      rules: "REGLAS ESTRICTAS",
+      format: "FORMATO REQUERIDO (solo JSON)"
+    },
+    it: {
+      system: "Sei un esperto nella generazione di alternative creative per le decisioni. Rispondi in italiano.",
+      rules: "REGOLE RIGIDE",
+      format: "FORMATO RICHIESTO (solo JSON)"
+    },
+    de: {
+      system: "Du bist ein Experte für die Generierung kreativer Alternativen für Entscheidungen. Du antwortest auf Deutsch.",
+      rules: "STRENGE REGELN",
+      format: "ERFORDERLICHES FORMAT (nur JSON)"
+    }
+  };
+  
+  const lang = languageInstructions[language] || languageInstructions.fr;
+  
+  const systemPrompt = `${lang.system}
 Ta mission est de générer ${maxNewOptions} nouvelles options viables qui n'ont PAS déjà été considérées.
 
-RÈGLES STRICTES :
+${lang.rules} :
 1. NE PAS répéter les options existantes : ${currentOptions.join(', ')}
 2. Générer EXACTEMENT ${maxNewOptions} nouvelles options uniques
 3. Chaque option doit être viable et réaliste pour le contexte donné
 4. Inclure 2-4 avantages et 2-4 inconvénients par option
 5. Attribuer un score entre 0.1 et 0.9 basé sur la viabilité
 
-FORMAT REQUIS (JSON uniquement) :
+${lang.format} :
 {
   "newOptions": [
     {

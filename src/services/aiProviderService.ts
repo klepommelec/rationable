@@ -16,6 +16,7 @@ export interface AIRequest {
   type: 'criteria' | 'options' | 'search';
   files?: any[];
   workspaceId?: string;
+  language?: 'fr' | 'en' | 'es' | 'it' | 'de';
 }
 
 export interface AIResponse {
@@ -179,7 +180,7 @@ export class AIProviderService {
 
   private async callOpenAI(config: AIProviderConfig, request: AIRequest): Promise<any> {
     const { callOpenAiApi } = await import('./openai');
-    const result = await callOpenAiApi(request.prompt, request.files);
+    const result = await callOpenAiApi(request.prompt, request.files, request.language);
     
     return result;
   }
@@ -196,7 +197,7 @@ export class AIProviderService {
 
   private async callPerplexity(config: AIProviderConfig, request: AIRequest): Promise<any> {
     const { searchWithPerplexity } = await import('./perplexityService');
-    const result = await searchWithPerplexity(request.prompt, request.context);
+    const result = await searchWithPerplexity(request.prompt, request.context, request.language);
     
     if (result.error) {
       throw new Error(result.error);

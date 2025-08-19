@@ -2,9 +2,9 @@
 import { supabase } from '@/integrations/supabase/client';
 import { UploadedFileInfo } from './fileUploadService';
 
-export const callOpenAiApi = async (prompt: string, files?: UploadedFileInfo[]) => {
+export const callOpenAiApi = async (prompt: string, files?: UploadedFileInfo[], language?: string) => {
   const { data, error } = await supabase.functions.invoke('openai-decision-maker', {
-    body: { prompt, files },
+    body: { prompt, files, language },
   });
 
   if (error) {

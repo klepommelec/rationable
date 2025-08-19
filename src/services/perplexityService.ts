@@ -67,8 +67,8 @@ export const searchWithPerplexity = async (
     
     // Detect language from query if not provided
     const detectedLanguage = language || I18nService.detectLanguage(query);
-    I18nService.setLanguage(detectedLanguage);
-    console.log('🌐 Language detected:', detectedLanguage);
+    // Remove language mutation - keep UI language independent
+    console.log('🌐 Language detected for content:', detectedLanguage);
     
     // Détecter l'intention temporelle et adapter la requête
     const temporalIntent = detectTemporalIntent(query, detectedLanguage);

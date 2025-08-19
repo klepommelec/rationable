@@ -6,6 +6,7 @@ import { getWorkspaceDocumentsForAnalysis, searchRelevantContent } from './works
 import { supabase } from '@/integrations/supabase/client';
 import { summarizeDecisionDescription } from './descriptionSummaryService';
 import { detectQuestionType, QuestionType } from './questionClassificationService';
+import { getLanguagePrompts } from '@/utils/languageDetection';
 
 const aiService = AIProviderService.getInstance();
 
@@ -80,7 +81,8 @@ const calculateDataFreshness = (realTimeData: any, hasWorkspaceData: boolean): '
 export const generateCriteriaWithFallback = async (
   dilemma: string, 
   files?: UploadedFileInfo[], 
-  workspaceId?: string
+  workspaceId?: string,
+  language?: 'fr' | 'en' | 'es' | 'it' | 'de'
 ) => {
   console.log('🎯 Generating criteria with multi-provider fallback');
 
@@ -101,12 +103,12 @@ export const generateCriteriaWithFallback = async (
     }
   }
 
-  let prompt = `
-Analysez ce dilemme et retournez une réponse JSON avec les éléments suivants :
+  // Get language-specific prompts
+  const languagePrompts = getLanguagePrompts(language);
+  
+  let prompt = `${languagePrompts.systemInstruction}
 
-1. "emoji": Un emoji représentant le dilemme (ex: 💻, ✈️, 🏠, etc.)
-2. "criteria": Une liste de 3-6 critères importants pour évaluer les options de ce dilemme
-3. "suggestedCategory": L'ID de la catégorie la plus appropriée
+${languagePrompts.criteriaInstruction}
 
 Dilemme: "${dilemma}"${workspaceContext}`;
 
@@ -134,7 +136,8 @@ Exemple de format:
     prompt,
     type: 'criteria',
     files,
-    workspaceId
+    workspaceId,
+    language
   };
 
   try {
@@ -222,7 +225,8 @@ export const generateOptionsWithFallback = async (
   dilemma: string, 
   criteria: ICriterion[], 
   files?: UploadedFileInfo[], 
-  workspaceId?: string
+  workspaceId?: string,
+  language?: 'fr' | 'en' | 'es' | 'it' | 'de'
 ): Promise<IResult> => {
   console.log('🎯 Generating options with multi-provider fallback');
 
@@ -258,7 +262,8 @@ export const generateOptionsWithFallback = async (
       const searchRequest: AIRequest = {
         prompt: dilemma,
         context: searchContext,
-        type: 'search'
+        type: 'search',
+        language
       };
 
       console.log('🔍 Searching for external data with context:', searchContext);
@@ -304,11 +309,12 @@ export const generateOptionsWithFallback = async (
     }
   }
   
-  let prompt = '';
+  // Get language-specific prompts
+  const languagePrompts = getLanguagePrompts(language);
+  
+  let prompt = `${languagePrompts.systemInstruction}
 
-  // Approche unifiée pour tous les types de questions
-  prompt = `
-Analysez ce dilemme et générez EXACTEMENT 3 à 5 options différentes avec évaluation détaillée.
+${languagePrompts.optionsInstruction}
 
 Dilemma: "${dilemma}"
 Critères d'évaluation: ${criteriaList}${realTimeContext}${workspaceContext}`;
@@ -356,7 +362,8 @@ Répondez UNIQUEMENT avec un objet JSON valide.`;
     prompt,
     type: 'options',
     files,
-    workspaceId
+    workspaceId,
+    language
   };
 
   try {

@@ -10,6 +10,7 @@ import { useWorkspaceContext } from './useWorkspaceContext';
 import { generateContextualEmoji } from '@/services/contextualEmojiService';
 import { detectQuestionType } from '@/services/questionClassificationService';
 import { useAuth } from '@/hooks/useAuth';
+import { detectLanguage } from '@/utils/languageDetection';
 
 interface UseDecisionAPIProps {
     dilemma: string;
@@ -69,6 +70,7 @@ export const useDecisionAPI = ({
     const handleGenerateOptions = async (isRetry = false, forcedType?: 'comparative') => {
         const currentCriteria = criteria;
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
+        const contentLanguage = detectLanguage(dilemma);
         
         console.log("🔄 [DEBUG] Starting options generation", {
             isRetry,
@@ -76,6 +78,7 @@ export const useDecisionAPI = ({
             criteriaCount: currentCriteria.length,
             filesCount: uploadedFiles.length,
             workspaceId: workspaceId || 'none',
+            contentLanguage,
             dilemma: dilemma.substring(0, 50) + "..."
         });
         
@@ -111,7 +114,7 @@ export const useDecisionAPI = ({
           console.log("📡 [DEBUG] Calling generateOptions API...");
           const startTime = Date.now();
           
-          const apiResult = await generateOptionsWithFallback(dilemma, currentCriteria, uploadedFileInfos, workspaceId);
+          const apiResult = await generateOptionsWithFallback(dilemma, currentCriteria, uploadedFileInfos, workspaceId, contentLanguage);
           
           const endTime = Date.now();
           console.log("✅ [DEBUG] API call successful", {
@@ -203,11 +206,13 @@ export const useDecisionAPI = ({
     const handleStartAnalysis = useCallback(async (forcedType?: 'comparative', options?: { threadFromId?: string; dilemmaOverride?: string }) => {
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
         const effectiveDilemma = options?.dilemmaOverride ?? dilemma;
+        const contentLanguage = detectLanguage(effectiveDilemma);
         
         console.log("🚀 [OPTIMIZED] Starting PARALLEL analysis", { 
           dilemma: effectiveDilemma.substring(0, 50) + "...",
           filesCount: uploadedFiles.length,
-          workspaceId: workspaceId || 'none'
+          workspaceId: workspaceId || 'none',
+          contentLanguage
         });
         
         resetRetry();
@@ -238,7 +243,7 @@ export const useDecisionAPI = ({
             setAnalysisStep('loading-options');
             setProgressMessage('Génération des critères...');
             
-            const criteriaPromise = generateCriteriaWithFallback(effectiveDilemma, [], workspaceId);
+            const criteriaPromise = generateCriteriaWithFallback(effectiveDilemma, [], workspaceId, contentLanguage);
             
             // Attendre seulement les critères (rapide)
             const criteriaResponse = await criteriaPromise;
@@ -269,7 +274,7 @@ export const useDecisionAPI = ({
             
             // Générer les options avec tous les éléments prêts
             console.log("📡 Generating options with all assets ready...");
-            const optionsResult = await generateOptionsWithFallback(effectiveDilemma, newCriteria, uploadedFileInfos, workspaceId);
+            const optionsResult = await generateOptionsWithFallback(effectiveDilemma, newCriteria, uploadedFileInfos, workspaceId, contentLanguage);
             console.log("✅ Options generated successfully");
             
             setResult(optionsResult);
@@ -292,7 +297,8 @@ export const useDecisionAPI = ({
                 threadId,
                 parentId: parentDecision?.id,
                 createdById: user?.id,
-                createdByName: getUserDisplayName()
+                createdByName: getUserDisplayName(),
+                language: contentLanguage
             };
             addDecision(newDecision);
             setCurrentDecisionId(newDecision.id);
