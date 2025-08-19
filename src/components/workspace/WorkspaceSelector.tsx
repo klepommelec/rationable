@@ -1,18 +1,15 @@
 import React, { useState } from 'react';
-import { Building2, Plus, Check } from 'lucide-react';
-import {
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, Plus, Building2, Check } from 'lucide-react';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
 import { CreateWorkspaceDialog } from './CreateWorkspaceDialog';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 export const WorkspaceSelector: React.FC = () => {
   const { workspaces, currentWorkspace, switchWorkspace, createWorkspace } = useWorkspaces();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const { t } = useI18nUI();
 
   const handleWorkspaceClick = (workspace: any) => {
     if (workspace.id !== currentWorkspace?.id) {
@@ -65,7 +62,7 @@ export const WorkspaceSelector: React.FC = () => {
             className="flex items-center gap-2 cursor-pointer text-primary"
           >
             <Plus className="h-4 w-4" />
-            <span>Nouveau workspace</span>
+            <span>{t('workspaces.newWorkspace')}</span>
           </DropdownMenuItem>
         </DropdownMenuSubContent>
       </DropdownMenuSub>

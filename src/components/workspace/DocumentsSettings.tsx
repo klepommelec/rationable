@@ -108,13 +108,13 @@ const DocumentsSettings = ({ workspaceId }: DocumentsSettingsProps) => {
             <input {...getInputProps()} />
             <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <h4 className="text-lg font-medium mb-2">
-              {isDragActive ? 'Déposez vos fichiers ici' : 'Télécharger des documents'}
+              {isDragActive ? t('workspaces.dropFiles') : t('workspaces.uploadDocuments')}
             </h4>
             <p className="text-sm text-muted-foreground mb-4">
-              Formats supportés: PDF, Word, Excel, CSV, TXT
+              {t('common.supportedFormats')}: PDF, Word, Excel, CSV, TXT
             </p>
             <Button disabled={uploading}>
-              {uploading ? 'Téléchargement...' : 'Parcourir les fichiers'}
+              {uploading ? t('workspaces.uploading') : t('common.browseFiles')}
             </Button>
           </div>
         </CardContent>
@@ -125,7 +125,7 @@ const DocumentsSettings = ({ workspaceId }: DocumentsSettingsProps) => {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Rechercher dans les documents..."
+            placeholder={t('workspaces.searchDocuments')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"

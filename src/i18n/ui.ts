@@ -597,6 +597,35 @@ export interface UITranslations {
     addFilesError: string;
     analysisHint: string;
   };
+  workspaces: {
+    title: string;
+    description: string;
+    newWorkspace: string;
+    createDialog: {
+      title: string;
+      description: string;
+      nameLabel: string;
+      namePlaceholder: string;
+      colorLabel: string;
+      cancel: string;
+      create: string;
+      creating: string;
+      nameRequired: string;
+      createError: string;
+    };
+    uploadDocuments: string;
+    dropFiles: string;
+    uploading: string;
+    searchDocuments: string;
+    defaultBadge: string;
+    currentBadge: string;
+    personal: string;
+    professional: string;
+    personalUsage: string;
+    personalDescription: string;
+    professionalUsage: string;
+    professionalDescription: string;
+  };
   emoji: {
     searchPlaceholder: string;
     tabs: {
@@ -1332,6 +1361,35 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       addFilesError: 'Erreur lors de l\'ajout des fichiers',
       analysisHint: 'Les documents seront analysés avec votre dilemme pour vous aider dans votre décision',
     },
+    workspaces: {
+      title: 'Workspaces',
+      description: 'Organisez vos décisions dans des espaces de travail séparés',
+      newWorkspace: 'Nouveau workspace',
+      createDialog: {
+        title: 'Créer un nouveau workspace',
+        description: 'Organisez vos décisions dans des espaces séparés pour différents projets ou contextes.',
+        nameLabel: 'Nom du workspace',
+        namePlaceholder: 'Entrez le nom du workspace...',
+        colorLabel: 'Couleur',
+        cancel: 'Annuler',
+        create: 'Créer',
+        creating: 'Création...',
+        nameRequired: 'Le nom est requis',
+        createError: 'Erreur lors de la création du workspace',
+      },
+      uploadDocuments: 'Télécharger des documents',
+      dropFiles: 'Déposez vos fichiers ici',
+      uploading: 'Téléchargement...',
+      searchDocuments: 'Rechercher dans les documents...',
+      defaultBadge: 'Par défaut',
+      currentBadge: 'Actuel',
+      personal: 'Personnel',
+      professional: 'Professionnel',
+      personalUsage: 'Usage personnel',
+      personalDescription: 'Décisions personnelles, choix de vie, achats, loisirs',
+      professionalUsage: 'Usage professionnel',
+      professionalDescription: 'Décisions business, stratégie, management, projets',
+    },
     common: {
       view: 'Voir',
       download: 'Télécharger',
@@ -2008,7 +2066,36 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         missingPublicId: 'Missing share ID',
         loading: 'Loading...',
         loadingError: 'Error loading',
+    },
+    workspaces: {
+      title: 'Workspaces',
+      description: 'Organize your decisions in separate workspaces',
+      newWorkspace: 'New workspace',
+      createDialog: {
+        title: 'Create a new workspace',
+        description: 'Organize your decisions in separate spaces for different projects or contexts.',
+        nameLabel: 'Workspace name',
+        namePlaceholder: 'Enter workspace name...',
+        colorLabel: 'Color',
+        cancel: 'Cancel',
+        create: 'Create',
+        creating: 'Creating...',
+        nameRequired: 'Name is required',
+        createError: 'Error creating workspace',
       },
+      uploadDocuments: 'Upload documents',
+      dropFiles: 'Drop your files here',
+      uploading: 'Uploading...',
+      searchDocuments: 'Search documents...',
+      defaultBadge: 'Default',
+      currentBadge: 'Current',
+      personal: 'Personal',
+      professional: 'Professional',
+      personalUsage: 'Personal use',
+      personalDescription: 'Personal decisions, life choices, purchases, leisure',
+      professionalUsage: 'Professional use',
+      professionalDescription: 'Business decisions, strategy, management, projects',
+    },
     common: {
       view: 'View',
       download: 'Download',

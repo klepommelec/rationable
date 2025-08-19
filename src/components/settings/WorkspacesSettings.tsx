@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Building2, Plus, Edit3, Trash2, Crown, Briefcase } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Palette, Plus, Edit3, Trash2, Crown, Building2, Briefcase } from 'lucide-react';
+import { toast } from "sonner";
+import { CreateWorkspaceDialog } from "@/components/workspace/CreateWorkspaceDialog";
 import { useWorkspaces } from '@/hooks/useWorkspaces';
-import { CreateWorkspaceDialog } from '@/components/workspace/CreateWorkspaceDialog';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +33,7 @@ export const WorkspacesSettings: React.FC = () => {
     color: '', 
     use_context: 'personal' as 'personal' | 'professional'
   });
+  const { t } = useI18nUI();
 
   const handleEditWorkspace = (workspace: any) => {
     setEditingWorkspace(workspace.id);
@@ -76,14 +79,14 @@ export const WorkspacesSettings: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium">Workspaces</h3>
+          <h3 className="text-lg font-medium">{t('workspaces.title')}</h3>
           <p className="text-sm text-muted-foreground">
-            Organisez vos décisions dans des espaces de travail séparés
+            {t('workspaces.description')}
           </p>
         </div>
         <Button onClick={() => setShowCreateDialog(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Nouveau workspace
+          {t('workspaces.newWorkspace')}
         </Button>
       </div>
 
@@ -116,12 +119,12 @@ export const WorkspacesSettings: React.FC = () => {
                         {workspace.is_default && (
                           <Badge variant="secondary" className="text-xs">
                             <Crown className="h-3 w-3 mr-1" />
-                            Par défaut
+                            {t('workspaces.defaultBadge')}
                           </Badge>
                         )}
                         {currentWorkspace?.id === workspace.id && (
                           <Badge variant="default" className="text-xs">
-                            Actuel
+                            {t('workspaces.currentBadge')}
                           </Badge>
                         )}
                       </div>
@@ -133,7 +136,7 @@ export const WorkspacesSettings: React.FC = () => {
                       <div className="flex items-center gap-1 mt-1">
                         <Briefcase className="h-3 w-3" />
                         <span className="text-xs text-muted-foreground">
-                          {workspace.use_context === 'professional' ? 'Professionnel' : 'Personnel'}
+                          {workspace.use_context === 'professional' ? t('workspaces.professional') : t('workspaces.personal')}
                         </span>
                       </div>
                     </div>
@@ -230,17 +233,17 @@ export const WorkspacesSettings: React.FC = () => {
                       <SelectContent>
                         <SelectItem value="personal">
                           <div className="flex flex-col items-start">
-                            <span className="font-medium">Usage personnel</span>
+                            <span className="font-medium">{t('workspaces.personalUsage')}</span>
                             <span className="text-sm text-muted-foreground">
-                              Décisions personnelles, choix de vie, achats, loisirs
+                              {t('workspaces.personalDescription')}
                             </span>
                           </div>
                         </SelectItem>
                         <SelectItem value="professional">
                           <div className="flex flex-col items-start">
-                            <span className="font-medium">Usage professionnel</span>
+                            <span className="font-medium">{t('workspaces.professionalUsage')}</span>
                             <span className="text-sm text-muted-foreground">
-                              Décisions business, stratégie, management, projets
+                              {t('workspaces.professionalDescription')}
                             </span>
                           </div>
                         </SelectItem>
