@@ -54,7 +54,7 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
           {isExpanded ? (
             <>
               <ChevronUp className="h-4 w-4 mr-1" />
-              Voir moins
+              {t('decision.seeLess')}
             </>
           ) : (
             <>

@@ -4,6 +4,7 @@ import { IResult, IFollowUpQuestion } from '@/types/decision';
 import { generateFollowUpQuestions } from '@/services/followUpQuestionService';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface FollowUpQuestionsProps {
   dilemma: string;
@@ -25,6 +26,7 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
   onQuestionSelect,
   isLoading = false
 }) => {
+  const { t } = useI18nUI();
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
 
@@ -93,10 +95,10 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
     <Card className="animate-fade-in">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          Questions de suivi
+          {t('history.followUpSection.title')}
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Cliquez sur une question pour lancer une nouvelle analyse complète
+          {t('history.followUpSection.subtitle')}
         </p>
       </CardHeader>
       <CardContent className="space-y-3">

@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Edit, Trash2, Save, X, Tag } from 'lucide-react';
 import { toast } from "sonner";
 import { ICriterion, IDecisionCategory, DEFAULT_CATEGORIES } from '@/types/decision';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface CustomTemplate {
   id: string;
@@ -31,6 +32,7 @@ interface CustomTemplateManagerProps {
 export const CustomTemplateManager: React.FC<CustomTemplateManagerProps> = ({
   onApplyTemplate
 }) => {
+  const { t } = useI18nUI();
   const [templates, setTemplates] = useState<CustomTemplate[]>(() => {
     const saved = localStorage.getItem('customDecisionTemplates');
     return saved ? JSON.parse(saved) : [];
@@ -144,7 +146,7 @@ export const CustomTemplateManager: React.FC<CustomTemplateManagerProps> = ({
     saveTemplates(updatedTemplates);
     
     onApplyTemplate(updatedTemplate);
-    toast.success(`Template "${template.name}" appliqué !`);
+    toast.success(t('history.toasts.templateApplied'));
   };
 
   const addCriterion = () => {

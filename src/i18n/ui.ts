@@ -301,6 +301,25 @@ export interface UITranslations {
     share: string;
     delete: string;
     clearAll: string;
+    categories: {
+      uncategorized: string;
+      technology: string;
+      travel: string;
+      career: string;
+      lifestyle: string;
+      finance: string;
+      health: string;
+      education: string;
+      other: string;
+    };
+    followUpSection: {
+      title: string;
+      subtitle: string;
+    };
+    toasts: {
+      templateApplied: string;
+      decisionLoaded: string;
+    };
   };
   decision: {
     a11y: {
@@ -341,6 +360,7 @@ export interface UITranslations {
     usefulLinks: string;
     popularVideos: string;
     seeMore: string;
+    seeLess: string;
     pointsOfAttention: string;
     moreAdvantages: string;
     comparisonTableCaption: string;
@@ -989,8 +1009,8 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
           plural: 'questions de suivi',
         },
         more: {
-          singular: 'de plus',
-          plural: 'de plus',
+          singular: 'autre',
+          plural: 'autres',
         },
       },
       search: {
@@ -1032,6 +1052,25 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       share: 'Partager',
       delete: 'Supprimer',
       clearAll: 'Tout effacer',
+      categories: {
+        uncategorized: 'Non catégorisées',
+        technology: 'Technologie',
+        travel: 'Voyages',
+        career: 'Carrière',
+        lifestyle: 'Style de vie',
+        finance: 'Finance',
+        health: 'Santé',
+        education: 'Éducation',
+        other: 'Autre',
+      },
+      followUpSection: {
+        title: 'Questions de suivi',
+        subtitle: 'Cliquez sur une question pour lancer une nouvelle analyse complète',
+      },
+      toasts: {
+        templateApplied: 'Modèle appliqué !',
+        decisionLoaded: 'Décision précédente chargée.',
+      },
     },
     decision: {
       a11y: {
@@ -1066,12 +1105,13 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       // Analysis results
       recommended: 'Recommandé',
       advantages: 'Avantages',
-      disadvantages: 'Inconvénients', 
+      disadvantages: 'Inconvénients',
       learnMore: 'En savoir plus',
       comparisonTable: 'Tableau comparatif',
       usefulLinks: 'Liens utiles',
       popularVideos: 'Vidéos populaires',
       seeMore: 'Voir plus',
+      seeLess: 'Voir moins',
       pointsOfAttention: 'Points d\'attention',
       moreAdvantages: 'Autres avantages',
       comparisonTableCaption: 'Tableau de comparaison des options',
@@ -1718,8 +1758,8 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
           plural: 'follow-up questions',
         },
         more: {
-          singular: 'more',
-          plural: 'more',
+          singular: 'other',
+          plural: 'others',
         },
       },
       search: {
@@ -1761,6 +1801,25 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       share: 'Share',
       delete: 'Delete',
       clearAll: 'Clear all',
+      categories: {
+        uncategorized: 'Uncategorized',
+        technology: 'Technology',
+        travel: 'Travel',
+        career: 'Career',
+        lifestyle: 'Lifestyle',
+        finance: 'Finance',
+        health: 'Health',
+        education: 'Education',
+        other: 'Other',
+      },
+      followUpSection: {
+        title: 'Follow-up questions',
+        subtitle: 'Click on a question to launch a complete new analysis',
+      },
+      toasts: {
+        templateApplied: 'Template applied!',
+        decisionLoaded: 'Previous decision loaded.',
+      },
     },
     dilemmaSetup: {
       hero: {
@@ -1826,6 +1885,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       usefulLinks: 'Useful links',
       popularVideos: 'Popular videos',
       seeMore: 'See more',
+      seeLess: 'See less',
       pointsOfAttention: 'Points of attention',
       moreAdvantages: 'More advantages',
       comparisonTableCaption: 'Options comparison table',
