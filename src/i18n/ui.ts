@@ -199,28 +199,69 @@ export interface UITranslations {
   sharedDecision: {
     signIn: string;
   };
-  decision: {
-    home: {
-      hero: {
-        titleLine1: string;
-        titleLine2: string;
-        subtitle: string;
-      };
-      textarea: {
-        drop: string;
-        helper: string;
-      };
-      attachFile: string;
-      startAnalysis: string;
-      analysisStarted: string;
-      fileToast: string;
-      history: {
-        title: string;
-        subtitle: string;
-      };
-    };
+  categorySelector: {
+    placeholder: string;
+    searchPlaceholder: string;
+    empty: string;
+    none: string;
   };
   history: {
+    title: string;
+    subtitle: string;
+    searchBar: {
+      searchPlaceholder: string;
+      filter: string;
+      categoryLabel: string;
+      allCategories: string;
+      uncategorized: string;
+      sortBy: string;
+      sort: {
+        date: string;
+        category: string;
+      };
+      more: string;
+      export: string;
+      exportPdf: string;
+      exportJson: string;
+      copyText: string;
+      clearAll: string;
+      confirm: {
+        title: string;
+        desc: string;
+        cancel: string;
+        ok: string;
+      };
+      toasts: {
+        export: {
+          success: string;
+          error: string;
+        };
+        json: {
+          success: string;
+          error: string;
+        };
+        copy: {
+          success: string;
+          error: string;
+        };
+      };
+    };
+    list: {
+      emptyMessage: string;
+      seeMore: string;
+    };
+    item: {
+      share: string;
+      delete: string;
+      followUp: {
+        singular: string;
+        plural: string;
+      };
+      more: {
+        singular: string;
+        plural: string;
+      };
+    };
     search: {
       placeholder: string;
     };
@@ -261,7 +302,137 @@ export interface UITranslations {
     delete: string;
     clearAll: string;
   };
+  decision: {
+    a11y: {
+      skipToMain: string;
+      mainLabel: string;
+    };
+    toasts: {
+      alreadyRunning: string;
+      followup: {
+        error: string;
+      };
+    };
+    home: {
+      hero: {
+        titleLine1: string;
+        titleLine2: string;
+        subtitle: string;
+      };
+      textarea: {
+        drop: string;
+        helper: string;
+      };
+      attachFile: string;
+      startAnalysis: string;
+      analysisStarted: string;
+      fileToast: string;
+      history: {
+        title: string;
+        subtitle: string;
+      };
+    };
+  };
+  dilemmaSetup: {
+    hero: {
+      titleLine1: string;
+      brand: string;
+      subtitle: string;
+    };
+    dropHere: string;
+    attachFile: string;
+    launchAnalysis: string;
+    helpText: string;
+    attachedDocs: string;
+    history: {
+      title: string;
+      description: string;
+    };
+    analysisStarted: string;
+    fileTooLarge: string;
+  };
+  optionsLoading: {
+    title: string;
+    subtitle: string;
+  };
+  mainActionButton: {
+    analyzing: string;
+  };
   share: {
+    button: {
+      share: string;
+      simpleShare: string;
+      collaborate: string;
+      shareAsTemplate: string;
+    };
+    toasts: {
+      linkCreated: string;
+      linkCopied: string;
+      shareError: string;
+      copyError: string;
+    };
+    collaborateDialog: {
+      title: string;
+      description: string;
+      tabs: {
+        public: string;
+        invite: string;
+      };
+      public: {
+        label: string;
+        help: string;
+        create: string;
+        creating: string;
+        createdHint: string;
+      };
+      invite: {
+        label: string;
+        help: string;
+        emailPlaceholder: string;
+        send: string;
+        missingEmail: string;
+        needPublicLink: string;
+        emailClientOpened: string;
+      };
+    };
+    templateDialog: {
+      title: string;
+      desc1: string;
+      desc2: string;
+      form: {
+        title: {
+          label: string;
+          placeholder: string;
+        };
+        description: {
+          label: string;
+          placeholder: string;
+        };
+        author: {
+          label: string;
+          placeholder: string;
+        };
+        category: {
+          label: string;
+          placeholder: string;
+        };
+        tags: {
+          label: string;
+          placeholder: string;
+        };
+      };
+      tags: {
+        add: string;
+      };
+      cancel: string;
+      submit: string;
+      submitting: string;
+      success: string;
+      error: string;
+    };
+    sharedView: {
+      sharedOn: string;
+    };
     menu: {
       share: string;
       simpleShare: string;
@@ -307,6 +478,89 @@ export interface UITranslations {
       required: string;
     };
   };
+  export: {
+    menuButton: {
+      idle: string;
+      busy: string;
+    };
+    menu: {
+      pdf: string;
+      pdfStandard: string;
+      pdfCustom: string;
+      image: string;
+      json: string;
+      copy: string;
+    };
+    pdfDialog: {
+      title: string;
+      includeCharts: string;
+      includeLinks: string;
+      includeBreakdown: string;
+      pageFormat: string;
+      orientation: string;
+      orientationPortrait: string;
+      orientationLandscape: string;
+      generatePdf: string;
+      toasts: {
+        pdfOnlySingle: string;
+        launchSuccess: string;
+        pdfError: string;
+        jsonSuccess: string;
+        jsonError: string;
+        imageOnlySingle: string;
+        imageDev: string;
+        copySuccess: string;
+        copyError: string;
+      };
+    };
+  };
+  comments: {
+    section: {
+      titleDefault: string;
+      placeholderDefault: string;
+      loading: string;
+      empty: string;
+      add: string;
+      cancel: string;
+      addButton: string;
+      toasts: {
+        emptyError: string;
+        loadError: string;
+        addSuccess: string;
+        addError: string;
+        updateSuccess: string;
+        updateError: string;
+        deleteSuccess: string;
+        deleteError: string;
+      };
+    };
+    item: {
+      types: {
+        criteria: string;
+        option: string;
+        recommendation: string;
+        general: string;
+      };
+      createdOn: string;
+      modifiedOn: string;
+    };
+  };
+  dataAccuracy: {
+    createdOn: string;
+    by: string;
+    updatedOn: string;
+    sources: {
+      zero: string;
+      one: string;
+      other: string;
+    };
+    noExternalSources: string;
+    unknown: {
+      author: string;
+      date: string;
+      datetime: string;
+    };
+  };
   categories: {
     tech: string;
     travel: string;
@@ -319,6 +573,18 @@ export interface UITranslations {
     all: string;
     uncategorized: string;
     none: string;
+  };
+  emoji: {
+    searchPlaceholder: string;
+    tabs: {
+      popular: string;
+      emotions: string;
+      activities: string;
+      objects: string;
+      nature: string;
+      food: string;
+      symbols: string;
+    };
   };
   common: {
     view: string;
@@ -545,28 +811,69 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
     sharedDecision: {
       signIn: 'Se connecter',
     },
-    decision: {
-      home: {
-        hero: {
-          titleLine1: 'Vos décisions seront',
-          titleLine2: 'Rationable',
-          subtitle: 'De l\'incertitude à la clarté : exploitez la puissance de l\'IA',
-        },
-        textarea: {
-          drop: 'Déposez vos fichiers ici',
-          helper: 'Décrivez le problème ou la décision que vous devez prendre. Vous pouvez aussi glisser-déposer des documents directement dans cette zone.',
-        },
-        attachFile: 'Joindre un fichier',
-        startAnalysis: 'Lancer l\'analyse',
-        analysisStarted: 'Analyse démarrée !',
-        fileToast: 'fichier(s) ajouté(s)',
-        history: {
-          title: 'Historique des décisions',
-          subtitle: 'Chargez ou supprimez vos analyses passées.',
-        },
-      },
+    categorySelector: {
+      placeholder: 'Sélectionner une catégorie...',
+      searchPlaceholder: 'Rechercher...',
+      empty: 'Aucune catégorie trouvée.',
+      none: 'Aucune catégorie',
     },
     history: {
+      title: 'Historique des décisions',
+      subtitle: 'Chargez ou supprimez vos analyses passées.',
+      searchBar: {
+        searchPlaceholder: 'Rechercher...',
+        filter: 'Filtrer',
+        categoryLabel: 'Catégorie',
+        allCategories: 'Toutes les catégories',
+        uncategorized: 'Non catégorisées',
+        sortBy: 'Trier par',
+        sort: {
+          date: 'Par date',
+          category: 'Par catégorie',
+        },
+        more: 'Plus',
+        export: 'Exporter',
+        exportPdf: 'Exporter en PDF',
+        exportJson: 'Exporter en JSON',
+        copyText: 'Copier le texte',
+        clearAll: 'Tout effacer',
+        confirm: {
+          title: 'Êtes-vous sûr ?',
+          desc: 'Cette action est irréversible et supprimera tout votre historique de décisions.',
+          cancel: 'Annuler',
+          ok: 'Confirmer',
+        },
+        toasts: {
+          export: {
+            success: 'Export réussi ! (format JSON pour le moment)',
+            error: 'Erreur lors de l\'export',
+          },
+          json: {
+            success: 'Export JSON réussi !',
+            error: 'Erreur lors de l\'export JSON',
+          },
+          copy: {
+            success: 'Données copiées dans le presse-papiers !',
+            error: 'Erreur lors de la copie',
+          },
+        },
+      },
+      list: {
+        emptyMessage: 'Aucune décision ne correspond aux critères de recherche.',
+        seeMore: 'Voir plus',
+      },
+      item: {
+        share: 'Partager',
+        delete: 'Supprimer',
+        followUp: {
+          singular: 'question de suivi',
+          plural: 'questions de suivi',
+        },
+        more: {
+          singular: 'de plus',
+          plural: 'de plus',
+        },
+      },
       search: {
         placeholder: 'Rechercher...',
       },
@@ -582,7 +889,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       more: {
         button: 'Plus',
       },
-      empty: 'Aucun historique',
+      empty: 'Aucune décision ne correspond aux critères de recherche.',
       copy: {
         success: 'Données copiées dans le presse-papiers !',
         error: 'Erreur lors de la copie',
@@ -606,6 +913,62 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       share: 'Partager',
       delete: 'Supprimer',
       clearAll: 'Tout effacer',
+    },
+    decision: {
+      a11y: {
+        skipToMain: 'Aller au contenu principal',
+        mainLabel: 'Assistant de décision',
+      },
+      toasts: {
+        alreadyRunning: 'Une analyse est déjà en cours, veuillez patienter...',
+        followup: {
+          error: 'Erreur lors du traitement de la question de suivi',
+        },
+      },
+      home: {
+        hero: {
+          titleLine1: 'Vos décisions seront',
+          titleLine2: 'Rationable',
+          subtitle: 'De l\'incertitude à la clarté : exploitez la puissance de l\'IA',
+        },
+        textarea: {
+          drop: 'Déposez vos fichiers ici',
+          helper: 'Décrivez le problème ou la décision que vous devez prendre. Vous pouvez aussi glisser-déposer des documents directement dans cette zone.',
+        },
+        attachFile: 'Joindre un fichier',
+        startAnalysis: 'Lancer l\'analyse',
+        analysisStarted: 'Analyse démarrée !',
+        fileToast: 'fichier(s) ajouté(s)',
+        history: {
+          title: 'Historique des décisions',
+          subtitle: 'Chargez ou supprimez vos analyses passées.',
+        },
+      },
+    },
+    dilemmaSetup: {
+      hero: {
+        titleLine1: 'Vos décisions seront',
+        brand: 'Rationable',
+        subtitle: 'De l\'incertitude à la clarté : exploitez la puissance de l\'IA',
+      },
+      dropHere: 'Déposez vos fichiers ici',
+      attachFile: 'Joindre un fichier',
+      launchAnalysis: 'Lancer l\'analyse',
+      helpText: 'Décrivez le problème ou la décision que vous devez prendre. Vous pouvez aussi glisser-déposer des documents directement dans cette zone.',
+      attachedDocs: 'Documents joints',
+      history: {
+        title: 'Historique des décisions',
+        description: 'Chargez ou supprimez vos analyses passées.',
+      },
+      analysisStarted: 'Analyse démarrée !',
+      fileTooLarge: 'est trop volumineux (max 10MB)',
+    },
+    optionsLoading: {
+      title: 'Analyse des options en cours...',
+      subtitle: 'L\'IA évalue les meilleures solutions selon vos critères',
+    },
+    mainActionButton: {
+      analyzing: 'Analyse en cours...',
     },
     share: {
       menu: {

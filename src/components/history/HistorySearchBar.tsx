@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MoreHorizontal, Trash2, FileDown, FileText, Download } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { useI18nUI } from '@/contexts/I18nUIContext';
+import { getCategoryLabel } from '@/utils/i18nHelpers';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -52,6 +54,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
   filteredDecisions,
   onClear
 }) => {
+  const { t, getLocaleTag } = useI18nUI();
   const exportToPDF = async () => {
     try {
       const dataStr = JSON.stringify(filteredDecisions, null, 2);
@@ -65,9 +68,9 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      toast.success("Export réussi ! (format JSON pour le moment)");
+      toast.success(t('history.searchBar.toasts.export.success'));
     } catch (error) {
-      toast.error("Erreur lors de l'export");
+      toast.error(t('history.searchBar.toasts.export.error'));
     }
   };
 
@@ -84,22 +87,23 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      toast.success("Export JSON réussi !");
+      toast.success(t('history.searchBar.toasts.json.success'));
     } catch (error) {
-      toast.error("Erreur lors de l'export JSON");
+      toast.error(t('history.searchBar.toasts.json.error'));
     }
   };
 
   const copyToClipboard = async () => {
     try {
+      const locale = getLocaleTag();
       const textData = filteredDecisions.map(decision => 
-        `🤔 ${decision.dilemma}\n✅ ${decision.result.recommendation}\n📅 ${new Date(decision.timestamp).toLocaleString('fr-FR')}\n`
+        `🤔 ${decision.dilemma}\n✅ ${decision.result.recommendation}\n📅 ${new Date(decision.timestamp).toLocaleString(locale)}\n`
       ).join('\n---\n\n');
       
       await navigator.clipboard.writeText(textData);
-      toast.success("Données copiées dans le presse-papiers !");
+      toast.success(t('history.searchBar.toasts.copy.success'));
     } catch (error) {
-      toast.error("Erreur lors de la copie");
+      toast.error(t('history.searchBar.toasts.copy.error'));
     }
   };
 
@@ -111,7 +115,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Rechercher..."
+            placeholder={t('history.searchBar.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 w-full"
@@ -124,24 +128,24 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="w-full">
-                Filtrer
+                {t('history.searchBar.filter')}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-64">
               <div className="p-2 space-y-3">
                 {/* Sélection de catégorie */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Catégorie</label>
+                  <label className="text-sm font-medium">{t('history.searchBar.categoryLabel')}</label>
                   <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Catégorie" />
+                      <SelectValue placeholder={t('history.searchBar.categoryLabel')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Toutes les catégories</SelectItem>
+                      <SelectItem value="all">{t('history.searchBar.allCategories')}</SelectItem>
                       <SelectItem value="uncategorized">
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="text-xs">
-                            Non catégorisées
+                            {t('history.searchBar.uncategorized')}
                           </Badge>
                           <span className="text-muted-foreground">({categoryCounts.uncategorized || 0})</span>
                         </div>
@@ -151,7 +155,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
                           <div className="flex items-center justify-between w-full gap-2">
                             <div className="flex items-center gap-2">
                               <Badge variant="secondary" className="text-xs">
-                                {category.name}
+                                {getCategoryLabel(category.id, t, category.name)}
                               </Badge>
                             </div>
                             <span className="text-muted-foreground">({categoryCounts[category.id] || 0})</span>
@@ -164,17 +168,17 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
 
                 {/* Sélection du tri */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Trier par</label>
+                  <label className="text-sm font-medium">{t('history.searchBar.sortBy')}</label>
                   <Select value={sortBy} onValueChange={(value: 'date' | 'category') => setSortBy(value)}>
                     <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="date">
-                        Par date
+                        {t('history.searchBar.sort.date')}
                       </SelectItem>
                       <SelectItem value="category">
-                        Par catégorie
+                        {t('history.searchBar.sort.category')}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -188,28 +192,28 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="w-full">
                 <MoreHorizontal className="h-4 w-4 mr-2" />
-                Plus
+                {t('history.searchBar.more')}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
                   <FileDown className="mr-2 h-4 w-4" />
-                  <span>Exporter</span>
+                  <span>{t('history.searchBar.export')}</span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
                   <DropdownMenuItem onClick={exportToPDF}>
                     <FileText className="mr-2 h-4 w-4" />
-                    <span>Exporter en PDF</span>
+                    <span>{t('history.searchBar.exportPdf')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={exportToJSON}>
                     <Download className="mr-2 h-4 w-4" />
-                    <span>Exporter en JSON</span>
+                    <span>{t('history.searchBar.exportJson')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={copyToClipboard}>
                     <FileText className="mr-2 h-4 w-4" />
-                    <span>Copier le texte</span>
+                    <span>{t('history.searchBar.copyText')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
@@ -218,19 +222,19 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
                 <AlertDialogTrigger asChild>
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Tout effacer
+                    {t('history.searchBar.clearAll')}
                   </DropdownMenuItem>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                    <AlertDialogTitle>{t('history.searchBar.confirm.title')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Cette action est irréversible et supprimera tout votre historique de décisions.
+                      {t('history.searchBar.confirm.desc')}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Annuler</AlertDialogCancel>
-                    <AlertDialogAction onClick={onClear}>Confirmer</AlertDialogAction>
+                    <AlertDialogCancel>{t('history.searchBar.confirm.cancel')}</AlertDialogCancel>
+                    <AlertDialogAction onClick={onClear}>{t('history.searchBar.confirm.ok')}</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -245,7 +249,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
         <div className="relative" style={{ width: '350px' }}>
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Rechercher..."
+            placeholder={t('history.searchBar.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 w-full"

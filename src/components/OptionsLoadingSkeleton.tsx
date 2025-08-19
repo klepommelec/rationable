@@ -2,19 +2,21 @@
 import React from 'react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoaderCircle } from 'lucide-react';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 export const OptionsLoadingSkeleton = () => {
+  const { t } = useI18nUI();
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="text-center space-y-2">
         <div className="flex items-center justify-center gap-2">
           <LoaderCircle className="h-5 w-5 animate-spin text-cyan-500" />
           <span className="text-lg font-medium text-cyan-500">
-            Analyse des options en cours...
+            {t('optionsLoading.title')}
           </span>
         </div>
         <p className="text-sm text-muted-foreground">
-          L'IA évalue les meilleures solutions selon vos critères
+          {t('optionsLoading.subtitle')}
         </p>
       </div>
 

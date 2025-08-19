@@ -7,6 +7,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Check, ChevronDown, Tag } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { DEFAULT_CATEGORIES, IDecisionCategory } from '@/types/decision';
+import { useI18nUI } from '@/contexts/I18nUIContext';
+import { getCategoryLabel } from '@/utils/i18nHelpers';
 
 interface CategorySelectorProps {
   selectedCategory?: string;
@@ -20,6 +22,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
   showLabel = true
 }) => {
   const [open, setOpen] = React.useState(false);
+  const { t } = useI18nUI();
   
   const selectedCat = DEFAULT_CATEGORIES.find(cat => cat.id === selectedCategory);
 
@@ -37,19 +40,19 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
             {selectedCat ? (
               <div className="flex items-center gap-2">
                 <span>{selectedCat.emoji}</span>
-                <span>{selectedCat.name}</span>
+                <span>{getCategoryLabel(selectedCat.id, t, selectedCat.name)}</span>
               </div>
             ) : (
-              "Sélectionner une catégorie..."
+              t('categorySelector.placeholder')
             )}
             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0">
           <Command>
-            <CommandInput placeholder="Rechercher..." />
+            <CommandInput placeholder={t('categorySelector.searchPlaceholder')} />
             <CommandList>
-              <CommandEmpty>Aucune catégorie trouvée.</CommandEmpty>
+              <CommandEmpty>{t('categorySelector.empty')}</CommandEmpty>
               <CommandGroup>
                 <CommandItem
                   onSelect={() => {
@@ -63,7 +66,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
                       !selectedCategory ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  Aucune catégorie
+                  {t('categorySelector.none')}
                 </CommandItem>
                 {DEFAULT_CATEGORIES.map((category) => (
                   <CommandItem
@@ -80,7 +83,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
                       )}
                     />
                     <span className="mr-2">{category.emoji}</span>
-                    {category.name}
+                    {getCategoryLabel(category.id, t, category.name)}
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -94,12 +97,13 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 
 export const CategoryBadge: React.FC<{ categoryId: string }> = ({ categoryId }) => {
   const category = DEFAULT_CATEGORIES.find(cat => cat.id === categoryId);
+  const { t } = useI18nUI();
   
   if (!category) return null;
   
   return (
     <Badge variant="secondary" className="text-xs">
-      {category.name}
+      {getCategoryLabel(category.id, t, category.name)}
     </Badge>
   );
 };
