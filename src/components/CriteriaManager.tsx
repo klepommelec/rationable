@@ -8,6 +8,7 @@ import { CriterionRow } from './CriterionRow';
 import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useI18nUI } from '@/contexts/I18nUIContext';
 interface CriteriaManagerProps {
   criteria: ICriterion[];
   setCriteria: React.Dispatch<React.SetStateAction<ICriterion[]>>;
@@ -28,6 +29,7 @@ export const CriteriaManager = ({
 }: CriteriaManagerProps) => {
   const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
   const [lastCriteriaCount, setLastCriteriaCount] = useState(0);
+  const { t } = useI18nUI();
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, {
     coordinateGetter: sortableKeyboardCoordinates
   }));
@@ -68,7 +70,7 @@ export const CriteriaManager = ({
       setCriteria(items => {
         const oldIndex = items.findIndex(item => item.id === active.id);
         const newIndex = items.findIndex(item => item.id === over.id);
-        toast.info("L'ordre des critères a été mis à jour.", {
+        toast.info(t('criteria.reorderSuccess'), {
           duration: 1600
         });
         return arrayMove(items, oldIndex, newIndex);
@@ -83,16 +85,16 @@ export const CriteriaManager = ({
   };
   const handleRemove = (id: string) => {
     if (criteria.length <= 2) {
-      toast.error("Vous devez conserver au moins 2 critères.");
+      toast.error(t('criteria.minCriteriaError'));
       return;
     }
     setCriteria(items => items.filter(item => item.id !== id));
     setVisibleCriteria(prev => prev.filter(criterionId => criterionId !== id));
-    toast.success("Critère supprimé.");
+    toast.success(t('criteria.removeSuccess'));
   };
   const handleAdd = () => {
     if (criteria.length >= 8) {
-      toast.error("Vous ne pouvez pas ajouter plus de 8 critères.");
+      toast.error(t('criteria.maxCriteriaError'));
       return;
     }
     const newCriterion: ICriterion = {
@@ -100,13 +102,13 @@ export const CriteriaManager = ({
       name: ''
     };
     setCriteria(items => [...items, newCriterion]);
-    toast.success("Nouveau critère ajouté.");
+    toast.success(t('criteria.addSuccess'));
   };
   return <Collapsible defaultOpen={isNewDecision} className="p-4 animate-fade-in shadow-neutral-500 rounded-xl border shadow-200 bg-background ">
       <CollapsibleTrigger className="flex justify-between items-center w-full group">
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-lg text-left">
-            Gérez les critères de décision
+            {t('criteria.title')}
           </h3>
           <span className="text-sm font-medium text-muted-foreground">
             ({criteria.length}/8)
@@ -117,7 +119,7 @@ export const CriteriaManager = ({
                 <Info className="h-4 w-4 text-muted-foreground cursor-help" />
               </TooltipTrigger>
               <TooltipContent>
-                <p>Modifiez, réorganisez (par glisser-déposer) ou supprimez les critères. L'ordre est important et reflète leur poids dans la décision.</p>
+                <p>{t('criteria.tooltip')}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -139,12 +141,12 @@ export const CriteriaManager = ({
         <div className="flex gap-2">
           <Button onClick={handleAdd} disabled={isInteractionDisabled || criteria.length >= 8} variant="outline" size="sm">
             <PlusCircle className="h-4 w-4 mr-2" />
-            Ajouter un critère
+            {t('criteria.addButton')}
           </Button>
           
           {hasChanges && onUpdateAnalysis && <Button onClick={onUpdateAnalysis} disabled={isInteractionDisabled} variant="default" size="sm" className="bg-cyan-500 hover:bg-cyan-600 text-slate-900">
               <RefreshCw className="h-4 w-4 mr-2" />
-              Mettre à jour l'analyse
+              {t('criteria.updateAnalysis')}
             </Button>}
         </div>
       </CollapsibleContent>

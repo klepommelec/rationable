@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload, X, FileText, Image, AlertCircle } from 'lucide-react';
 import { toast } from "sonner";
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 export interface UploadedFile {
   id: string;
@@ -21,6 +22,7 @@ interface FileUploadProps {
 
 const FileUpload: React.FC<FileUploadProps> = ({ files, onFilesChange, disabled }) => {
   const [isUploading, setIsUploading] = useState(false);
+  const { t } = useI18nUI();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (disabled) return;
@@ -33,7 +35,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ files, onFilesChange, disabled 
       for (const file of acceptedFiles) {
         // Validation de la taille (10MB max)
         if (file.size > 10 * 1024 * 1024) {
-          toast.error(`Le fichier ${file.name} est trop volumineux (max 10MB)`);
+          toast.error(t('fileUpload.filesTooBig').replace('{name}', file.name));
           continue;
         }
         
@@ -58,11 +60,11 @@ const FileUpload: React.FC<FileUploadProps> = ({ files, onFilesChange, disabled 
       onFilesChange([...files, ...newFiles]);
       
       if (newFiles.length > 0) {
-        toast.success(`${newFiles.length} fichier(s) ajouté(s)`);
+        toast.success(t('fileUpload.filesAdded').replace('{count}', newFiles.length.toString()));
       }
     } catch (error) {
       console.error('Erreur lors de l\'upload:', error);
-      toast.error('Erreur lors de l\'ajout des fichiers');
+      toast.error(t('fileUpload.addFilesError'));
     } finally {
       setIsUploading(false);
     }
@@ -121,16 +123,16 @@ const FileUpload: React.FC<FileUploadProps> = ({ files, onFilesChange, disabled 
             <input {...getInputProps()} />
             <Upload className={`mx-auto h-12 w-12 ${isUploading ? 'animate-pulse' : ''} text-muted-foreground mb-4`} />
             {isUploading ? (
-              <p className="text-sm text-muted-foreground">Traitement en cours...</p>
+              <p className="text-sm text-muted-foreground">{t('fileUpload.processing')}</p>
             ) : isDragActive ? (
-              <p className="text-sm text-primary">Déposez les fichiers ici...</p>
+              <p className="text-sm text-primary">{t('fileUpload.dropHere')}</p>
             ) : (
               <div>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Glissez-déposez vos documents ici, ou cliquez pour sélectionner
+                  {t('fileUpload.clickToSelect')}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  PDF, Images, Word (max 10MB par fichier)
+                  {t('fileUpload.formats')}
                 </p>
               </div>
             )}
@@ -141,7 +143,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ files, onFilesChange, disabled 
       {/* Liste des fichiers uploadés */}
       {files.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium">Fichiers joints ({files.length})</h4>
+          <h4 className="text-sm font-medium">{t('fileUpload.attachedFiles')} ({files.length})</h4>
           {files.map((uploadedFile) => (
             <Card key={uploadedFile.id} className="p-3">
               <div className="flex items-center gap-3">
@@ -177,7 +179,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ files, onFilesChange, disabled 
       {files.length > 0 && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <AlertCircle className="h-3 w-3" />
-          <span>Les documents seront analysés avec votre dilemme pour vous aider dans votre décision</span>
+          <span>{t('fileUpload.analysisHint')}</span>
         </div>
       )}
     </div>

@@ -574,6 +574,29 @@ export interface UITranslations {
     uncategorized: string;
     none: string;
   };
+  criteria: {
+    title: string;
+    tooltip: string;
+    reorderSuccess: string;
+    minCriteriaError: string;
+    maxCriteriaError: string;
+    addSuccess: string;
+    removeSuccess: string;
+    addButton: string;
+    updateAnalysis: string;
+  };
+  fileUpload: {
+    processing: string;
+    dropHere: string;
+    clickToSelect: string;
+    formats: string;
+    attachedFiles: string;
+    filesTooBig: string;
+    filesAdded: string;
+    uploadError: string;
+    addFilesError: string;
+    analysisHint: string;
+  };
   emoji: {
     searchPlaceholder: string;
     tabs: {
@@ -1286,6 +1309,29 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       loading: 'Chargement...',
       loadingError: 'Erreur lors du chargement',
     },
+    criteria: {
+      title: 'Gérez les critères de décision',
+      tooltip: 'Modifiez, réorganisez (par glisser-déposer) ou supprimez les critères. L\'ordre est important et reflète leur poids dans la décision.',
+      reorderSuccess: 'L\'ordre des critères a été mis à jour.',
+      minCriteriaError: 'Vous devez conserver au moins 2 critères.',
+      maxCriteriaError: 'Vous ne pouvez pas ajouter plus de 8 critères.',
+      addSuccess: 'Nouveau critère ajouté.',
+      removeSuccess: 'Critère supprimé.',
+      addButton: 'Ajouter un critère',
+      updateAnalysis: 'Mettre à jour l\'analyse',
+    },
+    fileUpload: {
+      processing: 'Traitement en cours...',
+      dropHere: 'Déposez les fichiers ici...',
+      clickToSelect: 'Glissez-déposez vos documents ici, ou cliquez pour sélectionner',
+      formats: 'PDF, Images, Word (max 10MB par fichier)',
+      attachedFiles: 'Fichiers joints',
+      filesTooBig: 'Le fichier {name} est trop volumineux (max 10MB)',
+      filesAdded: '{count} fichier(s) ajouté(s)',
+      uploadError: 'Erreur lors de l\'upload',
+      addFilesError: 'Erreur lors de l\'ajout des fichiers',
+      analysisHint: 'Les documents seront analysés avec votre dilemme pour vous aider dans votre décision',
+    },
     common: {
       view: 'Voir',
       download: 'Télécharger',
@@ -1883,6 +1929,29 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       all: 'All categories',
       uncategorized: 'Uncategorized',
       none: 'No category',
+    },
+    criteria: {
+      title: 'Manage Decision Criteria',
+      tooltip: 'Edit, reorder (drag and drop), or delete criteria. Order is important and reflects their weight in the decision.',
+      reorderSuccess: 'Criteria order has been updated.',
+      minCriteriaError: 'You must keep at least 2 criteria.',
+      maxCriteriaError: 'You cannot add more than 8 criteria.',
+      addSuccess: 'New criterion added.',
+      removeSuccess: 'Criterion removed.',
+      addButton: 'Add criterion',
+      updateAnalysis: 'Update analysis',
+    },
+    fileUpload: {
+      processing: 'Processing...',
+      dropHere: 'Drop files here...',
+      clickToSelect: 'Drag and drop your documents here, or click to select',
+      formats: 'PDF, Images, Word (max 10MB per file)',
+      attachedFiles: 'Attached files',
+      filesTooBig: 'The file {name} is too large (max 10MB)',
+      filesAdded: '{count} file(s) added',
+      uploadError: 'Upload error',
+      addFilesError: 'Error adding files',
+      analysisHint: 'Documents will be analyzed with your dilemma to help you make your decision',
     },
       emoji: {
         searchPlaceholder: 'Search emoji...',
