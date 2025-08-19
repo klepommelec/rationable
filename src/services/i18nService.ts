@@ -726,3 +726,6 @@ export class I18nService {
     return this.detectVertical(text, language) === 'software';
   }
 }
+
+// Initialize the service
+I18nService.initializeLanguage();
