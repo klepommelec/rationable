@@ -146,11 +146,11 @@ export const WorkspacesSettings: React.FC = () => {
                 <div className="flex items-center gap-2">
                   {editingWorkspace === workspace.id ? (
                     <>
-                      <Button size="sm" onClick={handleSaveEdit}>
-                        Sauvegarder
+                       <Button size="sm" onClick={handleSaveEdit}>
+                        {t('workspaces.save')}
                       </Button>
                       <Button size="sm" variant="outline" onClick={handleCancelEdit}>
-                        Annuler
+                        {t('workspaces.cancel')}
                       </Button>
                     </>
                   ) : (
@@ -162,7 +162,7 @@ export const WorkspacesSettings: React.FC = () => {
                           onClick={() => switchWorkspace(workspace)}
                         >
                           <Building2 className="h-4 w-4 mr-2" />
-                          Activer
+                          {t('workspaces.activate')}
                         </Button>
                       )}
                       <Button
@@ -192,18 +192,18 @@ export const WorkspacesSettings: React.FC = () => {
               <CardContent className="pt-0">
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="description">Description</Label>
+                    <Label htmlFor="description">{t('workspaces.workspaceDescription')}</Label>
                     <Textarea
                       id="description"
                       value={editForm.description}
                       onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                      placeholder="Description du workspace..."
+                      placeholder={t('workspaces.descriptionPlaceholder')}
                       rows={2}
                     />
                   </div>
                   
                   <div>
-                    <Label>Couleur</Label>
+                    <Label>{t('workspaces.color')}</Label>
                     <div className="flex gap-2 mt-2">
                       {colors.map((color) => (
                         <button
@@ -222,7 +222,7 @@ export const WorkspacesSettings: React.FC = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="editContext">Contexte d'utilisation</Label>
+                    <Label htmlFor="editContext">{t('workspaces.usageContext')}</Label>
                     <Select 
                       value={editForm.use_context} 
                       onValueChange={(value) => setEditForm({ ...editForm, use_context: value as 'personal' | 'professional' })}
@@ -266,18 +266,18 @@ export const WorkspacesSettings: React.FC = () => {
       <AlertDialog open={!!workspaceToDelete} onOpenChange={() => setWorkspaceToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer le workspace</AlertDialogTitle>
+            <AlertDialogTitle>{t('workspaces.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer ce workspace ? Toutes les décisions associées seront perdues. Cette action est irréversible.
+              {t('workspaces.deleteDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>{t('workspaces.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteWorkspace}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Supprimer
+              {t('workspaces.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

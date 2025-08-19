@@ -625,6 +625,16 @@ export interface UITranslations {
     personalDescription: string;
     professionalUsage: string;
     professionalDescription: string;
+    usageContext: string;
+    deleteTitle: string;
+    deleteDescription: string;
+    delete: string;
+    save: string;
+    cancel: string;
+    activate: string;
+    workspaceDescription: string;
+    descriptionPlaceholder: string;
+    color: string;
   };
   emoji: {
     searchPlaceholder: string;
@@ -1389,6 +1399,16 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       personalDescription: 'Décisions personnelles, choix de vie, achats, loisirs',
       professionalUsage: 'Usage professionnel',
       professionalDescription: 'Décisions business, stratégie, management, projets',
+      save: 'Sauvegarder',
+      cancel: 'Annuler',
+      activate: 'Activer',
+      workspaceDescription: 'Description',
+      descriptionPlaceholder: 'Description du workspace...',
+      color: 'Couleur',
+      usageContext: 'Contexte d\'utilisation',
+      deleteTitle: 'Supprimer le workspace',
+      deleteDescription: 'Êtes-vous sûr de vouloir supprimer ce workspace ? Toutes les décisions associées seront perdues. Cette action est irréversible.',
+      delete: 'Supprimer',
     },
     common: {
       view: 'Voir',
@@ -2095,6 +2115,16 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       personalDescription: 'Personal decisions, life choices, purchases, leisure',
       professionalUsage: 'Professional use',
       professionalDescription: 'Business decisions, strategy, management, projects',
+      save: 'Save',
+      cancel: 'Cancel',
+      activate: 'Activate',
+      workspaceDescription: 'Description',
+      descriptionPlaceholder: 'Workspace description...',
+      color: 'Color',
+      usageContext: 'Usage context',
+      deleteTitle: 'Delete workspace',
+      deleteDescription: 'Are you sure you want to delete this workspace? All associated decisions will be lost. This action is irreversible.',
+      delete: 'Delete',
     },
     common: {
       view: 'View',
