@@ -586,6 +586,50 @@ export interface UITranslations {
       symbols: string;
     };
   };
+  collaboration: {
+    title: string;
+    description: string;
+    publicLink: string;
+    invite: string;
+    publicLinkDescription: string;
+    createLink: string;
+    creating: string;
+    linkSuccess: string;
+    inviteByEmail: string;
+    inviteDescription: string;
+    emailPlaceholder: string;
+    sendInvitation: string;
+    createLinkFirst: string;
+    linkCreatedToast: string;
+    linkCreateError: string;
+    linkCopiedToast: string;
+    linkCopyError: string;
+    emailClientOpened: string;
+    emailRequired: string;
+    createLinkFirstError: string;
+  };
+  sharedDecisionView: {
+    notFound: string;
+    notFoundDescription: string;
+    backToHome: string;
+    sharedOn: string;
+    view: string;
+    views: string;
+    copyLinkButton: string;
+    recommended: string;
+    evaluationCriteria: string;
+    detailedAnalysis: string;
+    learnMore: string;
+    advantages: string;
+    disadvantages: string;
+    usefulLinks: string;
+    shoppingLinks: string;
+    commentsTitle: string;
+    commentsPlaceholder: string;
+    missingPublicId: string;
+    loading: string;
+    loadingError: string;
+  };
   common: {
     view: string;
     download: string;
@@ -1198,6 +1242,50 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         symbols: 'Symboles',
       },
     },
+    collaboration: {
+      title: 'Collaborer sur cette décision',
+      description: 'Partagez votre analyse et invitez d\'autres personnes à commenter.',
+      publicLink: 'Lien public',
+      invite: 'Inviter',
+      publicLinkDescription: 'Créez un lien que vous pouvez partager avec n\'importe qui.',
+      createLink: 'Créer un lien public',
+      creating: 'Création...',
+      linkSuccess: '✓ Lien créé ! Partagez-le avec qui vous voulez.',
+      inviteByEmail: 'Inviter par email',
+      inviteDescription: 'Envoyez une invitation personnalisée par email.',
+      emailPlaceholder: 'exemple@email.com',
+      sendInvitation: 'Envoyer l\'invitation',
+      createLinkFirst: '⚠️ Créez d\'abord un lien public dans l\'onglet précédent.',
+      linkCreatedToast: 'Lien de partage créé !',
+      linkCreateError: 'Erreur lors de la création du lien',
+      linkCopiedToast: 'Lien copié !',
+      linkCopyError: 'Erreur lors de la copie',
+      emailClientOpened: 'Client email ouvert !',
+      emailRequired: 'Veuillez entrer une adresse email',
+      createLinkFirstError: 'Créez d\'abord un lien de partage',
+    },
+    sharedDecisionView: {
+      notFound: 'Décision introuvable',
+      notFoundDescription: 'Cette décision partagée n\'existe pas ou a expiré.',
+      backToHome: 'Retour à l\'accueil',
+      sharedOn: 'Partagé le',
+      view: 'vue',
+      views: 'vues',
+      copyLinkButton: 'Copier le lien',
+      recommended: '✅ Recommandée',
+      evaluationCriteria: 'Critères d\'évaluation',
+      detailedAnalysis: 'Analyse détaillée',
+      learnMore: 'En savoir plus',
+      advantages: '✅ Avantages',
+      disadvantages: '❌ Inconvénients',
+      usefulLinks: 'Liens utiles',
+      shoppingLinks: '🛒 Liens d\'achat',
+      commentsTitle: 'Commentaires sur cette décision',
+      commentsPlaceholder: 'Partagez vos réflexions sur cette décision...',
+      missingPublicId: 'ID de partage manquant',
+      loading: 'Chargement...',
+      loadingError: 'Erreur lors du chargement',
+    },
     common: {
       view: 'Voir',
       download: 'Télécharger',
@@ -1796,18 +1884,62 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       uncategorized: 'Uncategorized',
       none: 'No category',
     },
-    emoji: {
-      searchPlaceholder: 'Search emoji...',
-      tabs: {
-        popular: 'Popular',
-        emotions: 'Emotions',
-        activities: 'Activities',
-        objects: 'Objects',
-        nature: 'Nature',
-        food: 'Food',
-        symbols: 'Symbols',
+      emoji: {
+        searchPlaceholder: 'Search emoji...',
+        tabs: {
+          popular: 'Popular',
+          emotions: 'Emotions',
+          activities: 'Activities',
+          objects: 'Objects',
+          nature: 'Nature',
+          food: 'Food',
+          symbols: 'Symbols',
+        },
       },
-    },
+      collaboration: {
+        title: 'Collaborate on this decision',
+        description: 'Share your analysis and invite others to comment.',
+        publicLink: 'Public link',
+        invite: 'Invite',
+        publicLinkDescription: 'Create a link you can share with anyone.',
+        createLink: 'Create public link',
+        creating: 'Creating...',
+        linkSuccess: '✓ Link created! Share it with anyone.',
+        inviteByEmail: 'Invite by email',
+        inviteDescription: 'Send a personalized invitation by email.',
+        emailPlaceholder: 'example@email.com',
+        sendInvitation: 'Send invitation',
+        createLinkFirst: '⚠️ Create a public link first in the previous tab.',
+        linkCreatedToast: 'Share link created!',
+        linkCreateError: 'Error creating link',
+        linkCopiedToast: 'Link copied!',
+        linkCopyError: 'Error copying link',
+        emailClientOpened: 'Email client opened!',
+        emailRequired: 'Please enter an email address',
+        createLinkFirstError: 'Create a public link first',
+      },
+      sharedDecisionView: {
+        notFound: 'Decision not found',
+        notFoundDescription: 'This shared decision does not exist or has expired.',
+        backToHome: 'Back to home',
+        sharedOn: 'Shared on',
+        view: 'view',
+        views: 'views',
+        copyLinkButton: 'Copy link',
+        recommended: '✅ Recommended',
+        evaluationCriteria: 'Evaluation criteria',
+        detailedAnalysis: 'Detailed analysis',
+        learnMore: 'Learn more',
+        advantages: '✅ Advantages',
+        disadvantages: '❌ Disadvantages',
+        usefulLinks: 'Useful links',
+        shoppingLinks: '🛒 Shopping links',
+        commentsTitle: 'Comments on this decision',
+        commentsPlaceholder: 'Share your thoughts on this decision...',
+        missingPublicId: 'Missing share ID',
+        loading: 'Loading...',
+        loadingError: 'Error loading',
+      },
     common: {
       view: 'View',
       download: 'Download',

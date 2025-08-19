@@ -4,6 +4,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Database, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { IResult } from '@/types/decision';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface DataAccuracyIndicatorProps {
   result: IResult;
@@ -16,13 +17,14 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
   currentDecision,
   className = '' 
 }) => {
+  const { t, getLocaleTag } = useI18nUI();
   const [isSourcesExpanded, setIsSourcesExpanded] = useState(false);
 
   // Helper functions for date formatting
   const formatDateOnly = (timestamp: number | string | undefined) => {
-    if (!timestamp) return 'Date inconnue';
+    if (!timestamp) return t('dataAccuracy.unknown.date');
     const date = typeof timestamp === 'string' ? new Date(timestamp) : new Date(timestamp);
-    return date.toLocaleDateString('fr-FR', {
+    return date.toLocaleDateString(getLocaleTag(), {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
@@ -30,9 +32,9 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
   };
 
   const formatDateTime = (timestamp: number | string | undefined) => {
-    if (!timestamp) return 'Date et heure inconnues';
+    if (!timestamp) return t('dataAccuracy.unknown.datetime');
     const date = typeof timestamp === 'string' ? new Date(timestamp) : new Date(timestamp);
-    return date.toLocaleDateString('fr-FR', {
+    return date.toLocaleDateString(getLocaleTag(), {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -43,11 +45,11 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
 
   // Get creation info
   const creationTimestamp = currentDecision?.timestamp;
-  const author = currentDecision?.createdByName || currentDecision?.author || 'Auteur inconnu';
+  const author = currentDecision?.createdByName || currentDecision?.author || t('dataAccuracy.unknown.author');
 
   // Get update info
   const updateTimestamp = currentDecision?.updatedAt || result.realTimeData?.timestamp;
-  const updatedBy = currentDecision?.updatedByName || currentDecision?.updatedBy || 'Utilisateur inconnu';
+  const updatedBy = currentDecision?.updatedByName || currentDecision?.updatedBy || t('dataAccuracy.unknown.user');
   const hasUpdates = !!currentDecision?.updatedAt || !!result.realTimeData?.timestamp;
 
   // Combine all sources for comprehensive display
@@ -69,6 +71,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
   };
   
   const allSources = getAllSources();
+  const sourceCount = allSources.length;
 
   return (
     <TooltipProvider>
@@ -79,7 +82,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
             <div className="space-y-1 text-xs text-muted-foreground">
               {/* 1er niveau: Créé le (date) par (auteur) */}
               <div className="flex flex-wrap items-center gap-x-1">
-                <span>Créé le</span>
+                <span>{t('dataAccuracy.createdOn')}</span>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="underline decoration-dotted cursor-help">
@@ -87,16 +90,16 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Créé le {formatDateTime(creationTimestamp)} par {author}</p>
+                    <p>{t('dataAccuracy.createdOn')} {formatDateTime(creationTimestamp)} {t('dataAccuracy.by')} {author}</p>
                   </TooltipContent>
                 </Tooltip>
-                <span>par {author}</span>
+                <span>{t('dataAccuracy.by')} {author}</span>
               </div>
               
               {/* 2ème niveau: Mis à jour le (date) si ça existe */}
               {hasUpdates && (
                 <div className="flex flex-wrap items-center gap-x-1">
-                  <span>Mis à jour le</span>
+                  <span>{t('dataAccuracy.updatedOn')}</span>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="underline decoration-dotted cursor-help">
@@ -104,7 +107,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                       </span>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Mis à jour le {formatDateTime(updateTimestamp)} par {updatedBy}</p>
+                      <p>{t('dataAccuracy.updatedOn')} {formatDateTime(updateTimestamp)} {t('dataAccuracy.by')} {updatedBy}</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -119,7 +122,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                   className="cursor-pointer flex items-center gap-2 hover:bg-muted w-fit"
                 >
                   <Database className="h-3 w-3" />
-                  {allSources.length} source{allSources.length > 1 ? 's' : ''}
+                  {sourceCount} {sourceCount > 1 ? t('dataAccuracy.sources.other') : t('dataAccuracy.sources.one')}
                   {isSourcesExpanded ? (
                     <ChevronUp className="h-3 w-3" />
                   ) : (
@@ -134,7 +137,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
           <div className="hidden sm:flex sm:items-center sm:justify-between gap-4">
             <div className="flex flex-col gap-1 text-xs text-muted-foreground min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
-                <span className="flex-shrink-0">Créé le</span>
+                <span className="flex-shrink-0">{t('dataAccuracy.createdOn')}</span>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="underline decoration-dotted cursor-help flex-shrink-0">
@@ -142,14 +145,14 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Créé le {formatDateTime(creationTimestamp)} par {author}</p>
+                    <p>{t('dataAccuracy.createdOn')} {formatDateTime(creationTimestamp)} {t('dataAccuracy.by')} {author}</p>
                   </TooltipContent>
                 </Tooltip>
-                <span className="flex-shrink-0">par</span>
+                <span className="flex-shrink-0">{t('dataAccuracy.by')}</span>
                 <span className="truncate min-w-0" title={author}>{author}</span>
                 {hasUpdates && (
                   <>
-                    <span className="flex-shrink-0">, mis à jour le</span>
+                    <span className="flex-shrink-0">, {t('dataAccuracy.updatedOn')}</span>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span className="underline decoration-dotted cursor-help flex-shrink-0">
@@ -157,7 +160,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                         </span>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Mis à jour le {formatDateTime(updateTimestamp)} par {updatedBy}</p>
+                        <p>{t('dataAccuracy.updatedOn')} {formatDateTime(updateTimestamp)} {t('dataAccuracy.by')} {updatedBy}</p>
                       </TooltipContent>
                     </Tooltip>
                   </>
@@ -171,7 +174,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                 className="flex-shrink-0 cursor-pointer flex items-center gap-2 hover:bg-muted"
               >
                 <Database className="h-3 w-3" />
-                {allSources.length} source{allSources.length > 1 ? 's' : ''}
+                {sourceCount} {sourceCount > 1 ? t('dataAccuracy.sources.other') : t('dataAccuracy.sources.one')}
                 {isSourcesExpanded ? (
                   <ChevronUp className="h-3 w-3" />
                 ) : (
@@ -185,7 +188,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
           <CollapsibleContent className="mt-2">
             <div className="space-y-1 pl-2 border-l-2 border-muted">
               {allSources.length === 0 ? (
-                <div className="text-xs text-muted-foreground">Aucune source externe utilisée</div>
+                <div className="text-xs text-muted-foreground">{t('dataAccuracy.noExternalSources')}</div>
               ) : (
                 allSources.map((source, index) => (
                   <div key={index} className="text-xs">

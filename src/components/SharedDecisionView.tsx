@@ -11,10 +11,12 @@ import { getSharedDecision, SharedDecision } from '@/services/sharedDecisionServ
 import { CategoryBadge } from './CategorySelector';
 import ValidatedLink from './ValidatedLink';
 import { CommentSection } from './comments/CommentSection';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 const SharedDecisionView: React.FC = () => {
   const { publicId } = useParams<{ publicId: string }>();
   const navigate = useNavigate();
+  const { t, getLocaleTag } = useI18nUI();
   const [sharedDecision, setSharedDecision] = useState<SharedDecision | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +24,7 @@ const SharedDecisionView: React.FC = () => {
   useEffect(() => {
     const fetchSharedDecision = async () => {
       if (!publicId) {
-        setError('ID de partage manquant');
+        setError(t('sharedDecisionView.missingPublicId'));
         setLoading(false);
         return;
       }
@@ -30,26 +32,26 @@ const SharedDecisionView: React.FC = () => {
       try {
         const decision = await getSharedDecision(publicId);
         if (!decision) {
-          setError('Cette décision partagée n\'existe pas ou a expiré');
+          setError(t('sharedDecisionView.notFoundDescription'));
         } else {
           setSharedDecision(decision);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erreur lors du chargement');
+        setError(err instanceof Error ? err.message : t('sharedDecisionView.loadingError'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchSharedDecision();
-  }, [publicId]);
+  }, [publicId, t]);
 
   const copyShareLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      toast.success('Lien copié dans le presse-papiers !');
+      toast.success(t('collaboration.linkCopiedToast'));
     } catch (error) {
-      toast.error('Erreur lors de la copie du lien');
+      toast.error(t('collaboration.linkCopyError'));
     }
   };
 
@@ -68,11 +70,11 @@ const SharedDecisionView: React.FC = () => {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Card>
           <CardContent className="p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4 text-red-500">Décision introuvable</h2>
+            <h2 className="text-2xl font-bold mb-4 text-red-500">{t('sharedDecisionView.notFound')}</h2>
             <p className="text-muted-foreground mb-6">{error}</p>
             <Button onClick={() => navigate('/')} variant="outline">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour à l'accueil
+              {t('sharedDecisionView.backToHome')}
             </Button>
           </CardContent>
         </Card>
@@ -88,7 +90,7 @@ const SharedDecisionView: React.FC = () => {
       <div className="mb-6">
         <Button onClick={() => navigate('/')} variant="ghost" className="mb-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour à l'accueil
+          {t('sharedDecisionView.backToHome')}
         </Button>
         
         {/* Emoji above title for all screen sizes */}
@@ -108,16 +110,16 @@ const SharedDecisionView: React.FC = () => {
         <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1 justify-center sm:justify-start">
             <Calendar className="h-4 w-4" />
-            Partagé le {new Date(sharedDecision.created_at).toLocaleDateString('fr-FR')}
+            {t('sharedDecisionView.sharedOn')} {new Date(sharedDecision.created_at).toLocaleDateString(getLocaleTag())}
           </div>
           <div className="flex items-center gap-1 justify-center sm:justify-start">
             <Eye className="h-4 w-4" />
-            {sharedDecision.view_count} {sharedDecision.view_count === 1 ? 'vue' : 'vues'}
+            {sharedDecision.view_count} {sharedDecision.view_count === 1 ? t('sharedDecisionView.view') : t('sharedDecisionView.views')}
           </div>
           <div className="flex justify-center sm:justify-start">
             <Button onClick={copyShareLink} variant="ghost" size="sm" className="text-xs px-2 py-1">
               <Share2 className="h-3 w-3 mr-1" />
-              Copier le lien
+              {t('sharedDecisionView.copyLinkButton')}
             </Button>
           </div>
         </div>
@@ -128,7 +130,7 @@ const SharedDecisionView: React.FC = () => {
       {/* Recommendation */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-xl text-green-600 dark:text-green-400">✅ Recommandée</CardTitle>
+          <CardTitle className="text-xl text-green-600 dark:text-green-400">{t('sharedDecisionView.recommended')}</CardTitle>
         </CardHeader>
         <CardContent>
           <h3 className="text-lg font-semibold mb-2">{decision.result.recommendation}</h3>
@@ -141,7 +143,7 @@ const SharedDecisionView: React.FC = () => {
       {/* Criteria */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Critères d'évaluation</CardTitle>
+          <CardTitle>{t('sharedDecisionView.evaluationCriteria')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
@@ -158,7 +160,7 @@ const SharedDecisionView: React.FC = () => {
       {decision.result.breakdown && decision.result.breakdown.length > 0 && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Analyse détaillée</CardTitle>
+            <CardTitle>{t('sharedDecisionView.detailedAnalysis')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -168,7 +170,7 @@ const SharedDecisionView: React.FC = () => {
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                       <h4 className="font-semibold text-lg">{item.option}</h4>
                       <div className="flex items-center gap-1 self-start sm:self-center">
-                        <span className="text-xs text-muted-foreground">En savoir plus</span>
+                        <span className="text-xs text-muted-foreground">{t('sharedDecisionView.learnMore')}</span>
                         <ValidatedLink
                           link={{
                             title: `Rechercher ${item.option}`,
@@ -182,7 +184,7 @@ const SharedDecisionView: React.FC = () => {
                   
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <h5 className="text-sm font-medium text-green-600 dark:text-green-400 mb-2">✅ Avantages</h5>
+                      <h5 className="text-sm font-medium text-green-600 dark:text-green-400 mb-2">{t('sharedDecisionView.advantages')}</h5>
                       <ul className="text-sm space-y-1">
                         {item.pros.map((pro, idx) => (
                           <li key={idx} className="text-muted-foreground">• {pro}</li>
@@ -191,7 +193,7 @@ const SharedDecisionView: React.FC = () => {
                     </div>
                     
                     <div>
-                      <h5 className="text-sm font-medium text-red-600 dark:text-red-400 mb-2">❌ Inconvénients</h5>
+                      <h5 className="text-sm font-medium text-red-600 dark:text-red-400 mb-2">{t('sharedDecisionView.disadvantages')}</h5>
                       <ul className="text-sm space-y-1">
                         {item.cons.map((con, idx) => (
                           <li key={idx} className="text-muted-foreground">• {con}</li>
@@ -210,11 +212,11 @@ const SharedDecisionView: React.FC = () => {
       {decision.result.shoppingLinks && decision.result.shoppingLinks.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Liens utiles</CardTitle>
+            <CardTitle>{t('sharedDecisionView.usefulLinks')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div>
-              <h4 className="font-medium mb-3">🛒 Liens d'achat</h4>
+              <h4 className="font-medium mb-3">{t('sharedDecisionView.shoppingLinks')}</h4>
               <div className="space-y-2">
                 {decision.result.shoppingLinks.map((link, index) => (
                   <ValidatedLink
@@ -236,8 +238,8 @@ const SharedDecisionView: React.FC = () => {
         <CommentSection 
           decisionId={sharedDecision.decision_data.id} 
           commentType="general"
-          title="Commentaires sur cette décision"
-          placeholder="Partagez vos réflexions sur cette décision..."
+          title={t('sharedDecisionView.commentsTitle')}
+          placeholder={t('sharedDecisionView.commentsPlaceholder')}
         />
       </div>
 

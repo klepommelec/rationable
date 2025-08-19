@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { IDecision } from '@/types/decision';
 import { exportToPDF, PDFExportOptions } from '@/services/pdfExportService';
 import ShareButton from './ShareButton';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface ExportMenuProps {
   decisions: IDecision[];
@@ -18,6 +19,7 @@ interface ExportMenuProps {
 }
 
 export const ExportMenu: React.FC<ExportMenuProps> = ({ decisions, singleDecision }) => {
+  const { t } = useI18nUI();
   const [isExporting, setIsExporting] = useState(false);
   const [showPDFOptions, setShowPDFOptions] = useState(false);
   const [pdfOptions, setPdfOptions] = useState<PDFExportOptions>({
@@ -32,7 +34,7 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ decisions, singleDecisio
 
   const handlePDFExport = async (customOptions?: PDFExportOptions) => {
     if (!singleDecision) {
-      toast.error("L'export PDF n'est disponible que pour une décision individuelle");
+      toast.error(t('export.pdfDialog.toasts.pdfOnlySingle'));
       return;
     }
 
@@ -40,10 +42,10 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ decisions, singleDecisio
     try {
       const options = customOptions || pdfOptions;
       await exportToPDF(singleDecision, options);
-      toast.success("Export PDF lancé !");
+      toast.success(t('export.pdfDialog.toasts.launchSuccess'));
     } catch (error) {
       console.error('PDF export error:', error);
-      toast.error("Erreur lors de l'export PDF");
+      toast.error(t('export.pdfDialog.toasts.pdfError'));
     } finally {
       setIsExporting(false);
       setShowPDFOptions(false);
@@ -73,24 +75,24 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ decisions, singleDecisio
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      toast.success("Export JSON réussi !");
+      toast.success(t('export.pdfDialog.toasts.jsonSuccess'));
     } catch (error) {
-      toast.error("Erreur lors de l'export JSON");
+      toast.error(t('export.pdfDialog.toasts.jsonError'));
     }
   };
 
   const exportToImage = async () => {
     if (!singleDecision) {
-      toast.error("L'export image n'est disponible que pour une décision individuelle");
+      toast.error(t('export.pdfDialog.toasts.imageOnlySingle'));
       return;
     }
 
     setIsExporting(true);
     try {
       // This would capture the analysis result component
-      toast.info("Fonctionnalité d'export image en développement");
+      toast.info(t('export.pdfDialog.toasts.imageDev'));
     } catch (error) {
-      toast.error("Erreur lors de l'export image");
+      toast.error(t('export.pdfDialog.toasts.pdfError'));
     } finally {
       setIsExporting(false);
     }
@@ -103,9 +105,9 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ decisions, singleDecisio
       ).join('\n---\n\n');
       
       await navigator.clipboard.writeText(textData);
-      toast.success("Données copiées dans le presse-papiers !");
+      toast.success(t('export.pdfDialog.toasts.copySuccess'));
     } catch (error) {
-      toast.error("Erreur lors de la copie");
+      toast.error(t('export.pdfDialog.toasts.copyError'));
     }
   };
 
@@ -119,34 +121,34 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ decisions, singleDecisio
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" disabled={isExporting}>
             <FileDown className="h-4 w-4 mr-2" />
-            {isExporting ? 'Export...' : 'Exporter'}
+            {isExporting ? t('export.menuButton.busy') : t('export.menuButton.idle')}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
               <FileText className="mr-2 h-4 w-4" />
-              <span>Export PDF</span>
+              <span>{t('export.menu.pdf')}</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               <DropdownMenuItem onClick={handleQuickPDFExport}>
                 <FileText className="mr-2 h-4 w-4" />
-                <span>PDF Standard</span>
+                <span>{t('export.menu.pdfStandard')}</span>
               </DropdownMenuItem>
               <Dialog open={showPDFOptions} onOpenChange={setShowPDFOptions}>
                 <DialogTrigger asChild>
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     <Settings className="mr-2 h-4 w-4" />
-                    <span>PDF Personnalisé</span>
+                    <span>{t('export.menu.pdfCustom')}</span>
                   </DropdownMenuItem>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Options d'export PDF</DialogTitle>
+                    <DialogTitle>{t('export.pdfDialog.title')}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="include-charts">Inclure les graphiques</Label>
+                      <Label htmlFor="include-charts">{t('export.pdfDialog.includeCharts')}</Label>
                       <Switch
                         id="include-charts"
                         checked={pdfOptions.includeCharts}
@@ -156,7 +158,7 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ decisions, singleDecisio
                       />
                     </div>
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="include-links">Inclure les liens</Label>
+                      <Label htmlFor="include-links">{t('export.pdfDialog.includeLinks')}</Label>
                       <Switch
                         id="include-links"
                         checked={pdfOptions.includeLinks}
@@ -166,7 +168,7 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ decisions, singleDecisio
                       />
                     </div>
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="include-breakdown">Inclure l'analyse détaillée</Label>
+                      <Label htmlFor="include-breakdown">{t('export.pdfDialog.includeBreakdown')}</Label>
                       <Switch
                         id="include-breakdown"
                         checked={pdfOptions.includeBreakdown}
@@ -176,7 +178,7 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ decisions, singleDecisio
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Format de page</Label>
+                      <Label>{t('export.pdfDialog.pageFormat')}</Label>
                       <Select
                         value={pdfOptions.format}
                         onValueChange={(value: 'A4' | 'Letter') => 
@@ -193,7 +195,7 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ decisions, singleDecisio
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Orientation</Label>
+                      <Label>{t('export.pdfDialog.orientation')}</Label>
                       <Select
                         value={pdfOptions.orientation}
                         onValueChange={(value: 'portrait' | 'landscape') => 
@@ -204,8 +206,8 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ decisions, singleDecisio
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="portrait">Portrait</SelectItem>
-                          <SelectItem value="landscape">Paysage</SelectItem>
+                          <SelectItem value="portrait">{t('export.pdfDialog.orientationPortrait')}</SelectItem>
+                          <SelectItem value="landscape">{t('export.pdfDialog.orientationLandscape')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -214,7 +216,7 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ decisions, singleDecisio
                       className="w-full"
                       disabled={isExporting}
                     >
-                      {isExporting ? 'Export en cours...' : 'Générer PDF'}
+                      {isExporting ? t('export.menuButton.busy') : t('export.pdfDialog.generatePdf')}
                     </Button>
                   </div>
                 </DialogContent>
@@ -224,19 +226,19 @@ export const ExportMenu: React.FC<ExportMenuProps> = ({ decisions, singleDecisio
           
           <DropdownMenuItem onClick={exportToImage}>
             <Image className="mr-2 h-4 w-4" />
-            <span>Export Image</span>
+            <span>{t('export.menu.image')}</span>
           </DropdownMenuItem>
           
           <DropdownMenuItem onClick={exportToJSON}>
             <Download className="mr-2 h-4 w-4" />
-            <span>Export JSON</span>
+            <span>{t('export.menu.json')}</span>
           </DropdownMenuItem>
           
           <DropdownMenuSeparator />
           
           <DropdownMenuItem onClick={copyToClipboard}>
             <FileText className="mr-2 h-4 w-4" />
-            <span>Copier le texte</span>
+            <span>{t('export.menu.copy')}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

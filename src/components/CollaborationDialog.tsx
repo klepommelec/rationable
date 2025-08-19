@@ -15,6 +15,7 @@ import { Users, Link as LinkIcon, Mail, Copy, Check } from "lucide-react";
 import { IDecision } from '@/types/decision';
 import { shareDecision } from '@/services/sharedDecisionService';
 import { toast } from "sonner";
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface CollaborationDialogProps {
   decision: IDecision;
@@ -25,23 +26,24 @@ const CollaborationDialog: React.FC<CollaborationDialogProps> = ({
   decision,
   children
 }) => {
+  const { t } = useI18nUI();
   const [isSharing, setIsSharing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>('');
   const [emailInput, setEmailInput] = useState('');
   const [copied, setCopied] = useState(false);
 
   const handleCreatePublicLink = async () => {
-    if (shareUrl) return; // Déjà créé
+    if (shareUrl) return; // Already created
     
     setIsSharing(true);
     try {
       const publicId = await shareDecision(decision);
       const url = `${window.location.origin}/shared/${publicId}`;
       setShareUrl(url);
-      toast.success("Lien de partage créé !");
+      toast.success(t('collaboration.linkCreatedToast'));
     } catch (error) {
       console.error('Error sharing decision:', error);
-      toast.error("Erreur lors de la création du lien");
+      toast.error(t('collaboration.linkCreateError'));
     } finally {
       setIsSharing(false);
     }
@@ -51,32 +53,32 @@ const CollaborationDialog: React.FC<CollaborationDialogProps> = ({
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      toast.success("Lien copié !");
+      toast.success(t('collaboration.linkCopiedToast'));
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      toast.error("Erreur lors de la copie");
+      toast.error(t('collaboration.linkCopyError'));
     }
   };
 
   const handleSendInvitation = () => {
     if (!emailInput.trim()) {
-      toast.error("Veuillez entrer une adresse email");
+      toast.error(t('collaboration.emailRequired'));
       return;
     }
     
     if (!shareUrl) {
-      toast.error("Créez d'abord un lien de partage");
+      toast.error(t('collaboration.createLinkFirstError'));
       return;
     }
 
-    // Ouvrir le client email avec le lien pré-rempli
+    // Open email client with pre-filled link
     const subject = encodeURIComponent(`Invitation à consulter: ${decision.dilemma}`);
     const body = encodeURIComponent(
       `Salut !\n\nJe souhaite partager avec toi mon analyse de décision : "${decision.dilemma}"\n\nTu peux la consulter ici : ${shareUrl}\n\nN'hésite pas à laisser tes commentaires !\n\nBonne journée !`
     );
     
     window.open(`mailto:${emailInput}?subject=${subject}&body=${body}`);
-    toast.success("Client email ouvert !");
+    toast.success(t('collaboration.emailClientOpened'));
     setEmailInput('');
   };
 
@@ -89,10 +91,10 @@ const CollaborationDialog: React.FC<CollaborationDialogProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Collaborer sur cette décision
+            {t('collaboration.title')}
           </DialogTitle>
           <DialogDescription>
-            Partagez votre analyse et invitez d'autres personnes à commenter.
+            {t('collaboration.description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -100,19 +102,19 @@ const CollaborationDialog: React.FC<CollaborationDialogProps> = ({
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="public" className="flex items-center gap-2">
               <LinkIcon className="h-4 w-4" />
-              Lien public
+              {t('collaboration.publicLink')}
             </TabsTrigger>
             <TabsTrigger value="invite" className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
-              Inviter
+              {t('collaboration.invite')}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="public" className="space-y-4">
             <div className="space-y-2">
-              <Label>Lien de partage public</Label>
+              <Label>{t('collaboration.publicLink')}</Label>
               <p className="text-sm text-muted-foreground">
-                Créez un lien que vous pouvez partager avec n'importe qui.
+                {t('collaboration.publicLinkDescription')}
               </p>
             </div>
             
@@ -122,7 +124,7 @@ const CollaborationDialog: React.FC<CollaborationDialogProps> = ({
                 disabled={isSharing}
                 className="w-full"
               >
-                {isSharing ? "Création..." : "Créer un lien public"}
+                {isSharing ? t('collaboration.creating') : t('collaboration.createLink')}
               </Button>
             ) : (
               <div className="space-y-2">
@@ -142,7 +144,7 @@ const CollaborationDialog: React.FC<CollaborationDialogProps> = ({
                   </Button>
                 </div>
                 <p className="text-sm text-green-600">
-                  ✓ Lien créé ! Partagez-le avec qui vous voulez.
+                  {t('collaboration.linkSuccess')}
                 </p>
               </div>
             )}
@@ -150,9 +152,9 @@ const CollaborationDialog: React.FC<CollaborationDialogProps> = ({
 
           <TabsContent value="invite" className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Inviter par email</Label>
+              <Label htmlFor="email">{t('collaboration.inviteByEmail')}</Label>
               <p className="text-sm text-muted-foreground">
-                Envoyez une invitation personnalisée par email.
+                {t('collaboration.inviteDescription')}
               </p>
             </div>
             
@@ -160,7 +162,7 @@ const CollaborationDialog: React.FC<CollaborationDialogProps> = ({
               <Input
                 id="email"
                 type="email"
-                placeholder="exemple@email.com"
+                placeholder={t('collaboration.emailPlaceholder')}
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)}
               />
@@ -169,11 +171,11 @@ const CollaborationDialog: React.FC<CollaborationDialogProps> = ({
                 className="w-full"
                 disabled={!shareUrl}
               >
-                Envoyer l'invitation
+                {t('collaboration.sendInvitation')}
               </Button>
               {!shareUrl && (
                 <p className="text-sm text-amber-600">
-                  ⚠️ Créez d'abord un lien public dans l'onglet précédent.
+                  {t('collaboration.createLinkFirst')}
                 </p>
               )}
             </div>
