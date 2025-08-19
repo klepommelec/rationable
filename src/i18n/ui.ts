@@ -332,6 +332,19 @@ export interface UITranslations {
         subtitle: string;
       };
     };
+    // Analysis results
+    recommended: string;
+    advantages: string;
+    disadvantages: string;
+    learnMore: string;
+    comparisonTable: string;
+    usefulLinks: string;
+    popularVideos: string;
+    seeMore: string;
+    pointsOfAttention: string;
+    moreAdvantages: string;
+    comparisonTableCaption: string;
+    seeMoreOptions: string;
   };
   dilemmaSetup: {
     hero: {
@@ -1050,6 +1063,19 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
           subtitle: 'Chargez ou supprimez vos analyses passées.',
         },
       },
+      // Analysis results
+      recommended: 'Recommandé',
+      advantages: 'Avantages',
+      disadvantages: 'Inconvénients', 
+      learnMore: 'En savoir plus',
+      comparisonTable: 'Tableau comparatif',
+      usefulLinks: 'Liens utiles',
+      popularVideos: 'Vidéos populaires',
+      seeMore: 'Voir plus',
+      pointsOfAttention: 'Points d\'attention',
+      moreAdvantages: 'Autres avantages',
+      comparisonTableCaption: 'Tableau de comparaison des options',
+      seeMoreOptions: 'Voir plus d\'options',
     },
     dilemmaSetup: {
       hero: {
@@ -1791,6 +1817,19 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
           subtitle: 'Load or delete your past analysis.',
         },
       },
+      // Analysis results
+      recommended: 'Recommended',
+      advantages: 'Advantages',
+      disadvantages: 'Disadvantages',
+      learnMore: 'Learn more',
+      comparisonTable: 'Comparison table',
+      usefulLinks: 'Useful links',
+      popularVideos: 'Popular videos',
+      seeMore: 'See more',
+      pointsOfAttention: 'Points of attention',
+      moreAdvantages: 'More advantages',
+      comparisonTableCaption: 'Options comparison table',
+      seeMoreOptions: 'See more options',
     },
     share: {
       button: {
