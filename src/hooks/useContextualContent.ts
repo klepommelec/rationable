@@ -1,11 +1,12 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
 import { PERSONAL_TEMPLATES, PROFESSIONAL_TEMPLATES } from '@/data/predefinedTemplates';
-import { I18nService } from '@/services/i18nService';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 export const useContextualContent = () => {
   const { profile } = useAuth();
   const { currentWorkspace } = useWorkspaces();
+  const { currentLanguage } = useI18nUI();
   
   const getTemplates = () => {
   const context = currentWorkspace?.use_context || 'personal';
@@ -26,7 +27,7 @@ export const useContextualContent = () => {
       ];
     }
     
-    const language = I18nService.getCurrentLanguage();
+    const language = currentLanguage;
     if (language === 'en') {
       return [
         "Ex: Which smartphone should I buy?",
@@ -87,7 +88,7 @@ export const useContextualContent = () => {
       ];
     }
     
-    const language = I18nService.getCurrentLanguage();
+    const language = currentLanguage;
     if (language === 'en') {
       return [
         {
