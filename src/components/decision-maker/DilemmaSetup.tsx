@@ -9,6 +9,7 @@ import MainActionButton from './MainActionButton';
 import { UploadedFile } from '../FileUpload';
 import { IDecision } from '@/types/decision';
 import { toast } from "sonner";
+import { useI18nUI } from '@/contexts/I18nUIContext';
 interface DilemmaSetupProps {
   dilemma: string;
   setDilemma: (dilemma: string) => void;
@@ -59,6 +60,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isAnalysisStarting, setIsAnalysisStarting] = useState(false);
+  const { t } = useI18nUI();
 
   // Afficher seulement les 3 premiers modèles
   const displayedTemplates = templates.slice(0, 3);
@@ -77,7 +79,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     const newFiles: UploadedFile[] = Array.from(files).map(file => {
       // Validation de la taille (10MB max)
       if (file.size > 10 * 1024 * 1024) {
-        toast.error(`Le fichier ${file.name} est trop volumineux (max 10MB)`);
+        toast.error(`${t('dilemmaSetup.fileTooLarge').replace('est trop volumineux (max 10MB)', `${file.name} ${t('dilemmaSetup.fileTooLarge')}`)}`);
         return null;
       }
       let fileType: 'pdf' | 'image' | 'other' = 'other';
@@ -97,7 +99,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     }).filter(Boolean) as UploadedFile[];
     setUploadedFiles([...uploadedFiles, ...newFiles]);
     if (newFiles.length > 0) {
-      toast.success(`${newFiles.length} fichier(s) ajouté(s)`);
+      toast.success(`${newFiles.length} ${t('dilemmaSetup.analysisStarted').replace('Analyse démarrée !', 'fichier(s) ajouté(s)')}`);
     }
   };
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { useDecisionMakerContext } from '@/contexts/DecisionMakerContext';
 import { useMultiAnalysis } from '@/hooks/useMultiAnalysis';
 import { detectQuestionType } from '@/services/questionClassificationService';
@@ -11,8 +11,10 @@ import AnalysisNavigation from './decision-maker/AnalysisNavigation';
 import DilemmaSetup from './decision-maker/DilemmaSetup';
 import AnalysisResult from './decision-maker/AnalysisResult';
 import { toast } from "sonner";
+import { useI18nUI } from '@/contexts/I18nUIContext';
 // Composant principal pour la prise de décision unifiée
 const DecisionMaker = () => {
+  const { t } = useI18nUI();
   const {
     dilemma,
     setDilemma,
@@ -103,7 +105,7 @@ const DecisionMaker = () => {
 
     // Empêcher les multi-clics pendant une analyse en cours
     if (analysisStep === 'loading-options' || isUpdating) {
-      toast.info('Une analyse est déjà en cours, veuillez patienter...');
+      toast.info(t('decision.toasts.alreadyRunning'));
       return;
     }
     try {
@@ -145,7 +147,7 @@ const DecisionMaker = () => {
       });
     } catch (error) {
       console.error('❌ Error in follow-up question:', error);
-      toast.error('Erreur lors du traitement de la question de suivi');
+      toast.error(t('decision.toasts.followup.error'));
       // Libérer le verrou en cas d'erreur
       pendingWriteAnalysisIdRef.current = null;
     }
@@ -285,7 +287,7 @@ const DecisionMaker = () => {
 
         {/* Section commentaires généraux - uniquement en bas de page */}
         {currentDecision && displayStep !== 'idle' && <div className="mt-12 mb-8 border-t pt-8">
-            <CommentSection decisionId={currentDecision.id} commentType="general" title="Commentaires sur cette décision" placeholder="Ajoutez vos réflexions, notes ou commentaires sur cette décision..." />
+            <CommentSection decisionId={currentDecision.id} commentType="general" title={t('comments.section.titleDefault')} placeholder={t('comments.section.placeholderDefault')} />
           </div>}
       </main>
     </div>;
