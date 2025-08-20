@@ -121,7 +121,7 @@ class FirstResultService {
           query: locationBoostQuery,
           language: detectedLanguage,
           vertical: detectedVertical,
-          numResults: actionType === 'directions' ? 10 : 8 // More results for local searches
+          numResults: actionType === 'directions' ? 5 : 4 // Optimize for speed
         }
       });
 
@@ -258,7 +258,7 @@ class FirstResultService {
           query,
           language: detectedLanguage,
           vertical: detectedVertical,
-          numResults: 5 // Increase to get more options for verification
+          numResults: 5 // Optimize for speed
         }
       });
 
@@ -543,27 +543,39 @@ class FirstResultService {
       return restaurantName;
     }
     
-    // Known brands mapping
+    // Enhanced multilingual brand mapping
     const brandMap = {
-      // Automotive
+      // Automotive - with multilingual variants
       'toyota': 'toyota',
       'honda': 'honda',
       'ford': 'ford',
       'bmw': 'bmw',
       'mercedes': 'mercedes',
+      'mercedes-benz': 'mercedes',
+      'mercedes benz': 'mercedes',
       'audi': 'audi',
       'volkswagen': 'volkswagen',
+      'vw': 'volkswagen',
       'peugeot': 'peugeot',
       'renault': 'renault',
       'citroën': 'citroen',
+      'citroen': 'citroen',
       'dacia': 'dacia',
+      'hyundai': 'hyundai',
+      'kia': 'kia',
+      'nissan': 'nissan',
+      'mazda': 'mazda',
+      'subaru': 'subaru',
+      'opel': 'opel',
+      'fiat': 'fiat',
       
-      // Technology
+      // Technology - with multilingual variants  
       'samsung': 'samsung',
       'apple': 'apple',
       'iphone': 'apple',
       'ipad': 'apple',
       'macbook': 'apple',
+      'imac': 'apple',
       'galaxy': 'samsung',
       'pixel': 'google',
       'oneplus': 'oneplus',
@@ -575,11 +587,17 @@ class FirstResultService {
       'lenovo': 'lenovo',
       'microsoft': 'microsoft',
       'surface': 'microsoft',
+      'asus': 'asus',
+      'acer': 'acer',
+      'msi': 'msi',
       
-      // Dining & Leisure brands
+      // Dining & Leisure brands - with multilingual variants
       'mcdonalds': 'mcdonalds',
+      'mcdonald\'s': 'mcdonalds',
+      'mcdonald': 'mcdonalds',
       'kfc': 'kfc',
       'burger king': 'burgerking',
+      'quick': 'quick',
       'starbucks': 'starbucks',
       'subway': 'subway',
       'fenocchio': 'fenocchio',
@@ -592,12 +610,17 @@ class FirstResultService {
       'accor': 'accor',
       'ibis': 'ibis',
       'novotel': 'novotel',
+      'mercure': 'mercure',
+      'sofitel': 'sofitel',
       
       // Other
       'nike': 'nike',
       'adidas': 'adidas',
       'ikea': 'ikea',
-      'lego': 'lego'
+      'lego': 'lego',
+      'zara': 'zara',
+      'h&m': 'hm',
+      'uniqlo': 'uniqlo'
     };
     
     for (const [keyword, brand] of Object.entries(brandMap)) {
@@ -654,27 +677,45 @@ class FirstResultService {
       'honda': ['honda.fr', 'honda.com', 'honda.es', 'honda.it', 'honda.de'],
       'ford': ['ford.fr', 'ford.com', 'ford.es', 'ford.it', 'ford.de'],
       'bmw': ['bmw.fr', 'bmw.com', 'bmw.es', 'bmw.it', 'bmw.de'],
-      'mercedes': ['mercedes-benz.fr', 'mercedes-benz.com'],
+      'mercedes': ['mercedes-benz.fr', 'mercedes-benz.com', 'mercedes-benz.es', 'mercedes-benz.it', 'mercedes-benz.de'],
       'audi': ['audi.fr', 'audi.com', 'audi.es', 'audi.it', 'audi.de'],
-      'peugeot': ['peugeot.fr', 'peugeot.com'],
-      'renault': ['renault.fr', 'renault.com'],
-      'dacia': ['dacia.fr', 'dacia.com'],
-      'nike': ['nike.com', 'nike.fr'],
-      'adidas': ['adidas.com', 'adidas.fr'],
+      'peugeot': ['peugeot.fr', 'peugeot.com', 'peugeot.es'],
+      'renault': ['renault.fr', 'renault.com', 'renault.es'],
+      'dacia': ['dacia.fr', 'dacia.com', 'dacia.es'],
+      'hyundai': ['hyundai.fr', 'hyundai.com', 'hyundai.es', 'hyundai.it', 'hyundai.de'],
+      'kia': ['kia.fr', 'kia.com', 'kia.es', 'kia.it', 'kia.de'],
+      'nissan': ['nissan.fr', 'nissan.com', 'nissan.es', 'nissan.it', 'nissan.de'],
+      'mazda': ['mazda.fr', 'mazda.com', 'mazda.es', 'mazda.it', 'mazda.de'],
+      'subaru': ['subaru.fr', 'subaru.com', 'subaru.es', 'subaru.it', 'subaru.de'],
+      'opel': ['opel.fr', 'opel.com', 'opel.es', 'opel.it', 'opel.de'],
+      'fiat': ['fiat.fr', 'fiat.com', 'fiat.es', 'fiat.it', 'fiat.de'],
+      'nike': ['nike.com', 'nike.fr', 'nike.es', 'nike.it', 'nike.de'],
+      'adidas': ['adidas.com', 'adidas.fr', 'adidas.es', 'adidas.it', 'adidas.de'],
+      'asus': ['asus.com', 'asus.fr', 'asus.es', 'asus.it', 'asus.de'],
+      'acer': ['acer.com', 'acer.fr', 'acer.es', 'acer.it', 'acer.de'],
+      'msi': ['msi.com', 'msi.fr', 'msi.es', 'msi.it', 'msi.de'],
       
       // Dining brands
-      'mcdonalds': ['mcdonalds.com', 'mcdonalds.fr'],
-      'kfc': ['kfc.com', 'kfc.fr'],
-      'burgerking': ['burgerking.fr', 'burgerking.com'],
-      'starbucks': ['starbucks.com', 'starbucks.fr'],
-      'subway': ['subway.com', 'subway.fr'],
+      'mcdonalds': ['mcdonalds.com', 'mcdonalds.fr', 'mcdonalds.es', 'mcdonalds.it', 'mcdonalds.de'],
+      'kfc': ['kfc.com', 'kfc.fr', 'kfc.es', 'kfc.it', 'kfc.de'],
+      'burgerking': ['burgerking.fr', 'burgerking.com', 'burgerking.es', 'burgerking.it', 'burgerking.de'],
+      'quick': ['quick.be', 'quick.fr'],
+      'starbucks': ['starbucks.com', 'starbucks.fr', 'starbucks.es', 'starbucks.it', 'starbucks.de'],
+      'subway': ['subway.com', 'subway.fr', 'subway.es', 'subway.it', 'subway.de'],
       
       // Hotels
-      'hilton': ['hilton.com', 'hilton.fr'],
-      'marriott': ['marriott.com', 'marriott.fr'],
+      'hilton': ['hilton.com', 'hilton.fr', 'hilton.es', 'hilton.it', 'hilton.de'],
+      'marriott': ['marriott.com', 'marriott.fr', 'marriott.es', 'marriott.it', 'marriott.de'],
       'accor': ['accor.com', 'all.accor.com'],
       'ibis': ['ibis.com', 'all.accor.com'],
-      'novotel': ['novotel.com', 'all.accor.com']
+      'novotel': ['novotel.com', 'all.accor.com'],
+      'mercure': ['mercure.com', 'all.accor.com'],
+      'sofitel': ['sofitel.com', 'all.accor.com'],
+      
+      // Fashion & Retail
+      'zara': ['zara.com', 'zara.fr', 'zara.es', 'zara.it', 'zara.de'],
+      'hm': ['hm.com', '2.hm.com'],
+      'uniqlo': ['uniqlo.com', 'uniqlo.fr', 'uniqlo.es', 'uniqlo.it', 'uniqlo.de']
     };
     
     return domainMap[brand] || [`${brand}.com`, `${brand}.fr`, `www.${brand}.com`, `www.${brand}.fr`];
@@ -697,23 +738,46 @@ class FirstResultService {
       return !isMarketplace;
     }
     
-    // More lenient check: domain contains brand name and looks official
-    const containsBrand = domain.includes(brand.toLowerCase());
-    if (containsBrand) {
+    // Enhanced multilingual brand detection
+    const brandVariants = this.getBrandVariants(brand);
+    const containsBrandVariant = brandVariants.some(variant => domain.includes(variant.toLowerCase()));
+    
+    if (containsBrandVariant) {
       // Check if it's likely to be official (not a marketplace/review site)
       const isMarketplace = ['amazon', 'fnac', 'cdiscount', 'darty', 'boulanger', 'leboncoin', 'ebay', 'rakuten',
-        'tripadvisor', 'booking', 'expedia', 'yelp', 'google', 'facebook', 'instagram'].some(
+        'tripadvisor', 'booking', 'expedia', 'yelp', 'facebook', 'instagram'].some(
         marketplace => domain.includes(marketplace)
       );
       
-      // Likely official if contains brand and not a marketplace
-      return !isMarketplace && (
-        domain.includes('.com') || domain.includes('.fr') || domain.includes('.org') || 
-        domain.includes('restaurant') || domain.includes('hotel') || domain.includes('official')
-      );
+      // More lenient official domain detection
+      const hasOfficialIndicators = 
+        domain.includes('.com') || domain.includes('.fr') || domain.includes('.es') || 
+        domain.includes('.it') || domain.includes('.de') || domain.includes('.org') || 
+        domain.includes('official') || domain.includes('store') || domain.includes('shop');
+      
+      return !isMarketplace && hasOfficialIndicators;
     }
     
     return false;
+  }
+
+  private getBrandVariants(brand: string): string[] {
+    // Generate brand variants for better multilingual detection
+    const variants = [brand];
+    
+    // Add common brand variations
+    const brandVariations: Record<string, string[]> = {
+      mercedes: ['mercedes', 'mercedes-benz', 'mercedesbenz'],
+      mcdonalds: ['mcdonalds', 'mcdonald', 'mcdonald\'s'],
+      volkswagen: ['volkswagen', 'vw'],
+      burgerking: ['burgerking', 'burger-king', 'burger king']
+    };
+    
+    if (brandVariations[brand]) {
+      variants.push(...brandVariations[brand]);
+    }
+    
+    return variants;
   }
 
   private extractDomain(url: string): string {
@@ -1090,22 +1154,31 @@ class FirstResultService {
       return false;
     }
     
-    // Context-specific filtering
+    // Context-specific filtering - make automotive less restrictive
     if (vertical === 'automotive') {
-      // For automotive, avoid Amazon and prioritize car-specific sites
+      // For automotive, avoid Amazon but be more lenient with other domains
       if (lowerUrl.includes('amazon.')) {
         console.log(`❌ Filtering out Amazon for automotive: ${url}`);
         return false;
       }
       
-      // Only allow automotive-relevant domains
+      // Allow broader automotive-relevant domains (less restrictive)
       const automotiveDomains = [
+        // Official car brands
         'toyota', 'honda', 'ford', 'bmw', 'mercedes', 'audi', 'volkswagen',
-        'peugeot', 'renault', 'citroen', 'dacia', 'lacentrale', 'autoscout24',
-        'leboncoin', 'paruvendu', 'caradisiac', 'automobile', 'voiture'
+        'peugeot', 'renault', 'citroen', 'dacia', 'hyundai', 'kia', 'nissan',
+        'mazda', 'subaru', 'opel', 'fiat', 'skoda', 'seat', 'volvo',
+        // Car marketplaces and info sites  
+        'lacentrale', 'autoscout24', 'leboncoin', 'paruvendu', 'caradisiac',
+        'largus', 'autoplus', 'turbo', 'auto-moto', 'challenges',
+        // Generic automotive terms
+        'automobile', 'voiture', 'auto', 'car', 'dealer', 'concessionnaire'
       ];
       
-      if (!automotiveDomains.some(domain => lowerUrl.includes(domain))) {
+      const hasAutomotiveRelevance = automotiveDomains.some(domain => lowerUrl.includes(domain)) ||
+        lowerUrl.includes('auto') || lowerUrl.includes('car') || lowerUrl.includes('voiture');
+      
+      if (!hasAutomotiveRelevance) {
         console.log(`❌ Filtering out non-automotive domain: ${url}`);
         return false;
       }
