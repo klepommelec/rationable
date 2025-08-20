@@ -149,23 +149,33 @@ class FirstResultService {
       const verified = await LinkVerifierService.verifyLinks(merchantsToVerify);
       console.log(`✅ Merchant verification complete:`, verified.summary);
 
-      // 9. Build final merchant list (max 3) - Use fallback if verification fails
+      // 9. Build final merchant list (max 3) - Filter for pertinence
       let finalMerchants;
       if (verified.validLinks.length > 0) {
-        // Use verified links
-        finalMerchants = verified.validLinks.slice(0, 3).map(link => ({
+        // Use verified links and filter for pertinence
+        const pertinentLinks = verified.validLinks.filter(link => 
+          this.isPertinentLink(link.url, detectedVertical, optionName)
+        );
+        finalMerchants = pertinentLinks.slice(0, 3).map(link => ({
           url: link.url,
           title: link.title,
           domain: this.extractDomain(link.url)
         }));
       } else if (merchants.length > 0) {
-        // Fallback: use unverified but prioritized merchants
-        console.log(`⚠️ Link verification failed, using unverified merchants as fallback`);
-        finalMerchants = merchants.slice(0, 3).map(merchant => ({
-          url: merchant.url,
-          title: merchant.title,
-          domain: this.extractDomain(merchant.url)
-        }));
+        // Fallback: use unverified but prioritized merchants, filter for pertinence
+        const pertinentMerchants = merchants.filter(merchant => 
+          this.isPertinentLink(merchant.url, detectedVertical, optionName)
+        );
+        if (pertinentMerchants.length > 0) {
+          console.log(`⚠️ Link verification failed, using pertinent unverified merchants as fallback`);
+          finalMerchants = pertinentMerchants.slice(0, 3).map(merchant => ({
+            url: merchant.url,
+            title: merchant.title,
+            domain: this.extractDomain(merchant.url)
+          }));
+        } else {
+          finalMerchants = [];
+        }
       } else {
         finalMerchants = [];
       }
@@ -193,31 +203,14 @@ class FirstResultService {
     } catch (error) {
       console.error(`❌ getBestLinks error for "${optionName}":`, error);
       
-      // For directions (local queries), don't add generic fallback merchants
-      if (actionType === 'directions') {
-        return {
-          official: null,
-          merchants: [],
-          maps: mapsResult,
-          actionType,
-          provider: 'perplexity',
-          fromCache: false
-        };
-      }
-      
-      // Fallback to legacy method for non-local queries
-      const fallback = await this.getFirstResultUrl({ optionName, dilemma, language, vertical });
+      // Return empty results instead of generic fallbacks when no pertinent links found
       return {
         official: null,
-        merchants: [{
-          url: fallback.url,
-          title: fallback.title,
-          domain: this.extractDomain(fallback.url)
-        }],
+        merchants: [],
         maps: mapsResult,
         actionType,
-        provider: fallback.sourceProvider,
-        fromCache: fallback.fromCache
+        provider: 'perplexity',
+        fromCache: false
       };
     }
   }
@@ -340,33 +333,8 @@ class FirstResultService {
     } catch (error) {
       console.error(`❌ FirstResultService error for "${optionName}":`, error);
       
-      // For local queries, don't provide generic fallbacks
-      const actionType = this.classifyActionType(optionName, dilemma, detectedVertical);
-      if (actionType === 'directions') {
-        throw new Error('No valid local results found');
-      }
-      
-      // Enhanced fallback: try to construct a merchant-specific search URL
-      const merchantFallback = this.buildMerchantFallbackUrl(optionName, detectedLanguage);
-      if (merchantFallback) {
-        console.log(`🔄 Using merchant fallback: ${merchantFallback}`);
-        return {
-          url: merchantFallback,
-          title: `${I18nService.getSearchLabel(detectedLanguage)} "${optionName}"`,
-          sourceProvider: 'perplexity', // arbitrary fallback
-          fromCache: false
-        };
-      }
-      
-      // Final fallback to Google search page (only for non-local queries)
-      const fallbackUrl = I18nService.buildGoogleWebUrl(query, detectedLanguage);
-      console.log(`🔄 Using Google fallback: ${fallbackUrl}`);
-      return {
-        url: fallbackUrl,
-        title: `${I18nService.getSearchLabel(detectedLanguage)} "${optionName}"`,
-        sourceProvider: 'perplexity', // arbitrary fallback
-        fromCache: false
-      };
+      // Don't provide generic fallbacks - throw error instead
+      throw new Error('No pertinent results found');
     }
   }
 
@@ -1106,6 +1074,53 @@ class FirstResultService {
     }
     
     return bonus;
+  }
+
+  private isPertinentLink(url: string, vertical: string | null, optionName: string): boolean {
+    const lowerUrl = url.toLowerCase();
+    const lowerOption = optionName.toLowerCase();
+    
+    // Filter out generic search engines and irrelevant domains
+    const irrelevantDomains = [
+      'google.com/search', 'google.fr/search', 'bing.com', 'yahoo.com',
+      'duckduckgo.com', 'search.', '/search?'
+    ];
+    
+    if (irrelevantDomains.some(domain => lowerUrl.includes(domain))) {
+      return false;
+    }
+    
+    // Context-specific filtering
+    if (vertical === 'automotive') {
+      // For automotive, avoid Amazon and prioritize car-specific sites
+      if (lowerUrl.includes('amazon.')) {
+        console.log(`❌ Filtering out Amazon for automotive: ${url}`);
+        return false;
+      }
+      
+      // Only allow automotive-relevant domains
+      const automotiveDomains = [
+        'toyota', 'honda', 'ford', 'bmw', 'mercedes', 'audi', 'volkswagen',
+        'peugeot', 'renault', 'citroen', 'dacia', 'lacentrale', 'autoscout24',
+        'leboncoin', 'paruvendu', 'caradisiac', 'automobile', 'voiture'
+      ];
+      
+      if (!automotiveDomains.some(domain => lowerUrl.includes(domain))) {
+        console.log(`❌ Filtering out non-automotive domain: ${url}`);
+        return false;
+      }
+    }
+    
+    // For dining/local businesses, avoid generic e-commerce
+    if (vertical === 'dining' || vertical === 'accommodation') {
+      const genericEcommerce = ['amazon.', 'cdiscount.', 'fnac.', 'darty.'];
+      if (genericEcommerce.some(domain => lowerUrl.includes(domain))) {
+        console.log(`❌ Filtering out generic e-commerce for ${vertical}: ${url}`);
+        return false;
+      }
+    }
+    
+    return true;
   }
 }
 

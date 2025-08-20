@@ -98,71 +98,87 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                         {option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
                       </span>
                       
-                      {/* Action buttons moved here */}
-                      <div className="mt-2">
-                        {isLoading ? (
-                          <Button variant="secondary" size="sm" disabled className="w-full text-xs h-7">
-                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                            {I18nService.getSearchingLabel(detectedLanguage)}
-                          </Button>
-                         ) : optionActionLinks && (optionActionLinks.official || (optionActionLinks.merchants && optionActionLinks.merchants.length > 0) || optionActionLinks.maps) ? (
-                            <div className="flex flex-col gap-2">
-                              {/* Primary button: Based on action type */}
-                              {optionActionLinks.actionType === 'directions' && optionActionLinks.maps ? (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => window.open(optionActionLinks.maps!.url, '_blank')}
-                                  className="text-xs max-w-[120px] truncate h-7"
-                                >
-                                  <Navigation className="h-3 w-3 mr-1" />
-                                  {I18nService.getDirectionsLabel(detectedLanguage)}
-                                </Button>
-                              ) : optionActionLinks.official ? (
-                                <Button
-                                   variant="outline"
-                                   size="sm"
-                                   onClick={() => window.open(optionActionLinks.official!.url, '_blank')}
-                                   className="text-xs max-w-[120px] truncate h-7"
+                       {/* Action buttons moved here */}
+                       <div className="mt-2">
+                         {isLoading ? (
+                           <Button variant="secondary" size="sm" disabled className="w-full text-xs h-7">
+                             <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                             {I18nService.getSearchingLabel(detectedLanguage)}
+                           </Button>
+                          ) : optionActionLinks && (optionActionLinks.official || (optionActionLinks.merchants && optionActionLinks.merchants.length > 0) || optionActionLinks.maps) ? (
+                             <div className="flex flex-col gap-2">
+                               {/* Primary button: Based on action type */}
+                               {optionActionLinks.actionType === 'directions' && optionActionLinks.maps ? (
+                                 <a
+                                   href={optionActionLinks.maps.url}
+                                   target="_blank"
+                                   rel="noopener noreferrer"
                                  >
-                                   <MerchantLogo url={optionActionLinks.official!.url} size={14} className="mr-1" />
-                                   {I18nService.getOfficialSiteLabel(detectedLanguage)}
-                                 </Button>
-                              ) : optionActionLinks.merchants?.[0] ? (
-                                <Button
-                                   variant="outline"
-                                   size="sm"
-                                   onClick={() => window.open(optionActionLinks.merchants?.[0]?.url, '_blank')}
-                                   className="text-xs max-w-[120px] truncate h-7"
+                                   <Button
+                                     variant="outline"
+                                     size="sm"
+                                     className="text-xs max-w-[120px] truncate h-7"
+                                   >
+                                     <Navigation className="h-3 w-3 mr-1" />
+                                     {I18nService.getDirectionsLabel(detectedLanguage)}
+                                   </Button>
+                                 </a>
+                               ) : optionActionLinks.official ? (
+                                 <a
+                                   href={optionActionLinks.official.url}
+                                   target="_blank"
+                                   rel="noopener noreferrer"
                                  >
-                                   <MerchantLogo url={optionActionLinks.merchants?.[0]?.url || ''} size={14} className="mr-1" />
-                                   {optionActionLinks.actionType === 'reserve' ? 
-                                     I18nService.getReserveLabel(detectedLanguage) :
-                                     firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)
-                                   }
-                                 </Button>
-                              ) : null}
-                             
-                              {/* Secondary buttons: Merchants */}
-                              {(optionActionLinks.actionType === 'directions' || optionActionLinks.official ? (optionActionLinks.merchants || []) : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => (
-                                 <Button
-                                   key={i}
-                                   variant="secondary"
-                                   size="sm"
-                                   onClick={() => window.open(merchant.url, '_blank')}
-                                   className="text-xs max-w-[120px] truncate h-7"
+                                   <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-xs max-w-[120px] truncate h-7"
+                                    >
+                                      <MerchantLogo url={optionActionLinks.official.url} size={14} className="mr-1" />
+                                      {I18nService.getOfficialSiteLabel(detectedLanguage)}
+                                    </Button>
+                                 </a>
+                               ) : optionActionLinks.merchants?.[0] ? (
+                                 <a
+                                   href={optionActionLinks.merchants[0].url}
+                                   target="_blank"
+                                   rel="noopener noreferrer"
                                  >
-                                   <MerchantLogo url={merchant.url} size={14} className="mr-1" />
-                                   {firstResultService.getDomainLabel(merchant.domain)}
-                                 </Button>
-                              ))}
-                           </div>
-                          ) : !optionActionLinks?.maps ? (
-                             <Button variant="secondary" size="sm" disabled className="text-xs max-w-[120px] truncate h-7">
-                               {I18nService.getNoLinkLabel(detectedLanguage)}
-                             </Button>
-                          ) : null}
-                      </div>
+                                   <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-xs max-w-[120px] truncate h-7"
+                                    >
+                                      <MerchantLogo url={optionActionLinks.merchants[0].url} size={14} className="mr-1" />
+                                      {optionActionLinks.actionType === 'reserve' ? 
+                                        I18nService.getReserveLabel(detectedLanguage) :
+                                        firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)
+                                      }
+                                    </Button>
+                                 </a>
+                               ) : null}
+                              
+                               {/* Secondary buttons: Merchants */}
+                               {(optionActionLinks.actionType === 'directions' || optionActionLinks.official ? (optionActionLinks.merchants || []) : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => (
+                                  <a
+                                    key={i}
+                                    href={merchant.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <Button
+                                      variant="secondary"
+                                      size="sm"
+                                      className="text-xs max-w-[120px] truncate h-7"
+                                    >
+                                      <MerchantLogo url={merchant.url} size={14} className="mr-1" />
+                                      {firstResultService.getDomainLabel(merchant.domain)}
+                                    </Button>
+                                  </a>
+                               ))}
+                            </div>
+                           ) : null}
+                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="align-top vertical-align-top">

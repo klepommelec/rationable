@@ -148,35 +148,41 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   <div className="flex flex-wrap gap-3">
                     {/* Primary button: Based on action type */}
                     {actionLinks.actionType === 'directions' && actionLinks.maps ? (
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => window.open(actionLinks.maps!.url, '_blank')}
+                      <a
+                        href={actionLinks.maps.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
-                        <Navigation className="h-4 w-4 mr-2" />
-                        {I18nService.getDirectionsLabel(detectedLanguage)}
-                      </Button>
+                        <Button variant="default" size="sm">
+                          <Navigation className="h-4 w-4 mr-2" />
+                          {I18nService.getDirectionsLabel(detectedLanguage)}
+                        </Button>
+                      </a>
                     ) : actionLinks.official ? (
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => window.open(actionLinks.official!.url, '_blank')}
+                      <a
+                        href={actionLinks.official.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
-                        <MerchantLogo url={actionLinks.official!.url} size={20} className="mr-2" />
-                        {I18nService.getOfficialSiteLabel(detectedLanguage)}
-                      </Button>
+                        <Button variant="default" size="sm">
+                          <MerchantLogo url={actionLinks.official.url} size={20} className="mr-2" />
+                          {I18nService.getOfficialSiteLabel(detectedLanguage)}
+                        </Button>
+                      </a>
                     ) : actionLinks.merchants[0] ? (
-                      <Button
-                         variant="default"
-                         size="sm"
-                         onClick={() => window.open(actionLinks.merchants[0].url, '_blank')}
-                       >
-                         <MerchantLogo url={actionLinks.merchants[0].url} size={20} className="mr-2" />
-                         {actionLinks.actionType === 'reserve' ? 
-                           I18nService.getReserveLabel(detectedLanguage) :
-                           firstResultService.getActionVerb(detectedVertical, detectedLanguage)
-                         } sur {firstResultService.getDomainLabel(actionLinks.merchants[0].domain)}
-                       </Button>
+                      <a
+                        href={actionLinks.merchants[0].url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="default" size="sm">
+                          <MerchantLogo url={actionLinks.merchants[0].url} size={20} className="mr-2" />
+                          {actionLinks.actionType === 'reserve' ? 
+                            I18nService.getReserveLabel(detectedLanguage) :
+                            firstResultService.getActionVerb(detectedVertical, detectedLanguage)
+                          } sur {firstResultService.getDomainLabel(actionLinks.merchants[0].domain)}
+                        </Button>
+                      </a>
                     ) : null}
                     
                      {/* Secondary buttons: Merchants (excluding already shown ones) */}
@@ -195,16 +201,21 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                        })
                        .slice(0, 2)
                        .map((merchant, i) => (
-                        <Button
+                        <a
                           key={`merchant-${merchant.domain}-${i}`}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open(merchant.url, '_blank')}
-                          className="min-w-[120px]"
-                         >
-                           <MerchantLogo url={merchant.url} size={20} className="mr-2" />
-                           {firstResultService.getDomainLabel(merchant.domain)}
-                         </Button>
+                          href={merchant.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="min-w-[120px]"
+                          >
+                            <MerchantLogo url={merchant.url} size={20} className="mr-2" />
+                            {firstResultService.getDomainLabel(merchant.domain)}
+                          </Button>
+                        </a>
                      ))}
                   </div>
                 ) : null}
