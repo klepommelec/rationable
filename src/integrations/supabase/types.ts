@@ -223,6 +223,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       workspace_documents: {
         Row: {
           category: string | null
@@ -389,6 +413,13 @@ export type Database = {
           view_count: number
         }[]
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       increment_template_copy_count: {
         Args: { template_id: string }
         Returns: undefined
@@ -396,6 +427,10 @@ export type Database = {
       increment_template_like_count: {
         Args: { template_id: string }
         Returns: undefined
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
       is_valid_shared_decision_access: {
         Args: { public_id_param: string }
@@ -407,6 +442,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       template_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
@@ -535,6 +571,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       template_status: ["pending", "approved", "rejected"],
     },
   },
