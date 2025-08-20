@@ -113,12 +113,8 @@ export const searchWithPerplexity = async (
       }
     };
     
-    // Adapter la requête selon l'intention temporelle
+    // Requête directe sans suffixes verbeux pour plus de pertinence
     let optimizedQuery = query;
-    const suffix = contextSuffixes[temporalIntent.type as keyof typeof contextSuffixes][detectedLanguage];
-    if (suffix) {
-      optimizedQuery = `${query} - ${suffix}`;
-    }
     
     // Get localized default context
     const defaultContexts = {

@@ -158,25 +158,20 @@ export const improveDescription = async (
 
   const context = detectDilemmaContext(dilemma);
 
-  const prompt = `Crée une description factuelle et informative de 2 lignes MAXIMUM pour cette recommandation :
+  const prompt = `Crée une description concise et factuelle de 1 ligne pour cette recommandation :
 
 DILEMME: "${dilemma}"
 RECOMMANDATION: "${result.recommendation}"
-CONTEXTE: ${context.domain}
 
-CONSIGNES ABSOLUES:
-1. EXACTEMENT 2 lignes courtes (maximum 180 caractères total)
-2. Première ligne: Commence par "${result.recommendation}" + ses caractéristiques FACTUELLES principales
-3. Deuxième ligne: Avantages CONCRETS et MESURABLES pour ce dilemme spécifique
-4. Style informatif et factuel comme un guide de voyage ou une fiche produit
-5. INTERDICTION: "Cette décision", "Le choix de", "Il est important", "En conclusion", "est recommandé"
-6. Éviter les généralités, donner des détails SPÉCIFIQUES
+CONSIGNES:
+1. Une seule ligne courte (maximum 100 caractères)
+2. Commence par "${result.recommendation}" + 1 avantage principal
+3. Factuel et direct
+4. Pas de "est recommandé" ou phrases génériques
 
-EXEMPLES PARFAITS (style Google/Wikipedia):
-- "Chamonix-Mont-Blanc offre un domaine skiable de 175km avec accès direct aux pistes depuis le centre-ville. L'ambiance alpine authentique et les liaisons vers l'Italie en font une destination hivernale complète."
-- "Nike Air Max 270 combine amorti Air Max visible au talon et mesh respirant sur l'avant-pied. Le design moderne et le confort optimal répondent parfaitement aux besoins quotidiens et sportifs."
+Exemple: "PlayStation 5 offre des temps de chargement instantanés et graphismes 4K."
 
-Réponds UNIQUEMENT avec les 2 lignes de description factuelle.`;
+Réponds uniquement avec la ligne de description.`;
 
   try {
     const response = await callOpenAiApi(prompt);

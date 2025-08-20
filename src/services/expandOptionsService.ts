@@ -32,62 +32,35 @@ export const generateMoreOptions = async (
 };
 
 export const generateOptionSearchLinks = (option: string, dilemma: string, category?: string): Array<{title: string, url: string}> => {
-  const currentLanguage = I18nService.getCurrentLanguage();
-  const searchQuery = encodeURIComponent(`${option} ${category || ''}`);
-  const comparisonQuery = encodeURIComponent(`${option} vs alternatives comparison`);
+  const locale = I18nService.getCurrentLanguage();
+  
+  // Simplify option name for search
+  const cleanOption = option.split(' ').slice(0, 2).join(' ').replace(/[^\w\s]/g, '');
   
   const links = [
     {
-      title: `${I18nService.getSearchLabel(currentLanguage)} "${option}"`,
-      url: I18nService.buildGoogleWebUrl(`${option} ${category || ''}`, currentLanguage)
+      title: I18nService.getSearchLabel(locale),
+      url: I18nService.buildGoogleWebUrl(cleanOption, locale)
     },
     {
-      title: `${I18nService.getCompareLabel(currentLanguage)} "${option}"`,
-      url: I18nService.buildGoogleWebUrl(`${option} vs alternatives comparison`, currentLanguage)
+      title: I18nService.getCompareLabel(locale), 
+      url: I18nService.buildGoogleWebUrl(`${cleanOption} avis`, locale)
     }
   ];
 
-  // Ajouter des liens spécialisés selon la catégorie
-  if (category) {
-    const categoryLower = category.toLowerCase();
-    
-    if (['tech', 'technologie'].includes(categoryLower)) {
-      const techLabel = currentLanguage === 'fr' ? 'Voir sur TechCrunch' :
-                       currentLanguage === 'es' ? 'Ver en TechCrunch' :
-                       currentLanguage === 'it' ? 'Vedi su TechCrunch' :
-                       currentLanguage === 'de' ? 'Auf TechCrunch ansehen' :
-                       'View on TechCrunch';
-      links.push({
-        title: techLabel,
-        url: I18nService.buildGoogleWebUrl(`${option} site:techcrunch.com`, currentLanguage)
-      });
-    } else if (['travel', 'voyages'].includes(categoryLower)) {
-      const tripAdvisorDomain = currentLanguage === 'fr' ? 'tripadvisor.fr' :
-                               currentLanguage === 'es' ? 'tripadvisor.es' :
-                               currentLanguage === 'it' ? 'tripadvisor.it' :
-                               currentLanguage === 'de' ? 'tripadvisor.de' :
-                               'tripadvisor.com';
-      const tripLabel = currentLanguage === 'fr' ? 'Voir sur TripAdvisor' :
-                       currentLanguage === 'es' ? 'Ver en TripAdvisor' :
-                       currentLanguage === 'it' ? 'Vedi su TripAdvisor' :
-                       currentLanguage === 'de' ? 'Auf TripAdvisor ansehen' :
-                       'View on TripAdvisor';
-      links.push({
-        title: tripLabel,
-        url: I18nService.buildGoogleWebUrl(`${option} site:${tripAdvisorDomain}`, currentLanguage)
-      });
-    } else if (['finance'].includes(categoryLower)) {
-      const priceLabel = currentLanguage === 'fr' ? 'Comparer les prix' :
-                        currentLanguage === 'es' ? 'Comparar precios' :
-                        currentLanguage === 'it' ? 'Confronta i prezzi' :
-                        currentLanguage === 'de' ? 'Preise vergleichen' :
-                        'Compare prices';
-      links.push({
-        title: priceLabel,
-        url: I18nService.buildGoogleShoppingUrl(option, currentLanguage)
-      });
-    }
+  // Add category-specific links only if really relevant
+  if (category?.toLowerCase().includes('tech')) {
+    links.push({
+      title: 'TechCrunch',
+      url: I18nService.buildGoogleWebUrl(`${cleanOption} site:techcrunch.com`, locale)
+    });
+  } else if (category?.toLowerCase().includes('travel')) {
+    const domain = locale === 'fr' ? 'tripadvisor.fr' : 'tripadvisor.com';
+    links.push({
+      title: 'TripAdvisor',
+      url: I18nService.buildGoogleWebUrl(`${cleanOption} site:${domain}`, locale)
+    });
   }
 
-  return links;
+  return links.slice(0, 3); // Limit to 3 links maximum
 };
