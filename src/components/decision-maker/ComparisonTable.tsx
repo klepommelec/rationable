@@ -24,31 +24,53 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   const detectedLanguage = I18nService.getCurrentLanguage();
   const detectedVertical = dilemma ? I18nService.detectVertical(dilemma) : null;
 
+  // Lazy load action links only for recommended option
   useEffect(() => {
     if (!breakdown?.length || !dilemma) return;
 
-    // Load action buttons for each option
-    breakdown.forEach(async (option) => {
-      const optionKey = option.option;
+    // Only load action links for the first (recommended) option
+    const recommendedOption = breakdown[0];
+    if (recommendedOption) {
+      const optionKey = recommendedOption.option;
       setLoadingStates(prev => ({ ...prev, [optionKey]: true }));
 
-      try {
-        const result = await firstResultService.getBestLinks({
-          optionName: option.option,
-          dilemma: dilemma,
-          language: detectedLanguage,
-          vertical: detectedVertical as any
-        });
-
+      firstResultService.getBestLinks({
+        optionName: recommendedOption.option,
+        dilemma: dilemma,
+        language: detectedLanguage,
+        vertical: detectedVertical as any
+      }).then(result => {
         setActionLinks(prev => ({ ...prev, [optionKey]: result }));
-      } catch (error) {
+      }).catch(error => {
         console.error(`Failed to get action links for ${optionKey}:`, error);
         setActionLinks(prev => ({ ...prev, [optionKey]: null }));
-      } finally {
+      }).finally(() => {
         setLoadingStates(prev => ({ ...prev, [optionKey]: false }));
-      }
-    });
+      });
+    }
   }, [breakdown, dilemma, detectedLanguage, detectedVertical]);
+
+  // Lazy load action links for other options on demand
+  const loadActionLinksForOption = async (option: IBreakdownItem) => {
+    const optionKey = option.option;
+    if (actionLinks[optionKey] !== undefined || loadingStates[optionKey]) return;
+
+    setLoadingStates(prev => ({ ...prev, [optionKey]: true }));
+    try {
+      const result = await firstResultService.getBestLinks({
+        optionName: option.option,
+        dilemma: dilemma || '',
+        language: detectedLanguage,
+        vertical: detectedVertical as any
+      });
+      setActionLinks(prev => ({ ...prev, [optionKey]: result }));
+    } catch (error) {
+      console.error(`Failed to get action links for ${optionKey}:`, error);
+      setActionLinks(prev => ({ ...prev, [optionKey]: null }));
+    } finally {
+      setLoadingStates(prev => ({ ...prev, [optionKey]: false }));
+    }
+  };
   if (!breakdown || breakdown.length === 0) {
     return <div className="flex items-center justify-center p-8 text-muted-foreground">
         <p>{t('decision.noResults')}</p>
@@ -83,7 +105,11 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
               const isLoading = loadingStates?.[optionKey] || false;
               
               return (
-                 <TableRow key={index} className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''}>
+                 <TableRow 
+                   key={index} 
+                   className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''}
+                   onMouseEnter={() => index > 0 && loadActionLinksForOption(option)}
+                 >
                    <TableCell className="font-medium align-top">
                      <div className="flex flex-col gap-3">
                        {index === 0 && (
@@ -98,8 +124,8 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                         {option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
                       </span>
                       
-                       {/* Action buttons moved here */}
-                       <div className="mt-2">
+                       {/* Action buttons - only show for recommended option or when loaded */}
+                       {(index === 0 || actionLinks[optionKey]) && <div className="mt-2">
                          {isLoading ? (
                            <Button variant="secondary" size="sm" disabled className="w-full text-xs h-7">
                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -178,7 +204,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                ))}
                             </div>
                            ) : null}
-                       </div>
+                       </div>}
                     </div>
                   </TableCell>
                   <TableCell className="align-top vertical-align-top">

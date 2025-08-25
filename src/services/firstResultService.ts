@@ -28,6 +28,9 @@ export interface FirstResultOptions {
 
 class FirstResultService {
   async getBestLinks({ optionName, dilemma, language, vertical }: FirstResultOptions): Promise<BestLinksResponse> {
+    const startTime = Date.now();
+    const TIMEOUT_MS = 3500; // Total timeout for the entire operation
+    
     // 1. Detect language and vertical
     const detectedLanguage = language || I18nService.detectLanguage(dilemma + ' ' + optionName);
     const detectedVertical = vertical || I18nService.detectVertical(dilemma + ' ' + optionName);
@@ -53,6 +56,8 @@ class FirstResultService {
       title: I18nService.getDirectionsLabel(detectedLanguage)
     } : undefined;
     
+    try {
+    
     // 6. Check cache for both official and merchants
     const officialCacheKey = `${query}_${detectedLanguage}_${detectedVertical || 'general'}_official`;
     const merchantsCacheKey = `${query}_${detectedLanguage}_${detectedVertical || 'general'}_merchants`;
@@ -72,112 +77,102 @@ class FirstResultService {
       };
     }
     
-    try {
-      console.log(`🔍 Searching best links for: "${query}" (${detectedLanguage}, ${detectedVertical})`);
-      
-      // 7. Search for official site first if we have a brand
-      let officialResult = null;
-      if (brand) {
-        const officialQuery = `${brand} ${optionName} site officiel`;
-        const siteBias = this.getBrandDomains(brand);
-        
-        const { data: officialData, error: officialError } = await supabase.functions.invoke('first-web-result', {
-          body: {
-            query: officialQuery,
-            language: detectedLanguage,
-            vertical: detectedVertical,
-            numResults: 3,
-            siteBias
-          }
-        });
-        
-        if (!officialError && officialData?.results?.length) {
-          const officialResults = officialData.results.filter((r: any) => 
-            this.isOfficialDomain(r.url, brand)
-          );
-          
-          if (officialResults.length > 0) {
-            const verified = await LinkVerifierService.verifyLinks(
-              officialResults.slice(0, 1).map((r: any) => ({ url: r.url, title: r.title }))
-            );
-            
-            if (verified.validLinks.length > 0) {
-              const validLink = verified.validLinks[0];
-              officialResult = {
-                url: validLink.url,
-                title: validLink.title,
-                domain: this.extractDomain(validLink.url)
-              };
-              console.log(`✅ Official found: ${validLink.url}`);
-            }
-          }
-        }
-      }
-      
-      // 8. Search for general results (merchants) with location boost
-      const locationBoostQuery = cityContext ? `${query} ${cityContext}` : query;
-      const { data, error } = await supabase.functions.invoke('first-web-result', {
-        body: {
-          query: locationBoostQuery,
-          language: detectedLanguage,
-          vertical: detectedVertical,
-          numResults: actionType === 'directions' ? 5 : 4 // Optimize for speed
-        }
+      // Performance optimization: Race condition with timeout
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Operation timeout')), TIMEOUT_MS);
       });
 
-      if (error) {
-        console.error(`❌ Edge function error:`, error);
-        throw new Error(`Edge function error: ${error.message}`);
-      }
+      const searchPromise = (async () => {
+        console.log(`🔍 Searching best links for: "${query}" (${detectedLanguage}, ${detectedVertical})`);
+        
+        // 7. Search for official site first if we have a brand (with timeout)
+        let officialResult = null;
+        if (brand && (Date.now() - startTime) < 2000) {
+          const officialQuery = `${brand} ${optionName} site officiel`;
+          const siteBias = this.getBrandDomains(brand);
+          
+          try {
+            const { data: officialData, error: officialError } = await Promise.race([
+              supabase.functions.invoke('first-web-result', {
+                body: {
+                  query: officialQuery,
+                  language: detectedLanguage,
+                  vertical: detectedVertical,
+                  numResults: 2, // Reduced for speed
+                  siteBias
+                }
+              }),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Official search timeout')), 2500))
+            ]) as any;
+            
+            if (!officialError && officialData?.results?.length) {
+              const officialResults = officialData.results.filter((r: any) => 
+                this.isOfficialDomain(r.url, brand)
+              );
+              
+              if (officialResults.length > 0) {
+                // Skip verification for speed - trust official domains
+                const bestOfficial = officialResults[0];
+                officialResult = {
+                  url: bestOfficial.url,
+                  title: bestOfficial.title,
+                  domain: this.extractDomain(bestOfficial.url)
+                };
+                console.log(`✅ Official found: ${bestOfficial.url}`);
+              }
+            }
+          } catch (error) {
+            console.log(`⚠️ Official search failed/timed out: ${error.message}`);
+          }
+        }
+        
+        // 8. Search for general results (merchants) with location boost
+        const locationBoostQuery = cityContext ? `${query} ${cityContext}` : query;
+        const { data, error } = await Promise.race([
+          supabase.functions.invoke('first-web-result', {
+            body: {
+              query: locationBoostQuery,
+              language: detectedLanguage,
+              vertical: detectedVertical,
+              numResults: 3 // Reduced for speed
+            }
+          }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Merchant search timeout')), 2500))
+        ]) as any;
 
-      if (!data?.results?.length) {
-        console.log(`⚠️ No results returned from search provider: ${data?.provider}`);
-        throw new Error('No results returned from search');
-      }
+        if (error) {
+          console.error(`❌ Edge function error:`, error);
+          throw new Error(`Edge function error: ${error.message}`);
+        }
 
-      // 9. Separate official vs merchants and prioritize with location boost
-      const { merchants } = this.separateOfficialAndMerchants(data.results, brand, officialResult, cityContext, actionType);
+        if (!data?.results?.length) {
+          console.log(`⚠️ No results returned from search provider: ${data?.provider}`);
+          throw new Error('No results returned from search');
+        }
+
+        // 9. Separate official vs merchants and prioritize with location boost
+        const { merchants } = this.separateOfficialAndMerchants(data.results, brand, officialResult, cityContext, actionType);
+        
+        return { data, merchants, officialResult };
+      })();
+
+      const { data, merchants, officialResult } = await Promise.race([searchPromise, timeoutPromise]) as any;
       
-      // 8. Verify merchant links
-      const merchantsToVerify = merchants.slice(0, 5).map((r: any) => ({ 
-        url: r.url, 
-        title: r.title,
-        description: r.snippet 
-      }));
-      
-      console.log(`🔍 Verifying merchant links:`, merchantsToVerify.map(l => l.url));
-      const verified = await LinkVerifierService.verifyLinks(merchantsToVerify);
-      console.log(`✅ Merchant verification complete:`, verified.summary);
-
-      // 9. Build final merchant list (max 3) - Filter for pertinence
-      let finalMerchants;
-      if (verified.validLinks.length > 0) {
-        // Use verified links and filter for pertinence
-        const pertinentLinks = verified.validLinks.filter(link => 
-          this.isPertinentLink(link.url, detectedVertical, optionName)
-        );
-        finalMerchants = pertinentLinks.slice(0, 3).map(link => ({
-          url: link.url,
-          title: link.title,
-          domain: this.extractDomain(link.url)
-        }));
-      } else if (merchants.length > 0) {
-        // Fallback: use unverified but prioritized merchants, filter for pertinence
+      // 10. Build final merchant list (max 2) - Skip verification for speed, filter for pertinence
+      let finalMerchants = [];
+      if (merchants.length > 0) {
         const pertinentMerchants = merchants.filter(merchant => 
           this.isPertinentLink(merchant.url, detectedVertical, optionName)
         );
+        
         if (pertinentMerchants.length > 0) {
-          console.log(`⚠️ Link verification failed, using pertinent unverified merchants as fallback`);
-          finalMerchants = pertinentMerchants.slice(0, 3).map(merchant => ({
+          finalMerchants = pertinentMerchants.slice(0, 2).map(merchant => ({
             url: merchant.url,
             title: merchant.title,
             domain: this.extractDomain(merchant.url)
           }));
-        } else {
-          finalMerchants = [];
+          console.log(`✅ Found ${finalMerchants.length} pertinent merchants (unverified for speed)`);
         }
-      } else {
-        finalMerchants = [];
       }
 
       // No fallback for directions (local queries) - return with empty merchants
@@ -197,21 +192,26 @@ class FirstResultService {
       }
       searchCacheService.set(merchantsCacheKey, detectedVertical || 'general', { merchants: finalMerchants }, data.provider);
 
-      console.log(`🎉 Best links found: ${officialResult ? 'official + ' : ''}${finalMerchants.length} merchants`);
-      return result;
+        console.log(`🎉 Best links found: ${officialResult ? 'official + ' : ''}${finalMerchants.length} merchants`);
+        return result;
 
     } catch (error) {
       console.error(`❌ getBestLinks error for "${optionName}":`, error);
       
-      // Return empty results instead of generic fallbacks when no pertinent links found
+      // Soft fallback: provide basic links for known categories
+      const softFallback = this.createSoftFallback(optionName, detectedVertical, detectedLanguage, actionType, brand);
+      
       return {
-        official: null,
-        merchants: [],
+        official: softFallback.official,
+        merchants: softFallback.merchants,
         maps: mapsResult,
         actionType,
-        provider: 'perplexity',
+        provider: 'fallback' as any,
         fromCache: false
       };
+    } finally {
+      const duration = Date.now() - startTime;
+      console.log(`⏱️ getBestLinks completed in ${duration}ms for "${optionName}"`);
     }
   }
 
@@ -258,7 +258,7 @@ class FirstResultService {
           query,
           language: detectedLanguage,
           vertical: detectedVertical,
-          numResults: 5 // Optimize for speed
+          numResults: 3 // Optimize for speed
         }
       });
 
@@ -336,6 +336,36 @@ class FirstResultService {
       // Don't provide generic fallbacks - throw error instead
       throw new Error('No pertinent results found');
     }
+  }
+
+  private createSoftFallback(optionName: string, vertical: string | null, language: SupportedLanguage, actionType: string, brand?: string | null) {
+    // Create sensible fallbacks for common cases
+    let official = null;
+    let merchants = [];
+
+    // Only provide official site for recognized brands
+    if (brand && this.getBrandDomains(brand).length > 0) {
+      const primaryDomain = this.getBrandDomains(brand)[0];
+      official = {
+        url: `https://www.${primaryDomain}`,
+        title: I18nService.getOfficialSiteLabel(language),
+        domain: primaryDomain
+      };
+    }
+
+    // Add pertinent merchants based on vertical
+    if (vertical === 'automotive' && actionType === 'buy') {
+      // Don't include Amazon for cars
+      merchants = [];
+    } else if (vertical === 'software' || vertical === 'tech') {
+      merchants = [{
+        url: I18nService.buildGoogleShoppingUrl(optionName, language),
+        title: I18nService.getShoppingConfig(language).buyVerb.charAt(0).toUpperCase() + I18nService.getShoppingConfig(language).buyVerb.slice(1),
+        domain: 'google.com'
+      }];
+    }
+
+    return { official, merchants };
   }
 
   private buildOptimizedQuery(optionName: string, vertical: string | null, language: SupportedLanguage, cityContext?: string | null): string {

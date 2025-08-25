@@ -70,68 +70,17 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
       .slice(0, 6); // Limit to most relevant links
   };
   
-  // Server-side verification of shopping links
+  // Simplified link processing without heavy verification
   useEffect(() => {
-    const verifyLinks = async () => {
-      if (!shoppingLinks?.length) {
-        setVerifiedShoppingLinks([]);
-        return;
-      }
+    if (!shoppingLinks?.length) {
+      setVerifiedShoppingLinks([]);
+      return;
+    }
 
-      const filteredLinks = filterRelevantLinks(shoppingLinks);
-      
-      try {
-        console.log('🔍 Verifying shopping links...', filteredLinks.map(l => l.url));
-        const verificationResult = await LinkVerifierService.verifyLinks(filteredLinks);
-        
-        // Replace invalid links with merchant-specific search fallbacks
-        const enhancedLinks = filteredLinks.map(originalLink => {
-          const verification = [...verificationResult.invalidLinks].find(inv => inv.url === originalLink.url);
-          
-          if (verification && (verification.status === 'invalid' || verification.status === 'timeout')) {
-            console.log(`🔄 Replacing invalid link: ${originalLink.url}`);
-            
-            // Generate merchant-specific or vertical-specific fallback
-            const fallbackUrl = generateLinkFallback(originalLink, detectedVertical, currentLanguage);
-            
-            return {
-              ...originalLink,
-              url: fallbackUrl,
-              description: `${originalLink.description || originalLink.title} (recherche)`
-            };
-          }
-          
-          // Follow redirects for valid links
-          const validLink = verificationResult.validLinks.find(valid => 
-            valid.url === originalLink.url || valid.title === originalLink.title
-          );
-          
-          if (validLink && validLink.url !== originalLink.url) {
-            console.log(`➡️ Following redirect: ${originalLink.url} → ${validLink.url}`);
-            return {
-              ...originalLink,
-              url: validLink.url
-            };
-          }
-          
-          return originalLink;
-        });
-
-        console.log('✅ Link verification complete:', {
-          original: filteredLinks.length,
-          verified: enhancedLinks.length,
-          invalid: verificationResult.summary.invalid,
-          redirects: verificationResult.summary.redirects
-        });
-
-        setVerifiedShoppingLinks(enhancedLinks);
-      } catch (error) {
-        console.error('❌ Link verification failed, using original links:', error);
-        setVerifiedShoppingLinks(filterRelevantLinks(shoppingLinks));
-      }
-    };
-
-    verifyLinks();
+    // Skip heavy verification for performance, just filter for relevance
+    const filteredLinks = filterRelevantLinks(shoppingLinks);
+    console.log('📋 Using shopping links without verification for speed:', filteredLinks.length);
+    setVerifiedShoppingLinks(filteredLinks);
   }, [shoppingLinks, detectedVertical, currentLanguage]);
 
   // Generate fallback URL for invalid links
