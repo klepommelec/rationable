@@ -113,10 +113,10 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                    <TableCell className="font-medium align-top">
                      <div className="flex flex-col gap-3">
                        {index === 0 && (
-                         <Badge 
-                           variant="default" 
-                           className="bg-green-500 hover:bg-green-600 text-white whitespace-nowrap"
-                         >
+                          <Badge 
+                            variant="default" 
+                            className="bg-green-500 hover:bg-green-600 text-white whitespace-nowrap w-fit"
+                          >
                            {t('decision.recommended')}
                          </Badge>
                        )}
