@@ -9,13 +9,15 @@ import { DataAccuracyIndicator } from './DataAccuracyIndicator';
 import { WorkspaceDocumentIndicator } from './WorkspaceDocumentIndicator';
 import { AIProviderIndicator } from './AIProviderIndicator';
 import ValidatedLink from '@/components/ValidatedLink';
-import { ExternalLink, Lightbulb, CheckCircle, ShoppingBag, Loader2, Navigation } from 'lucide-react';
+import { ExternalLink, Lightbulb, CheckCircle, ShoppingBag, Loader2, Navigation, Search } from 'lucide-react';
 import { ExpandableText } from '@/components/ExpandableText';
 import { firstResultService, BestLinksResponse } from '@/services/firstResultService';
 import { I18nService } from '@/services/i18nService';
 import { MerchantLogo } from '@/components/MerchantLogo';
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import { UsefulLinks } from './UsefulLinks';
+import { generateOptionSearchLinks } from '@/services/expandOptionsService';
+import { handleExternalLinkClick } from '@/utils/navigation';
 interface RecommendationCardProps {
   result: IResult;
   dilemma: string;
@@ -217,9 +219,39 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                             {firstResultService.getDomainLabel(merchant.domain)}
                           </Button>
                         </a>
-                     ))}
-                  </div>
-                ) : null}
+                      ))}
+
+                     {/* Always show search button */}
+                     <Button
+                       variant="secondary"
+                       size="sm"
+                       onClick={(e) => {
+                         const searchLinks = generateOptionSearchLinks(topOption.option, dilemma);
+                         if (searchLinks.length > 0) {
+                           handleExternalLinkClick(e, searchLinks[0].url);
+                         }
+                       }}
+                     >
+                       <Search className="h-4 w-4 mr-2" />
+                       {t('decision.search')}
+                     </Button>
+                   </div>
+                ) : (
+                  /* Show search button even when no action links */
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={(e) => {
+                      const searchLinks = generateOptionSearchLinks(topOption.option, dilemma);
+                      if (searchLinks.length > 0) {
+                        handleExternalLinkClick(e, searchLinks[0].url);
+                      }
+                    }}
+                  >
+                    <Search className="h-4 w-4 mr-2" />
+                    {t('decision.search')}
+                  </Button>
+                )}
               </div>
             )}
 
