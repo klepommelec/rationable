@@ -233,7 +233,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                        }}
                      >
                        <ExternalLink className="h-3 w-3 mr-1" />
-                       {t('decision.search')}
+                       {t('common.search')}
                      </Button>
                    </div>
                 ) : (
@@ -249,7 +249,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     }}
                   >
                     <ExternalLink className="h-3 w-3 mr-1" />
-                    {t('decision.search')}
+                    {t('common.search')}
                   </Button>
                 )}
               </div>
