@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { ExternalLink, Globe } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { handleExternalLinkClick } from '@/utils/navigation';
+import ValidatedLink from '@/components/ValidatedLink';
 
 interface SourcesListProps {
   sources: string[];
@@ -43,19 +43,15 @@ export const SourcesList: React.FC<SourcesListProps> = ({
       
       <div className="grid gap-2">
         {displayedSources.map((source, index) => (
-          <a
+          <ValidatedLink
             key={index}
-            href={source}
-            className="flex items-center gap-2 p-2 rounded-md border border-border/50 hover:border-border transition-colors group bg-card/50 hover:bg-card"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => handleExternalLinkClick(e, source)}
-          >
-            <ExternalLink className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-            <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors truncate">
-              {extractDomain(source)}
-            </span>
-          </a>
+            link={{
+              url: source,
+              title: extractDomain(source),
+              description: ''
+            }}
+            className="flex items-center gap-2 p-2 rounded-md border border-border/50 hover:border-border transition-colors group bg-card/50 hover:bg-card text-sm text-muted-foreground group-hover:text-foreground"
+          />
         ))}
         
         {sources.length > 5 && (

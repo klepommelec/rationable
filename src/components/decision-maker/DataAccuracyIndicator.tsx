@@ -2,14 +2,24 @@ import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Database, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { Database, ChevronDown, ChevronUp, Search, AlertTriangle } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { useI18nUI } from '@/contexts/I18nUIContext';
+import ValidatedLink from '@/components/ValidatedLink';
+import { LinkVerifierService } from '@/services/linkVerifierService';
 
 interface DataAccuracyIndicatorProps {
   result: IResult;
   currentDecision?: any;
   className?: string;
+}
+
+interface VerifiedSource {
+  url: string;
+  title?: string;
+  status?: 'valid' | 'invalid' | 'redirect' | 'timeout' | 'pending';
+  finalUrl?: string;
+  error?: string;
 }
 
 export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({ 
@@ -19,6 +29,8 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
 }) => {
   const { t, getLocaleTag } = useI18nUI();
   const [isSourcesExpanded, setIsSourcesExpanded] = useState(false);
+  const [verifiedSources, setVerifiedSources] = useState<VerifiedSource[]>([]);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   // Helper functions for date formatting
   const formatDateOnly = (timestamp: number | string | undefined) => {
@@ -73,10 +85,60 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
   const allSources = getAllSources();
   const sourceCount = allSources.length;
 
+  // Verify sources when expanded
+  const handleSourcesExpand = async (expanded: boolean) => {
+    setIsSourcesExpanded(expanded);
+    
+    if (expanded && allSources.length > 0 && verifiedSources.length === 0) {
+      setIsVerifying(true);
+      try {
+        const linksToVerify = allSources.map(source => ({
+          url: source.url,
+          title: source.title || '',
+          description: ''
+        }));
+        
+        const { validLinks, invalidLinks } = await LinkVerifierService.verifyLinks(linksToVerify);
+        
+        const verified: VerifiedSource[] = allSources.map(source => {
+          const validLink = validLinks.find(v => v.url === source.url);
+          const invalidLink = invalidLinks.find(i => i.url === source.url);
+          
+          if (validLink) {
+            return {
+              ...source,
+              status: 'valid' as const,
+              finalUrl: validLink.url
+            };
+          } else if (invalidLink) {
+            return {
+              ...source,
+              status: invalidLink.status as any,
+              error: invalidLink.error
+            };
+          } else {
+            return {
+              ...source,
+              status: 'valid' as const
+            };
+          }
+        });
+        
+        setVerifiedSources(verified);
+      } catch (error) {
+        console.error('Source verification failed:', error);
+        // Fallback to unverified sources
+        setVerifiedSources(allSources.map(source => ({ ...source, status: 'valid' as const })));
+      } finally {
+        setIsVerifying(false);
+      }
+    }
+  };
+
   return (
     <TooltipProvider>
       <div className={`flex flex-col gap-2 ${className}`}>
-        <Collapsible open={isSourcesExpanded} onOpenChange={setIsSourcesExpanded}>
+        <Collapsible open={isSourcesExpanded} onOpenChange={handleSourcesExpand}>
           {/* Layout mobile : structure verticale en 3 niveaux */}
           <div className="block sm:hidden px-1">
             <div className="space-y-1 text-xs text-muted-foreground">
@@ -186,23 +248,72 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
 
           {/* Sources Content - Below when expanded */}
           <CollapsibleContent className="mt-2">
-            <div className="space-y-1 pl-2 border-l-2 border-muted">
+            <div className="space-y-2 pl-2 border-l-2 border-muted">
               {allSources.length === 0 ? (
                 <div className="text-xs text-muted-foreground">{t('dataAccuracy.noExternalSources')}</div>
+              ) : isVerifying ? (
+                <div className="text-xs text-muted-foreground">Vérification des sources...</div>
               ) : (
-                allSources.map((source, index) => (
-                  <div key={index} className="text-xs">
-                    <a 
-                      href={source.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline flex items-center gap-1"
-                    >
-                      <ExternalLink className="h-3 w-3" />
-                      {source.title || (source.url.length > 50 ? `${source.url.substring(0, 50)}...` : source.url)}
-                    </a>
-                  </div>
-                ))
+                (verifiedSources.length > 0 ? verifiedSources : allSources).map((source, index) => {
+                  const verified = verifiedSources[index];
+                  const needsFallback = verified?.status && ['invalid', 'timeout'].includes(verified.status);
+                  
+                  return (
+                    <div key={index} className="text-xs flex items-center gap-2">
+                      <ValidatedLink
+                        link={{
+                          url: source.url,
+                          title: source.title || '',
+                          description: ''
+                        }}
+                        className="text-primary hover:underline flex items-center gap-1 flex-1"
+                      />
+                      
+                      {verified?.status && (
+                        <div className="flex items-center gap-1">
+                          {verified.status === 'redirect' && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Badge variant="outline" className="h-4 px-1 text-[10px]">
+                                  <ChevronDown className="h-2 w-2" />
+                                </Badge>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Lien redirigé</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                          
+                          {needsFallback && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Badge variant="outline" className="h-4 px-1 text-[10px] bg-orange-50 text-orange-700 border-orange-200">
+                                  <Search className="h-2 w-2" />
+                                </Badge>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Lien original indisponible → recherche sur le site</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                          
+                          {verified.status === 'invalid' && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Badge variant="outline" className="h-4 px-1 text-[10px] bg-red-50 text-red-700 border-red-200">
+                                  <AlertTriangle className="h-2 w-2" />
+                                </Badge>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Source non accessible</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </div>
           </CollapsibleContent>
