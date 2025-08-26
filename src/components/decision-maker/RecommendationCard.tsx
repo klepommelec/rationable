@@ -15,6 +15,7 @@ import { firstResultService, BestLinksResponse } from '@/services/firstResultSer
 import { I18nService } from '@/services/i18nService';
 import { MerchantLogo } from '@/components/MerchantLogo';
 import { useI18nUI } from '@/contexts/I18nUIContext';
+import { UsefulLinks } from './UsefulLinks';
 interface RecommendationCardProps {
   result: IResult;
   dilemma: string;
@@ -221,6 +222,16 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 ) : null}
               </div>
             )}
+
+            {/* Useful Links moved inside recommendation card */}
+            <div className="w-full pt-4">
+              <UsefulLinks 
+                shoppingLinks={result.shoppingLinks}
+                socialContent={result.socialContent}
+                dilemma={dilemma}
+                recommendation={result.recommendation}
+              />
+            </div>
           </div>
         </div>
       </CardContent>

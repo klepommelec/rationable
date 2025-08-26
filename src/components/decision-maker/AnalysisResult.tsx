@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { IResult, IDecision, IBreakdownItem } from '@/types/decision';
 import { RecommendationCard } from './RecommendationCard';
 import { ComparisonTable } from './ComparisonTable';
-import { UsefulLinks } from './UsefulLinks';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -63,13 +63,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         result={result}
         dilemma={dilemma}
         currentDecision={currentDecision}
-      />
-      
-      <UsefulLinks 
-        shoppingLinks={result.shoppingLinks}
-        socialContent={result.socialContent}
-        dilemma={dilemma}
-        recommendation={result.recommendation}
       />
       
       {hasMultipleOptions && (
