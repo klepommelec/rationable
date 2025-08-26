@@ -35,16 +35,15 @@ export const generateOptionSearchLinks = (option: string, dilemma: string, categ
   const locale = I18nService.getCurrentLanguage();
   const detectedVertical = I18nService.detectVertical(dilemma + ' ' + option);
   
-  // Use full context for better search relevance
+  // Use only the option name for clean search results
   const contextualOption = option.replace(/^Option\s+\d+:\s*/i, '').trim();
-  const searchContext = dilemma ? `${contextualOption} ${dilemma}` : contextualOption;
   
   const links = [];
 
-  // Primary search - contextual with dilemma
+  // Primary search - clean option name only
   links.push({
     title: I18nService.getSearchLabel(locale),
-    url: I18nService.buildGoogleWebUrl(searchContext, locale)
+    url: I18nService.buildGoogleWebUrl(contextualOption, locale)
   });
 
   // Secondary search - reviews/comparison based on vertical
