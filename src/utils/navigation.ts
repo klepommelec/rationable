@@ -3,18 +3,32 @@
  */
 
 /**
- * Forces external links to open in a new window/tab, bypassing iframe restrictions
+ * Forces external links to open by bypassing iframe restrictions
  * This is essential when the app runs inside an iframe that may block certain domains
  */
 export const openExternal = (url: string, target: string = '_blank'): void => {
   try {
-    // First try: Use window.top to break out of iframe
+    // For iframe contexts, try to navigate the top window directly
     if (window.top && window.top !== window.self) {
-      window.top.open(url, target, 'noopener,noreferrer');
-      return;
+      // Try to post message to parent to handle navigation
+      try {
+        window.top.postMessage({ type: 'OPEN_EXTERNAL_URL', url, target }, '*');
+        
+        // Fallback: Direct navigation to top window
+        setTimeout(() => {
+          if (window.top && confirm(`Ouvrir le lien dans un nouvel onglet ?\n${url}`)) {
+            window.top.location.href = url;
+          }
+        }, 100);
+        return;
+      } catch (e) {
+        // If postMessage fails, try direct navigation
+        window.top.location.href = url;
+        return;
+      }
     }
 
-    // Fallback: Regular window.open
+    // Regular window.open for non-iframe contexts
     window.open(url, target, 'noopener,noreferrer');
   } catch (error) {
     console.warn('Failed to open external URL:', error);
