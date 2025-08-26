@@ -561,9 +561,9 @@ Répondez au format JSON exact suivant :
 
 Critères d'évaluation: ${criteria.map(c => c.name).join(', ')}
 
-Proposez exactement 4 options différentes avec des scores variés (entre 65 et 90).
+Proposez exactement 6-8 options différentes et pertinentes avec des scores variés (entre 50 et 95).
 
-IMPORTANT: Générez TOUJOURS 4 options avec des scores DIFFÉRENTS pour la comparaison.
+IMPORTANT: Générez TOUJOURS 6-8 options avec des scores DIFFÉRENTS pour la comparaison. Évitez les options génériques sans valeur.
 
 Format JSON EXACT (sans texte avant ou après):
 {

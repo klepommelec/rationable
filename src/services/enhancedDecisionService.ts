@@ -330,7 +330,7 @@ Analysez le contenu de ces documents pour enrichir votre analyse et vos recomman
 
   prompt += `
 
-IMPORTANT: Vous DEVEZ générer entre 3 et 5 options distinctes avec des scores différents (pas tous identiques).
+IMPORTANT: Vous DEVEZ générer entre 6 et 8 options distinctes et de qualité avec des scores différents (pas tous identiques).
 
 Retournez un objet JSON avec:
 1. "recommendation": La meilleure option recommandée (texte court)
@@ -340,7 +340,7 @@ Retournez un objet JSON avec:
 5. "dataFreshness": Fraîcheur des données utilisées ("very-fresh", "fresh", "moderate", "stale")
 6. "infoLinks": Tableau de 3-5 liens utiles avec "title" et "url" (obligatoire)
 7. "shoppingLinks": Tableau de 2-3 liens d'achat avec "title" et "url" (obligatoire)
-8. "breakdown": Tableau de 3-5 objets avec:
+8. "breakdown": Tableau de 6-8 objets avec:
    - "option": Nom de l'option (différent pour chaque option)
    - "pros": Tableau des avantages spécifiques
    - "cons": Tableau des inconvénients spécifiques
@@ -351,10 +351,12 @@ Exemple de breakdown attendu:
   {"option": "Tesla Model 3", "pros": ["..."], "cons": ["..."], "score": 88},
   {"option": "BMW i4", "pros": ["..."], "cons": ["..."], "score": 82},
   {"option": "Peugeot e-208", "pros": ["..."], "cons": ["..."], "score": 76},
-  {"option": "Renault Zoe", "pros": ["..."], "cons": ["..."], "score": 71}
+  {"option": "Renault Zoe", "pros": ["..."], "cons": ["..."], "score": 71},
+  {"option": "Volkswagen ID.3", "pros": ["..."], "cons": ["..."], "score": 69},
+  {"option": "Hyundai Kona Electric", "pros": ["..."], "cons": ["..."], "score": 65}
 ]
 
-Générez des options concrètes et pertinentes avec des scores réalistes et variés.
+Générez des options concrètes et pertinentes avec des scores réalistes et variés. Évitez les options génériques sans valeur.
 
 Répondez UNIQUEMENT avec un objet JSON valide.`;
 

@@ -55,15 +55,15 @@ export const getLanguagePrompts = (language: SupportedLanguage = 'fr') => {
 3. "suggestedCategory": L'ID de la catégorie la plus appropriée
 
 Répondez UNIQUEMENT avec un objet JSON valide.`,
-      optionsInstruction: `Analysez ce dilemme et générez EXACTEMENT 3 à 5 options différentes avec évaluation détaillée.
+      optionsInstruction: `Analysez ce dilemme et générez EXACTEMENT 6 à 8 options différentes et pertinentes avec évaluation détaillée.
 
-IMPORTANT: Vous DEVEZ générer entre 3 et 5 options distinctes avec des scores différents.
+IMPORTANT: Vous DEVEZ générer entre 6 et 8 options distinctes et de qualité avec des scores différents. Évitez les options génériques sans valeur.
 
 Retournez un objet JSON avec:
 1. "recommendation": La meilleure option recommandée
 2. "description": Explication détaillée de pourquoi cette option est recommandée
 3. "imageQuery": Description pour générer une image (en anglais)
-4. "breakdown": Tableau de 3-5 objets avec "option", "pros", "cons", "score"
+4. "breakdown": Tableau de 6-8 objets avec "option", "pros", "cons", "score"
 
 Répondez UNIQUEMENT avec un objet JSON valide.`
     },
@@ -75,15 +75,15 @@ Répondez UNIQUEMENT avec un objet JSON valide.`
 3. "suggestedCategory": The most appropriate category ID
 
 Respond ONLY with a valid JSON object.`,
-      optionsInstruction: `Analyze this dilemma and generate EXACTLY 3 to 5 different options with detailed evaluation.
+      optionsInstruction: `Analyze this dilemma and generate EXACTLY 6 to 8 different and relevant options with detailed evaluation.
 
-IMPORTANT: You MUST generate between 3 and 5 distinct options with different scores.
+IMPORTANT: You MUST generate between 6 and 8 distinct, quality options with different scores. Avoid generic options without value.
 
 Return a JSON object with:
 1. "recommendation": The best recommended option
 2. "description": Detailed explanation of why this option is recommended
 3. "imageQuery": Description for image generation (in English)
-4. "breakdown": Array of 3-5 objects with "option", "pros", "cons", "score"
+4. "breakdown": Array of 6-8 objects with "option", "pros", "cons", "score"
 
 Respond ONLY with a valid JSON object.`
     },

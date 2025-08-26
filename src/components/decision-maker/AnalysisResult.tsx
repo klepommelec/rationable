@@ -34,8 +34,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   const { t } = useI18nUI();
   const [showAllOptions, setShowAllOptions] = useState(false);
   
-  // Nombre d'options à afficher initialement (3-4)
-  const initialOptionsCount = 3;
+  // Nombre d'options à afficher initialement (5)
+  const initialOptionsCount = 5;
   if (!result) {
     return (
       <div className="space-y-6 animate-fade-in">

@@ -429,7 +429,7 @@ export const generateComparativeWithOpenAI = async (
   try {
     console.log('🤖 Génération comparative avec OpenAI/Claude');
     
-    const prompt = `Analysez cette décision et générez 3-4 options détaillées :
+    const prompt = `Analysez cette décision et générez 6-8 options détaillées et pertinentes :
 
 DILEMME: "${dilemma}"
 
