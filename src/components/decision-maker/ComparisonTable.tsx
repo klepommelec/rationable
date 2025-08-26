@@ -9,6 +9,7 @@ import { firstResultService, BestLinksResponse } from '@/services/firstResultSer
 import { I18nService } from '@/services/i18nService';
 import { MerchantLogo } from '@/components/MerchantLogo';
 import { useI18nUI } from '@/contexts/I18nUIContext';
+import { handleExternalLinkClick } from '@/utils/navigation';
 
 interface ComparisonTableProps {
   breakdown: IBreakdownItem[];
@@ -232,18 +233,16 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                   <TableCell className="align-top">
                     <div className="space-y-1">
                       {searchLinks.slice(0, 2).map((link, i) => (
-                        <a
+                        <Button
                           key={i}
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block"
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs"
+                          onClick={(e) => handleExternalLinkClick(e, link.url)}
                         >
-                          <Button variant="outline" size="sm" className="w-full text-xs">
-                            <ExternalLink className="h-3 w-3 mr-1" />
-                            {link.title.replace(`"${option.option}"`, '').trim() || t('decision.search')}
-                          </Button>
-                        </a>
+                          <ExternalLink className="h-3 w-3 mr-1" />
+                          {link.title.replace(`"${option.option}"`, '').trim() || t('decision.search')}
+                        </Button>
                       ))}
                     </div>
                   </TableCell>
