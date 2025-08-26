@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { Globe } from 'lucide-react';
+import { Globe, Database } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import ValidatedLink from '@/components/ValidatedLink';
 
 interface SourcesListProps {
   sources: string[];
@@ -43,15 +42,18 @@ export const SourcesList: React.FC<SourcesListProps> = ({
       
       <div className="grid gap-2">
         {displayedSources.map((source, index) => (
-          <ValidatedLink
+          <a
             key={index}
-            link={{
-              url: source,
-              title: extractDomain(source),
-              description: ''
-            }}
-            className="flex items-center gap-2 p-2 rounded-md border border-border/50 hover:border-border transition-colors group bg-card/50 hover:bg-card text-sm text-muted-foreground group-hover:text-foreground"
-          />
+            href={source}
+            className="flex items-center gap-2 p-2 rounded-md border border-border/50 hover:border-border transition-colors group bg-card/50 hover:bg-card"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Database className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+            <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors truncate">
+              {extractDomain(source)}
+            </span>
+          </a>
         ))}
         
         {sources.length > 5 && (

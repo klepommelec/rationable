@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Database, ChevronDown, ChevronUp, Search, AlertTriangle } from 'lucide-react';
+import { Database, ChevronDown, ChevronUp } from 'lucide-react';
 import { IResult } from '@/types/decision';
 import { useI18nUI } from '@/contexts/I18nUIContext';
-import ValidatedLink from '@/components/ValidatedLink';
 import { LinkVerifierService } from '@/services/linkVerifierService';
 
 interface DataAccuracyIndicatorProps {
@@ -31,6 +30,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
   const [isSourcesExpanded, setIsSourcesExpanded] = useState(false);
   const [verifiedSources, setVerifiedSources] = useState<VerifiedSource[]>([]);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [displayedSourceCount, setDisplayedSourceCount] = useState(0);
 
   // Helper functions for date formatting
   const formatDateOnly = (timestamp: number | string | undefined) => {
@@ -83,7 +83,18 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
   };
   
   const allSources = getAllSources();
-  const sourceCount = allSources.length;
+  
+  // Update displayed source count when verification completes
+  useEffect(() => {
+    if (verifiedSources.length === 0) {
+      setDisplayedSourceCount(allSources.length);
+    } else {
+      const validCount = verifiedSources.filter(source => 
+        ['valid', 'redirect'].includes(source.status || 'valid')
+      ).length;
+      setDisplayedSourceCount(validCount);
+    }
+  }, [verifiedSources, allSources.length]);
 
   // Verify sources when expanded
   const handleSourcesExpand = async (expanded: boolean) => {
@@ -184,7 +195,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                   className="cursor-pointer flex items-center gap-2 hover:bg-muted w-fit"
                 >
                   <Database className="h-3 w-3" />
-                  {sourceCount} {sourceCount > 1 ? t('dataAccuracy.sources.other') : t('dataAccuracy.sources.one')}
+                   {displayedSourceCount} {displayedSourceCount > 1 ? t('dataAccuracy.sources.other') : t('dataAccuracy.sources.one')}
                   {isSourcesExpanded ? (
                     <ChevronUp className="h-3 w-3" />
                   ) : (
@@ -236,7 +247,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                 className="flex-shrink-0 cursor-pointer flex items-center gap-2 hover:bg-muted"
               >
                 <Database className="h-3 w-3" />
-                {sourceCount} {sourceCount > 1 ? t('dataAccuracy.sources.other') : t('dataAccuracy.sources.one')}
+                {displayedSourceCount} {displayedSourceCount > 1 ? t('dataAccuracy.sources.other') : t('dataAccuracy.sources.one')}
                 {isSourcesExpanded ? (
                   <ChevronUp className="h-3 w-3" />
                 ) : (
@@ -254,66 +265,29 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
               ) : isVerifying ? (
                 <div className="text-xs text-muted-foreground">Vérification des sources...</div>
               ) : (
-                (verifiedSources.length > 0 ? verifiedSources : allSources).map((source, index) => {
-                  const verified = verifiedSources[index];
-                  const needsFallback = verified?.status && ['invalid', 'timeout'].includes(verified.status);
-                  
-                  return (
-                    <div key={index} className="text-xs flex items-center gap-2">
-                      <ValidatedLink
-                        link={{
-                          url: source.url,
-                          title: source.title || '',
-                          description: ''
-                        }}
-                        className="text-primary hover:underline flex items-center gap-1 flex-1"
-                      />
-                      
-                      {verified?.status && (
-                        <div className="flex items-center gap-1">
-                          {verified.status === 'redirect' && (
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Badge variant="outline" className="h-4 px-1 text-[10px]">
-                                  <ChevronDown className="h-2 w-2" />
-                                </Badge>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Lien redirigé</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                          
-                          {needsFallback && (
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Badge variant="outline" className="h-4 px-1 text-[10px] bg-orange-50 text-orange-700 border-orange-200">
-                                  <Search className="h-2 w-2" />
-                                </Badge>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Lien original indisponible → recherche sur le site</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                          
-                          {verified.status === 'invalid' && (
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Badge variant="outline" className="h-4 px-1 text-[10px] bg-red-50 text-red-700 border-red-200">
-                                  <AlertTriangle className="h-2 w-2" />
-                                </Badge>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Source non accessible</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
+                (verifiedSources.length > 0 ? verifiedSources : allSources)
+                  .filter(source => {
+                    const verified = verifiedSources.find(v => v.url === source.url);
+                    return !verified || ['valid', 'redirect'].includes(verified.status || 'valid');
+                  })
+                  .map((source, index) => {
+                    const verified = verifiedSources.find(v => v.url === source.url);
+                    const finalUrl = verified?.finalUrl || source.url;
+                    
+                    return (
+                      <div key={index} className="text-xs">
+                        <a 
+                          href={finalUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline flex items-center gap-1"
+                        >
+                          <Database className="h-3 w-3" />
+                          {source.title || (finalUrl.length > 50 ? `${finalUrl.substring(0, 50)}...` : finalUrl)}
+                        </a>
+                      </div>
+                    );
+                  })
               )}
             </div>
           </CollapsibleContent>
