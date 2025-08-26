@@ -262,24 +262,24 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
-{t('history.filter')}
+              {t('history.searchBar.filter')}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-64">
             <div className="p-2 space-y-3">
               {/* Sélection de catégorie */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Catégorie</label>
+                <label className="text-sm font-medium">{t('history.searchBar.categoryLabel')}</label>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Catégorie" />
+                    <SelectValue placeholder={t('history.searchBar.categoryLabel')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t('history.allCategories')}</SelectItem>
+                    <SelectItem value="all">{t('history.searchBar.allCategories')}</SelectItem>
                     <SelectItem value="uncategorized">
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">
-                          Non catégorisées
+                          {t('history.searchBar.uncategorized')}
                         </Badge>
                         <span className="text-muted-foreground">({categoryCounts.uncategorized || 0})</span>
                       </div>
@@ -289,7 +289,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
                         <div className="flex items-center justify-between w-full gap-2">
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary" className="text-xs">
-                              {category.name}
+                              {getCategoryLabel(category.id, t, category.name)}
                             </Badge>
                           </div>
                           <span className="text-muted-foreground">({categoryCounts[category.id] || 0})</span>
@@ -302,17 +302,17 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
 
               {/* Sélection du tri */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Trier par</label>
+                <label className="text-sm font-medium">{t('history.searchBar.sortBy')}</label>
                 <Select value={sortBy} onValueChange={(value: 'date' | 'category') => setSortBy(value)}>
                   <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="date">
-                      Par date
+                      {t('history.searchBar.sort.date')}
                     </SelectItem>
                     <SelectItem value="category">
-                      Par catégorie
+                      {t('history.searchBar.sort.category')}
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -326,28 +326,28 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
               <MoreHorizontal className="h-4 w-4 mr-2" />
-              Plus
+              {t('history.searchBar.more')}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 <FileDown className="mr-2 h-4 w-4" />
-                <span>{t('history.export')}</span>
+                <span>{t('history.searchBar.export')}</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
                 <DropdownMenuItem onClick={exportToPDF}>
                   <FileText className="mr-2 h-4 w-4" />
-                  <span>Exporter en PDF</span>
+                  <span>{t('history.searchBar.exportPdf')}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={exportToJSON}>
                   <Download className="mr-2 h-4 w-4" />
-                  <span>Exporter en JSON</span>
+                  <span>{t('history.searchBar.exportJson')}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={copyToClipboard}>
                   <FileText className="mr-2 h-4 w-4" />
-                  <span>Copier le texte</span>
+                  <span>{t('history.searchBar.copyText')}</span>
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
@@ -356,19 +356,19 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
               <AlertDialogTrigger asChild>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Tout effacer
+                  {t('history.searchBar.clearAll')}
                 </DropdownMenuItem>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                  <AlertDialogTitle>{t('history.searchBar.confirm.title')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Cette action est irréversible et supprimera tout votre historique de décisions.
+                    {t('history.searchBar.confirm.desc')}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Annuler</AlertDialogCancel>
-                  <AlertDialogAction onClick={onClear}>Confirmer</AlertDialogAction>
+                  <AlertDialogCancel>{t('history.searchBar.confirm.cancel')}</AlertDialogCancel>
+                  <AlertDialogAction onClick={onClear}>{t('history.searchBar.confirm.ok')}</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>

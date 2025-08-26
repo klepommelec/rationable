@@ -254,7 +254,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
         </Table>
       </div>
       
-      <div className="text-xs text-muted-foreground text-center">
+      <div className="text-xs text-muted-foreground text-center sr-only">
         {t('decision.comparisonTableCaption').replace('{count}', sortedOptions.length.toString())}
       </div>
     </div>;

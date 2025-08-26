@@ -2,6 +2,7 @@
 import React from 'react';
 import { ExternalLink } from 'lucide-react';
 import { IYouTubeVideo } from '@/types/decision';
+import { handleExternalLinkClick } from '@/utils/navigation';
 
 interface YouTubeVideoCardProps {
   video: IYouTubeVideo;
@@ -14,6 +15,7 @@ const YouTubeVideoCard: React.FC<YouTubeVideoCardProps> = ({ video }) => {
       target="_blank"
       rel="noopener noreferrer"
       className="group block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
+      onClick={(e) => handleExternalLinkClick(e, video.url)}
     >
       <div className="aspect-video relative overflow-hidden">
         <img

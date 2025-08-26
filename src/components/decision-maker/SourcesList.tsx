@@ -2,7 +2,7 @@
 import React from 'react';
 import { ExternalLink, Globe } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import ValidatedLink from '@/components/ValidatedLink';
+import { handleExternalLinkClick } from '@/utils/navigation';
 
 interface SourcesListProps {
   sources: string[];
@@ -49,6 +49,7 @@ export const SourcesList: React.FC<SourcesListProps> = ({
             className="flex items-center gap-2 p-2 rounded-md border border-border/50 hover:border-border transition-colors group bg-card/50 hover:bg-card"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => handleExternalLinkClick(e, source)}
           >
             <ExternalLink className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
             <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors truncate">

@@ -3,6 +3,7 @@ import React from 'react';
 import { ExternalLink, Search } from 'lucide-react';
 import { ILink } from '@/types/decision';
 import { I18nService } from '@/services/i18nService';
+import { handleExternalLinkClick } from '@/utils/navigation';
 
 interface ValidatedLinkProps {
   link: ILink;
@@ -366,6 +367,7 @@ const ValidatedLink: React.FC<ValidatedLinkProps> = ({
       rel="noopener noreferrer" 
       className={className}
       title={isSearchUrl ? `${getActionVerb()}: ${link.title}` : link.title}
+      onClick={(e) => handleExternalLinkClick(e, finalUrl)}
     >
       <span className="flex items-center gap-2 truncate flex-1 text-gray-700 dark:text-gray-300">
         {isSearchUrl ? <Search className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-blue-500 dark:text-blue-400" aria-hidden="true" /> : <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-blue-500 dark:text-blue-400" aria-hidden="true" />}
