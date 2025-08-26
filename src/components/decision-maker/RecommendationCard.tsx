@@ -223,7 +223,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
                      {/* Always show search button */}
                      <Button
-                       variant="secondary"
+                       variant="outline"
                        size="sm"
                        onClick={(e) => {
                          const searchLinks = generateOptionSearchLinks(topOption.option, dilemma);
@@ -232,14 +232,14 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                          }
                        }}
                      >
-                       <Search className="h-4 w-4 mr-2" />
+                       <ExternalLink className="h-3 w-3 mr-1" />
                        {t('decision.search')}
                      </Button>
                    </div>
                 ) : (
                   /* Show search button even when no action links */
                   <Button
-                    variant="secondary"
+                    variant="outline"
                     size="sm"
                     onClick={(e) => {
                       const searchLinks = generateOptionSearchLinks(topOption.option, dilemma);
@@ -248,7 +248,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                       }
                     }}
                   >
-                    <Search className="h-4 w-4 mr-2" />
+                    <ExternalLink className="h-3 w-3 mr-1" />
                     {t('decision.search')}
                   </Button>
                 )}
