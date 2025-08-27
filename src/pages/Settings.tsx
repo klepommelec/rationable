@@ -4,9 +4,6 @@ import SettingsSidebar from '@/components/settings/SettingsSidebar';
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import ProfileSettings from '@/components/settings/ProfileSettings';
 import AppearanceSettings from '@/components/settings/AppearanceSettings';
-import NotificationSettings from '@/components/settings/NotificationSettings';
-import AppPreferencesSettings from '@/components/settings/AppPreferencesSettings';
-import DataManagementSettings from '@/components/settings/DataManagementSettings';
 import { WorkspacesSettings } from '@/components/settings/WorkspacesSettings';
 import DocumentsSettings from '@/components/workspace/DocumentsSettings';
 import AdminSettings from '@/components/settings/AdminSettings';
@@ -27,12 +24,6 @@ const Settings = () => {
         return currentWorkspace ? <DocumentsSettings workspaceId={currentWorkspace.id} /> : <div>{t('settings.header.selectWorkspace')}</div>;
       case 'appearance':
         return <AppearanceSettings />;
-      case 'notifications':
-        return <NotificationSettings />;
-      case 'preferences':
-        return <AppPreferencesSettings />;
-      case 'data':
-        return <DataManagementSettings />;
       case 'admin':
         return <AdminSettings />;
       default:
@@ -46,9 +37,6 @@ const Settings = () => {
       workspaces: 'settings.sidebar.workspaces',
       documents: 'settings.sidebar.documents',
       appearance: 'settings.sidebar.appearance',
-      notifications: 'settings.sidebar.notifications',
-      preferences: 'settings.sidebar.preferences',
-      data: 'settings.sidebar.data',
       admin: 'settings.sidebar.admin'
     };
     const titleKey = titleKeys[activeSection as keyof typeof titleKeys];

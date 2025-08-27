@@ -22,21 +22,9 @@ const getSettingsSections = (t: (key: string) => string) => [{
   label: t('settings.sidebar.appearance'),
   icon: Lightbulb
 }, {
-  id: 'notifications',
-  label: t('settings.sidebar.notifications'),
-  icon: Bell
-}, {
-  id: 'preferences',
-  label: t('settings.sidebar.preferences'),
-  icon: Shield
-}, {
   id: 'documents',
   label: t('settings.sidebar.documents'),
   icon: FileText
-}, {
-  id: 'data',
-  label: t('settings.sidebar.data'),
-  icon: Database
 }, {
   id: 'admin',
   label: t('settings.sidebar.admin'),
@@ -78,6 +66,16 @@ const SettingsSidebar = ({
             );
           })}
         </nav>
+      </div>
+      
+      <div className="p-6 px-3 pr-4 border-t border-sidebar-border">
+        <button 
+          onClick={handleSignOut}
+          className="w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>{t('auth.signOut')}</span>
+        </button>
       </div>
     </div>
   );

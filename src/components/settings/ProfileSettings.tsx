@@ -1,21 +1,24 @@
 
 import { useState, useEffect } from 'react';
-import { User, Globe } from 'lucide-react';
+import { User, Globe, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import AvatarUpload from '@/components/AvatarUpload';
 import { I18nService, SupportedLanguage } from '@/services/i18nService';
 import { useI18nUI } from '@/contexts/I18nUIContext';
+import { useDecisionHistory } from '@/hooks/useDecisionHistory';
 
 const ProfileSettings = () => {
   const { user, profile, updateProfile, updateAvatar, deleteAvatar } = useAuth();
   const { toast } = useToast();
   const { t } = useI18nUI();
+  const { clearHistory } = useDecisionHistory();
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>('fr');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -82,6 +85,15 @@ const ProfileSettings = () => {
     });
     // Rechargement pour appliquer la langue partout
     setTimeout(() => window.location.reload(), 100);
+  };
+
+  const handleClearHistory = () => {
+    clearHistory();
+    toast({
+      title: t('settings.data.toast.cleared'),
+      description: t('settings.data.toast.clearedDesc'),
+      variant: "destructive",
+    });
   };
 
   const hasChanges = fullName !== (profile?.full_name || '');
@@ -183,6 +195,33 @@ const ProfileSettings = () => {
             <p className="text-sm text-muted-foreground">
               {t('profile.language.helpText')}
             </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Section Gestion des données */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trash2 className="h-5 w-5" />
+            {t('settings.data.title')}
+          </CardTitle>
+          <CardDescription>
+            {t('settings.data.description')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="font-medium">{t('settings.data.history.title')}</Label>
+              <p className="text-sm text-muted-foreground">
+                {t('settings.data.history.desc')}
+              </p>
+            </div>
+            <Button variant="destructive" size="sm" onClick={handleClearHistory}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              {t('settings.data.clearHistory')}
+            </Button>
           </div>
         </CardContent>
       </Card>
