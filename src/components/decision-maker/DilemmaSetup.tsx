@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { BrainCircuit, Paperclip, X, FileText, Image, ArrowRight, Loader2 } from 'lucide-react';
+import { BrainCircuit, Paperclip, X, FileText, Image, ArrowRight, Loader2, ExternalLink } from 'lucide-react';
 import { DecisionHistory } from '../DecisionHistory';
 import { AnimatedPlaceholder } from '../AnimatedPlaceholder';
 import MainActionButton from './MainActionButton';
@@ -10,6 +10,8 @@ import { UploadedFile } from '../FileUpload';
 import { IDecision } from '@/types/decision';
 import { toast } from "sonner";
 import { useI18nUI } from '@/contexts/I18nUIContext';
+import { Link } from 'react-router-dom';
+import { PERSONAL_TEMPLATES, PROFESSIONAL_TEMPLATES } from '@/data/predefinedTemplates';
 interface DilemmaSetupProps {
   dilemma: string;
   setDilemma: (dilemma: string) => void;
@@ -262,6 +264,50 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     </CardFooter>
                 </Card>
             </div>
+
+            {/* Section Templates */}
+            <Card className="backdrop-blur-sm">
+                <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle className="font-semibold text-2xl">{t('navbar.templates')}</CardTitle>
+                            <CardDescription className="text-muted-foreground">
+                                Utilisez des modèles prêts à l'emploi pour commencer rapidement
+                            </CardDescription>
+                        </div>
+                        <Button asChild variant="outline" size="sm">
+                            <Link to="/templates" className="flex items-center gap-2">
+                                Voir tout
+                                <ExternalLink className="h-4 w-4" />
+                            </Link>
+                        </Button>
+                    </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {[...PERSONAL_TEMPLATES, ...PROFESSIONAL_TEMPLATES].slice(0, 6).map((template) => (
+                            <Button
+                                key={template.id}
+                                variant="outline"
+                                onClick={() => handleTemplateClick({
+                                    name: template.title,
+                                    dilemma: template.decision_data.dilemma
+                                })}
+                                disabled={isLoading || isUpdating || analysisStep !== 'idle'}
+                                className="h-auto p-4 text-left justify-start flex-col items-start gap-2"
+                            >
+                                <div className="flex items-center gap-2 w-full">
+                                    <span className="text-lg">{template.decision_data.emoji}</span>
+                                    <span className="font-medium text-sm truncate">{template.title}</span>
+                                </div>
+                                <span className="text-xs text-muted-foreground line-clamp-2 text-left">
+                                    {template.description}
+                                </span>
+                            </Button>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Historique intégré directement dans la page */}
             <Card className="backdrop-blur-sm">
