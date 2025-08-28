@@ -711,6 +711,8 @@ export interface UITranslations {
     view: string;
     views: string;
     copyLinkButton: string;
+    copyToWorkspace: string;
+    copySuccess: string;
     recommended: string;
     evaluationCriteria: string;
     detailedAnalysis: string;
@@ -1410,6 +1412,8 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       shoppingLinks: '🛒 Liens d\'achat',
       commentsTitle: 'Commentaires sur cette décision',
       commentsPlaceholder: 'Partagez vos réflexions sur cette décision...',
+      copyToWorkspace: 'Copier dans mon workspace',
+      copySuccess: 'Ajouté à votre workspace',
       missingPublicId: 'ID de partage manquant',
       loading: 'Chargement...',
       loadingError: 'Erreur lors du chargement',
@@ -2172,6 +2176,8 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         view: 'view',
         views: 'views',
         copyLinkButton: 'Copy link',
+        copyToWorkspace: 'Copy to workspace',
+        copySuccess: 'Added to your workspace',
         recommended: '✅ Recommended',
         evaluationCriteria: 'Evaluation criteria',
         detailedAnalysis: 'Detailed analysis',

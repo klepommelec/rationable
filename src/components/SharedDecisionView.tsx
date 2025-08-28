@@ -12,11 +12,14 @@ import { CategoryBadge } from './CategorySelector';
 import ValidatedLink from './ValidatedLink';
 import { CommentSection } from './comments/CommentSection';
 import { useI18nUI } from '@/contexts/I18nUIContext';
+import { useDecisionHistory } from '@/hooks/useDecisionHistory';
+import { Plus } from 'lucide-react';
 
 const SharedDecisionView: React.FC = () => {
   const { publicId } = useParams<{ publicId: string }>();
   const navigate = useNavigate();
   const { t, getLocaleTag } = useI18nUI();
+  const { addDecision } = useDecisionHistory();
   const [sharedDecision, setSharedDecision] = useState<SharedDecision | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +56,19 @@ const SharedDecisionView: React.FC = () => {
     } catch (error) {
       toast.error(t('collaboration.linkCopyError'));
     }
+  };
+
+  const copyToWorkspace = () => {
+    if (!sharedDecision) return;
+    
+    const newDecision = {
+      ...sharedDecision.decision_data,
+      id: crypto.randomUUID(),
+      timestamp: Date.now()
+    };
+    
+    addDecision(newDecision);
+    toast.success(t('sharedDecisionView.copySuccess'));
   };
 
   if (loading) {
@@ -116,10 +132,14 @@ const SharedDecisionView: React.FC = () => {
             <Eye className="h-4 w-4" />
             {sharedDecision.view_count} {sharedDecision.view_count === 1 ? t('sharedDecisionView.view') : t('sharedDecisionView.views')}
           </div>
-          <div className="flex justify-center sm:justify-start">
+          <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
             <Button onClick={copyShareLink} variant="ghost" size="sm" className="text-xs px-2 py-1">
               <Share2 className="h-3 w-3 mr-1" />
               {t('sharedDecisionView.copyLinkButton')}
+            </Button>
+            <Button onClick={copyToWorkspace} variant="outline" size="sm" className="text-xs px-2 py-1">
+              <Plus className="h-3 w-3 mr-1" />
+              {t('sharedDecisionView.copyToWorkspace')}
             </Button>
           </div>
         </div>

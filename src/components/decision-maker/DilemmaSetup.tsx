@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import { Link } from 'react-router-dom';
 import { PERSONAL_TEMPLATES, PROFESSIONAL_TEMPLATES } from '@/data/predefinedTemplates';
+import { shareDecision } from '@/services/sharedDecisionService';
 interface DilemmaSetupProps {
   dilemma: string;
   setDilemma: (dilemma: string) => void;
@@ -66,13 +67,17 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
 
   // Afficher seulement les 3 premiers modèles
   const displayedTemplates = templates.slice(0, 3);
-  const handleTemplateClick = (template: {
-    name: string;
-    dilemma: string;
-  }) => {
-    console.log('Template clicked:', template);
-    setDilemma(template.dilemma);
-    applyTemplate(template);
+  const handleOpenTemplate = async (template: any) => {
+    try {
+      const publicId = await shareDecision(template.decision_data);
+      window.open(`/shared/${publicId}`, '_blank');
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('connecté')) {
+        toast.error('Vous devez être connecté pour consulter les templates');
+      } else {
+        toast.error('Erreur lors de l\'ouverture du template');
+      }
+    }
   };
   const handleFileButtonClick = () => {
     fileInputRef.current?.click();
@@ -253,7 +258,11 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
 
                         <div className="space-y-3">
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                {displayedTemplates.map(template => <Button key={template.name} variant="outline" size="sm" onClick={() => handleTemplateClick(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} aria-label={`Utiliser le modèle: ${template.name}`} className="text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-full py-[8px] px-[8px]">
+                                {displayedTemplates.map(template => <Button key={template.name} variant="outline" size="sm" onClick={() => handleOpenTemplate({
+                                    name: template.name,
+                                    dilemma: template.dilemma,
+                                    decision_data: PERSONAL_TEMPLATES.find(t => t.title === template.name)?.decision_data || PROFESSIONAL_TEMPLATES.find(t => t.title === template.name)?.decision_data
+                                })} disabled={isLoading || isUpdating || analysisStep !== 'idle'} aria-label={`Utiliser le modèle: ${template.name}`} className="text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-full py-[8px] px-[8px]">
                                         <span className="truncate text-sm px-[4px] font-medium text-gray-500">{template.name}</span>
                                     </Button>)}
                             </div>
@@ -289,10 +298,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                             <Button
                                 key={template.id}
                                 variant="outline"
-                                onClick={() => handleTemplateClick({
-                                    name: template.title,
-                                    dilemma: template.decision_data.dilemma
-                                })}
+                                onClick={() => handleOpenTemplate(template)}
                                 disabled={isLoading || isUpdating || analysisStep !== 'idle'}
                                 className="h-auto p-4 text-left justify-start flex-col items-start gap-2"
                             >
