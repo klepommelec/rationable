@@ -300,13 +300,13 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 variant="outline"
                                 onClick={() => handleOpenTemplate(template)}
                                 disabled={isLoading || isUpdating || analysisStep !== 'idle'}
-                                className="h-auto p-4 text-left justify-start flex-col items-start gap-2"
+                                className="h-auto p-4 text-left justify-start flex-col items-start gap-2 rounded-lg overflow-hidden"
                             >
-                                <div className="flex items-center gap-2 w-full">
-                                    <span className="text-lg">{template.decision_data.emoji}</span>
+                                <div className="flex items-center gap-2 w-full min-w-0">
+                                    <span className="text-lg shrink-0">{template.decision_data.emoji}</span>
                                     <span className="font-medium text-sm truncate">{template.title}</span>
                                 </div>
-                                <span className="text-xs text-muted-foreground line-clamp-2 text-left">
+                                <span className="text-xs text-muted-foreground line-clamp-2 text-left w-full overflow-hidden">
                                     {template.description}
                                 </span>
                             </Button>
