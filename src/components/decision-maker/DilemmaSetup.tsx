@@ -300,7 +300,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 variant="outline"
                                 onClick={() => handleOpenTemplate(template)}
                                 disabled={isLoading || isUpdating || analysisStep !== 'idle'}
-                                className="min-h-24 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg overflow-hidden"
+                                className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg overflow-hidden"
                             >
                                 <div className="flex items-center gap-2 w-full min-w-0">
                                     <span className="text-lg shrink-0">{template.decision_data.emoji}</span>
