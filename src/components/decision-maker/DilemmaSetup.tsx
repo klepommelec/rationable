@@ -281,12 +281,12 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         <div>
                             <CardTitle className="font-semibold text-2xl">{t('navbar.templates')}</CardTitle>
                             <CardDescription className="text-muted-foreground">
-                                Utilisez des modèles prêts à l'emploi pour commencer rapidement
+                                {t('dilemmaSetup.templates.description')}
                             </CardDescription>
                         </div>
                         <Button asChild variant="outline" size="sm">
                             <Link to="/templates" className="flex items-center gap-2">
-                                Voir tout
+                                {t('dilemmaSetup.templates.viewAll')}
                                 <ExternalLink className="h-4 w-4" />
                             </Link>
                         </Button>
@@ -300,7 +300,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 variant="outline"
                                 onClick={() => handleOpenTemplate(template)}
                                 disabled={isLoading || isUpdating || analysisStep !== 'idle'}
-                                className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg overflow-hidden"
+                                className="h-40 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg overflow-hidden"
                             >
                                 <div className="flex items-center gap-2 w-full min-w-0">
                                     <span className="text-lg shrink-0">{template.decision_data.emoji}</span>

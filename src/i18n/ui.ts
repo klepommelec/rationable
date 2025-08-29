@@ -366,24 +366,28 @@ export interface UITranslations {
     comparisonTableCaption: string;
     seeMoreOptions: string;
   };
-  dilemmaSetup: {
-    hero: {
-      titleLine1: string;
-      brand: string;
-      subtitle: string;
+    dilemmaSetup: {
+      hero: {
+        titleLine1: string;
+        brand: string;
+        subtitle: string;
+      };
+      dropHere: string;
+      attachFile: string;
+      launchAnalysis: string;
+      helpText: string;
+      attachedDocs: string;
+      history: {
+        title: string;
+        description: string;
+      };
+      templates: {
+        description: string;
+        viewAll: string;
+      };
+      analysisStarted: string;
+      fileTooLarge: string;
     };
-    dropHere: string;
-    attachFile: string;
-    launchAnalysis: string;
-    helpText: string;
-    attachedDocs: string;
-    history: {
-      title: string;
-      description: string;
-    };
-    analysisStarted: string;
-    fileTooLarge: string;
-  };
   optionsLoading: {
     title: string;
     subtitle: string;
@@ -1134,6 +1138,10 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         title: 'Historique des décisions',
         description: 'Chargez ou supprimez vos analyses passées.',
       },
+      templates: {
+        description: 'Utilisez des modèles prêts à l\'emploi pour commencer rapidement',
+        viewAll: 'Voir tout',
+      },
       analysisStarted: 'Analyse démarrée !',
       fileTooLarge: 'est trop volumineux (max 10MB)',
     },
@@ -1839,6 +1847,10 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       history: {
         title: 'Decision History',
         description: 'Load or delete your past analyses.',
+      },
+      templates: {
+        description: 'Use ready-to-use templates to get started quickly',
+        viewAll: 'View all',
       },
       analysisStarted: 'Analysis started!',
       fileTooLarge: 'is too large (max 10MB)',
