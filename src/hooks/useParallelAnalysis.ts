@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { ICriterion, IResult } from '@/types/decision';
 import { generateCriteriaWithFallback, generateOptionsWithFallback } from '@/services/enhancedDecisionService';
 import { UploadedFileInfo } from '@/services/fileUploadService';
+import { I18nService } from '@/services/i18nService';
 
 interface UseParallelAnalysisProps {
   setProgressMessage: (message: string) => void;
@@ -39,7 +40,11 @@ export const useParallelAnalysis = ({
       // Phase 1: Génération des critères en parallèle avec upload de fichiers
       console.log('⚡ Starting parallel criteria generation and file processing...');
       
-      const criteriaPromise = generateCriteriaWithFallback(dilemma, files, workspaceId);
+      // Forcer l'utilisation de la langue actuelle de l'interface
+      const currentLanguage = I18nService.getCurrentLanguage();
+      console.log(`🌐 Using forced language: ${currentLanguage}`);
+      
+      const criteriaPromise = generateCriteriaWithFallback(dilemma, files, workspaceId, currentLanguage);
       
       // Attendre la génération des critères (rapide)
       const criteriaResult = await criteriaPromise;
@@ -68,7 +73,7 @@ export const useParallelAnalysis = ({
       console.log('⚡ Starting options generation with criteria...');
       setAnalysisStep('loading-options');
       
-      const result = await generateOptionsWithFallback(dilemma, criteriaObjects, files, workspaceId);
+      const result = await generateOptionsWithFallback(dilemma, criteriaObjects, files, workspaceId, currentLanguage);
       
       console.log('✅ Options generated successfully');
       setResult(result);

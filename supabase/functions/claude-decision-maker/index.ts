@@ -23,7 +23,8 @@ serve(async (req) => {
       criteria = [], 
       realTimeData = null,
       workspaceData = null,
-      model = 'claude-3-5-sonnet-20241022'
+      model = 'claude-3-5-sonnet-20241022',
+      language = 'fr'
     } = await req.json();
 
     if (!anthropicApiKey) {
@@ -40,16 +41,9 @@ serve(async (req) => {
     console.log(`🤖 Using Claude model: ${model}`);
     console.log(`🔑 API Key format: ${anthropicApiKey.substring(0, 10)}...`);
 
-    // Détection de la langue et configuration locale
-    const detectedLanguage = dilemma ? (() => {
-      const lowerText = dilemma.toLowerCase();
-      if (lowerText.match(/\b(le|la|les|et|ou|est|sont|avoir|sera|serait|devrait|pourrait)\b/g)) return 'fr';
-      if (lowerText.match(/\b(el|la|los|las|y|o|es|son|tener|será|sería|debería|podría)\b/g)) return 'es';
-      if (lowerText.match(/\b(il|la|gli|le|e|o|è|sono|avere|sarà|sarebbe|dovrebbe|potrebbe)\b/g)) return 'it';
-      if (lowerText.match(/\b(der|die|das|und|oder|ist|sind|haben|wird|würde|sollte|könnte)\b/g)) return 'de';
-      if (lowerText.match(/\b(the|and|or|is|are|have|will|would|should|could)\b/g)) return 'en';
-      return 'fr'; // default
-    })() : 'fr';
+    // Utiliser la langue forcée depuis le frontend
+    const detectedLanguage = language || 'fr';
+    console.log(`🌐 Language forced from frontend: ${detectedLanguage}`);
 
     const languageConfig = {
       fr: { buyVerb: 'acheter', currency: '€', country: 'France', domains: 'amazon.fr, fnac.com, darty.com, cdiscount.com' },

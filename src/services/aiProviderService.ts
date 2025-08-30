@@ -190,7 +190,7 @@ export class AIProviderService {
     
     // Convertir le prompt en structure compatible Claude
     const mockCriteria = [{ id: '1', name: 'Analysis' }];
-    const result = await makeQuickDecision(request.prompt, mockCriteria);
+    const result = await makeQuickDecision(request.prompt, mockCriteria, request.language);
     
     return result;
   }
