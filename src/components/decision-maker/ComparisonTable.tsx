@@ -10,7 +10,6 @@ import { I18nService } from '@/services/i18nService';
 import { MerchantLogo } from '@/components/MerchantLogo';
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import { handleExternalLinkClick } from '@/utils/navigation';
-
 interface ComparisonTableProps {
   breakdown: IBreakdownItem[];
   dilemma?: string;
@@ -19,7 +18,9 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   breakdown,
   dilemma
 }) => {
-  const { t } = useI18nUI();
+  const {
+    t
+  } = useI18nUI();
   const [actionLinks, setActionLinks] = useState<Record<string, BestLinksResponse | null>>({});
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
   const detectedLanguage = I18nService.getCurrentLanguage();
@@ -33,20 +34,31 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
     const recommendedOption = breakdown[0];
     if (recommendedOption) {
       const optionKey = recommendedOption.option;
-      setLoadingStates(prev => ({ ...prev, [optionKey]: true }));
-
+      setLoadingStates(prev => ({
+        ...prev,
+        [optionKey]: true
+      }));
       firstResultService.getBestLinks({
         optionName: recommendedOption.option,
         dilemma: dilemma,
         language: detectedLanguage,
         vertical: detectedVertical as any
       }).then(result => {
-        setActionLinks(prev => ({ ...prev, [optionKey]: result }));
+        setActionLinks(prev => ({
+          ...prev,
+          [optionKey]: result
+        }));
       }).catch(error => {
         console.error(`Failed to get action links for ${optionKey}:`, error);
-        setActionLinks(prev => ({ ...prev, [optionKey]: null }));
+        setActionLinks(prev => ({
+          ...prev,
+          [optionKey]: null
+        }));
       }).finally(() => {
-        setLoadingStates(prev => ({ ...prev, [optionKey]: false }));
+        setLoadingStates(prev => ({
+          ...prev,
+          [optionKey]: false
+        }));
       });
     }
   }, [breakdown, dilemma, detectedLanguage, detectedVertical]);
@@ -55,8 +67,10 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   const loadActionLinksForOption = async (option: IBreakdownItem) => {
     const optionKey = option.option;
     if (actionLinks[optionKey] !== undefined || loadingStates[optionKey]) return;
-
-    setLoadingStates(prev => ({ ...prev, [optionKey]: true }));
+    setLoadingStates(prev => ({
+      ...prev,
+      [optionKey]: true
+    }));
     try {
       const result = await firstResultService.getBestLinks({
         optionName: option.option,
@@ -64,12 +78,21 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
         language: detectedLanguage,
         vertical: detectedVertical as any
       });
-      setActionLinks(prev => ({ ...prev, [optionKey]: result }));
+      setActionLinks(prev => ({
+        ...prev,
+        [optionKey]: result
+      }));
     } catch (error) {
       console.error(`Failed to get action links for ${optionKey}:`, error);
-      setActionLinks(prev => ({ ...prev, [optionKey]: null }));
+      setActionLinks(prev => ({
+        ...prev,
+        [optionKey]: null
+      }));
     } finally {
-      setLoadingStates(prev => ({ ...prev, [optionKey]: false }));
+      setLoadingStates(prev => ({
+        ...prev,
+        [optionKey]: false
+      }));
     }
   };
   if (!breakdown || breakdown.length === 0) {
@@ -92,123 +115,64 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[280px]">Option</TableHead>
-              <TableHead>{t('decision.advantages')}</TableHead>
-              <TableHead>{t('decision.disadvantages')}</TableHead>
+              <TableHead className="w-[280px] border-r">Option</TableHead>
+              <TableHead className="border-r">{t('decision.advantages')}</TableHead>
+              <TableHead className="border-r">{t('decision.disadvantages')}</TableHead>
               <TableHead className="w-[180px]">{t('decision.learnMore')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedOptions.map((option, index) => {
-              const searchLinks = generateOptionSearchLinks(option.option, dilemma || '');
-              const optionKey = option.option;
-              const optionActionLinks = actionLinks?.[optionKey] || null;
-              const isLoading = loadingStates?.[optionKey] || false;
-              
-              return (
-                 <TableRow 
-                   key={index} 
-                   className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''}
-                   onMouseEnter={() => index > 0 && loadActionLinksForOption(option)}
-                 >
-                   <TableCell className="font-medium align-top">
+            const searchLinks = generateOptionSearchLinks(option.option, dilemma || '');
+            const optionKey = option.option;
+            const optionActionLinks = actionLinks?.[optionKey] || null;
+            const isLoading = loadingStates?.[optionKey] || false;
+            return <TableRow key={index} className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''} onMouseEnter={() => index > 0 && loadActionLinksForOption(option)}>
+                   <TableCell className="font-medium align-top border-r">
                      <div className="flex flex-col gap-3">
-                       {index === 0 && (
-                          <Badge 
-                            variant="default" 
-                            className="bg-green-500 hover:bg-green-600 text-white whitespace-nowrap w-fit"
-                          >
+                       {index === 0 && <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-white whitespace-nowrap w-fit">
                            {t('decision.recommended')}
-                         </Badge>
-                       )}
+                         </Badge>}
                       <span className="text-sm font-medium">
                         {option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
                       </span>
                       
                        {/* Action buttons - only show for recommended option or when loaded */}
                        {(index === 0 || actionLinks[optionKey]) && <div className="mt-2">
-                         {isLoading ? (
-                           <Button variant="secondary" size="sm" disabled className="w-full text-xs h-7">
+                         {isLoading ? <Button variant="secondary" size="sm" disabled className="w-full text-xs h-7">
                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                              {I18nService.getSearchingLabel(detectedLanguage)}
-                           </Button>
-                          ) : optionActionLinks && (optionActionLinks.official || (optionActionLinks.merchants && optionActionLinks.merchants.length > 0) || optionActionLinks.maps) ? (
-                             <div className="flex flex-col gap-2">
+                           </Button> : optionActionLinks && (optionActionLinks.official || optionActionLinks.merchants && optionActionLinks.merchants.length > 0 || optionActionLinks.maps) ? <div className="flex flex-col gap-2">
                                {/* Primary button: Based on action type */}
-                               {optionActionLinks.actionType === 'directions' && optionActionLinks.maps ? (
-                                 <a
-                                   href={optionActionLinks.maps.url}
-                                   target="_blank"
-                                   rel="noopener noreferrer"
-                                 >
-                                   <Button
-                                     variant="outline"
-                                     size="sm"
-                                     className="text-xs max-w-[120px] truncate h-7"
-                                   >
+                               {optionActionLinks.actionType === 'directions' && optionActionLinks.maps ? <a href={optionActionLinks.maps.url} target="_blank" rel="noopener noreferrer">
+                                   <Button variant="outline" size="sm" className="text-xs max-w-[120px] truncate h-7">
                                      <Navigation className="h-3 w-3 mr-1" />
                                      {I18nService.getDirectionsLabel(detectedLanguage)}
                                    </Button>
-                                 </a>
-                               ) : optionActionLinks.official ? (
-                                 <a
-                                   href={optionActionLinks.official.url}
-                                   target="_blank"
-                                   rel="noopener noreferrer"
-                                 >
-                                   <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="text-xs max-w-[120px] truncate h-7"
-                                    >
+                                 </a> : optionActionLinks.official ? <a href={optionActionLinks.official.url} target="_blank" rel="noopener noreferrer">
+                                   <Button variant="outline" size="sm" className="text-xs max-w-[120px] truncate h-7">
                                       <MerchantLogo url={optionActionLinks.official.url} size={14} className="mr-1" />
                                       {I18nService.getOfficialSiteLabel(detectedLanguage)}
                                     </Button>
-                                 </a>
-                               ) : optionActionLinks.merchants?.[0] ? (
-                                 <a
-                                   href={optionActionLinks.merchants[0].url}
-                                   target="_blank"
-                                   rel="noopener noreferrer"
-                                 >
-                                   <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="text-xs max-w-[120px] truncate h-7"
-                                    >
+                                 </a> : optionActionLinks.merchants?.[0] ? <a href={optionActionLinks.merchants[0].url} target="_blank" rel="noopener noreferrer">
+                                   <Button variant="outline" size="sm" className="text-xs max-w-[120px] truncate h-7">
                                       <MerchantLogo url={optionActionLinks.merchants[0].url} size={14} className="mr-1" />
-                                      {optionActionLinks.actionType === 'reserve' ? 
-                                        I18nService.getReserveLabel(detectedLanguage) :
-                                        firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)
-                                      }
+                                      {optionActionLinks.actionType === 'reserve' ? I18nService.getReserveLabel(detectedLanguage) : firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)}
                                     </Button>
-                                 </a>
-                               ) : null}
+                                 </a> : null}
                               
                                {/* Secondary buttons: Merchants */}
-                               {(optionActionLinks.actionType === 'directions' || optionActionLinks.official ? (optionActionLinks.merchants || []) : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => (
-                                  <a
-                                    key={i}
-                                    href={merchant.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    <Button
-                                      variant="secondary"
-                                      size="sm"
-                                      className="text-xs max-w-[120px] truncate h-7"
-                                    >
+                               {(optionActionLinks.actionType === 'directions' || optionActionLinks.official ? optionActionLinks.merchants || [] : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => <a key={i} href={merchant.url} target="_blank" rel="noopener noreferrer">
+                                    <Button variant="secondary" size="sm" className="text-xs max-w-[120px] truncate h-7">
                                       <MerchantLogo url={merchant.url} size={14} className="mr-1" />
                                       {firstResultService.getDomainLabel(merchant.domain)}
                                     </Button>
-                                  </a>
-                               ))}
-                            </div>
-                           ) : null}
+                                  </a>)}
+                            </div> : null}
                        </div>}
                     </div>
                   </TableCell>
-                  <TableCell className="align-top vertical-align-top">
+                  <TableCell className="align-top vertical-align-top border-r">
                     <div className="space-y-1">
                       {option.pros?.slice(0, 3).map((pro, proIndex) => <div key={proIndex} className="flex items-start gap-2 text-sm">
                           <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
@@ -219,7 +183,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                         </p>}
                     </div>
                   </TableCell>
-                  <TableCell className="align-top vertical-align-top">
+                  <TableCell className="align-top vertical-align-top border-r">
                     <div className="space-y-1">
                       {option.cons?.slice(0, 3).map((con, conIndex) => <div key={conIndex} className="flex items-start gap-2 text-sm">
                           <XCircle className="h-3 w-3 text-red-500 mt-0.5 flex-shrink-0" />
@@ -232,23 +196,14 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                   </TableCell>
                   <TableCell className="align-top">
                     <div className="space-y-1">
-                      {searchLinks.slice(0, 2).map((link, i) => (
-                        <Button
-                          key={i}
-                          variant="outline"
-                          size="sm"
-                          className="w-full text-xs"
-                          onClick={(e) => handleExternalLinkClick(e, link.url)}
-                        >
+                      {searchLinks.slice(0, 2).map((link, i) => <Button key={i} variant="outline" size="sm" className="w-full text-xs" onClick={e => handleExternalLinkClick(e, link.url)}>
                           <ExternalLink className="h-3 w-3 mr-1" />
                           {link.title.replace(`"${option.option}"`, '').trim() || t('decision.search')}
-                        </Button>
-                      ))}
+                        </Button>)}
                     </div>
                   </TableCell>
-                </TableRow>
-              );
-            })}
+                </TableRow>;
+          })}
           </TableBody>
         </Table>
       </div>
