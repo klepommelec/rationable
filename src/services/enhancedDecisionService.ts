@@ -110,20 +110,44 @@ export const generateCriteriaWithFallback = async (
 
 ${languagePrompts.criteriaInstruction}
 
-Dilemme: "${dilemma}"${workspaceContext}`;
+${language === 'fr' ? 'Dilemme' : language === 'en' ? 'Dilemma' : language === 'es' ? 'Dilema' : language === 'it' ? 'Dilemma' : 'Dilemma'}: "${dilemma}"${workspaceContext}`;
 
   if (files && files.length > 0) {
+    const attachedDocsText = language === 'fr' ? 'Documents joints à analyser' : 
+                           language === 'en' ? 'Attached documents to analyze' :
+                           language === 'es' ? 'Documentos adjuntos para analizar' :
+                           language === 'it' ? 'Documenti allegati da analizzare' :
+                           'Angehängte Dokumente zur Analyse';
+    
+    const fileText = language === 'fr' ? 'fichier(s)' : 
+                    language === 'en' ? 'file(s)' :
+                    language === 'es' ? 'archivo(s)' :
+                    language === 'it' ? 'file' :
+                    'Datei(en)';
+    
+    const analyzeText = language === 'fr' ? 'Analysez le contenu de ces documents pour mieux comprendre le contexte du dilemme et ajustez les critères en conséquence.' :
+                       language === 'en' ? 'Analyze the content of these documents to better understand the context of the dilemma and adjust the criteria accordingly.' :
+                       language === 'es' ? 'Analiza el contenido de estos documentos para comprender mejor el contexto del dilema y ajusta los criterios en consecuencia.' :
+                       language === 'it' ? 'Analizza il contenuto di questi documenti per comprendere meglio il contesto del dilemma e regola i criteri di conseguenza.' :
+                       'Analysieren Sie den Inhalt dieser Dokumente, um den Kontext des Dilemmas besser zu verstehen und die Kriterien entsprechend anzupassen.';
+    
     prompt += `
 
-Documents joints à analyser (${files.length} fichier(s)) :
+${attachedDocsText} (${files.length} ${fileText}) :
 ${files.map(f => `- ${f.fileName} (${f.fileType})`).join('\n')}
 
-Analysez le contenu de ces documents pour mieux comprendre le contexte du dilemme et ajustez les critères en conséquence.`;
+${analyzeText}`;
   }
+
+  const respondText = language === 'fr' ? 'Répondez UNIQUEMENT avec un objet JSON valide contenant "emoji", "criteria" et "suggestedCategory".' :
+                     language === 'en' ? 'Respond ONLY with a valid JSON object containing "emoji", "criteria" and "suggestedCategory".' :
+                     language === 'es' ? 'Responde ÚNICAMENTE con un objeto JSON válido que contenga "emoji", "criteria" y "suggestedCategory".' :
+                     language === 'it' ? 'Rispondi SOLO con un oggetto JSON valido contenente "emoji", "criteria" e "suggestedCategory".' :
+                     'Antworten Sie NUR mit einem gültigen JSON-Objekt, das "emoji", "criteria" und "suggestedCategory" enthält.';
 
   prompt += `
 
-Répondez UNIQUEMENT avec un objet JSON valide contenant "emoji", "criteria" et "suggestedCategory".
+${respondText}
 
 Exemple de format:
 {
@@ -312,25 +336,55 @@ export const generateOptionsWithFallback = async (
   // Get language-specific prompts
   const languagePrompts = getLanguagePrompts(language);
   
+  const dilemmaText = language === 'fr' ? 'Dilemme' : 
+                     language === 'en' ? 'Dilemma' :
+                     language === 'es' ? 'Dilema' :
+                     language === 'it' ? 'Dilemma' :
+                     'Dilemma';
+  
+  const criteriaText = language === 'fr' ? 'Critères d\'évaluation' :
+                      language === 'en' ? 'Evaluation criteria' :
+                      language === 'es' ? 'Criterios de evaluación' :
+                      language === 'it' ? 'Criteri di valutazione' :
+                      'Bewertungskriterien';
+
   let prompt = `${languagePrompts.systemInstruction}
 
 ${languagePrompts.optionsInstruction}
 
-Dilemma: "${dilemma}"
-Critères d'évaluation: ${criteriaList}${realTimeContext}${workspaceContext}`;
+${dilemmaText}: "${dilemma}"
+${criteriaText}: ${criteriaList}${realTimeContext}${workspaceContext}`;
 
   if (files && files.length > 0) {
+    const attachedDocsText = language === 'fr' ? 'Documents joints à analyser' : 
+                           language === 'en' ? 'Attached documents to analyze' :
+                           language === 'es' ? 'Documentos adjuntos para analizar' :
+                           language === 'it' ? 'Documenti allegati da analizzare' :
+                           'Angehängte Dokumente zur Analyse';
+    
+    const fileText = language === 'fr' ? 'fichier(s)' : 
+                    language === 'en' ? 'file(s)' :
+                    language === 'es' ? 'archivo(s)' :
+                    language === 'it' ? 'file' :
+                    'Datei(en)';
+    
+    const analyzeText = language === 'fr' ? 'Analysez le contenu de ces documents pour enrichir votre analyse et vos recommandations.' :
+                       language === 'en' ? 'Analyze the content of these documents to enrich your analysis and recommendations.' :
+                       language === 'es' ? 'Analiza el contenido de estos documentos para enriquecer tu análisis y recomendaciones.' :
+                       language === 'it' ? 'Analizza il contenuto di questi documenti per arricchire la tua analisi e le tue raccomandazioni.' :
+                       'Analysieren Sie den Inhalt dieser Dokumente, um Ihre Analyse und Empfehlungen zu bereichern.';
+    
     prompt += `
 
-Documents joints à analyser (${files.length} fichier(s)) :
+${attachedDocsText} (${files.length} ${fileText}) :
 ${files.map(f => `- ${f.fileName} (${f.fileType})`).join('\n')}
 
-Analysez le contenu de ces documents pour enrichir votre analyse et vos recommandations.`;
+${analyzeText}`;
   }
 
-  prompt += `
-
-IMPORTANT: Vous DEVEZ générer entre 6 et 8 options distinctes et de qualité avec des scores différents (pas tous identiques).
+  // Create localized response format instructions
+  const responseInstructions = language === 'fr' ? 
+    `IMPORTANT: Vous DEVEZ générer entre 6 et 8 options distinctes et de qualité avec des scores différents (pas tous identiques).
 
 Retournez un objet JSON avec:
 1. "recommendation": La meilleure option recommandée (texte court)
@@ -346,19 +400,95 @@ Retournez un objet JSON avec:
    - "cons": Tableau des inconvénients spécifiques
    - "score": Note sur 100 (VARIEZ les scores: 85-95 pour la meilleure, 70-84 pour les bonnes, 50-69 pour les moyennes)
 
-Exemple de breakdown attendu:
-[
-  {"option": "Tesla Model 3", "pros": ["..."], "cons": ["..."], "score": 88},
-  {"option": "BMW i4", "pros": ["..."], "cons": ["..."], "score": 82},
-  {"option": "Peugeot e-208", "pros": ["..."], "cons": ["..."], "score": 76},
-  {"option": "Renault Zoe", "pros": ["..."], "cons": ["..."], "score": 71},
-  {"option": "Volkswagen ID.3", "pros": ["..."], "cons": ["..."], "score": 69},
-  {"option": "Hyundai Kona Electric", "pros": ["..."], "cons": ["..."], "score": 65}
-]
-
 Générez des options concrètes et pertinentes avec des scores réalistes et variés. Évitez les options génériques sans valeur.
 
-Répondez UNIQUEMENT avec un objet JSON valide.`;
+Répondez UNIQUEMENT avec un objet JSON valide.` :
+    language === 'en' ? 
+    `IMPORTANT: You MUST generate between 6 and 8 distinct quality options with different scores (not all identical).
+
+Return a JSON object with:
+1. "recommendation": The best recommended option (short text)
+2. "description": Detailed explanation of why this option is recommended
+3. "imageQuery": Description to generate an image (in English, very descriptive)
+4. "confidenceLevel": Analysis confidence level (1-100)
+5. "dataFreshness": Freshness of data used ("very-fresh", "fresh", "moderate", "stale")
+6. "infoLinks": Array of 3-5 useful links with "title" and "url" (mandatory)
+7. "shoppingLinks": Array of 2-3 purchase links with "title" and "url" (mandatory)
+8. "breakdown": Array of 6-8 objects with:
+   - "option": Option name (different for each option)
+   - "pros": Array of specific advantages
+   - "cons": Array of specific disadvantages
+   - "score": Score out of 100 (VARY scores: 85-95 for best, 70-84 for good, 50-69 for average)
+
+Generate concrete and relevant options with realistic and varied scores. Avoid generic options without value.
+
+Respond ONLY with a valid JSON object.` :
+    language === 'es' ?
+    `IMPORTANTE: DEBES generar entre 6 y 8 opciones distintas de calidad con puntuaciones diferentes (no todas idénticas).
+
+Devuelve un objeto JSON con:
+1. "recommendation": La mejor opción recomendada (texto corto)
+2. "description": Explicación detallada de por qué se recomienda esta opción
+3. "imageQuery": Descripción para generar una imagen (en inglés, muy descriptiva)
+4. "confidenceLevel": Nivel de confianza del análisis (1-100)
+5. "dataFreshness": Frescura de los datos utilizados ("very-fresh", "fresh", "moderate", "stale")
+6. "infoLinks": Array de 3-5 enlaces útiles con "title" y "url" (obligatorio)
+7. "shoppingLinks": Array de 2-3 enlaces de compra con "title" y "url" (obligatorio)
+8. "breakdown": Array de 6-8 objetos con:
+   - "option": Nombre de la opción (diferente para cada opción)
+   - "pros": Array de ventajas específicas
+   - "cons": Array de desventajas específicas
+   - "score": Puntuación sobre 100 (VARIA las puntuaciones: 85-95 para la mejor, 70-84 para las buenas, 50-69 para las promedio)
+
+Genera opciones concretas y relevantes con puntuaciones realistas y variadas. Evita opciones genéricas sin valor.
+
+Responde ÚNICAMENTE con un objeto JSON válido.` :
+    language === 'it' ?
+    `IMPORTANTE: DEVI generare tra 6 e 8 opzioni distinte di qualità con punteggi diversi (non tutti identici).
+
+Restituisci un oggetto JSON con:
+1. "recommendation": La migliore opzione raccomandata (testo breve)
+2. "description": Spiegazione dettagliata del perché questa opzione è raccomandata
+3. "imageQuery": Descrizione per generare un'immagine (in inglese, molto descrittiva)
+4. "confidenceLevel": Livello di fiducia dell'analisi (1-100)
+5. "dataFreshness": Freschezza dei dati utilizzati ("very-fresh", "fresh", "moderate", "stale")
+6. "infoLinks": Array di 3-5 link utili con "title" e "url" (obbligatorio)
+7. "shoppingLinks": Array di 2-3 link di acquisto con "title" e "url" (obbligatorio)
+8. "breakdown": Array di 6-8 oggetti con:
+   - "option": Nome dell'opzione (diverso per ogni opzione)
+   - "pros": Array di vantaggi specifici
+   - "cons": Array di svantaggi specifici
+   - "score": Punteggio su 100 (VARIA i punteggi: 85-95 per il migliore, 70-84 per i buoni, 50-69 per la media)
+
+Genera opzioni concrete e pertinenti con punteggi realistici e variati. Evita opzioni generiche senza valore.
+
+Rispondi SOLO con un oggetto JSON valido.` :
+    `WICHTIG: Sie MÜSSEN zwischen 6 und 8 unterschiedliche Qualitätsoptionen mit verschiedenen Bewertungen generieren (nicht alle identisch).
+
+Geben Sie ein JSON-Objekt zurück mit:
+1. "recommendation": Die beste empfohlene Option (kurzer Text)
+2. "description": Detaillierte Erklärung, warum diese Option empfohlen wird
+3. "imageQuery": Beschreibung zur Bildgenerierung (auf Englisch, sehr beschreibend)
+4. "confidenceLevel": Vertrauensniveau der Analyse (1-100)
+5. "dataFreshness": Aktualität der verwendeten Daten ("very-fresh", "fresh", "moderate", "stale")
+6. "infoLinks": Array von 3-5 nützlichen Links mit "title" und "url" (obligatorisch)
+7. "shoppingLinks": Array von 2-3 Einkaufslinks mit "title" und "url" (obligatorisch)
+8. "breakdown": Array von 6-8 Objekten mit:
+   - "option": Optionsname (unterschiedlich für jede Option)
+   - "pros": Array spezifischer Vorteile
+   - "cons": Array spezifischer Nachteile
+   - "score": Bewertung von 100 (VARIIEREN Sie die Bewertungen: 85-95 für die beste, 70-84 für gute, 50-69 für durchschnittliche)
+
+Generieren Sie konkrete und relevante Optionen mit realistischen und varierten Bewertungen. Vermeiden Sie generische Optionen ohne Wert.
+
+Antworten Sie NUR mit einem gültigen JSON-Objekt.`;
+
+  // Use the complete localized instruction from languagePrompts
+  prompt += `
+
+${responseInstructions}`;
+
+  // The responseInstructions now contains all the JSON structure requirements in the right language
 
   const request: AIRequest = {
     prompt,
