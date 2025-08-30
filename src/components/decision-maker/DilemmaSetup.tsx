@@ -63,7 +63,9 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isAnalysisStarting, setIsAnalysisStarting] = useState(false);
-  const { t } = useI18nUI();
+  const {
+    t
+  } = useI18nUI();
 
   // Afficher seulement les 3 premiers modèles
   const displayedTemplates = templates.slice(0, 3);
@@ -259,10 +261,10 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         <div className="space-y-3">
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                 {displayedTemplates.map(template => <Button key={template.name} variant="outline" size="sm" onClick={() => handleOpenTemplate({
-                                    name: template.name,
-                                    dilemma: template.dilemma,
-                                    decision_data: PERSONAL_TEMPLATES.find(t => t.title === template.name)?.decision_data || PROFESSIONAL_TEMPLATES.find(t => t.title === template.name)?.decision_data
-                                })} disabled={isLoading || isUpdating || analysisStep !== 'idle'} aria-label={`Utiliser le modèle: ${template.name}`} className="text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-full py-[8px] px-[8px]">
+                name: template.name,
+                dilemma: template.dilemma,
+                decision_data: PERSONAL_TEMPLATES.find(t => t.title === template.name)?.decision_data || PROFESSIONAL_TEMPLATES.find(t => t.title === template.name)?.decision_data
+              })} disabled={isLoading || isUpdating || analysisStep !== 'idle'} aria-label={`Utiliser le modèle: ${template.name}`} className="text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-full py-[8px] px-[8px]">
                                         <span className="truncate text-sm px-[4px] font-medium text-gray-500">{template.name}</span>
                                     </Button>)}
                             </div>
@@ -294,23 +296,15 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                 </CardHeader>
                 <CardContent className="pt-0">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {[...PERSONAL_TEMPLATES, ...PROFESSIONAL_TEMPLATES].slice(0, 6).map((template) => (
-                            <Button
-                                key={template.id}
-                                variant="outline"
-                                onClick={() => handleOpenTemplate(template)}
-                                disabled={isLoading || isUpdating || analysisStep !== 'idle'}
-                                className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal"
-                            >
+                        {[...PERSONAL_TEMPLATES, ...PROFESSIONAL_TEMPLATES].slice(0, 6).map(template => <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal">
                                 <div className="flex items-center gap-2 w-full min-w-0">
                                     <span className="text-lg shrink-0">{template.decision_data.emoji}</span>
-                                    <span className="font-medium text-sm truncate">{template.title}</span>
+                                    <span className="text-sm truncate font-semibold">{template.title}</span>
                                 </div>
                                 <div className="text-xs text-muted-foreground line-clamp-3 text-left w-full leading-relaxed">
                                     {template.description}
                                 </div>
-                            </Button>
-                        ))}
+                            </Button>)}
                     </div>
                 </CardContent>
             </Card>
