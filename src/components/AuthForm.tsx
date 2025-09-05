@@ -125,11 +125,9 @@ const AuthForm: React.FC<AuthFormProps> = ({
           {t('auth.actions.continueWithGoogle')}
         </Button>
         
-        <Link 
-          to="/privacy" 
-          className="block text-center mt-1 font-medium text-gray-500 underline hover:text-gray-700 transition-colors"
-          style={{ fontSize: '11px' }}
-        >
+        <Link to="/privacy" className="block text-center mt-1 font-medium text-gray-500 underline hover:text-gray-700 transition-colors" style={{
+        fontSize: '11px'
+      }}>
           Voir notre politique de confidentialité
         </Link>
         
@@ -162,7 +160,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
               </Button>
             </form>
             
-            <div className="text-center text-sm text-muted-foreground">
+            <div className="text-center text-xs text-muted-foreground">
               {t('auth.toggleText.signUpPrompt')}{' '}
               <button type="button" onClick={() => setActiveTab('signup')} className="text-primary underline hover:text-primary/80">
                 {t('auth.toggleText.signUpLink')}
