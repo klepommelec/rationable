@@ -338,18 +338,20 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                 </CardContent>
             </Card>
 
-            {/* Historique intégré directement dans la page */}
-            <Card className="backdrop-blur-sm">
-                <CardHeader className="pb-4">
-                    <CardTitle className="font-semibold text-2xl">{t('dilemmaSetup.history.title')}</CardTitle>
-                    <CardDescription className="text-muted-foreground">
-                        {t('dilemmaSetup.history.description')}
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                    <DecisionHistory history={history} onLoad={loadDecision} onDelete={deleteDecision} onClear={clearHistory} onClose={() => {}} onUpdateCategory={onUpdateCategory} />
-                </CardContent>
-            </Card>
+            {/* Historique intégré directement dans la page - seulement pour les utilisateurs connectés */}
+            {user && (
+              <Card className="backdrop-blur-sm">
+                  <CardHeader className="pb-4">
+                      <CardTitle className="font-semibold text-2xl">{t('dilemmaSetup.history.title')}</CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                          {t('dilemmaSetup.history.description')}
+                      </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                      <DecisionHistory history={history} onLoad={loadDecision} onDelete={deleteDecision} onClear={clearHistory} onClose={() => {}} onUpdateCategory={onUpdateCategory} />
+                  </CardContent>
+              </Card>
+            )}
         </div>;
 };
 export default DilemmaSetup;
