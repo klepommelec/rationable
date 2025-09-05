@@ -138,7 +138,7 @@ export const CriteriaManager = ({
           </SortableContext>
         </DndContext>
         
-        <div className="flex gap-2">
+        <div className="flex justify-between items-center gap-2">
           <Button onClick={handleAdd} disabled={isInteractionDisabled || criteria.length >= 8} variant="outline" size="sm">
             <PlusCircle className="h-4 w-4 mr-2" />
             {t('criteria.addButton')}
