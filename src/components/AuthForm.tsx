@@ -127,6 +127,8 @@ const AuthForm: React.FC<AuthFormProps> = ({
         
         <Link 
           to="/privacy" 
+          target="_blank"
+          rel="noopener noreferrer"
           className="block text-center mt-1.5 font-medium text-gray-500 pt-1 underline hover:text-gray-700 transition-colors"
           style={{ fontSize: '11px' }}
         >
