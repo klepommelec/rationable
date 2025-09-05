@@ -2,17 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Button } from '@/components/ui/button';
-import { LogIn } from 'lucide-react';
+import { LogIn, Copy } from 'lucide-react';
 import { getTemplatePreview } from '@/services/templatePreviewService';
 import { IDecision } from '@/types/decision';
 import { I18nUIProvider } from '@/contexts/I18nUIContext';
 import { useI18nUI } from '@/contexts/I18nUIContext';
+import { useAuth } from '@/hooks/useAuth';
+import { useDecisionMakerContext } from '@/contexts/DecisionMakerContext';
+import { useToast } from '@/hooks/use-toast';
+import Navbar from '@/components/Navbar';
 import AnalysisResult from '@/components/decision-maker/AnalysisResult';
 
 const TemplatePreviewContent: React.FC = () => {
   const { previewId } = useParams<{ previewId: string }>();
   const navigate = useNavigate();
   const { t } = useI18nUI();
+  const { user } = useAuth();
+  const { setDilemma, setCriteria, setResult } = useDecisionMakerContext();
+  const { toast } = useToast();
   const [decision, setDecision] = useState<IDecision | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +46,23 @@ const TemplatePreviewContent: React.FC = () => {
     }
   }, [previewId]);
 
+  const handleCopyTemplate = () => {
+    if (!decision) return;
+    
+    // Copy template data to DecisionMaker context
+    setDilemma(decision.dilemma);
+    setCriteria(decision.criteria || []);
+    setResult(decision.result);
+    
+    toast({
+      title: "Template copié !",
+      description: "Le template a été copié dans votre workspace. Vous pouvez maintenant le modifier.",
+    });
+    
+    // Navigate to home page with the copied data
+    navigate('/');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -64,25 +88,29 @@ const TemplatePreviewContent: React.FC = () => {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <div className="min-h-screen bg-background text-foreground">
-        {/* Header avec logo et bouton de connexion */}
-        <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">
-          <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-            <Link to="/" className="flex items-center gap-2 hover:underline transition-all duration-200">
-              <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-9 w-9 rounded-none" />
-              <span className="text-xl font-medium">Rationable</span>
-            </Link>
-            
-            <Button 
-              onClick={() => navigate('/auth')} 
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <LogIn className="h-4 w-4" />
-              Se connecter
-            </Button>
+        {/* Conditionally render header based on authentication */}
+        {user ? (
+          <Navbar />
+        ) : (
+          <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">
+            <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+              <Link to="/" className="flex items-center gap-2 hover:underline transition-all duration-200">
+                <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-9 w-9 rounded-none" />
+                <span className="text-xl font-medium">Rationable</span>
+              </Link>
+              
+              <Button 
+                onClick={() => navigate('/auth')} 
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <LogIn className="h-4 w-4" />
+                Se connecter
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
         
         {/* Content */}
         <div className="container mx-auto px-4 py-8">
@@ -93,12 +121,22 @@ const TemplatePreviewContent: React.FC = () => {
                 <div>
                   <h2 className="font-semibold text-primary">Aperçu du template</h2>
                   <p className="text-sm text-muted-foreground">
-                    Ceci est un exemple d'analyse de décision. Connectez-vous pour créer vos propres analyses.
+                    {user 
+                      ? "Ceci est un exemple d'analyse de décision. Copiez-le dans votre workspace pour l'utiliser."
+                      : "Ceci est un exemple d'analyse de décision. Connectez-vous pour créer vos propres analyses."
+                    }
                   </p>
                 </div>
-                <Button onClick={() => navigate('/auth?tab=signup')} size="sm">
-                  Commencer gratuitement
-                </Button>
+                {user ? (
+                  <Button onClick={handleCopyTemplate} size="sm" className="flex items-center gap-2">
+                    <Copy className="h-4 w-4" />
+                    Copier
+                  </Button>
+                ) : (
+                  <Button onClick={() => navigate('/auth?tab=signup')} size="sm">
+                    Commencer gratuitement
+                  </Button>
+                )}
               </div>
             </div>
 
