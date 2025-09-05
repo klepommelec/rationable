@@ -238,12 +238,7 @@ const DecisionMaker = () => {
 
   const shouldShowCriteria = true;
   return <div className="w-full mx-auto px-4 sm:px-6 lg:px-0">
-      {/* Skip to main content link for screen readers */}
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50" aria-label="Aller au contenu principal">
-        Aller au contenu principal
-      </a>
-
-      <main id="main-content" role="main" aria-label="Assistant de décision">
+      <section aria-label="Assistant de décision">
         {/* Navigation entre analyses */}
         {displayStep !== 'idle' && <AnalysisNavigation analyses={analyses} currentAnalysisIndex={currentAnalysisIndex} onNavigate={handleAnalysisNavigation} />}
 
@@ -291,7 +286,7 @@ const DecisionMaker = () => {
         {currentDecision && displayStep !== 'idle' && <div className="mt-12 mb-8 border-t pt-8">
             <CommentSection decisionId={currentDecision.id} commentType="general" title={t('comments.section.titleDefault')} placeholder={t('comments.section.placeholderDefault')} />
           </div>}
-      </main>
+      </section>
     </div>;
 };
 export default DecisionMaker;

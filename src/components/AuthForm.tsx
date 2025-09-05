@@ -142,13 +142,13 @@ const AuthForm: React.FC<AuthFormProps> = ({
         
         <Link 
           to="/privacy" 
-          className="block text-center mt-1 font-medium text-gray-500 underline hover:text-gray-700 transition-colors" 
+          className="block text-center mt-0.5 font-medium text-gray-500 underline hover:text-gray-700 transition-colors" 
           style={{ fontSize: '11px' }}
         >
           Voir notre politique de confidentialité
         </Link>
         
-        <div className="relative mt-8">
+        <div className="relative mt-12">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />
           </div>
