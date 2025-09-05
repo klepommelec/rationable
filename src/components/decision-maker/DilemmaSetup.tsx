@@ -67,8 +67,12 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   const [isAnalysisStarting, setIsAnalysisStarting] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [pendingAnalysis, setPendingAnalysis] = useState(false);
-  const { t } = useI18nUI();
-  const { user } = useAuth();
+  const {
+    t
+  } = useI18nUI();
+  const {
+    user
+  } = useAuth();
 
   // Afficher seulement les 3 premiers modèles
   const displayedTemplates = templates.slice(0, 3);
@@ -76,7 +80,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     try {
       // Créer un aperçu temporaire du template
       const previewId = shareTemplateForPreview(template.decision_data);
-      
+
       // Ouvrir l'aperçu dans un nouvel onglet
       const previewUrl = `/template-preview/${previewId}`;
       window.open(previewUrl, '_blank');
@@ -174,14 +178,12 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
   const isMainButtonDisabled = dilemma.trim() === '' || isLoading || isAnalysisStarting;
-  
   const handleAnalysisClick = async () => {
     if (!user) {
       setPendingAnalysis(true);
       setAuthModalOpen(true);
       return;
     }
-
     setIsAnalysisStarting(true);
     toast.success(t('dilemmaSetup.analysisStarted'));
     try {
@@ -190,7 +192,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
       setIsAnalysisStarting(false);
     }
   };
-
   const handleAuthSuccess = () => {
     setAuthModalOpen(false);
     if (pendingAnalysis) {
@@ -207,10 +208,10 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                 <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none shadow-none bg-transparent">
                     <CardHeader className="text-center pt-12 px-4 sm:px-6">
         <h2 className="font-bold text-4xl sm:text-4xl md:text-5xl lg:text-6xl">
-                            <div className="font-semibold ">{t('dilemmaSetup.hero.titleLine1')} </div>
+                            <div className="font-bold ">{t('dilemmaSetup.hero.titleLine1')} </div>
                             <div className="flex items-center justify-center gap-3">
-                                <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 xl:h-16 xl:w-16" />
-                                <span className="font-semibold ">{t('dilemmaSetup.hero.brand')}</span>
+                                <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-14 w-14 sm:h-10 sm:w-10 lg:h-12 lg:w-12 xl:h-16 xl:w-16" />
+                                <span className="font-bold">{t('dilemmaSetup.hero.brand')}</span>
                             </div>
                         </h2>
                         <CardDescription className="text-muted-foreground text-sm:text-base">{t('dilemmaSetup.hero.subtitle')}</CardDescription>
@@ -219,7 +220,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         <div className="space-y-2">
                             <div className="relative">
                                 <Textarea id="dilemma-input" placeholder="" value={dilemma} onChange={e => setDilemma(e.target.value)} onKeyDown={e => {
-                if ((e.key === 'Enter' && e.ctrlKey) || e.key === 'Enter') {
+                if (e.key === 'Enter' && e.ctrlKey || e.key === 'Enter') {
                   if (!isMainButtonDisabled) {
                     e.preventDefault();
                     handleAnalysisClick();
@@ -299,11 +300,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                 </Card>
             </div>
 
-            <AuthModal 
-              open={authModalOpen}
-              onOpenChange={setAuthModalOpen}
-              onSuccess={handleAuthSuccess}
-            />
+            <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} onSuccess={handleAuthSuccess} />
 
             {/* Section Templates */}
             <Card className="backdrop-blur-sm">
@@ -339,8 +336,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             </Card>
 
             {/* Historique intégré directement dans la page - seulement pour les utilisateurs connectés */}
-            {user && (
-              <Card className="backdrop-blur-sm">
+            {user && <Card className="backdrop-blur-sm">
                   <CardHeader className="pb-4">
                       <CardTitle className="font-semibold text-2xl">{t('dilemmaSetup.history.title')}</CardTitle>
                       <CardDescription className="text-muted-foreground">
@@ -350,8 +346,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                   <CardContent className="pt-0">
                       <DecisionHistory history={history} onLoad={loadDecision} onDelete={deleteDecision} onClear={clearHistory} onClose={() => {}} onUpdateCategory={onUpdateCategory} />
                   </CardContent>
-              </Card>
-            )}
+              </Card>}
         </div>;
 };
 export default DilemmaSetup;
