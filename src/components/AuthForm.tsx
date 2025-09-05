@@ -144,6 +144,10 @@ const AuthForm: React.FC<AuthFormProps> = ({
           {t('auth.actions.continueWithGoogle')}
         </Button>
         
+        <p className="text-[10px] text-muted-foreground/60 text-center mt-1">
+          Données traitées selon notre politique de confidentialité
+        </p>
+        
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />
