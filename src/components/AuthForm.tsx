@@ -99,18 +99,16 @@ const AuthForm: React.FC<AuthFormProps> = ({
   return (
     <>
       <div className="text-center mb-6">
-        <div className="flex items-center justify-center gap-2 mb-4">
+        <div className="flex items-center justify-center mb-4">
           <img 
             src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" 
             alt="Rationable Logo" 
             className="h-8 w-8" 
           />
-          <span className="font-bold text-xl">Rationable</span>
         </div>
-        <h1 className="text-2xl font-bold">{t('auth.title')}</h1>
-        <p className="text-muted-foreground mt-2">
-          {t('auth.description')}
-        </p>
+        <h1 className="text-2xl font-bold">
+          {activeTab === 'signin' ? t('auth.actions.signIn') : t('auth.actions.createAccount')}
+        </h1>
       </div>
 
       {error && (
