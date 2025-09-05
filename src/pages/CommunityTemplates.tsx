@@ -8,6 +8,8 @@ import { useContextualContent } from '@/hooks/useContextualContent';
 import TemplateFilters from '@/components/templates/TemplateFilters';
 import TemplateGrid from '@/components/templates/TemplateGrid';
 import { useI18nUI } from '@/contexts/I18nUIContext';
+import { useAuth } from '@/hooks/useAuth';
+import AuthModal from '@/components/AuthModal';
 
 const CommunityTemplates = () => {
   const [templates, setTemplates] = useState<any[]>([]);
@@ -16,8 +18,10 @@ const CommunityTemplates = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'most_copied'>('newest');
   const [showPredefined, setShowPredefined] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const { context } = useContextualContent();
   const { t } = useI18nUI();
+  const { user } = useAuth();
 
   const loadTemplates = async () => {
     try {
@@ -48,6 +52,12 @@ const CommunityTemplates = () => {
   const handleOpenTemplate = async (template: any) => {
     try {
       console.log('🔄 Opening template:', template.title);
+      
+      if (!user) {
+        // For non-authenticated users, show auth modal
+        setShowAuthModal(true);
+        return;
+      }
       
       // Utiliser directement les données du template avec l'analyse réelle
       const publicId = await shareDecision(template.decision_data);
@@ -121,6 +131,11 @@ const CommunityTemplates = () => {
           userContext={context}
         />
       )}
+
+      <AuthModal 
+        open={showAuthModal} 
+        onOpenChange={setShowAuthModal} 
+      />
     </div>
   );
 };
