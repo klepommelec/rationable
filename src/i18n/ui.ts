@@ -592,6 +592,7 @@ export interface UITranslations {
       other: string;
     };
     noExternalSources: string;
+    viewSources: string;
     unknown: {
       author: string;
       date: string;
@@ -1349,6 +1350,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         other: 'sources',
       },
       noExternalSources: 'Aucune source externe utilisée',
+      viewSources: 'Voir sources',
       unknown: {
         author: 'Auteur inconnu',
         date: 'Date inconnue',
@@ -2104,6 +2106,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         other: 'sources',
       },
       noExternalSources: 'No external sources used',
+      viewSources: 'View sources',
       unknown: {
         author: 'Unknown author',
         date: 'Unknown date',
