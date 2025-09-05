@@ -11,6 +11,7 @@ import TemplatePreview from "./pages/TemplatePreview";
 import CommunityTemplates from "./pages/CommunityTemplates";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
+import Privacy from "./pages/Privacy";
 import { ThemeProvider } from "./components/theme-provider";
 import { AuthProvider } from "./hooks/useAuth";
 import { DecisionMakerProvider } from "./contexts/DecisionMakerContext";
@@ -35,8 +36,9 @@ const App = () => (
                   <Route path="/shared/:publicId" element={<SharedDecision />} />
                   <Route path="/template-preview/:previewId" element={<TemplatePreview />} />
                 <Route element={<Layout />}>
-                  <Route path="/" element={<Index />} />
+                <Route path="/" element={<Index />} />
                   <Route path="/templates" element={<CommunityTemplates />} />
+                  <Route path="/privacy" element={<Privacy />} />
                   <Route path="/settings" element={
                     <ProtectedRoute>
                       <Settings />
