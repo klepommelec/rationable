@@ -25,7 +25,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(defaultTab);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithGoogle } = useAuth();
   const { t } = useI18nUI();
 
   const [signInData, setSignInData] = useState({
@@ -89,6 +89,21 @@ const AuthModal: React.FC<AuthModalProps> = ({
     setLoading(false);
   };
 
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    setError(null);
+    
+    const { error } = await signInWithGoogle();
+    
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else {
+      onOpenChange(false);
+      onSuccess?.();
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -127,6 +142,26 @@ const AuthModal: React.FC<AuthModalProps> = ({
             </TabsList>
             
             <TabsContent value="signin" className="space-y-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="w-full" 
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+              >
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t('auth.actions.continueWithGoogle')}
+              </Button>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">ou</span>
+                </div>
+              </div>
+
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div>
                   <Input
@@ -154,6 +189,26 @@ const AuthModal: React.FC<AuthModalProps> = ({
             </TabsContent>
             
             <TabsContent value="signup" className="space-y-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="w-full" 
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+              >
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t('auth.actions.continueWithGoogle')}
+              </Button>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">ou</span>
+                </div>
+              </div>
+
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div>
                   <Input

@@ -13,6 +13,7 @@ import AvatarUpload from '@/components/AvatarUpload';
 import { I18nService, SupportedLanguage } from '@/services/i18nService';
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import { useDecisionHistory } from '@/hooks/useDecisionHistory';
+import GoogleAccountSettings from './GoogleAccountSettings';
 
 const ProfileSettings = () => {
   const { user, profile, updateProfile, updateAvatar, deleteAvatar } = useAuth();
@@ -225,6 +226,9 @@ const ProfileSettings = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Section Compte Google */}
+      <GoogleAccountSettings />
     </div>
   );
 };

@@ -188,6 +188,9 @@ export interface UITranslations {
       signIn: string;
       signUp: string;
       createAccount: string;
+      continueWithGoogle: string;
+      linkGoogle: string;
+      unlinkGoogle: string;
     };
     errors: {
       passwordsMismatch: string;
@@ -947,6 +950,9 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         signIn: 'Se connecter',
         signUp: 'Créer un compte',
         createAccount: 'Créer un compte',
+        continueWithGoogle: 'Continuer avec Google',
+        linkGoogle: 'Connecter mon compte Google',
+        unlinkGoogle: 'Déconnecter Google',
       },
       errors: {
         passwordsMismatch: 'Les mots de passe ne correspondent pas',
@@ -1704,6 +1710,9 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         signIn: 'Sign In',
         signUp: 'Create Account',
         createAccount: 'Create Account',
+        continueWithGoogle: 'Continue with Google',
+        linkGoogle: 'Connect my Google account',
+        unlinkGoogle: 'Disconnect Google',
       },
       errors: {
         passwordsMismatch: 'Passwords do not match',
