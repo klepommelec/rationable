@@ -144,7 +144,7 @@ export const CriteriaManager = ({
             {t('criteria.addButton')}
           </Button>
           
-          {hasChanges && onUpdateAnalysis && <Button onClick={onUpdateAnalysis} disabled={isInteractionDisabled} variant="default" size="sm" className="bg-cyan-500 hover:bg-cyan-600 text-slate-900">
+          {hasChanges && onUpdateAnalysis && <Button onClick={onUpdateAnalysis} disabled={isInteractionDisabled} variant="default" size="sm" className="bg-black hover:bg-black/90 text-white">
               <RefreshCw className="h-4 w-4 mr-2" />
               {t('criteria.updateAnalysis')}
             </Button>}

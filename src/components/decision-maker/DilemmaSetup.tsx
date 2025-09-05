@@ -221,7 +221,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                     </button>
                                     
                                     {/* Bouton d'analyse avec feedback visuel */}
-                                    {analysisStep === 'idle' && <button type="button" onClick={handleAnalysisClick} disabled={isMainButtonDisabled} aria-label={t('dilemmaSetup.launchAnalysis')} title={t('dilemmaSetup.launchAnalysis')} className="p-2 bg-cyan-500 hover:bg-cyan-600 text-slate-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full hover:scale-105 active:scale-95">
+                                    {analysisStep === 'idle' && <button type="button" onClick={handleAnalysisClick} disabled={isMainButtonDisabled} aria-label={t('dilemmaSetup.launchAnalysis')} title={t('dilemmaSetup.launchAnalysis')} className="p-2 bg-black hover:bg-black/90 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full hover:scale-105 active:scale-95">
                                             {isAnalysisStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
                                         </button>}
                                 </div>
