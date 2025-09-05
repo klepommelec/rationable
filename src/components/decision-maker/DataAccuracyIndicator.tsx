@@ -195,8 +195,9 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                   className="cursor-pointer flex items-center gap-2 hover:bg-muted w-fit"
                  >
                   <Database className="h-3 w-3" />
-                  {verifiedSources.length === 0 && !isVerifying ? 
+                   {!isVerifying && verifiedSources.length === 0 ? 
                     t('dataAccuracy.viewSources') : 
+                    isVerifying ? 'Vérification...' :
                     `${displayedSourceCount} ${displayedSourceCount > 1 ? t('dataAccuracy.sources.other') : t('dataAccuracy.sources.one')}`
                   }
                   {isSourcesExpanded ? (
@@ -250,8 +251,9 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                 className="flex-shrink-0 cursor-pointer flex items-center gap-2 hover:bg-muted"
                >
                 <Database className="h-3 w-3" />
-                {verifiedSources.length === 0 && !isVerifying ? 
+                {!isVerifying && verifiedSources.length === 0 ? 
                   t('dataAccuracy.viewSources') : 
+                  isVerifying ? 'Vérification...' :
                   `${displayedSourceCount} ${displayedSourceCount > 1 ? t('dataAccuracy.sources.other') : t('dataAccuracy.sources.one')}`
                 }
                 {isSourcesExpanded ? (
