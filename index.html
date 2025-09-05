@@ -25,7 +25,31 @@
   </head>
 
   <body>
+    <!-- Static privacy link for Google verification (hidden once React loads) -->
+    <div id="static-privacy" style="position: absolute; bottom: 10px; right: 10px; font-size: 12px; opacity: 0.7;">
+      <a href="https://rationable.ai/privacy" style="color: #666; text-decoration: none;">Politique de Confidentialité</a>
+    </div>
+    
+    <!-- Fallback for no-JS scenarios -->
+    <noscript>
+      <div style="text-align: center; padding: 20px;">
+        <a href="https://rationable.ai/privacy" style="color: #666;">Politique de Confidentialité</a>
+      </div>
+    </noscript>
+    
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Hide static privacy link once React is loaded -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          const staticPrivacy = document.getElementById('static-privacy');
+          if (staticPrivacy) {
+            staticPrivacy.style.display = 'none';
+          }
+        }, 1000);
+      });
+    </script>
   </body>
 </html>

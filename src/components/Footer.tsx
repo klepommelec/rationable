@@ -13,12 +13,12 @@ const Footer = () => {
             © {new Date().getFullYear()} Rationable. {t('footer.allRightsReserved')}
           </p>
           <div className="flex items-center gap-4 text-sm">
-            <Link 
-              to="/privacy" 
+            <a 
+              href="https://rationable.ai/privacy" 
               className="text-muted-foreground hover:text-primary transition-colors"
             >
               Politique de Confidentialité
-            </Link>
+            </a>
           </div>
         </div>
       </div>
