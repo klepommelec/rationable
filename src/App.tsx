@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SharedDecision from "./pages/SharedDecision";
+import TemplatePreview from "./pages/TemplatePreview";
 import CommunityTemplates from "./pages/CommunityTemplates";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
@@ -31,7 +32,8 @@ const App = () => (
               <DecisionMakerProvider>
                 <Routes>
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/shared/:publicId" element={<SharedDecision />} />
+                  <Route path="/shared/:publicId" element={<SharedDecision />} />
+                  <Route path="/template-preview/:previewId" element={<TemplatePreview />} />
                 <Route element={<Layout />}>
                   <Route path="/" element={<Index />} />
                   <Route path="/templates" element={<CommunityTemplates />} />

@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import { Link } from 'react-router-dom';
 import { PERSONAL_TEMPLATES, PROFESSIONAL_TEMPLATES } from '@/data/predefinedTemplates';
-import { shareDecision } from '@/services/sharedDecisionService';
+import { shareTemplateForPreview } from '@/services/templatePreviewService';
 import { useAuth } from '@/hooks/useAuth';
 import AuthModal from '@/components/AuthModal';
 interface DilemmaSetupProps {
@@ -74,14 +74,14 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   const displayedTemplates = templates.slice(0, 3);
   const handleOpenTemplate = async (template: any) => {
     try {
-      const publicId = await shareDecision(template.decision_data);
-      window.open(`/shared/${publicId}`, '_blank');
+      // Créer un aperçu temporaire du template
+      const previewId = shareTemplateForPreview(template.decision_data);
+      
+      // Ouvrir l'aperçu dans un nouvel onglet
+      const previewUrl = `/template-preview/${previewId}`;
+      window.open(previewUrl, '_blank');
     } catch (error) {
-      if (error instanceof Error && error.message.includes('connecté')) {
-        toast.error('Vous devez être connecté pour consulter les templates');
-      } else {
-        toast.error('Erreur lors de l\'ouverture du template');
-      }
+      toast.error('Erreur lors de l\'ouverture du template');
     }
   };
   const handleFileButtonClick = () => {

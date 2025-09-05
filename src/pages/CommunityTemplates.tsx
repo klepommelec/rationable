@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { getCommunityTemplates } from '@/services/communityTemplateService';
-import { shareDecision } from '@/services/sharedDecisionService';
+import { shareTemplateForPreview } from '@/services/templatePreviewService';
 import { PERSONAL_TEMPLATES, PROFESSIONAL_TEMPLATES } from '@/data/predefinedTemplates';
 import { useContextualContent } from '@/hooks/useContextualContent';
 import TemplateFilters from '@/components/templates/TemplateFilters';
@@ -18,10 +18,8 @@ const CommunityTemplates = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'most_copied'>('newest');
   const [showPredefined, setShowPredefined] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const { context } = useContextualContent();
   const { t } = useI18nUI();
-  const { user } = useAuth();
 
   const loadTemplates = async () => {
     try {
@@ -53,19 +51,13 @@ const CommunityTemplates = () => {
     try {
       console.log('🔄 Opening template:', template.title);
       
-      if (!user) {
-        // For non-authenticated users, show auth modal
-        setShowAuthModal(true);
-        return;
-      }
+      // Créer un aperçu temporaire du template
+      const previewId = shareTemplateForPreview(template.decision_data);
       
-      // Utiliser directement les données du template avec l'analyse réelle
-      const publicId = await shareDecision(template.decision_data);
-      
-      // Open the shared decision in a new tab
-      const sharedUrl = `/shared/${publicId}`;
-      console.log('🌐 Opening shared URL:', sharedUrl);
-      window.open(sharedUrl, '_blank');
+      // Ouvrir l'aperçu dans un nouvel onglet
+      const previewUrl = `/template-preview/${previewId}`;
+      console.log('🌐 Opening template preview URL:', previewUrl);
+      window.open(previewUrl, '_blank');
       
     } catch (error) {
       console.error('❌ Error opening template:', error);
@@ -132,10 +124,7 @@ const CommunityTemplates = () => {
         />
       )}
 
-      <AuthModal 
-        open={showAuthModal} 
-        onOpenChange={setShowAuthModal} 
-      />
+      {/* Plus besoin de AuthModal */}
     </div>
   );
 };
