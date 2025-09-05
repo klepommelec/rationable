@@ -19,6 +19,7 @@ import { DecisionMakerProvider } from "./contexts/DecisionMakerContext";
 import { I18nUIProvider } from "./contexts/I18nUIContext";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { AppErrorBoundary } from "./components/core/AppErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -33,22 +34,24 @@ const App = () => (
             <AuthProvider>
               <I18nUIProvider>
                 <DecisionMakerProvider>
-                  <Routes>
-                  <Route path="/auth" element={<Auth />} />
-                    <Route path="/shared/:publicId" element={<SharedDecision />} />
-                    <Route path="/template-preview/:previewId" element={<TemplatePreview />} />
-                  <Route element={<Layout />}>
-                  <Route path="/" element={<Index />} />
-                    <Route path="/templates" element={<CommunityTemplates />} />
-                    <Route path="/privacy" element={<Privacy />} />
-                    <Route path="/settings" element={
-                      <ProtectedRoute>
-                        <Settings />
-                      </ProtectedRoute>
-                    } />
-                  </Route>
-                  <Route path="*" element={<NotFound />} />
-                  </Routes>
+                  <AppErrorBoundary>
+                    <Routes>
+                    <Route path="/auth" element={<Auth />} />
+                      <Route path="/shared/:publicId" element={<SharedDecision />} />
+                      <Route path="/template-preview/:previewId" element={<TemplatePreview />} />
+                    <Route element={<Layout />}>
+                    <Route path="/" element={<Index />} />
+                      <Route path="/templates" element={<CommunityTemplates />} />
+                      <Route path="/privacy" element={<Privacy />} />
+                      <Route path="/settings" element={
+                        <ProtectedRoute>
+                          <Settings />
+                        </ProtectedRoute>
+                      } />
+                    </Route>
+                    <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </AppErrorBoundary>
                 </DecisionMakerProvider>
               </I18nUIProvider>
             </AuthProvider>

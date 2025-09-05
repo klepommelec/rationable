@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -124,15 +125,13 @@ const AuthForm: React.FC<AuthFormProps> = ({
           {t('auth.actions.continueWithGoogle')}
         </Button>
         
-        <a 
-          href="/privacy" 
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link 
+          to="/privacy" 
           className="block text-center mt-1 font-medium text-gray-500 underline hover:text-gray-700 transition-colors"
           style={{ fontSize: '11px' }}
         >
           Voir notre politique de confidentialité
-        </a>
+        </Link>
         
         <div className="relative mt-8">
           <div className="absolute inset-0 flex items-center">
