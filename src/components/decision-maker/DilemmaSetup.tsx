@@ -13,6 +13,8 @@ import { useI18nUI } from '@/contexts/I18nUIContext';
 import { Link } from 'react-router-dom';
 import { PERSONAL_TEMPLATES, PROFESSIONAL_TEMPLATES } from '@/data/predefinedTemplates';
 import { shareDecision } from '@/services/sharedDecisionService';
+import { useAuth } from '@/hooks/useAuth';
+import AuthModal from '@/components/AuthModal';
 interface DilemmaSetupProps {
   dilemma: string;
   setDilemma: (dilemma: string) => void;
@@ -63,9 +65,10 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isAnalysisStarting, setIsAnalysisStarting] = useState(false);
-  const {
-    t
-  } = useI18nUI();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [pendingAnalysis, setPendingAnalysis] = useState(false);
+  const { t } = useI18nUI();
+  const { user } = useAuth();
 
   // Afficher seulement les 3 premiers modèles
   const displayedTemplates = templates.slice(0, 3);
@@ -171,13 +174,31 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
   const isMainButtonDisabled = dilemma.trim() === '' || isLoading || isAnalysisStarting;
+  
   const handleAnalysisClick = async () => {
+    if (!user) {
+      setPendingAnalysis(true);
+      setAuthModalOpen(true);
+      return;
+    }
+
     setIsAnalysisStarting(true);
     toast.success(t('dilemmaSetup.analysisStarted'));
     try {
       await handleStartAnalysis();
     } finally {
       setIsAnalysisStarting(false);
+    }
+  };
+
+  const handleAuthSuccess = () => {
+    setAuthModalOpen(false);
+    if (pendingAnalysis) {
+      setPendingAnalysis(false);
+      // Auto-launch analysis after successful auth
+      setTimeout(() => {
+        handleAnalysisClick();
+      }, 100);
     }
   };
   return <div className="mx-auto space-y-6">
@@ -198,9 +219,11 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         <div className="space-y-2">
                             <div className="relative">
                                 <Textarea id="dilemma-input" placeholder="" value={dilemma} onChange={e => setDilemma(e.target.value)} onKeyDown={e => {
-                if (e.key === 'Enter' && e.ctrlKey && !isMainButtonDisabled) {
-                  e.preventDefault();
-                  handleAnalysisClick();
+                if ((e.key === 'Enter' && e.ctrlKey) || e.key === 'Enter') {
+                  if (!isMainButtonDisabled) {
+                    e.preventDefault();
+                    handleAnalysisClick();
+                  }
                 }
               }} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`pulsing-glow focus:ring-cyan-500 text-base md:text-sm h-[160px] resize-none pr-20 transition-colors dark:bg-card ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-over' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
                                 {dilemma === '' && !isDragOver && <div className="absolute top-2 left-3 pointer-events-none">
@@ -270,11 +293,17 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                             </div>
                         </div>
                     </CardContent>
-                    <CardFooter className="flex flex-col gap-4 px-4 sm:px-6">
-                        <MainActionButton analysisStep={analysisStep} handleStartAnalysis={handleStartAnalysis} isMainButtonDisabled={isMainButtonDisabled} progress={progress} progressMessage={progressMessage} />
+                     <CardFooter className="flex flex-col gap-4 px-4 sm:px-6">
+                        <MainActionButton analysisStep={analysisStep} handleStartAnalysis={handleAnalysisClick} isMainButtonDisabled={isMainButtonDisabled} progress={progress} progressMessage={progressMessage} />
                     </CardFooter>
                 </Card>
             </div>
+
+            <AuthModal 
+              open={authModalOpen}
+              onOpenChange={setAuthModalOpen}
+              onSuccess={handleAuthSuccess}
+            />
 
             {/* Section Templates */}
             <Card className="backdrop-blur-sm">

@@ -33,11 +33,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/shared/:publicId" element={<SharedDecision />} />
                 <Route element={<Layout />}>
-                  <Route path="/" element={
-                    <ProtectedRoute>
-                      <Index />
-                    </ProtectedRoute>
-                  } />
+                  <Route path="/" element={<Index />} />
                   <Route path="/templates" element={
                     <ProtectedRoute>
                       <CommunityTemplates />

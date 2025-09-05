@@ -133,11 +133,20 @@ const Navbar: React.FC = () => {
               
               {/* Bouton partager en dernier pour les décisions en cours */}
               {currentDecision && <ShareButton decision={currentDecision} />}
-            </> : <Link to="/auth">
-              <Button variant="default" size="sm">
-                {t('navbar.signIn')}
-              </Button>
-            </Link>}
+            </> : 
+            <div className="flex items-center gap-2">
+              <Link to="/auth">
+                <Button variant="ghost" size="sm">
+                  {t('navbar.signIn')}
+                </Button>
+              </Link>
+              <Link to="/auth?tab=signup">
+                <Button variant="default" size="sm">
+                  {t('navbar.getStarted')}
+                </Button>
+              </Link>
+            </div>
+          }
         </div>
       </div>
     </header>;

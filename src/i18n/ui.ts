@@ -134,6 +134,7 @@ export interface UITranslations {
     templates: string;
     settings: string;
     signIn: string;
+    getStarted: string;
     signOut: string;
     userFallback: string;
   };
@@ -892,6 +893,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       templates: 'Templates',
       settings: 'Paramètres',
       signIn: 'Se connecter',
+      getStarted: 'Commencer',
       signOut: 'Se déconnecter',
       userFallback: 'Utilisateur',
     },
@@ -1648,6 +1650,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       templates: 'Templates',
       settings: 'Settings',
       signIn: 'Sign In',
+      getStarted: 'Get Started',
       signOut: 'Sign Out',
       userFallback: 'User',
     },

@@ -1,31 +1,32 @@
-
-import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 import { useI18nUI } from '@/contexts/I18nUIContext';
 
-const Auth = () => {
+interface AuthModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  defaultTab?: 'signin' | 'signup';
+  onSuccess?: () => void;
+}
+
+const AuthModal: React.FC<AuthModalProps> = ({ 
+  open, 
+  onOpenChange, 
+  defaultTab = 'signin',
+  onSuccess 
+}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
+  const [activeTab, setActiveTab] = useState(defaultTab);
   const { signIn, signUp } = useAuth();
-  const navigate = useNavigate();
   const { t } = useI18nUI();
-  const [searchParams] = useSearchParams();
-
-  useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab === 'signup') {
-      setActiveTab('signup');
-    }
-  }, [searchParams]);
 
   const [signInData, setSignInData] = useState({
     email: '',
@@ -49,7 +50,8 @@ const Auth = () => {
     if (error) {
       setError(error.message);
     } else {
-      navigate('/');
+      onOpenChange(false);
+      onSuccess?.();
     }
     
     setLoading(false);
@@ -80,15 +82,17 @@ const Auth = () => {
     } else {
       setMessage(t('auth.messages.accountCreated'));
       setSignUpData({ email: '', password: '', fullName: '', confirmPassword: '' });
+      // Auto-switch to signin tab after successful signup
+      setActiveTab('signin');
     }
     
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <img 
               src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" 
@@ -97,21 +101,21 @@ const Auth = () => {
             />
             <span className="font-bold text-xl">Rationable</span>
           </div>
-          <CardTitle>{t('auth.title')}</CardTitle>
-          <CardDescription>
+          <DialogTitle>{t('auth.title')}</DialogTitle>
+          <DialogDescription>
             {t('auth.description')}
-          </CardDescription>
-        </CardHeader>
+          </DialogDescription>
+        </DialogHeader>
         
-        <CardContent>
+        <div className="space-y-4">
           {error && (
-            <Alert variant="destructive" className="mb-4">
+            <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
           
           {message && (
-            <Alert className="mb-4">
+            <Alert>
               <AlertDescription>{message}</AlertDescription>
             </Alert>
           )}
@@ -194,10 +198,10 @@ const Auth = () => {
               </form>
             </TabsContent>
           </Tabs>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
-export default Auth;
+export default AuthModal;
