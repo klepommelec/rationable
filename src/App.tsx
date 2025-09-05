@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SharedDecision from "./pages/SharedDecision";
@@ -22,38 +23,40 @@ import ProtectedRoute from "./components/ProtectedRoute";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthProvider>
-            <I18nUIProvider>
-              <DecisionMakerProvider>
-                <Routes>
-                <Route path="/auth" element={<Auth />} />
-                  <Route path="/shared/:publicId" element={<SharedDecision />} />
-                  <Route path="/template-preview/:previewId" element={<TemplatePreview />} />
-                <Route element={<Layout />}>
-                <Route path="/" element={<Index />} />
-                  <Route path="/templates" element={<CommunityTemplates />} />
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/settings" element={
-                    <ProtectedRoute>
-                      <Settings />
-                    </ProtectedRoute>
-                  } />
-                </Route>
-                <Route path="*" element={<NotFound />} />
-                </Routes>
-              </DecisionMakerProvider>
-            </I18nUIProvider>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ThemeProvider>
+  <HelmetProvider>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <I18nUIProvider>
+                <DecisionMakerProvider>
+                  <Routes>
+                  <Route path="/auth" element={<Auth />} />
+                    <Route path="/shared/:publicId" element={<SharedDecision />} />
+                    <Route path="/template-preview/:previewId" element={<TemplatePreview />} />
+                  <Route element={<Layout />}>
+                  <Route path="/" element={<Index />} />
+                    <Route path="/templates" element={<CommunityTemplates />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/settings" element={
+                      <ProtectedRoute>
+                        <Settings />
+                      </ProtectedRoute>
+                    } />
+                  </Route>
+                  <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </DecisionMakerProvider>
+              </I18nUIProvider>
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
+  </HelmetProvider>
 );
 
 export default App;
