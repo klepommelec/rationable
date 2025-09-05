@@ -172,14 +172,16 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
             </div>
           </Card>
         ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsAddingComment(true)}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            {t('comments.section.addButton')}
-          </Button>
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAddingComment(true)}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {t('comments.section.addButton')}
+            </Button>
+          </div>
         )}
       </div>
     </div>
