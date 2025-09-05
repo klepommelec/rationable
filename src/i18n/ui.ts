@@ -192,6 +192,12 @@ export interface UITranslations {
       linkGoogle: string;
       unlinkGoogle: string;
     };
+    toggleText: {
+      signInPrompt: string;
+      signInLink: string;
+      signUpPrompt: string;
+      signUpLink: string;
+    };
     errors: {
       passwordsMismatch: string;
       passwordTooShort: string;
@@ -954,6 +960,12 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         linkGoogle: 'Connecter mon compte Google',
         unlinkGoogle: 'Déconnecter Google',
       },
+      toggleText: {
+        signInPrompt: 'Vous avez déjà un compte ?',
+        signInLink: 'Se connecter',
+        signUpPrompt: 'Vous n\'avez pas de compte ?',
+        signUpLink: 'Créer votre compte',
+      },
       errors: {
         passwordsMismatch: 'Les mots de passe ne correspondent pas',
         passwordTooShort: 'Le mot de passe doit contenir au moins 6 caractères',
@@ -1713,6 +1725,12 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         continueWithGoogle: 'Continue with Google',
         linkGoogle: 'Connect my Google account',
         unlinkGoogle: 'Disconnect Google',
+      },
+      toggleText: {
+        signInPrompt: 'Already have an account?',
+        signInLink: 'Log in',
+        signUpPrompt: 'Don\'t have an account?',
+        signUpLink: 'Create your account',
       },
       errors: {
         passwordsMismatch: 'Passwords do not match',
