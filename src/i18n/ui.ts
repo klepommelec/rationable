@@ -260,6 +260,8 @@ export interface UITranslations {
     list: {
       emptyMessage: string;
       seeMore: string;
+      emptyTitle: string;
+      emptyDescription: string;
     };
     item: {
       share: string;
@@ -1029,6 +1031,8 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       list: {
         emptyMessage: 'Aucune décision ne correspond aux critères de recherche.',
         seeMore: 'Voir plus',
+        emptyTitle: 'Aucun historique',
+        emptyDescription: 'Vos décisions analysées apparaîtront ici.',
       },
       item: {
         share: 'Partager',
@@ -1796,6 +1800,8 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       list: {
         emptyMessage: 'No decisions match the search criteria.',
         seeMore: 'See more',
+        emptyTitle: 'No History',
+        emptyDescription: 'Your analyzed decisions will appear here.',
       },
       item: {
         share: 'Share',
