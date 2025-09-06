@@ -1,63 +1,100 @@
 import { IDecision } from '@/types/decision';
+import { supabase } from '@/integrations/supabase/client';
 
 // Service pour prévisualiser les templates sans authentification
-// Utilise le localStorage pour stocker temporairement les données du template
+// Utilise Supabase pour stocker temporairement les données du template
 
-const TEMPLATE_PREVIEW_KEY = 'template_preview_data';
+const CLIENT_ID_KEY = 'template_client_id';
 
-export const shareTemplateForPreview = (templateData: IDecision): string => {
-  // Générer un ID unique pour cette preview
-  const previewId = `template_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+// Générer ou récupérer un client ID pour le rate limiting
+const getClientId = (): string => {
+  let clientId = localStorage.getItem(CLIENT_ID_KEY);
+  if (!clientId) {
+    clientId = `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem(CLIENT_ID_KEY, clientId);
+  }
+  return clientId;
+};
+
+// Vérifier le rate limiting (10 previews par 10 minutes par client)
+const checkRateLimit = async (clientId: string): Promise<boolean> => {
+  const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
   
-  // Stocker les données dans le localStorage avec l'ID
-  const previewData = {
-    id: previewId,
-    data: templateData,
-    timestamp: Date.now(),
-    expires: Date.now() + (24 * 60 * 60 * 1000) // Expire dans 24h
-  };
-  
-  // Récupérer les previews existantes et nettoyer les expirées
-  const existingPreviews = getStoredPreviews();
-  const validPreviews = existingPreviews.filter(p => p.expires > Date.now());
-  
-  // Ajouter la nouvelle preview
-  validPreviews.push(previewData);
-  
-  // Limiter à 10 previews max pour éviter de surcharger le localStorage
-  if (validPreviews.length > 10) {
-    validPreviews.splice(0, validPreviews.length - 10);
+  const { count, error } = await supabase
+    .from('template_previews')
+    .select('id', { count: 'exact', head: true })
+    .eq('client_id', clientId)
+    .gte('created_at', tenMinutesAgo);
+    
+  if (error) {
+    console.error('Error checking rate limit:', error);
+    return true; // En cas d'erreur, autoriser
   }
   
-  localStorage.setItem(TEMPLATE_PREVIEW_KEY, JSON.stringify(validPreviews));
-  
-  return previewId;
+  return (count || 0) < 10;
 };
 
-export const getTemplatePreview = (previewId: string): IDecision | null => {
-  const previews = getStoredPreviews();
-  const preview = previews.find(p => p.id === previewId && p.expires > Date.now());
-  
-  return preview ? preview.data : null;
-};
-
-const getStoredPreviews = (): Array<{
-  id: string;
-  data: IDecision;
-  timestamp: number;
-  expires: number;
-}> => {
+export const shareTemplateForPreview = async (templateData: IDecision): Promise<string | null> => {
   try {
-    const stored = localStorage.getItem(TEMPLATE_PREVIEW_KEY);
-    return stored ? JSON.parse(stored) : [];
+    const clientId = getClientId();
+    
+    // Vérifier le rate limiting
+    const canCreate = await checkRateLimit(clientId);
+    if (!canCreate) {
+      console.warn('Rate limit exceeded for template previews');
+      return null;
+    }
+    
+    // Générer un ID unique pour cette preview
+    const previewId = `template_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Insérer dans Supabase
+    const { error } = await supabase
+      .from('template_previews')
+      .insert({
+        preview_id: previewId,
+        decision_data: templateData as any,
+        client_id: clientId
+      });
+      
+    if (error) {
+      console.error('Error creating template preview:', error);
+      return null;
+    }
+    
+    return previewId;
   } catch (error) {
-    console.error('Error parsing stored template previews:', error);
-    return [];
+    console.error('Error in shareTemplateForPreview:', error);
+    return null;
   }
 };
 
-// Nettoyer les previews expirées
-export const cleanupExpiredPreviews = () => {
-  const validPreviews = getStoredPreviews().filter(p => p.expires > Date.now());
-  localStorage.setItem(TEMPLATE_PREVIEW_KEY, JSON.stringify(validPreviews));
+export const getTemplatePreview = async (previewId: string): Promise<IDecision | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('template_previews')
+      .select('decision_data')
+      .eq('preview_id', previewId)
+      .gt('expires_at', new Date().toISOString())
+      .maybeSingle();
+      
+    if (error) {
+      console.error('Error fetching template preview:', error);
+      return null;
+    }
+    
+    return (data?.decision_data as unknown as IDecision) || null;
+  } catch (error) {
+    console.error('Error in getTemplatePreview:', error);
+    return null;
+  }
+};
+
+// Nettoyer les previews expirées (optionnel, géré automatiquement par la DB)
+export const cleanupExpiredPreviews = async () => {
+  try {
+    await supabase.rpc('cleanup_expired_template_previews');
+  } catch (error) {
+    console.error('Error cleaning up expired previews:', error);
+  }
 };

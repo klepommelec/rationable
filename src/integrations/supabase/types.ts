@@ -223,6 +223,33 @@ export type Database = {
         }
         Relationships: []
       }
+      template_previews: {
+        Row: {
+          client_id: string
+          created_at: string
+          decision_data: Json
+          expires_at: string
+          id: string
+          preview_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          decision_data: Json
+          expires_at?: string
+          id?: string
+          preview_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          decision_data?: Json
+          expires_at?: string
+          id?: string
+          preview_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -386,6 +413,10 @@ export type Database = {
         Returns: boolean
       }
       cleanup_expired_shared_decisions: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      cleanup_expired_template_previews: {
         Args: Record<PropertyKey, never>
         Returns: number
       }

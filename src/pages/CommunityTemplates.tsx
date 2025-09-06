@@ -51,8 +51,13 @@ const CommunityTemplates = () => {
     try {
       console.log('🔄 Opening template:', template.title);
       
-      // Créer un aperçu temporaire du template
-      const previewId = shareTemplateForPreview(template.decision_data);
+      // Créer un aperçu temporaire du template dans Supabase
+      const previewId = await shareTemplateForPreview(template.decision_data);
+      
+      if (!previewId) {
+        toast.error(t('templates.errors.rateLimitError') || 'Limite de création de previews atteinte. Veuillez patienter quelques minutes.');
+        return;
+      }
       
       // Ouvrir l'aperçu dans un nouvel onglet
       const previewUrl = `/template-preview/${previewId}`;

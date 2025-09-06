@@ -25,25 +25,29 @@ const TemplatePreviewContent: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!previewId) {
-      setError('ID de preview manquant');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const templateData = getTemplatePreview(previewId);
-      if (templateData) {
-        setDecision(templateData);
-      } else {
-        setError('Template preview introuvable ou expiré');
+    const loadTemplate = async () => {
+      if (!previewId) {
+        setError('ID de preview manquant');
+        setLoading(false);
+        return;
       }
-    } catch (err) {
-      console.error('Error loading template preview:', err);
-      setError('Erreur lors du chargement du template');
-    } finally {
-      setLoading(false);
-    }
+
+      try {
+        const templateData = await getTemplatePreview(previewId);
+        if (templateData) {
+          setDecision(templateData);
+        } else {
+          setError('Template preview introuvable ou expiré');
+        }
+      } catch (err) {
+        console.error('Error loading template preview:', err);
+        setError('Erreur lors du chargement du template');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTemplate();
   }, [previewId]);
 
   const handleCopyTemplate = () => {
