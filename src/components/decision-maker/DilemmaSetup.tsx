@@ -351,7 +351,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         <div className="space-y-6">
                             {/* Templates personnels */}
                             <div>
-                                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Templates personnels</h3>
+                                <h3 className="text-xs font-medium text-muted-foreground tracking-wide mb-3">Templates personnels</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                     {PERSONAL_TEMPLATES.slice(0, 6).map(template => 
                                         <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal">
@@ -369,7 +369,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                             
                             {/* Templates professionnels */}
                             <div>
-                                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Templates professionnels</h3>
+                                <h3 className="text-xs font-medium text-muted-foreground tracking-wide mb-3">Templates professionnels</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                     {PROFESSIONAL_TEMPLATES.slice(0, 6).map(template => 
                                         <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal">
