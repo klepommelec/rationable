@@ -142,6 +142,68 @@ export interface UITranslations {
     allRightsReserved: string;
     privacyPolicy: string;
   };
+  privacy: {
+    title: string;
+    lastUpdated: string;
+    sections: {
+      dataCollection: {
+        title: string;
+        description: string;
+        item1: string;
+        item2: string;
+        item3: string;
+        item4: string;
+      };
+      dataUsage: {
+        title: string;
+        description: string;
+        item1: string;
+        item2: string;
+        item3: string;
+        item4: string;
+      };
+      dataSharing: {
+        title: string;
+        description: string;
+        item1: string;
+        item2: string;
+        item3: string;
+      };
+      security: {
+        title: string;
+        description: string;
+        item1: string;
+        item2: string;
+        item3: string;
+        item4: string;
+      };
+      rights: {
+        title: string;
+        description: string;
+        item1: string;
+        item2: string;
+        item3: string;
+        item4: string;
+      };
+      cookies: {
+        title: string;
+        description: string;
+      };
+      retention: {
+        title: string;
+        description: string;
+      };
+      contact: {
+        title: string;
+        description: string;
+        email: string;
+      };
+      changes: {
+        title: string;
+        description: string;
+      };
+    };
+  };
   templates: {
     page: {
       title: string;
@@ -913,6 +975,68 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       allRightsReserved: 'Tous droits réservés.',
       privacyPolicy: 'Politique de confidentialité',
     },
+    privacy: {
+      title: 'Politique de Confidentialité',
+      lastUpdated: 'Dernière mise à jour',
+      sections: {
+        dataCollection: {
+          title: '1. Collecte des Données',
+          description: 'Rationable collecte uniquement les données nécessaires au fonctionnement de l\'application :',
+          item1: 'Adresse email (pour l\'authentification)',
+          item2: 'Nom d\'utilisateur (pour personnaliser l\'expérience)',
+          item3: 'Décisions et analyses créées (stockées de manière sécurisée)',
+          item4: 'Données d\'usage anonymisées (pour améliorer le service)'
+        },
+        dataUsage: {
+          title: '2. Utilisation des Données',
+          description: 'Vos données sont utilisées exclusivement pour :',
+          item1: 'Fournir nos services d\'aide à la décision',
+          item2: 'Personnaliser votre expérience utilisateur',
+          item3: 'Assurer la sécurité de votre compte',
+          item4: 'Améliorer nos services (données anonymisées)'
+        },
+        dataSharing: {
+          title: '3. Partage des Données',
+          description: 'Rationable ne partage jamais vos données personnelles avec des tiers, sauf :',
+          item1: 'Avec votre consentement explicite',
+          item2: 'Pour se conformer à des obligations légales',
+          item3: 'Pour protéger nos droits et la sécurité des utilisateurs'
+        },
+        security: {
+          title: '4. Sécurité',
+          description: 'Nous utilisons des mesures de sécurité industry-standard pour protéger vos données :',
+          item1: 'Chiffrement en transit et au repos',
+          item2: 'Authentification sécurisée via Supabase',
+          item3: 'Accès limité aux données par notre équipe',
+          item4: 'Audits de sécurité réguliers'
+        },
+        rights: {
+          title: '5. Vos Droits',
+          description: 'Conformément au RGPD, vous avez le droit de :',
+          item1: 'Accéder à vos données personnelles',
+          item2: 'Rectifier ou supprimer vos données',
+          item3: 'Vous opposer au traitement de vos données',
+          item4: 'Demander la portabilité de vos données'
+        },
+        cookies: {
+          title: '6. Cookies et Tracking',
+          description: 'Rationable utilise des cookies techniques nécessaires au fonctionnement de l\'application et des cookies d\'analyse anonymisés pour améliorer nos services. Aucun cookie publicitaire n\'est utilisé.'
+        },
+        retention: {
+          title: '7. Conservation des Données',
+          description: 'Vos données sont conservées aussi longtemps que votre compte est actif. Vous pouvez supprimer votre compte à tout moment depuis les paramètres de l\'application.'
+        },
+        contact: {
+          title: '8. Contact',
+          description: 'Pour toute question concernant cette politique de confidentialité, contactez-nous à :',
+          email: 'contact@rationable.fr'
+        },
+        changes: {
+          title: '9. Modifications',
+          description: 'Cette politique peut être mise à jour occasionnellement. Les changements significatifs vous seront notifiés par email ou via l\'application.'
+        }
+      }
+    },
     templates: {
       page: {
         title: 'Templates Communautaires',
@@ -1681,6 +1805,68 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
     footer: {
       allRightsReserved: 'All rights reserved.',
       privacyPolicy: 'Privacy Policy',
+    },
+    privacy: {
+      title: 'Privacy Policy',
+      lastUpdated: 'Last updated',
+      sections: {
+        dataCollection: {
+          title: '1. Data Collection',
+          description: 'Rationable only collects data necessary for the application to function:',
+          item1: 'Email address (for authentication)',
+          item2: 'Username (to personalize the experience)',
+          item3: 'Decisions and analyses created (stored securely)',
+          item4: 'Anonymized usage data (to improve the service)'
+        },
+        dataUsage: {
+          title: '2. Data Usage',
+          description: 'Your data is used exclusively to:',
+          item1: 'Provide our decision-making services',
+          item2: 'Personalize your user experience',
+          item3: 'Ensure the security of your account',
+          item4: 'Improve our services (anonymized data)'
+        },
+        dataSharing: {
+          title: '3. Data Sharing',
+          description: 'Rationable never shares your personal data with third parties, except:',
+          item1: 'With your explicit consent',
+          item2: 'To comply with legal obligations',
+          item3: 'To protect our rights and user safety'
+        },
+        security: {
+          title: '4. Security',
+          description: 'We use industry-standard security measures to protect your data:',
+          item1: 'Encryption in transit and at rest',
+          item2: 'Secure authentication via Supabase',
+          item3: 'Limited data access by our team',
+          item4: 'Regular security audits'
+        },
+        rights: {
+          title: '5. Your Rights',
+          description: 'In accordance with GDPR, you have the right to:',
+          item1: 'Access your personal data',
+          item2: 'Rectify or delete your data',
+          item3: 'Object to the processing of your data',
+          item4: 'Request data portability'
+        },
+        cookies: {
+          title: '6. Cookies and Tracking',
+          description: 'Rationable uses technical cookies necessary for the application to function and anonymized analytics cookies to improve our services. No advertising cookies are used.'
+        },
+        retention: {
+          title: '7. Data Retention',
+          description: 'Your data is retained as long as your account is active. You can delete your account at any time from the application settings.'
+        },
+        contact: {
+          title: '8. Contact',
+          description: 'For any questions regarding this privacy policy, contact us at:',
+          email: 'contact@rationable.fr'
+        },
+        changes: {
+          title: '9. Changes',
+          description: 'This policy may be updated occasionally. Significant changes will be notified to you by email or via the application.'
+        }
+      }
     },
     templates: {
       page: {

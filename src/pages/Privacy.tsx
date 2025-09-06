@@ -1,112 +1,112 @@
 import { useI18nUI } from '@/contexts/I18nUIContext';
 
 const Privacy = () => {
-  const { t } = useI18nUI();
+  const { t, getLocaleTag } = useI18nUI();
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
       <div className="container py-12">
         <div className="max-w-4xl mx-auto">
           <header className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">Politique de Confidentialité</h1>
+            <h1 className="text-4xl font-bold mb-4">{t('privacy.title')}</h1>
             <p className="text-muted-foreground text-lg">
-              Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}
+              {t('privacy.lastUpdated')} : {new Date().toLocaleDateString(getLocaleTag())}
             </p>
           </header>
 
           <div className="prose prose-slate dark:prose-invert max-w-none space-y-8">
             <section>
-              <h2 className="text-2xl font-semibold mb-4">1. Collecte des Données</h2>
+              <h2 className="text-2xl font-semibold mb-4">{t('privacy.sections.dataCollection.title')}</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Rationable collecte uniquement les données nécessaires au fonctionnement de l'application :
+                {t('privacy.sections.dataCollection.description')}
               </p>
               <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-                <li>Adresse email (pour l'authentification)</li>
-                <li>Nom d'utilisateur (pour personnaliser l'expérience)</li>
-                <li>Décisions et analyses créées (stockées de manière sécurisée)</li>
-                <li>Données d'usage anonymisées (pour améliorer le service)</li>
+                <li>{t('privacy.sections.dataCollection.item1')}</li>
+                <li>{t('privacy.sections.dataCollection.item2')}</li>
+                <li>{t('privacy.sections.dataCollection.item3')}</li>
+                <li>{t('privacy.sections.dataCollection.item4')}</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-4">2. Utilisation des Données</h2>
+              <h2 className="text-2xl font-semibold mb-4">{t('privacy.sections.dataUsage.title')}</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Vos données sont utilisées exclusivement pour :
+                {t('privacy.sections.dataUsage.description')}
               </p>
               <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-                <li>Fournir nos services d'aide à la décision</li>
-                <li>Personnaliser votre expérience utilisateur</li>
-                <li>Assurer la sécurité de votre compte</li>
-                <li>Améliorer nos services (données anonymisées)</li>
+                <li>{t('privacy.sections.dataUsage.item1')}</li>
+                <li>{t('privacy.sections.dataUsage.item2')}</li>
+                <li>{t('privacy.sections.dataUsage.item3')}</li>
+                <li>{t('privacy.sections.dataUsage.item4')}</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-4">3. Partage des Données</h2>
+              <h2 className="text-2xl font-semibold mb-4">{t('privacy.sections.dataSharing.title')}</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Rationable ne partage jamais vos données personnelles avec des tiers, sauf :
+                {t('privacy.sections.dataSharing.description')}
               </p>
               <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-                <li>Avec votre consentement explicite</li>
-                <li>Pour se conformer à des obligations légales</li>
-                <li>Pour protéger nos droits et la sécurité des utilisateurs</li>
+                <li>{t('privacy.sections.dataSharing.item1')}</li>
+                <li>{t('privacy.sections.dataSharing.item2')}</li>
+                <li>{t('privacy.sections.dataSharing.item3')}</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-4">4. Sécurité</h2>
+              <h2 className="text-2xl font-semibold mb-4">{t('privacy.sections.security.title')}</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Nous utilisons des mesures de sécurité industry-standard pour protéger vos données :
+                {t('privacy.sections.security.description')}
               </p>
               <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-                <li>Chiffrement en transit et au repos</li>
-                <li>Authentification sécurisée via Supabase</li>
-                <li>Accès limité aux données par notre équipe</li>
-                <li>Audits de sécurité réguliers</li>
+                <li>{t('privacy.sections.security.item1')}</li>
+                <li>{t('privacy.sections.security.item2')}</li>
+                <li>{t('privacy.sections.security.item3')}</li>
+                <li>{t('privacy.sections.security.item4')}</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-4">5. Vos Droits</h2>
+              <h2 className="text-2xl font-semibold mb-4">{t('privacy.sections.rights.title')}</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Conformément au RGPD, vous avez le droit de :
+                {t('privacy.sections.rights.description')}
               </p>
               <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-                <li>Accéder à vos données personnelles</li>
-                <li>Rectifier ou supprimer vos données</li>
-                <li>Vous opposer au traitement de vos données</li>
-                <li>Demander la portabilité de vos données</li>
+                <li>{t('privacy.sections.rights.item1')}</li>
+                <li>{t('privacy.sections.rights.item2')}</li>
+                <li>{t('privacy.sections.rights.item3')}</li>
+                <li>{t('privacy.sections.rights.item4')}</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-4">6. Cookies et Tracking</h2>
+              <h2 className="text-2xl font-semibold mb-4">{t('privacy.sections.cookies.title')}</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Rationable utilise des cookies techniques nécessaires au fonctionnement de l'application et des cookies d'analyse anonymisés pour améliorer nos services. Aucun cookie publicitaire n'est utilisé.
+                {t('privacy.sections.cookies.description')}
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-4">7. Conservation des Données</h2>
+              <h2 className="text-2xl font-semibold mb-4">{t('privacy.sections.retention.title')}</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Vos données sont conservées aussi longtemps que votre compte est actif. Vous pouvez supprimer votre compte à tout moment depuis les paramètres de l'application.
+                {t('privacy.sections.retention.description')}
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-4">8. Contact</h2>
+              <h2 className="text-2xl font-semibold mb-4">{t('privacy.sections.contact.title')}</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Pour toute question concernant cette politique de confidentialité, contactez-nous à :
+                {t('privacy.sections.contact.description')}
               </p>
               <p className="text-primary font-medium">
-                Email : contact@rationable.fr
+                Email : {t('privacy.sections.contact.email')}
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-4">9. Modifications</h2>
+              <h2 className="text-2xl font-semibold mb-4">{t('privacy.sections.changes.title')}</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Cette politique peut être mise à jour occasionnellement. Les changements significatifs vous seront notifiés par email ou via l'application.
+                {t('privacy.sections.changes.description')}
               </p>
             </section>
           </div>
