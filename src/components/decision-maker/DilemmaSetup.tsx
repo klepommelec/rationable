@@ -348,7 +348,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         </div>
                     ) : (
                         // Utilisateurs non connectés : sections séparées
-                        <div className="space-y-6">
+                        <div className="space-y-8">
                             {/* Templates personnels */}
                             <div>
                                 <h3 className="text-xs font-medium text-muted-foreground tracking-wide mb-3">Templates personnels</h3>
