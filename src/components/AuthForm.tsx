@@ -258,7 +258,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
               </Button>
             </form>
             
-            <div className="text-center text-sm text-muted-foreground">
+            <div className="text-center text-xs text-muted-foreground">
               {t('auth.toggleText.signInPrompt')}{' '}
               <button 
                 type="button" 
