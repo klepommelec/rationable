@@ -129,6 +129,17 @@ export interface UITranslations {
       toastTitle: string;
       toastDesc: string;
     };
+    googleAccount: {
+      title: string;
+      description: string;
+      connected: string;
+      notConnected: string;
+      connectButton: string;
+      toasts: {
+        connectSuccess: string;
+        connectError: string;
+      };
+    };
   };
   navbar: {
     templates: string;
@@ -267,6 +278,9 @@ export interface UITranslations {
     };
     messages: {
       accountCreated: string;
+    };
+    separator: {
+      or: string;
     };
   };
   sharedDecision: {
@@ -962,6 +976,17 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         toastTitle: 'Langue mise à jour',
         toastDesc: 'La langue de l\'interface a été modifiée.',
       },
+      googleAccount: {
+        title: 'Compte Google',
+        description: 'Connectez votre compte Google pour une connexion plus rapide',
+        connected: 'Votre compte Google est connecté. Vous pouvez maintenant vous connecter avec Google.',
+        notConnected: 'Vous pouvez lier votre compte Google pour vous connecter plus facilement à l\'avenir.',
+        connectButton: 'Connecter mon compte Google',
+        toasts: {
+          connectSuccess: 'Compte Google connecté avec succès',
+          connectError: 'Erreur',
+        },
+      },
     },
     navbar: {
       templates: 'Templates',
@@ -1100,6 +1125,9 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       },
       messages: {
         accountCreated: 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.',
+      },
+      separator: {
+        or: 'ou',
       },
     },
     sharedDecision: {
@@ -1793,6 +1821,17 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         toastTitle: 'Language updated',
         toastDesc: 'The interface language has been changed.',
       },
+      googleAccount: {
+        title: 'Google Account',
+        description: 'Connect your Google account for faster login',
+        connected: 'Your Google account is connected. You can now sign in with Google.',
+        notConnected: 'You can link your Google account to sign in more easily in the future.',
+        connectButton: 'Connect my Google account',
+        toasts: {
+          connectSuccess: 'Google account connected successfully',
+          connectError: 'Error',
+        },
+      },
     },
     navbar: {
       templates: 'Templates',
@@ -1931,6 +1970,9 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       },
       messages: {
         accountCreated: 'Account created successfully! You can now sign in.',
+      },
+      separator: {
+        or: 'or',
       },
     },
     sharedDecision: {
