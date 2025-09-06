@@ -5,15 +5,20 @@ import { ChevronDown, Plus, Building2, Check } from 'lucide-react';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
 import { CreateWorkspaceDialog } from './CreateWorkspaceDialog';
 import { useI18nUI } from '@/contexts/I18nUIContext';
+import { useDecisionMakerContext } from '@/contexts/DecisionMakerContext';
 
 export const WorkspaceSelector: React.FC = () => {
   const { workspaces, currentWorkspace, switchWorkspace, createWorkspace } = useWorkspaces();
+  const { clearSession } = useDecisionMakerContext();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const { t } = useI18nUI();
 
   const handleWorkspaceClick = (workspace: any) => {
     if (workspace.id !== currentWorkspace?.id) {
-      switchWorkspace(workspace);
+      switchWorkspace(workspace, () => {
+        // Clear current decision session when switching workspace
+        clearSession();
+      });
     }
   };
 

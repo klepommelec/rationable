@@ -94,9 +94,14 @@ export const useWorkspaces = () => {
   };
 
   // Switch to a different workspace
-  const switchWorkspace = (workspace: WorkspaceWithMembers) => {
+  const switchWorkspace = (workspace: WorkspaceWithMembers, onSwitchCallback?: () => void) => {
     setCurrentWorkspace(workspace);
     localStorage.setItem(CURRENT_WORKSPACE_KEY, workspace.id);
+    
+    // Call callback after workspace switch (for clearing session)
+    if (onSwitchCallback) {
+      onSwitchCallback();
+    }
     
     toast({
       title: "Workspace changé",
