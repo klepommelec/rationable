@@ -15,6 +15,7 @@ import Auth from "./pages/Auth";
 import Privacy from "./pages/Privacy";
 import { ThemeProvider } from "./components/theme-provider";
 import { AuthProvider } from "./hooks/useAuth";
+import { WorkspacesProvider } from "./contexts/WorkspacesContext";
 import { DecisionMakerProvider } from "./contexts/DecisionMakerContext";
 import { I18nUIProvider } from "./contexts/I18nUIContext";
 import Layout from "./components/Layout";
@@ -32,8 +33,9 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
-              <I18nUIProvider>
-                <DecisionMakerProvider>
+              <WorkspacesProvider>
+                <I18nUIProvider>
+                  <DecisionMakerProvider>
                   <AppErrorBoundary>
                     <Routes>
                     <Route path="/auth" element={<Auth />} />
@@ -52,8 +54,9 @@ const App = () => (
                     <Route path="*" element={<NotFound />} />
                     </Routes>
                   </AppErrorBoundary>
-                </DecisionMakerProvider>
-              </I18nUIProvider>
+                  </DecisionMakerProvider>
+                </I18nUIProvider>
+              </WorkspacesProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>
