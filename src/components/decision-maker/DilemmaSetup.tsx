@@ -311,37 +311,63 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             />
 
             {/* Section Templates */}
-            <Card className="backdrop-blur-sm">
-                <CardHeader className="pb-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <CardTitle className="font-semibold text-2xl">{t('navbar.templates')}</CardTitle>
-                            <CardDescription className="text-muted-foreground">
-                                {t('dilemmaSetup.templates.description')}
-                            </CardDescription>
-                        </div>
-                        <Button asChild variant="outline" size="sm">
-                            <Link to="/templates" className="flex items-center gap-2">
-                                {t('dilemmaSetup.templates.viewAll')}
-                                <ExternalLink className="h-4 w-4" />
-                            </Link>
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {[...PERSONAL_TEMPLATES, ...PROFESSIONAL_TEMPLATES].slice(0, 6).map(template => <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal">
-                                <div className="flex items-center gap-2 w-full min-w-0">
-                                    <span className="text-lg shrink-0">{template.decision_data.emoji}</span>
-                                    <span className="text-sm truncate font-semibold">{template.title}</span>
-                                </div>
-                                <div className="text-xs text-muted-foreground line-clamp-3 text-left w-full leading-relaxed">
-                                    {template.description}
-                                </div>
-                            </Button>)}
-                    </div>
-                </CardContent>
-            </Card>
+            {!user && (
+              <Card className="backdrop-blur-sm">
+                  <CardHeader className="pb-4">
+                      <div className="flex items-center justify-between">
+                          <div>
+                              <CardTitle className="font-semibold text-2xl">{t('navbar.templates')}</CardTitle>
+                              <CardDescription className="text-muted-foreground">
+                                  {t('dilemmaSetup.templates.description')}
+                              </CardDescription>
+                          </div>
+                          <Button asChild variant="outline" size="sm">
+                              <Link to="/templates" className="flex items-center gap-2">
+                                  {t('dilemmaSetup.templates.viewAll')}
+                                  <ExternalLink className="h-4 w-4" />
+                              </Link>
+                          </Button>
+                      </div>
+                  </CardHeader>
+                  <CardContent className="pt-0 space-y-6">
+                      {/* Templates personnels */}
+                      <div>
+                          <h3 className="text-lg font-semibold mb-3 text-blue-600">Templates personnels</h3>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                              {PERSONAL_TEMPLATES.slice(0, 6).map(template => 
+                                  <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal">
+                                      <div className="flex items-center gap-2 w-full min-w-0">
+                                          <span className="text-lg shrink-0">{template.decision_data.emoji}</span>
+                                          <span className="text-sm truncate font-semibold">{template.title}</span>
+                                      </div>
+                                      <div className="text-xs text-muted-foreground line-clamp-3 text-left w-full leading-relaxed">
+                                          {template.description}
+                                      </div>
+                                  </Button>
+                              )}
+                          </div>
+                      </div>
+                      
+                      {/* Templates professionnels */}
+                      <div>
+                          <h3 className="text-lg font-semibold mb-3 text-green-600">Templates professionnels</h3>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                              {PROFESSIONAL_TEMPLATES.slice(0, 6).map(template => 
+                                  <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal">
+                                      <div className="flex items-center gap-2 w-full min-w-0">
+                                          <span className="text-lg shrink-0">{template.decision_data.emoji}</span>
+                                          <span className="text-sm truncate font-semibold">{template.title}</span>
+                                      </div>
+                                      <div className="text-xs text-muted-foreground line-clamp-3 text-left w-full leading-relaxed">
+                                          {template.description}
+                                      </div>
+                                  </Button>
+                              )}
+                          </div>
+                      </div>
+                  </CardContent>
+              </Card>
+            )}
 
             {/* Historique intégré directement dans la page - seulement pour les utilisateurs connectés */}
             {user && (
