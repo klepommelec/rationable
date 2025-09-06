@@ -350,7 +350,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         // Utilisateurs non connectés : sections séparées
                         <div className="space-y-8">
                             {/* Templates personnels */}
-                            <div className="mt-16">
+                            <div className="mt-8">
                                 <h3 className="text-xs font-medium text-muted-foreground tracking-wide mb-3">Templates personnels</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                     {PERSONAL_TEMPLATES.slice(0, 6).map(template => 
