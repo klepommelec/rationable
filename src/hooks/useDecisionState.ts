@@ -1,10 +1,12 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ICriterion, IResult } from '@/types/decision';
+import { useWorkspaces } from './useWorkspaces';
 
 export type AnalysisStep = 'idle' | 'criteria-loaded' | 'loading-options' | 'done';
 
 export const useDecisionState = () => {
+    const { currentWorkspace } = useWorkspaces();
     const [dilemma, setDilemma] = useState('');
     const [emoji, setEmojiState] = useState('🤔');
     const [analysisStep, setAnalysisStep] = useState<AnalysisStep>('idle');
@@ -34,6 +36,13 @@ export const useDecisionState = () => {
         setHasChanges(false);
         setSelectedCategory(undefined);
     };
+
+    // Clear session when workspace changes
+    useEffect(() => {
+        if (currentWorkspace) {
+            resetState();
+        }
+    }, [currentWorkspace?.id]);
 
     return {
         // States
