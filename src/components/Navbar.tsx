@@ -86,15 +86,6 @@ const Navbar: React.FC = () => {
         
         <div className="flex items-center gap-2">
           {user ? <>
-              {!hasActiveDecision && (
-                <Link to="/templates">
-                  <Button variant="ghost" size="sm">
-                    <Users className="h-4 w-4 mr-2" />
-                    <span className="hidden sm:inline">{t('navbar.templates')}</span>
-                  </Button>
-                </Link>
-              )}
-              
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="flex items-center gap-2">
