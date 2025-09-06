@@ -17,6 +17,17 @@ export const useContextualContent = () => {
     const context = currentWorkspace?.use_context || 'personal';
     
     if (context === 'professional') {
+      const language = currentLanguage;
+      if (language === 'en') {
+        return [
+          "Ex: Choose our tech stack for the new project",
+          "Ex: Define our marketing strategy for Q2",
+          "Ex: Select a cloud provider for our infrastructure",
+          "Ex: Plan our product roadmap for 2025",
+          "Ex: Decide on our recruitment strategy",
+          "Ex: Evaluate this partnership opportunity"
+        ];
+      }
       return [
         "Ex: Choisir notre stack technique pour le nouveau projet",
         "Ex: Définir notre stratégie marketing pour Q2",
@@ -52,6 +63,43 @@ export const useContextualContent = () => {
     const context = currentWorkspace?.use_context || 'personal';
     
     if (context === 'professional') {
+      const language = currentLanguage;
+      if (language === 'en') {
+        return [
+          {
+            name: "🏢 Tech Stack",
+            dilemma: "Which tech stack should we choose for our new project?",
+          },
+          {
+            name: "📈 Marketing Strategy",
+            dilemma: "How to define our marketing strategy for Q2?",
+          },
+          {
+            name: "☁️ Cloud Provider",
+            dilemma: "Which cloud provider should we select for our infrastructure?",
+          },
+          {
+            name: "🗺️ Product Roadmap",
+            dilemma: "How to plan our product roadmap for 2025?",
+          },
+          {
+            name: "👥 Recruitment Strategy",
+            dilemma: "What recruitment strategy should we adopt this year?",
+          },
+          {
+            name: "🤝 Partnership",
+            dilemma: "Should we accept this partnership opportunity?",
+          },
+          {
+            name: "💼 External Provider",
+            dilemma: "Which external provider should we choose for this project?",
+          },
+          {
+            name: "🎯 Quarterly Goals",
+            dilemma: "What priority goals should we set for this quarter?",
+          }
+        ];
+      }
       return [
         {
           name: "🏢 Stack technique",
@@ -144,13 +192,24 @@ export const useContextualContent = () => {
   const getWelcomeMessage = () => {
     const context = currentWorkspace?.use_context || 'personal';
     const name = profile?.full_name?.split(' ')[0] || '';
+    const language = currentLanguage;
     
     if (context === 'professional') {
+      if (language === 'en') {
+        return name 
+          ? `Hello ${name}, let's analyze your professional challenges together`
+          : 'Analyze your professional challenges with AI';
+      }
       return name 
         ? `Bonjour ${name}, analysons vos défis professionnels ensemble`
         : 'Analysons vos défis professionnels avec l\'IA';
     }
     
+    if (language === 'en') {
+      return name
+        ? `Hello ${name}, let's make the best decision together`
+        : 'Make the best decision with AI';
+    }
     return name
       ? `Bonjour ${name}, prenons la meilleure décision ensemble`
       : 'Prenez la meilleure décision avec l\'IA';
