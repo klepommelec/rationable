@@ -19,7 +19,7 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              Politique de confidentialité
+              {t('footer.privacyPolicy')}
             </a>
           </div>
         </div>

@@ -132,7 +132,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
           className="block text-center -mt-1 font-medium text-gray-500 underline hover:text-gray-700 transition-colors" 
           style={{ fontSize: '11px' }}
         >
-          Politique de confidentialité
+          {t('footer.privacyPolicy')}
         </a>
         
         <div className="relative mt-12">

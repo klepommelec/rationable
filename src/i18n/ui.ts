@@ -140,6 +140,7 @@ export interface UITranslations {
   };
   footer: {
     allRightsReserved: string;
+    privacyPolicy: string;
   };
   templates: {
     page: {
@@ -908,6 +909,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
     },
     footer: {
       allRightsReserved: 'Tous droits réservés.',
+      privacyPolicy: 'Politique de confidentialité',
     },
     templates: {
       page: {
@@ -1674,6 +1676,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
     },
     footer: {
       allRightsReserved: 'All rights reserved.',
+      privacyPolicy: 'Privacy Policy',
     },
     templates: {
       page: {
