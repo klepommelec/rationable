@@ -125,11 +125,15 @@ const AuthForm: React.FC<AuthFormProps> = ({
           {t('auth.actions.continueWithGoogle')}
         </Button>
         
-        <Link to="/privacy" className="block text-center mt-0.5 font-medium text-gray-500 underline hover:text-gray-700 transition-colors" style={{
-        fontSize: '11px'
-      }}>
-          Voir notre politique de confidentialité
-        </Link>
+        <a 
+          href="/privacy" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="block text-center mt-0.5 font-medium text-gray-500 underline hover:text-gray-700 transition-colors" 
+          style={{ fontSize: '11px' }}
+        >
+          Politique de confidentialité
+        </a>
         
         <div className="relative mt-12">
           <div className="absolute inset-0 flex items-center">
