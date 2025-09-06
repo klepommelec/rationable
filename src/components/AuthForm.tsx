@@ -129,7 +129,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
           href="/privacy" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="block text-center mt-0.5 font-medium text-gray-500 underline hover:text-gray-700 transition-colors" 
+          className="block text-center -mt-1 font-medium text-gray-500 underline hover:text-gray-700 transition-colors" 
           style={{ fontSize: '11px' }}
         >
           Politique de confidentialité
