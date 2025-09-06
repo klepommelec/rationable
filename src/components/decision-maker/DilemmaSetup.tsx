@@ -386,10 +386,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                             </div>
                         </div>
                     )}
-                    {/* Debug info - can remove later */}
-                    <div className="mt-4 p-2 bg-muted rounded text-xs text-muted-foreground">
-                        Debug: user={user ? 'connected' : 'not connected'}, context={context}
-                    </div>
                 </CardContent>
             </Card>
 
