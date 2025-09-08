@@ -82,6 +82,8 @@ export interface UITranslations {
     signIn: string;
     signOut: string;
     profile: string;
+    getStarted: string;
+    userFallback: string;
   };
   hero: {
     title: string;
@@ -923,6 +925,8 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       signIn: 'Se connecter',
       signOut: 'Se déconnecter',
       profile: 'Profil',
+      getStarted: 'Commencer',
+      userFallback: 'Utilisateur',
     },
     hero: {
       title: 'Prenez des décisions',
@@ -1762,6 +1766,8 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       signIn: 'Sign In',
       signOut: 'Sign Out',
       profile: 'Profile',
+      getStarted: 'Get Started',
+      userFallback: 'User',
     },
     hero: {
       title: 'Make',
