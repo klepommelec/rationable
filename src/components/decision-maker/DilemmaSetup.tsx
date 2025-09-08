@@ -348,7 +348,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                             </CardDescription>
                         </div>
                         <Button asChild variant="outline" size="sm">
-                            <Link to="/templates" className="flex items-center gap-2">
+                            <Link to="/templates" className="flex items-center gap-2 hover:no-underline">
                                 {t('dilemmaSetup.templates.viewAll')}
                                 <ChevronRight className="h-4 w-4" />
                             </Link>
