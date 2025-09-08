@@ -2104,7 +2104,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
     },
     dilemmaSetup: {
       hero: {
-        titleLine1: 'Your decisions will be',
+        titleLine1: 'Make every decision',
         brand: 'Rationable',
         subtitle: 'From uncertainty to clarity: harness the power of AI',
       },
