@@ -144,6 +144,16 @@ export interface UITranslations {
   };
   settings: {
     title: string;
+    sidebar: {
+      profile: string;
+      workspaces: string;
+      appearance: string;
+      documents: string;
+      admin: string;
+    };
+    header: {
+      subtitle: string;
+    };
     profile: {
       title: string;
       fullName: string;
@@ -201,6 +211,69 @@ export interface UITranslations {
     retry: string;
     viewMore: string;
     viewLess: string;
+    search: string;
+  };
+  criteria: {
+    title: string;
+    description: string;
+    add: string;
+    addSuccess: string;
+    weight: string;
+    importance: string;
+    placeholder: string;
+    save: string;
+    cancel: string;
+    delete: string;
+    edit: string;
+    low: string;
+    medium: string;
+    high: string;
+  };
+  share: {
+    button: {
+      share: string;
+      simpleShare: string;
+      collaborate: string;
+      shareAsTemplate: string;
+    };
+    title: string;
+    subtitle: string;
+    copyLink: string;
+    linkCopied: string;
+    emailShare: string;
+    socialShare: string;
+    publicDecision: string;
+    publicDescription: string;
+    privateDecision: string;
+    privateDescription: string;
+  };
+  profile: {
+    avatar: {
+      title: string;
+      description: string;
+      change: string;
+      formatSupport: string;
+      dropHere: string;
+      tooBig: string;
+      uploadSuccess: string;
+      uploadError: string;
+      deleteSuccess: string;
+      deleteError: string;
+    };
+    info: {
+      title: string;
+      description: string;
+      email: string;
+      fullName: string;
+      fullNamePlaceholder: string;
+      save: string;
+      saving: string;
+      savedSuccess: string;
+      savedError: string;
+    };
+    language: {
+      title: string;
+    };
   };
   dashboard: {
     title: string;
@@ -374,18 +447,6 @@ export interface UITranslations {
     success: string;
     error: string;
     remove: string;
-  };
-  sharing: {
-    title: string;
-    subtitle: string;
-    copyLink: string;
-    linkCopied: string;
-    emailShare: string;
-    socialShare: string;
-    publicDecision: string;
-    publicDescription: string;
-    privateDecision: string;
-    privateDescription: string;
   };
   collaboration: {
     title: string;
@@ -664,6 +725,16 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
     },
     settings: {
       title: 'Paramètres',
+      sidebar: {
+        profile: 'Profil',
+        workspaces: 'Espaces de travail',
+        appearance: 'Apparence',
+        documents: 'Documents',
+        admin: 'Administration',
+      },
+      header: {
+        subtitle: 'Gérez vos préférences et paramètres',
+      },
       profile: {
         title: 'Profil',
         fullName: 'Nom complet',
@@ -721,6 +792,69 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       retry: 'Réessayer',
       viewMore: 'Voir plus',
       viewLess: 'Voir moins',
+      search: 'Rechercher',
+    },
+    criteria: {
+      title: 'Critères de décision',
+      description: 'Gérez les critères de votre décision',
+      add: 'Ajouter un critère',
+      addSuccess: 'Critère ajouté avec succès',
+      weight: 'Poids',
+      importance: 'Importance',
+      placeholder: 'Nom du critère...',
+      save: 'Sauvegarder',
+      cancel: 'Annuler',
+      delete: 'Supprimer',
+      edit: 'Modifier',
+      low: 'Faible',
+      medium: 'Moyen',
+      high: 'Élevé',
+    },
+    share: {
+      button: {
+        share: 'Partager',
+        simpleShare: 'Partager le lien',
+        collaborate: 'Collaborer',
+        shareAsTemplate: 'Partager comme modèle',
+      },
+      title: 'Partager la décision',
+      subtitle: 'Partagez votre analyse avec d\'autres',
+      copyLink: 'Copier le lien',
+      linkCopied: 'Lien copié !',
+      emailShare: 'Partager par email',
+      socialShare: 'Partager sur les réseaux',
+      publicDecision: 'Décision publique',
+      publicDescription: 'Tout le monde peut voir cette décision',
+      privateDecision: 'Décision privée',
+      privateDescription: 'Seules les personnes avec le lien peuvent voir',
+    },
+    profile: {
+      avatar: {
+        title: 'Photo de profil',
+        description: 'Personnalisez votre avatar',
+        change: 'Changer la photo',
+        formatSupport: 'JPG, PNG, GIF jusqu\'à 2MB',
+        dropHere: 'Déposez votre image ici',
+        tooBig: 'Le fichier est trop volumineux (max 2MB)',
+        uploadSuccess: 'Photo mise à jour avec succès',
+        uploadError: 'Erreur lors du téléchargement',
+        deleteSuccess: 'Photo supprimée avec succès',
+        deleteError: 'Erreur lors de la suppression',
+      },
+      info: {
+        title: 'Informations personnelles',
+        description: 'Gérez vos informations de profil',
+        email: 'Adresse email',
+        fullName: 'Nom complet',
+        fullNamePlaceholder: 'Votre nom complet',
+        save: 'Sauvegarder',
+        saving: 'Sauvegarde...',
+        savedSuccess: 'Profil sauvegardé avec succès',
+        savedError: 'Erreur lors de la sauvegarde',
+      },
+      language: {
+        title: 'Langue de l\'interface',
+      },
     },
     dashboard: {
       title: 'Tableau de bord',
@@ -894,18 +1028,6 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       success: 'Fichier téléchargé',
       error: 'Erreur de téléchargement',
       remove: 'Supprimer',
-    },
-    sharing: {
-      title: 'Partager la décision',
-      subtitle: 'Partagez votre analyse avec d\'autres',
-      copyLink: 'Copier le lien',
-      linkCopied: 'Lien copié !',
-      emailShare: 'Partager par email',
-      socialShare: 'Partager sur les réseaux',
-      publicDecision: 'Décision publique',
-      publicDescription: 'Tout le monde peut voir cette décision',
-      privateDecision: 'Décision privée',
-      privateDescription: 'Seules les personnes avec le lien peuvent voir',
     },
     collaboration: {
       title: 'Collaboration',
@@ -1182,6 +1304,16 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
     },
     settings: {
       title: 'Settings',
+      sidebar: {
+        profile: 'Profile',
+        workspaces: 'Workspaces',
+        appearance: 'Appearance',
+        documents: 'Documents',
+        admin: 'Admin',
+      },
+      header: {
+        subtitle: 'Manage your preferences and settings',
+      },
       profile: {
         title: 'Profile',
         fullName: 'Full Name',
@@ -1239,6 +1371,69 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       retry: 'Retry',
       viewMore: 'View more',
       viewLess: 'View less',
+      search: 'Search',
+    },
+    criteria: {
+      title: 'Decision Criteria',
+      description: 'Manage your decision criteria',
+      add: 'Add criterion',
+      addSuccess: 'Criterion added successfully',
+      weight: 'Weight',
+      importance: 'Importance',
+      placeholder: 'Criterion name...',
+      save: 'Save',
+      cancel: 'Cancel',
+      delete: 'Delete',
+      edit: 'Edit',
+      low: 'Low',
+      medium: 'Medium',
+      high: 'High',
+    },
+    share: {
+      button: {
+        share: 'Share',
+        simpleShare: 'Share Link',
+        collaborate: 'Collaborate',
+        shareAsTemplate: 'Share as Template',
+      },
+      title: 'Share Decision',
+      subtitle: 'Share your analysis with others',
+      copyLink: 'Copy link',
+      linkCopied: 'Link copied!',
+      emailShare: 'Share by email',
+      socialShare: 'Share on social',
+      publicDecision: 'Public decision',
+      publicDescription: 'Anyone can view this decision',
+      privateDecision: 'Private decision',
+      privateDescription: 'Only people with the link can view',
+    },
+    profile: {
+      avatar: {
+        title: 'Profile Picture',
+        description: 'Customize your avatar',
+        change: 'Change Picture',
+        formatSupport: 'JPG, PNG, GIF up to 2MB',
+        dropHere: 'Drop your image here',
+        tooBig: 'File is too large (max 2MB)',
+        uploadSuccess: 'Picture updated successfully',
+        uploadError: 'Error during upload',
+        deleteSuccess: 'Picture deleted successfully',
+        deleteError: 'Error during deletion',
+      },
+      info: {
+        title: 'Personal Information',
+        description: 'Manage your profile information',
+        email: 'Email Address',
+        fullName: 'Full Name',
+        fullNamePlaceholder: 'Your full name',
+        save: 'Save',
+        saving: 'Saving...',
+        savedSuccess: 'Profile saved successfully',
+        savedError: 'Error saving profile',
+      },
+      language: {
+        title: 'Interface Language',
+      },
     },
     dashboard: {
       title: 'Dashboard',
@@ -1412,18 +1607,6 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       success: 'File uploaded',
       error: 'Upload error',
       remove: 'Remove',
-    },
-    sharing: {
-      title: 'Share Decision',
-      subtitle: 'Share your analysis with others',
-      copyLink: 'Copy link',
-      linkCopied: 'Link copied!',
-      emailShare: 'Share by email',
-      socialShare: 'Share on social',
-      publicDecision: 'Public decision',
-      publicDescription: 'Anyone can view this decision',
-      privateDecision: 'Private decision',
-      privateDescription: 'Only people with the link can view',
     },
     collaboration: {
       title: 'Collaboration',

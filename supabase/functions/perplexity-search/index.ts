@@ -9,7 +9,7 @@ const getAllowedOrigin = (origin: string | null): string => {
     'http://localhost:5173',
   ];
   
-  if (origin && (allowedOrigins.includes(origin) || origin.includes('lovableproject.com'))) {
+  if (origin && (allowedOrigins.includes(origin) || origin.includes('lovableproject.com') || origin.includes('lovable.app') || origin.includes('sandbox.lovable.dev'))) {
     return origin;
   }
   
