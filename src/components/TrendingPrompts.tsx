@@ -13,7 +13,7 @@ const TrendingPrompts: React.FC<TrendingPromptsProps> = ({
   onPromptSelect,
   disabled = false
 }) => {
-  const { prompts, isLoading, error, countryName } = useTrendingPrompts();
+  const { prompts, isLoading, error, countryName, refreshPrompts } = useTrendingPrompts();
   const { t } = useI18nUI();
 
   const handlePromptClick = (prompt: string) => {
@@ -47,9 +47,22 @@ const TrendingPrompts: React.FC<TrendingPromptsProps> = ({
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium text-muted-foreground">
-        {t('dilemmaSetup.trending.title').replace('{country}', countryName)}
-      </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium text-muted-foreground">
+          {t('dilemmaSetup.trending.title').replace('{country}', countryName)}
+        </h3>
+        {prompts.length > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={refreshPrompts}
+            disabled={disabled || isLoading}
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
+            {t('dilemmaSetup.trending.refresh')}
+          </Button>
+        )}
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
         {prompts.map((prompt, index) => (
           <Button

@@ -17,6 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 import AuthModal from '@/components/AuthModal';
 import { useContextualContent } from '@/hooks/useContextualContent';
 import TrendingPrompts from '@/components/TrendingPrompts';
+import { useTrendingPrompts } from '@/hooks/useTrendingPrompts';
 interface DilemmaSetupProps {
   dilemma: string;
   setDilemma: (dilemma: string) => void;
@@ -289,23 +290,34 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 </div>
                             </div>}
 
-                        <div className="space-y-3">
-                            <TrendingPrompts
-                              onPromptSelect={setDilemma}
-                              disabled={isLoading || isUpdating || analysisStep !== 'idle'}
-                            />
-                            
-                            {/* Fallback to original templates if trending prompts fail */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                {displayedTemplates.map(template => <Button key={template.name} variant="outline" size="sm" onClick={() => handleOpenTemplate({
-                name: template.name,
-                dilemma: template.dilemma,
-                decision_data: PERSONAL_TEMPLATES.find(t => t.title === template.name)?.decision_data || PROFESSIONAL_TEMPLATES.find(t => t.title === template.name)?.decision_data
-              })} disabled={isLoading || isUpdating || analysisStep !== 'idle'} aria-label={`Utiliser le modèle: ${template.name}`} className="text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-full py-[8px] px-[8px]">
-                                        <span className="truncate text-sm px-[4px] font-medium text-gray-500">{template.name}</span>
-                                    </Button>)}
-                            </div>
-                        </div>
+          {/* Show trending prompts first, fallback to templates if they fail */}
+          {!trendsLoading && !trendsError && prompts.length > 0 ? (
+            <TrendingPrompts
+              onPromptSelect={setDilemma}
+              disabled={isLoading || isUpdating || analysisStep !== 'idle'}
+            />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {displayedTemplates.map(template => 
+                <Button 
+                  key={template.name} 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleOpenTemplate({
+                    name: template.name,
+                    dilemma: template.dilemma,
+                    decision_data: PERSONAL_TEMPLATES.find(t => t.title === template.name)?.decision_data || 
+                                  PROFESSIONAL_TEMPLATES.find(t => t.title === template.name)?.decision_data
+                  })} 
+                  disabled={isLoading || isUpdating || analysisStep !== 'idle'} 
+                  aria-label={`Utiliser le modèle: ${template.name}`} 
+                  className="text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-full py-[8px] px-[8px]"
+                >
+                  <span className="truncate text-sm px-[4px] font-medium text-gray-500">{template.name}</span>
+                </Button>
+              )}
+            </div>
+          )}
                     </CardContent>
                      <CardFooter className="flex flex-col gap-4 px-4 sm:px-6">
                         <MainActionButton analysisStep={analysisStep} handleStartAnalysis={handleAnalysisClick} isMainButtonDisabled={isMainButtonDisabled} progress={progress} progressMessage={progressMessage} />
