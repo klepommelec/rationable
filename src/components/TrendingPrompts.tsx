@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TrendingUp } from 'lucide-react';
 import { useTrendingPrompts } from '@/hooks/useTrendingPrompts';
 import { useI18nUI } from '@/contexts/I18nUIContext';
 
@@ -57,6 +58,7 @@ const TrendingPrompts: React.FC<TrendingPromptsProps> = ({
             disabled={disabled}
             className="text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-full py-[8px] px-[8px] hover:bg-primary/5"
           >
+            <TrendingUp className="h-3 w-3 text-primary/70 flex-shrink-0" />
             <span className="truncate text-sm px-[4px] font-medium text-gray-500 line-clamp-2">
               {prompt}
             </span>
