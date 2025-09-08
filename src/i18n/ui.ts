@@ -140,9 +140,32 @@ export interface UITranslations {
       userNotFound: string;
       invalidEmail: string;
       generic: string;
+      passwordsMismatch: string;
+      passwordTooShort: string;
     };
     actions: {
       linkGoogle: string;
+      signIn: string;
+      createAccount: string;
+      continueWithGoogle: string;
+    };
+    fields: {
+      email: string;
+      password: string;
+      fullName: string;
+      confirmPassword: string;
+    };
+    messages: {
+      accountCreated: string;
+    };
+    separator: {
+      or: string;
+    };
+    toggleText: {
+      signUpPrompt: string;
+      signUpLink: string;
+      signInPrompt: string;
+      signInLink: string;
     };
   };
   settings: {
@@ -201,6 +224,10 @@ export interface UITranslations {
   templates: {
     title: string;
     subtitle: string;
+    page: {
+      title: string;
+      description: string;
+    };
     categories: {
       all: string;
       personal: string;
@@ -213,6 +240,30 @@ export interface UITranslations {
     featured: string;
     community: string;
     myTemplates: string;
+    grid: {
+      personalTitle: string;
+      professionalTitle: string;
+      recommendedBadge: string;
+      emptyMessage: string;
+      resetFilters: string;
+    };
+    card: {
+      open: string;
+    };
+    filters: {
+      searchPlaceholder: string;
+      categoryAll: string;
+      sort: {
+        newest: string;
+        popular: string;
+        mostCopied: string;
+      };
+    };
+    errors: {
+      loadError: string;
+      openError: string;
+      rateLimitError: string;
+    };
   };
   common: {
     loading: string;
@@ -332,6 +383,10 @@ export interface UITranslations {
       placeholder: string;
       noResults: string;
     };
+    list: {
+      emptyTitle: string;
+      emptyDescription: string;
+    };
     searchBar: {
       searchPlaceholder: string;
       filter: string;
@@ -341,6 +396,34 @@ export interface UITranslations {
       categoryLabel: string;
       allCategories: string;
       uncategorized: string;
+      sortBy: string;
+      sort: {
+        date: string;
+        category: string;
+      };
+      exportPdf: string;
+      exportJson: string;
+      copyText: string;
+      confirm: {
+        title: string;
+        desc: string;
+        cancel: string;
+        ok: string;
+      };
+      toasts: {
+        export: {
+          success: string;
+          error: string;
+        };
+        json: {
+          success: string;
+          error: string;
+        };
+        copy: {
+          success: string;
+          error: string;
+        };
+      };
     };
     filters: {
       all: string;
@@ -866,9 +949,32 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         userNotFound: 'Utilisateur non trouvé',
         invalidEmail: 'Email invalide',
         generic: 'Une erreur s\'est produite',
+        passwordsMismatch: 'Les mots de passe ne correspondent pas',
+        passwordTooShort: 'Le mot de passe doit contenir au moins 6 caractères',
       },
       actions: {
         linkGoogle: 'Associer un compte Google',
+        signIn: 'Se connecter',
+        createAccount: 'Créer un compte',
+        continueWithGoogle: 'Continuer avec Google',
+      },
+      fields: {
+        email: 'Adresse email',
+        password: 'Mot de passe',
+        fullName: 'Nom complet',
+        confirmPassword: 'Confirmer le mot de passe',
+      },
+      messages: {
+        accountCreated: 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.',
+      },
+      separator: {
+        or: 'OU',
+      },
+      toggleText: {
+        signUpPrompt: 'Pas encore de compte ?',
+        signUpLink: 'Créer un compte',
+        signInPrompt: 'Déjà un compte ?',
+        signInLink: 'Se connecter',
       },
     },
     settings: {
@@ -927,6 +1033,10 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
     templates: {
       title: 'Modèles de décision',
       subtitle: 'Utilisez nos modèles prêts à l\'emploi pour démarrer rapidement',
+      page: {
+        title: 'Templates de décision',
+        description: 'Découvrez des modèles de décision prêts à utiliser pour différentes situations.',
+      },
       categories: {
         all: 'Tous',
         personal: 'Personnel',
@@ -939,6 +1049,30 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       featured: 'À la une',
       community: 'Communauté',
       myTemplates: 'Mes modèles',
+      grid: {
+        personalTitle: 'Templates personnels',
+        professionalTitle: 'Templates professionnels',
+        recommendedBadge: 'Recommandé',
+        emptyMessage: 'Aucun template trouvé avec ces critères.',
+        resetFilters: 'Réinitialiser les filtres',
+      },
+      card: {
+        open: 'Ouvrir',
+      },
+      filters: {
+        searchPlaceholder: 'Rechercher un template...',
+        categoryAll: 'Toutes les catégories',
+        sort: {
+          newest: 'Plus récents',
+          popular: 'Plus populaires',
+          mostCopied: 'Plus copiés',
+        },
+      },
+      errors: {
+        loadError: 'Erreur lors du chargement des templates',
+        openError: 'Erreur lors de l\'ouverture du template',
+        rateLimitError: 'Limite de création de previews atteinte. Veuillez patienter quelques minutes.',
+      },
     },
     common: {
       loading: 'Chargement...',
@@ -1058,6 +1192,10 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         placeholder: 'Rechercher une décision...',
         noResults: 'Aucun résultat trouvé',
       },
+      list: {
+        emptyTitle: 'Aucune décision dans l\'historique',
+        emptyDescription: 'Vos analyses passées apparaîtront ici.',
+      },
       searchBar: {
         searchPlaceholder: 'Rechercher dans l\'historique...',
         filter: 'Filtrer',
@@ -1067,6 +1205,34 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         categoryLabel: 'Catégorie',
         allCategories: 'Toutes les catégories',
         uncategorized: 'Non catégorisé',
+        sortBy: 'Trier par',
+        sort: {
+          date: 'Date',
+          category: 'Catégorie',
+        },
+        exportPdf: 'Exporter en PDF',
+        exportJson: 'Exporter en JSON',
+        copyText: 'Copier le texte',
+        confirm: {
+          title: 'Confirmer la suppression',
+          desc: 'Cette action supprimera définitivement tout votre historique de décisions. Cette action est irréversible.',
+          cancel: 'Annuler',
+          ok: 'Confirmer',
+        },
+        toasts: {
+          export: {
+            success: 'Historique exporté en PDF avec succès',
+            error: 'Erreur lors de l\'export PDF',
+          },
+          json: {
+            success: 'Historique exporté en JSON avec succès',
+            error: 'Erreur lors de l\'export JSON',
+          },
+          copy: {
+            success: 'Texte copié dans le presse-papiers',
+            error: 'Erreur lors de la copie',
+          },
+        },
       },
       filters: {
         all: 'Toutes',
@@ -1590,9 +1756,32 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         userNotFound: 'User not found',
         invalidEmail: 'Invalid email',
         generic: 'An error occurred',
+        passwordsMismatch: 'Passwords do not match',
+        passwordTooShort: 'Password must be at least 6 characters long',
       },
       actions: {
         linkGoogle: 'Link Google Account',
+        signIn: 'Sign In',
+        createAccount: 'Create Account',
+        continueWithGoogle: 'Continue with Google',
+      },
+      fields: {
+        email: 'Email address',
+        password: 'Password',
+        fullName: 'Full name',
+        confirmPassword: 'Confirm password',
+      },
+      messages: {
+        accountCreated: 'Account created successfully! You can now sign in.',
+      },
+      separator: {
+        or: 'OR',
+      },
+      toggleText: {
+        signUpPrompt: 'Don\'t have an account?',
+        signUpLink: 'Create account',
+        signInPrompt: 'Already have an account?',
+        signInLink: 'Sign in',
       },
     },
     settings: {
@@ -1651,6 +1840,10 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
     templates: {
       title: 'Decision Templates',
       subtitle: 'Use our ready-made templates to get started quickly',
+      page: {
+        title: 'Decision Templates',
+        description: 'Discover ready-to-use decision templates for different situations.',
+      },
       categories: {
         all: 'All',
         personal: 'Personal',
@@ -1663,6 +1856,30 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       featured: 'Featured',
       community: 'Community',
       myTemplates: 'My Templates',
+      grid: {
+        personalTitle: 'Personal Templates',
+        professionalTitle: 'Professional Templates',
+        recommendedBadge: 'Recommended',
+        emptyMessage: 'No templates found with these criteria.',
+        resetFilters: 'Reset Filters',
+      },
+      card: {
+        open: 'Open',
+      },
+      filters: {
+        searchPlaceholder: 'Search templates...',
+        categoryAll: 'All categories',
+        sort: {
+          newest: 'Newest',
+          popular: 'Most popular',
+          mostCopied: 'Most copied',
+        },
+      },
+      errors: {
+        loadError: 'Error loading templates',
+        openError: 'Error opening template',
+        rateLimitError: 'Preview creation limit reached. Please wait a few minutes.',
+      },
     },
     common: {
       loading: 'Loading...',
@@ -1782,6 +1999,10 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         placeholder: 'Search decisions...',
         noResults: 'No results found',
       },
+      list: {
+        emptyTitle: 'No decisions in history',
+        emptyDescription: 'Your past analyses will appear here.',
+      },
       searchBar: {
         searchPlaceholder: 'Search history...',
         filter: 'Filter',
@@ -1791,6 +2012,34 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         categoryLabel: 'Category',
         allCategories: 'All Categories',
         uncategorized: 'Uncategorized',
+        sortBy: 'Sort by',
+        sort: {
+          date: 'Date',
+          category: 'Category',
+        },
+        exportPdf: 'Export as PDF',
+        exportJson: 'Export as JSON',
+        copyText: 'Copy text',
+        confirm: {
+          title: 'Confirm deletion',
+          desc: 'This action will permanently delete your entire decision history. This action cannot be undone.',
+          cancel: 'Cancel',
+          ok: 'Confirm',
+        },
+        toasts: {
+          export: {
+            success: 'History exported to PDF successfully',
+            error: 'Error during PDF export',
+          },
+          json: {
+            success: 'History exported to JSON successfully',
+            error: 'Error during JSON export',
+          },
+          copy: {
+            success: 'Text copied to clipboard',
+            error: 'Error during copy',
+          },
+        },
       },
       filters: {
         all: 'All',
