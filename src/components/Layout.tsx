@@ -50,7 +50,7 @@ const Layout = () => {
           className={`flex-grow ${
             isSettingsPage 
               ? 'h-[calc(100vh-4rem)] overflow-hidden' 
-              : 'container mx-auto sm:px-6 lg:px-8 sm:py-6 lg:py-8 max-w-full overflow-x-hidden px-[3px] py-0'
+              : 'container mx-auto sm:px-6 lg:px-8 py-6 sm:py-6 lg:py-8 max-w-full overflow-x-hidden px-[3px] sm:px-6'
           }`}
         >
           <Outlet />
