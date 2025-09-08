@@ -353,6 +353,8 @@ export interface UITranslations {
       description: string;
       label: string;
       helpText: string;
+      toastTitle: string;
+      toastDesc: string;
     };
     googleAccount: {
       title: string;
@@ -386,6 +388,7 @@ export interface UITranslations {
     list: {
       emptyTitle: string;
       emptyDescription: string;
+      seeMore: string;
     };
     searchBar: {
       searchPlaceholder: string;
@@ -482,6 +485,9 @@ export interface UITranslations {
     usageContext: string;
     professionalUsage: string;
     professionalDescription: string;
+    personalUsage: string;
+    personalDescription: string;
+    activate: string;
     searchDocuments: string;
     uploadDocuments: string;
   };
@@ -568,6 +574,7 @@ export interface UITranslations {
         item1: string;
         item2: string;
         item3: string;
+        item4: string;
       };
       dataUsage: {
         title: string;
@@ -575,10 +582,22 @@ export interface UITranslations {
         item1: string;
         item2: string;
         item3: string;
+        item4: string;
       };
       dataSharing: {
         title: string;
         description: string;
+        item1: string;
+        item2: string;
+        item3: string;
+      };
+      security: {
+        title: string;
+        description: string;
+        item1: string;
+        item2: string;
+        item3: string;
+        item4: string;
       };
       cookies: {
         title: string;
@@ -587,8 +606,21 @@ export interface UITranslations {
       rights: {
         title: string;
         description: string;
+        item1: string;
+        item2: string;
+        item3: string;
+        item4: string;
+      };
+      retention: {
+        title: string;
+        description: string;
       };
       contact: {
+        title: string;
+        description: string;
+        email: string;
+      };
+      changes: {
         title: string;
         description: string;
       };
@@ -1162,6 +1194,8 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         description: 'Choisissez votre langue préférée',
         label: 'Langue',
         helpText: 'Sélectionnez la langue d\'affichage de l\'interface',
+        toastTitle: 'Langue mise à jour',
+        toastDesc: 'La langue de l\'interface a été modifiée avec succès',
       },
       googleAccount: {
         title: 'Compte Google',
@@ -1195,6 +1229,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       list: {
         emptyTitle: 'Aucune décision dans l\'historique',
         emptyDescription: 'Vos analyses passées apparaîtront ici.',
+        seeMore: 'Voir plus',
       },
       searchBar: {
         searchPlaceholder: 'Rechercher dans l\'historique...',
@@ -1360,6 +1395,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
           item1: 'Données de décision et critères',
           item2: 'Informations de profil utilisateur',
           item3: 'Données d\'usage de l\'application',
+          item4: 'Métadonnées de sessions et préférences',
         },
         dataUsage: {
           title: 'Utilisation des données',
@@ -1367,10 +1403,22 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
           item1: 'Améliorer nos algorithmes de décision',
           item2: 'Personnaliser votre expérience',
           item3: 'Fournir un support technique',
+          item4: 'Analyser l\'utilisation de l\'application',
         },
         dataSharing: {
           title: 'Partage de données',
           description: 'Nous ne partageons pas vos données personnelles avec des tiers',
+          item1: 'Aucun partage avec des tiers sans consentement',
+          item2: 'Données anonymisées pour des statistiques générales',
+          item3: 'Respect strict de votre vie privée',
+        },
+        security: {
+          title: 'Sécurité des données',
+          description: 'Nous protégeons vos données avec des mesures de sécurité avancées',
+          item1: 'Chiffrement de bout en bout',
+          item2: 'Serveurs sécurisés et certifiés',
+          item3: 'Accès restreint aux données personnelles',
+          item4: 'Sauvegardes régulières et sécurisées',
         },
         cookies: {
           title: 'Cookies',
@@ -1379,10 +1427,23 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         rights: {
           title: 'Vos droits',
           description: 'Vous avez le droit d\'accéder, modifier ou supprimer vos données',
+          item1: 'Droit d\'accès à vos données personnelles',
+          item2: 'Droit de rectification des informations incorrectes',
+          item3: 'Droit à l\'effacement de vos données',
+          item4: 'Droit à la portabilité de vos données',
+        },
+        retention: {
+          title: 'Conservation des données',
+          description: 'Nous conservons vos données uniquement le temps nécessaire',
         },
         contact: {
           title: 'Contact',
           description: 'Pour toute question, contactez-nous',
+          email: 'support@rationable.com',
+        },
+        changes: {
+          title: 'Modifications de la politique',
+          description: 'Nous vous informerons de tout changement important',
         },
       },
     },
@@ -1613,6 +1674,9 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       usageContext: 'Contexte d\'utilisation',
       professionalUsage: 'Usage professionnel',
       professionalDescription: 'Pour les décisions commerciales et professionnelles',
+      personalUsage: 'Usage personnel',
+      personalDescription: 'Pour vos décisions personnelles quotidiennes',
+      activate: 'Activer',
       searchDocuments: 'Rechercher des documents',
       uploadDocuments: 'Télécharger des documents',
     },
@@ -1969,6 +2033,8 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         description: 'Choose your preferred language',
         label: 'Language',
         helpText: 'Select the interface display language',
+        toastTitle: 'Language updated',
+        toastDesc: 'Interface language has been successfully changed',
       },
       googleAccount: {
         title: 'Google Account',
@@ -2002,6 +2068,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       list: {
         emptyTitle: 'No decisions in history',
         emptyDescription: 'Your past analyses will appear here.',
+        seeMore: 'See more',
       },
       searchBar: {
         searchPlaceholder: 'Search history...',
@@ -2167,6 +2234,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
           item1: 'Decision data and criteria',
           item2: 'User profile information',
           item3: 'Application usage data',
+          item4: 'Session metadata and preferences',
         },
         dataUsage: {
           title: 'Data Usage',
@@ -2174,10 +2242,22 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
           item1: 'Improve our decision algorithms',
           item2: 'Personalize your experience',
           item3: 'Provide technical support',
+          item4: 'Analyze application usage',
         },
         dataSharing: {
           title: 'Data Sharing',
           description: 'We do not share your personal data with third parties',
+          item1: 'No sharing with third parties without consent',
+          item2: 'Anonymized data for general statistics',
+          item3: 'Strict respect for your privacy',
+        },
+        security: {
+          title: 'Data Security',
+          description: 'We protect your data with advanced security measures',
+          item1: 'End-to-end encryption',
+          item2: 'Secure and certified servers',
+          item3: 'Restricted access to personal data',
+          item4: 'Regular and secure backups',
         },
         cookies: {
           title: 'Cookies',
@@ -2186,10 +2266,23 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         rights: {
           title: 'Your Rights',
           description: 'You have the right to access, modify or delete your data',
+          item1: 'Right to access your personal data',
+          item2: 'Right to rectify incorrect information',
+          item3: 'Right to erasure of your data',
+          item4: 'Right to data portability',
+        },
+        retention: {
+          title: 'Data Retention',
+          description: 'We keep your data only as long as necessary',
         },
         contact: {
           title: 'Contact',
           description: 'For any questions, contact us',
+          email: 'support@rationable.com',
+        },
+        changes: {
+          title: 'Policy Changes',
+          description: 'We will notify you of any important changes',
         },
       },
     },
@@ -2406,23 +2499,25 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         loading: 'Loading...',
       },
     },
-    // Add missing keys from screenshots
     workspaces: {
-      title: 'Espaces de travail',
-      description: 'Gérez vos préférences et paramètres',
-      newWorkspace: 'Nouvel espace de travail',
-      defaultBadge: 'Par défaut',
-      currentBadge: 'Actuel',
-      personal: 'Personnel',
-      save: 'Sauvegarder',
-      cancel: 'Annuler',
-      workspaceDescription: 'Description de l\'espace de travail',
-      color: 'Couleur',
-      usageContext: 'Contexte d\'utilisation',
-      professionalUsage: 'Usage professionnel',
-      professionalDescription: 'Pour les décisions commerciales et professionnelles',
-      searchDocuments: 'Rechercher des documents',
-      uploadDocuments: 'Télécharger des documents',
+      title: 'Workspaces',
+      description: 'Manage your preferences and settings',
+      newWorkspace: 'New workspace',
+      defaultBadge: 'Default',
+      currentBadge: 'Current',
+      personal: 'Personal',
+      save: 'Save',
+      cancel: 'Cancel',
+      workspaceDescription: 'Workspace description',
+      color: 'Color',
+      usageContext: 'Usage context',
+      professionalUsage: 'Professional usage',
+      professionalDescription: 'For commercial and professional decisions',
+      personalUsage: 'Personal usage',
+      personalDescription: 'For your daily personal decisions',
+      activate: 'Activate',
+      searchDocuments: 'Search documents',
+      uploadDocuments: 'Upload documents',
     },
   },
 };
