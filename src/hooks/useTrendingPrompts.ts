@@ -95,8 +95,10 @@ export const useTrendingPrompts = (): UseTrendingPromptsResult => {
         };
         localStorage.setItem(cacheKey, JSON.stringify(cacheData));
         
-        // Always show exactly 3 prompts
-        const displayPrompts = trendingData.prompts.slice(0, 3);
+        // Always show exactly 3 prompts from daily rotation
+        const dayOfWeek = new Date().getDay();
+        const startIndex = dayOfWeek % Math.max(1, (trendingData.prompts.length - 2));
+        const displayPrompts = trendingData.prompts.slice(startIndex, startIndex + 3);
         setResult(prev => ({
           ...prev,
           prompts: displayPrompts,

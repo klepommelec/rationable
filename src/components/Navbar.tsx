@@ -29,9 +29,9 @@ const Navbar: React.FC = () => {
     clearSession
   } = useDecisionMakerContext();
   
-  // Détection d'une décision active
+  // Détection d'une décision active (seulement si analyse démarrée)
   const hasActiveDecision = location.pathname === '/' && user && (
-    result !== null || analysisStep !== 'idle' || dilemma.trim() !== ''
+    result !== null || analysisStep !== 'idle'
   );
   
   // Créer l'objet currentDecision pour ShareButton

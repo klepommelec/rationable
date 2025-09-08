@@ -173,7 +173,7 @@ export const getTrendingPrompts = async (
     }
     
     return {
-      prompts: finalPrompts.slice(0, 3), // Always return exactly 3 prompts
+      prompts: finalPrompts.slice(0, 5), // Return up to 5 prompts for rotation
       country: countryCode,
       countryName
     };
