@@ -474,6 +474,11 @@ export interface UITranslations {
         description: string;
         viewAll: string;
       };
+      trending: {
+        title: string;
+        loading: string;
+        error: string;
+      };
       analysisStarted: string;
       fileTooLarge: string;
     };
@@ -1321,6 +1326,11 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         description: 'Utilisez des modèles prêts à l\'emploi pour commencer rapidement',
         viewAll: 'Voir tout',
       },
+      trending: {
+        title: 'Tendances de la semaine en {country}',
+        loading: 'Chargement des tendances...',
+        error: 'Impossible de charger les tendances',
+      },
       analysisStarted: 'Analyse démarrée !',
       fileTooLarge: 'est trop volumineux (max 10MB)',
     },
@@ -2120,6 +2130,11 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       templates: {
         description: 'Use ready-to-use templates to get started quickly',
         viewAll: 'View all',
+      },
+      trending: {
+        title: 'Trending this week in {country}',
+        loading: 'Loading trends...',
+        error: 'Unable to load trends',
       },
       analysisStarted: 'Analysis started!',
       fileTooLarge: 'is too large (max 10MB)',

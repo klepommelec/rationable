@@ -16,6 +16,7 @@ import { shareTemplateForPreview } from '@/services/templatePreviewService';
 import { useAuth } from '@/hooks/useAuth';
 import AuthModal from '@/components/AuthModal';
 import { useContextualContent } from '@/hooks/useContextualContent';
+import TrendingPrompts from '@/components/TrendingPrompts';
 interface DilemmaSetupProps {
   dilemma: string;
   setDilemma: (dilemma: string) => void;
@@ -289,6 +290,12 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                             </div>}
 
                         <div className="space-y-3">
+                            <TrendingPrompts
+                              onPromptSelect={setDilemma}
+                              disabled={isLoading || isUpdating || analysisStep !== 'idle'}
+                            />
+                            
+                            {/* Fallback to original templates if trending prompts fail */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                 {displayedTemplates.map(template => <Button key={template.name} variant="outline" size="sm" onClick={() => handleOpenTemplate({
                 name: template.name,
