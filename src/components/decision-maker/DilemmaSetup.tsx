@@ -73,6 +73,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   const { t } = useI18nUI();
   const { user } = useAuth();
   const { context } = useContextualContent();
+  const { prompts, isLoading: trendsLoading, error: trendsError } = useTrendingPrompts();
 
   // Afficher seulement les 3 premiers modèles
   const displayedTemplates = templates.slice(0, 3);
