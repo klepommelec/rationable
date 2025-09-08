@@ -304,6 +304,7 @@ export interface UITranslations {
     low: string;
     medium: string;
     high: string;
+    updateAnalysis: string;
   };
   share: {
     button: {
@@ -1147,6 +1148,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       low: 'Faible',
       medium: 'Moyen',
       high: 'Élevé',
+      updateAnalysis: 'Mettre à jour l\'analyse',
     },
     share: {
       button: {
@@ -1988,6 +1990,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       low: 'Low',
       medium: 'Medium',
       high: 'High',
+      updateAnalysis: 'Update Analysis',
     },
     share: {
       button: {
