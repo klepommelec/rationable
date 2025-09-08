@@ -268,7 +268,7 @@ const DecisionMaker = () => {
               </div>}
           </>}
 
-        {displayStep === 'idle' && <DilemmaSetup dilemma={dilemma} setDilemma={setDilemma} analysisStep={analysisStep} isLoading={isLoading} isUpdating={isUpdating} applyTemplate={applyTemplate} clearSession={clearAll} history={history} loadDecision={loadDecisionWithThread} deleteDecision={deleteDecision} clearHistory={clearHistory} handleStartAnalysis={handleStartAnalysis} progress={progress} progressMessage={progressMessage} templates={templates} selectedCategory={selectedCategory} onCategoryChange={handleCategoryChange} onUpdateCategory={handleUpdateCategory} uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} />}
+        {displayStep === 'idle' && <DilemmaSetup dilemma={dilemma} setDilemma={setDilemma} analysisStep={analysisStep} isLoading={isLoading} isUpdating={isUpdating} applyTemplate={applyTemplate} clearSession={clearAll} clearAnalyses={clearAnalyses} history={history} loadDecision={loadDecisionWithThread} deleteDecision={deleteDecision} clearHistory={clearHistory} handleStartAnalysis={handleStartAnalysis} progress={progress} progressMessage={progressMessage} templates={templates} selectedCategory={selectedCategory} onCategoryChange={handleCategoryChange} onUpdateCategory={handleUpdateCategory} uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} />}
         
         {/* Bouton de génération manuelle uniquement pour les questions comparatives */}
         {displayStep === 'criteria-loaded' && shouldShowCriteria && <div className="mb-6">

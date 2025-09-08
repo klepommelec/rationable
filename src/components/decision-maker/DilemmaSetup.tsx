@@ -26,6 +26,7 @@ interface DilemmaSetupProps {
   isUpdating: boolean;
   applyTemplate: (template: any) => void;
   clearSession: () => void;
+  clearAnalyses: () => void;
   history: IDecision[];
   loadDecision: (id: string) => void;
   deleteDecision: (id: string) => void;
@@ -51,6 +52,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   isUpdating,
   applyTemplate,
   clearSession,
+  clearAnalyses,
   history,
   loadDecision,
   deleteDecision,
@@ -192,6 +194,9 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
       return;
     }
 
+    // Clear previous analyses when starting a new question (not a follow-up)
+    clearAnalyses();
+    
     setIsAnalysisStarting(true);
     toast.success(t('dilemmaSetup.analysisStarted'));
     try {
