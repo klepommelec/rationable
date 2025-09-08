@@ -4,69 +4,57 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TrendingUp } from 'lucide-react';
 import { useTrendingPrompts } from '@/hooks/useTrendingPrompts';
 import { useI18nUI } from '@/contexts/I18nUIContext';
-
 interface TrendingPromptsProps {
   onPromptSelect: (prompt: string) => void;
   disabled?: boolean;
 }
-
 const TrendingPrompts: React.FC<TrendingPromptsProps> = ({
   onPromptSelect,
   disabled = false
 }) => {
-  const { prompts, isLoading, error, countryName } = useTrendingPrompts();
-  const { t } = useI18nUI();
-
+  const {
+    prompts,
+    isLoading,
+    error,
+    countryName
+  } = useTrendingPrompts();
+  const {
+    t
+  } = useI18nUI();
   const handlePromptClick = (prompt: string) => {
     onPromptSelect(prompt);
     // Scroll to dilemma input area
     setTimeout(() => {
       const dilemmaInput = document.getElementById('dilemma-input');
       if (dilemmaInput) {
-        dilemmaInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        dilemmaInput.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
         dilemmaInput.focus();
       }
     }, 100);
   };
-
   if (isLoading) {
-    return (
-      <div className="space-y-3">
+    return <div className="space-y-3">
         <Skeleton className="h-6 w-48" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-10 rounded-full" />
-          ))}
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-10 rounded-full" />)}
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (error || prompts.length === 0) {
     return null; // Will show fallback templates in DilemmaSetup
   }
-
-  return (
-    <div className="space-y-3">
+  return <div className="space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-        {prompts.map((prompt, index) => (
-          <Button
-            key={index}
-            variant="outline"
-            size="sm"
-            onClick={() => handlePromptClick(prompt)}
-            disabled={disabled}
-            className="text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-full py-[8px] px-[8px] hover:bg-primary/5"
-          >
+        {prompts.map((prompt, index) => <Button key={index} variant="outline" size="sm" onClick={() => handlePromptClick(prompt)} disabled={disabled} className="text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-full py-[8px] hover:bg-primary/5 px-[13px]">
             <TrendingUp className="h-3 w-3 text-primary/70 flex-shrink-0" />
             <span className="truncate text-sm px-[4px] font-medium text-gray-500 line-clamp-2">
               {prompt}
             </span>
-          </Button>
-        ))}
+          </Button>)}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default TrendingPrompts;
