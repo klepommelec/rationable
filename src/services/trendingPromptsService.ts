@@ -42,21 +42,34 @@ const parsePromptsFromResponse = (content: string): string[] => {
   
   for (const line of lines) {
     const trimmed = line.trim();
-    // Match patterns like "1. ", "1) ", "- ", etc.
-    const match = trimmed.match(/^(?:\d+[\.\)]\s*|[-•]\s*|[*]\s*)(.+)$/);
+    // Match patterns like "1. ", "1) ", "- ", etc. and capture only the question part
+    const match = trimmed.match(/^(?:\d+[\.\)]\s*|[-•*]\s*)(.+?)(?:\s*\d+\.|$)/);
     if (match && match[1]) {
-      const prompt = match[1].trim();
-      // Skip empty or very short prompts
+      let prompt = match[1].trim();
+      // Remove any trailing numbers or punctuation that might be part of next item
+      prompt = prompt.replace(/\s+\d+\.\s*.*$/, '');
+      // Skip empty or very short prompts, and ensure it ends with ?
       if (prompt.length > 10) {
+        // Add question mark if missing
+        if (!prompt.endsWith('?')) {
+          prompt += '?';
+        }
         prompts.push(prompt);
       }
     }
   }
   
-  // If no numbered list found, try to split by periods or line breaks
+  // If no numbered list found, try to extract individual questions
   if (prompts.length === 0) {
-    const sentences = content.split(/[.!?]\s+/).filter(s => s.trim().length > 20);
-    return sentences.slice(0, 5).map(s => s.trim());
+    // Look for question patterns
+    const questionMatches = content.match(/[^.!?]*\?/g);
+    if (questionMatches) {
+      const validQuestions = questionMatches
+        .map(q => q.trim())
+        .filter(q => q.length > 10 && q.includes(' '))
+        .map(q => q.replace(/^\d+[\.\)]\s*/, '').trim());
+      return validQuestions.slice(0, 5);
+    }
   }
   
   return prompts.slice(0, 5); // Return max 5 prompts
