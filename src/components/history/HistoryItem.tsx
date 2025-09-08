@@ -85,7 +85,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
                       + {followUpCount} {followUpCount > 1 ? t('history.item.followUp.plural') : t('history.item.followUp.singular')}
                     </span>
                         </TooltipTrigger>
-                        <TooltipContent className="max-w-lg max-h-64 overflow-y-auto">
+                        <TooltipContent className="max-h-64 overflow-y-auto">
                           <div className="space-y-3">
                             {followUpDecisions?.slice(0, 5).map((followUp, index) => (
                               <div key={followUp.id} className="text-sm">
@@ -153,7 +153,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
                     + {followUpCount} {followUpCount > 1 ? t('history.item.followUp.plural') : t('history.item.followUp.singular')}
                   </span>
                     </TooltipTrigger>
-                    <TooltipContent className="max-w-lg max-h-64 overflow-y-auto">
+                    <TooltipContent className="max-h-64 overflow-y-auto">
                       <div className="space-y-3">
                         {followUpDecisions?.slice(0, 5).map((followUp, index) => (
                           <div key={followUp.id} className="text-sm">
