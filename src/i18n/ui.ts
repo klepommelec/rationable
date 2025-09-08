@@ -867,6 +867,9 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         invalidEmail: 'Email invalide',
         generic: 'Une erreur s\'est produite',
       },
+      actions: {
+        linkGoogle: 'Associer un compte Google',
+      },
     },
     settings: {
       title: 'Paramètres',
@@ -1025,6 +1028,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         description: 'Choisissez votre langue préférée',
         label: 'Langue',
         helpText: 'Sélectionnez la langue d\'affichage de l\'interface',
+      },
       googleAccount: {
         title: 'Compte Google',
         description: 'Gérez votre connexion Google',
@@ -1107,7 +1111,6 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         ok: 'Supprimer',
       },
     },
-    userFallback: 'Utilisateur',
     comments: {
       section: {
         titleDefault: 'Commentaires',
@@ -1310,6 +1313,10 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       pending: 'En attente',
       remove: 'Retirer',
       resend: 'Renvoyer',
+      description: 'Invitez d\'autres personnes à collaborer sur cette décision',
+      publicLink: 'Lien public',
+      publicLinkDescription: 'Toute personne avec ce lien peut voir et commenter',
+      createLink: 'Créer un lien',
     },
     templates_: {
       personal: {
@@ -1425,6 +1432,23 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         confirm: 'Confirmer',
         loading: 'Chargement...',
       },
+    },
+    workspaces: {
+      title: 'Espaces de travail',
+      description: 'Gérez vos préférences et paramètres',
+      newWorkspace: 'Nouvel espace de travail',
+      defaultBadge: 'Par défaut',
+      currentBadge: 'Actuel',
+      personal: 'Personnel',
+      save: 'Sauvegarder',
+      cancel: 'Annuler',
+      workspaceDescription: 'Description de l\'espace de travail',
+      color: 'Couleur',
+      usageContext: 'Contexte d\'utilisation',
+      professionalUsage: 'Usage professionnel',
+      professionalDescription: 'Pour les décisions commerciales et professionnelles',
+      searchDocuments: 'Rechercher des documents',
+      uploadDocuments: 'Télécharger des documents',
     },
   },
   en: {
@@ -1567,6 +1591,9 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         invalidEmail: 'Invalid email',
         generic: 'An error occurred',
       },
+      actions: {
+        linkGoogle: 'Link Google Account',
+      },
     },
     settings: {
       title: 'Settings',
@@ -1695,11 +1722,6 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       toasts: {
         linkCopied: 'Link copied to clipboard!',
       },
-      googleAccount: {
-        title: 'Google Account',
-        description: 'Manage your Google connection',
-        notConnected: 'Google account not connected',
-      },
     },
     profile: {
       avatar: {
@@ -1813,7 +1835,6 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         ok: 'Delete',
       },
     },
-    userFallback: 'User',
     comments: {
       section: {
         titleDefault: 'Comments',
@@ -2016,6 +2037,10 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       pending: 'Pending',
       remove: 'Remove',
       resend: 'Resend',
+      description: 'Invite others to collaborate on this decision',
+      publicLink: 'Public Link',
+      publicLinkDescription: 'Anyone with this link can view and comment',
+      createLink: 'Create Link',
     },
     templates_: {
       personal: {
@@ -2149,18 +2174,6 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       professionalDescription: 'Pour les décisions commerciales et professionnelles',
       searchDocuments: 'Rechercher des documents',
       uploadDocuments: 'Télécharger des documents',
-    },
-    collaboration: {
-      description: 'Invite others to collaborate on this decision',
-      publicLink: 'Public Link',
-      publicLinkDescription: 'Anyone with this link can view and comment',
-      createLink: 'Create Link',
-    },
-    auth: {
-      actions: {
-        linkGoogle: 'Link Google Account',
-      },
-    },
     },
   },
 };
