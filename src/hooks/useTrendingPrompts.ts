@@ -26,7 +26,6 @@ interface UseTrendingPromptsResult {
   isLoading: boolean;
   error: boolean;
   countryName: string;
-  refreshPrompts: () => void;
 }
 
 export const useTrendingPrompts = (): UseTrendingPromptsResult => {
@@ -39,14 +38,6 @@ export const useTrendingPrompts = (): UseTrendingPromptsResult => {
     countryName: ''
   });
 
-  const refreshPrompts = () => {
-    // Clear cache to force refresh
-    const weekKey = getCurrentWeekKey();
-    const countryCode = getCountryCode(currentLanguage);
-    const cacheKey = `trending_${context}_${countryCode}_${currentLanguage}_${weekKey}`;
-    localStorage.removeItem(cacheKey);
-    loadTrendingPrompts();
-  };
 
   const loadTrendingPrompts = async () => {
     setResult(prev => ({ ...prev, isLoading: true, error: false }));
@@ -96,7 +87,7 @@ export const useTrendingPrompts = (): UseTrendingPromptsResult => {
       // Fetch new data
       const trendingData = await getTrendingPrompts(currentLanguage, context);
       
-      if (trendingData && trendingData.prompts.length > 0) {
+      if (trendingData && trendingData.prompts.length >= 3) {
         // Cache the result with all prompts for daily rotation
         const cacheData = {
           ...trendingData,
@@ -104,7 +95,7 @@ export const useTrendingPrompts = (): UseTrendingPromptsResult => {
         };
         localStorage.setItem(cacheKey, JSON.stringify(cacheData));
         
-        // Show first 3 prompts initially
+        // Always show exactly 3 prompts
         const displayPrompts = trendingData.prompts.slice(0, 3);
         setResult(prev => ({
           ...prev,
@@ -114,6 +105,7 @@ export const useTrendingPrompts = (): UseTrendingPromptsResult => {
           countryName: trendingData.countryName
         }));
       } else {
+        // This shouldn't happen anymore with fallbacks, but keep as safety
         setResult(prev => ({
           ...prev,
           prompts: [],
@@ -138,5 +130,5 @@ export const useTrendingPrompts = (): UseTrendingPromptsResult => {
     loadTrendingPrompts();
   }, [currentLanguage, context]);
 
-  return { ...result, refreshPrompts };
+  return result;
 };

@@ -87,28 +87,134 @@ export const getTrendingPrompts = async (
       }
     };
     
+    // Fallback prompts to ensure we always have 3 minimum
+    const fallbackPrompts = {
+      professional: {
+        fr: [
+          "Dois-je changer de carrière professionnelle ?",
+          "Faut-il investir dans de nouveaux outils pour mon équipe ?",
+          "Dois-je accepter cette proposition de partenariat ?"
+        ],
+        en: [
+          "Should I change my professional career?",
+          "Should I invest in new tools for my team?",
+          "Should I accept this partnership proposal?"
+        ],
+        es: [
+          "¿Debería cambiar mi carrera profesional?",
+          "¿Debería invertir en nuevas herramientas para mi equipo?",
+          "¿Debería aceptar esta propuesta de asociación?"
+        ],
+        it: [
+          "Dovrei cambiare la mia carriera professionale?",
+          "Dovrei investire in nuovi strumenti per il mio team?",
+          "Dovrei accettare questa proposta di partnership?"
+        ],
+        de: [
+          "Sollte ich meine berufliche Laufbahn ändern?",
+          "Sollte ich in neue Tools für mein Team investieren?",
+          "Sollte ich diesen Partnerschaftsvorschlag annehmen?"
+        ]
+      },
+      personal: {
+        fr: [
+          "Dois-je déménager dans une nouvelle ville ?",
+          "Faut-il que j'adopte un animal de compagnie ?",
+          "Dois-je reprendre mes études ?"
+        ],
+        en: [
+          "Should I move to a new city?",
+          "Should I adopt a pet?",
+          "Should I go back to school?"
+        ],
+        es: [
+          "¿Debería mudarme a una nueva ciudad?",
+          "¿Debería adoptar una mascota?",
+          "¿Debería volver a estudiar?"
+        ],
+        it: [
+          "Dovrei trasferirmi in una nuova città?",
+          "Dovrei adottare un animale domestico?",
+          "Dovrei tornare a studiare?"
+        ],
+        de: [
+          "Sollte ich in eine neue Stadt ziehen?",
+          "Sollte ich ein Haustier adoptieren?",
+          "Sollte ich wieder studieren?"
+        ]
+      }
+    };
+    
     const query = contextQueries[context][language];
+    let prompts: string[] = [];
     
-    const result = await searchWithPerplexity(query, undefined, language);
-    
-    if (!result || !result.content) {
-      return null;
+    try {
+      const result = await searchWithPerplexity(query, undefined, language);
+      
+      if (result && result.content) {
+        prompts = parsePromptsFromResponse(result.content);
+      }
+    } catch (error) {
+      console.warn('Error fetching from Perplexity:', error);
     }
     
-    const prompts = parsePromptsFromResponse(result.content);
+    // Ensure we have at least 3 prompts by using fallbacks
+    const finalPrompts = [...prompts];
+    const fallbacks = fallbackPrompts[context][language];
     
-    if (prompts.length === 0) {
-      return null;
+    while (finalPrompts.length < 3 && fallbacks.length > 0) {
+      const fallbackIndex = (finalPrompts.length) % fallbacks.length;
+      if (!finalPrompts.includes(fallbacks[fallbackIndex])) {
+        finalPrompts.push(fallbacks[fallbackIndex]);
+      } else {
+        // If all fallbacks are already included, break to avoid infinite loop
+        break;
+      }
     }
     
     return {
-      prompts: prompts.slice(0, 3), // Return only 3 prompts as requested
+      prompts: finalPrompts.slice(0, 3), // Always return exactly 3 prompts
       country: countryCode,
       countryName
     };
     
   } catch (error) {
     console.error('Error fetching trending prompts:', error);
-    return null;
+    // Return fallback prompts even on error
+    const { code: countryCode, name: countryName } = getCountryInfo(language);
+    const fallbackPrompts = {
+      professional: {
+        fr: [
+          "Dois-je changer de carrière professionnelle ?",
+          "Faut-il investir dans de nouveaux outils pour mon équipe ?",
+          "Dois-je accepter cette proposition de partenariat ?"
+        ],
+        en: [
+          "Should I change my professional career?",
+          "Should I invest in new tools for my team?",
+          "Should I accept this partnership proposal?"
+        ]
+      },
+      personal: {
+        fr: [
+          "Dois-je déménager dans une nouvelle ville ?",
+          "Faut-il que j'adopte un animal de compagnie ?",
+          "Dois-je reprendre mes études ?"
+        ],
+        en: [
+          "Should I move to a new city?",
+          "Should I adopt a pet?",
+          "Should I go back to school?"
+        ]
+      }
+    };
+    
+    const contextPrompts = fallbackPrompts[context][language] || fallbackPrompts[context]['fr'];
+    
+    return {
+      prompts: contextPrompts,
+      country: countryCode,
+      countryName
+    };
   }
 };
