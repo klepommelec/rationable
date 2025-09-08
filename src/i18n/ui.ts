@@ -316,6 +316,18 @@ export interface UITranslations {
       date: string;
       category: string;
     };
+    item: {
+      share: string;
+      delete: string;
+      followUp: {
+        singular: string;
+        plural: string;
+      };
+      more: {
+        singular: string;
+        plural: string;
+      };
+    };
     more: string;
     export: string;
     exportPdf: string;
@@ -330,6 +342,75 @@ export interface UITranslations {
     };
   };
   userFallback: string;
+  comments: {
+    section: {
+      titleDefault: string;
+      placeholderDefault: string;
+      loading: string;
+      empty: string;
+      add: string;
+      cancel: string;
+      addButton: string;
+      toasts: {
+        loadError: string;
+        emptyError: string;
+        addSuccess: string;
+        addError: string;
+      };
+    };
+    item: {
+      types: {
+        general: string;
+        criteria: string;
+        option: string;
+        follow_up: string;
+      };
+      createdOn: string;
+      modifiedOn: string;
+    };
+  };
+  dataAccuracy: {
+    unknown: {
+      date: string;
+      datetime: string;
+      author: string;
+      user: string;
+    };
+    createdOn: string;
+    updatedOn: string;
+    by: string;
+    viewSources: string;
+    noExternalSources: string;
+    sources: {
+      one: string;
+      other: string;
+    };
+  };
+  decision: {
+    title: string;
+    recommended: string;
+    advantages: string;
+    disadvantages: string;
+    learnMore: string;
+    moreAdvantages: string;
+    moreDisadvantages: string;
+    search: string;
+    comparisonTableCaption: string;
+    comparisonTable: string;
+    seeMoreOptions: string;
+    noResults: string;
+    pointsOfAttention: string;
+    usefulLinks: string;
+    popularVideos: string;
+    seeMore: string;
+    seeLess: string;
+    toasts: {
+      alreadyRunning: string;
+      followup: {
+        error: string;
+      };
+    };
+  };
   footer: {
     allRightsReserved: string;
     privacyPolicy: string;
@@ -897,6 +978,18 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         date: 'Date',
         category: 'Catégorie',
       },
+      item: {
+        share: 'Partager',
+        delete: 'Supprimer',
+        followUp: {
+          singular: 'question de suivi',
+          plural: 'questions de suivi',
+        },
+        more: {
+          singular: 'autre',
+          plural: 'autres',
+        },
+      },
       more: 'Plus',
       export: 'Exporter',
       exportPdf: 'Exporter en PDF',
@@ -911,6 +1004,75 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       },
     },
     userFallback: 'Utilisateur',
+    comments: {
+      section: {
+        titleDefault: 'Commentaires',
+        placeholderDefault: 'Ajouter un commentaire...',
+        loading: 'Chargement des commentaires...',
+        empty: 'Aucun commentaire pour le moment',
+        add: 'Ajouter',
+        cancel: 'Annuler',
+        addButton: 'Ajouter un commentaire',
+        toasts: {
+          loadError: 'Erreur lors du chargement des commentaires',
+          emptyError: 'Le commentaire ne peut pas être vide',
+          addSuccess: 'Commentaire ajouté avec succès',
+          addError: 'Erreur lors de l\'ajout du commentaire',
+        },
+      },
+      item: {
+        types: {
+          general: 'Général',
+          criteria: 'Critère',
+          option: 'Option',
+          follow_up: 'Question de suivi',
+        },
+        createdOn: 'Créé le',
+        modifiedOn: 'Modifié le',
+      },
+    },
+    dataAccuracy: {
+      unknown: {
+        date: 'Date inconnue',
+        datetime: 'Date et heure inconnues',
+        author: 'Auteur inconnu',
+        user: 'Utilisateur inconnu',
+      },
+      createdOn: 'Créé le',
+      updatedOn: 'mis à jour le',
+      by: 'par',
+      viewSources: 'Voir les sources',
+      noExternalSources: 'Aucune source externe disponible',
+      sources: {
+        one: 'source',
+        other: 'sources',
+      },
+    },
+    decision: {
+      title: 'Décision',
+      recommended: 'Recommandé',
+      advantages: 'Avantages',
+      disadvantages: 'Inconvénients',
+      learnMore: 'En savoir plus',
+      moreAdvantages: 'avantages supplémentaires',
+      moreDisadvantages: 'inconvénients supplémentaires',
+      search: 'Rechercher',
+      comparisonTableCaption: 'Tableau de comparaison de {count} options',
+      comparisonTable: 'Tableau de comparaison',
+      seeMoreOptions: 'Voir plus d\'options',
+      noResults: 'Aucun résultat disponible',
+      pointsOfAttention: 'Points d\'attention',
+      usefulLinks: 'Liens utiles',
+      popularVideos: 'Vidéos populaires',
+      seeMore: 'Voir plus',
+      seeLess: 'Voir moins',
+      toasts: {
+        alreadyRunning: 'Une analyse est déjà en cours',
+        followup: {
+          error: 'Erreur lors de la question de suivi',
+        },
+      },
+    },
     footer: {
       allRightsReserved: 'Tous droits réservés',
       privacyPolicy: 'Politique de confidentialité',
@@ -1476,6 +1638,18 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         date: 'Date',
         category: 'Category',
       },
+      item: {
+        share: 'Share',
+        delete: 'Delete',
+        followUp: {
+          singular: 'follow-up question',
+          plural: 'follow-up questions',
+        },
+        more: {
+          singular: 'other',
+          plural: 'others',
+        },
+      },
       more: 'More',
       export: 'Export',
       exportPdf: 'Export as PDF',
@@ -1490,6 +1664,75 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       },
     },
     userFallback: 'User',
+    comments: {
+      section: {
+        titleDefault: 'Comments',
+        placeholderDefault: 'Add a comment...',
+        loading: 'Loading comments...',
+        empty: 'No comments yet',
+        add: 'Add',
+        cancel: 'Cancel',
+        addButton: 'Add comment',
+        toasts: {
+          loadError: 'Error loading comments',
+          emptyError: 'Comment cannot be empty',
+          addSuccess: 'Comment added successfully',
+          addError: 'Error adding comment',
+        },
+      },
+      item: {
+        types: {
+          general: 'General',
+          criteria: 'Criteria',
+          option: 'Option',
+          follow_up: 'Follow-up',
+        },
+        createdOn: 'Created on',
+        modifiedOn: 'Modified on',
+      },
+    },
+    dataAccuracy: {
+      unknown: {
+        date: 'Unknown date',
+        datetime: 'Unknown date and time',
+        author: 'Unknown author',
+        user: 'Unknown user',
+      },
+      createdOn: 'Created on',
+      updatedOn: 'updated on',
+      by: 'by',
+      viewSources: 'View sources',
+      noExternalSources: 'No external sources available',
+      sources: {
+        one: 'source',
+        other: 'sources',
+      },
+    },
+    decision: {
+      title: 'Decision',
+      recommended: 'Recommended',
+      advantages: 'Advantages',
+      disadvantages: 'Disadvantages',
+      learnMore: 'Learn more',
+      moreAdvantages: 'more advantages',
+      moreDisadvantages: 'more disadvantages',
+      search: 'Search',
+      comparisonTableCaption: 'Comparison table of {count} options',
+      comparisonTable: 'Comparison table',
+      seeMoreOptions: 'See more options',
+      noResults: 'No results available',
+      pointsOfAttention: 'Points of attention',
+      usefulLinks: 'Useful links',
+      popularVideos: 'Popular videos',
+      seeMore: 'See more',
+      seeLess: 'See less',
+      toasts: {
+        alreadyRunning: 'An analysis is already running',
+        followup: {
+          error: 'Error with follow-up question',
+        },
+      },
+    },
     footer: {
       allRightsReserved: 'All rights reserved',
       privacyPolicy: 'Privacy Policy',

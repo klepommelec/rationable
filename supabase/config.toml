@@ -2,3 +2,6 @@ project_id = "dzrlrfkidaahceryoajc"
 
 [functions.first-web-result]
 verify_jwt = false
+
+[functions.perplexity-search]
+verify_jwt = false

@@ -15,7 +15,10 @@ class SearchCacheService {
     // Normaliser et hasher la requête pour la clé de cache
     const normalized = query.toLowerCase().trim();
     const contextKey = context ? `_${context.toLowerCase().trim()}` : '';
-    return btoa(normalized + contextKey).replace(/[/+=]/g, ''); // Encoder en base64 et nettoyer
+    // Utiliser encodeURIComponent pour gérer les caractères Unicode
+    const encoded = encodeURIComponent(normalized + contextKey);
+    // Créer un hash simple pour la clé de cache
+    return encoded.replace(/[.%]/g, '').substring(0, 50);
   }
 
   private isExpired(cachedResult: CachedSearchResult): boolean {
