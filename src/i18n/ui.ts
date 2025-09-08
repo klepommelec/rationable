@@ -305,6 +305,7 @@ export interface UITranslations {
     medium: string;
     high: string;
     updateAnalysis: string;
+    tooltip: string;
   };
   share: {
     button: {
@@ -1149,6 +1150,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       medium: 'Moyen',
       high: 'Élevé',
       updateAnalysis: 'Mettre à jour l\'analyse',
+      tooltip: 'Les critères vous permettent d\'évaluer vos options selon différents aspects importants pour votre décision.',
     },
     share: {
       button: {
@@ -1991,6 +1993,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       medium: 'Medium',
       high: 'High',
       updateAnalysis: 'Update Analysis',
+      tooltip: 'Criteria help you evaluate your options based on different aspects important to your decision.',
     },
     share: {
       button: {
