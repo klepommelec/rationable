@@ -141,6 +141,9 @@ export interface UITranslations {
       invalidEmail: string;
       generic: string;
     };
+    actions: {
+      linkGoogle: string;
+    };
   };
   settings: {
     title: string;
@@ -166,6 +169,8 @@ export interface UITranslations {
     };
     appearance: {
       title: string;
+      description: string;
+      themeLabel: string;
       theme: string;
       light: string;
       dark: string;
@@ -176,6 +181,21 @@ export interface UITranslations {
       title: string;
       deleteAccount: string;
       deleteWarning: string;
+    };
+    data: {
+      title: string;
+      description: string;
+      history: {
+        title: string;
+        desc: string;
+      };
+      clearHistory: string;
+    };
+    documents: {
+      title: string;
+      description: string;
+      usage: string;
+      added: string;
     };
   };
   templates: {
@@ -212,11 +232,14 @@ export interface UITranslations {
     viewMore: string;
     viewLess: string;
     search: string;
+    browseFiles: string;
+    supportedFormats: string;
   };
   criteria: {
     title: string;
     description: string;
     add: string;
+    addButton: string;
     addSuccess: string;
     weight: string;
     importance: string;
@@ -246,6 +269,9 @@ export interface UITranslations {
     publicDescription: string;
     privateDecision: string;
     privateDescription: string;
+    toasts: {
+      linkCopied: string;
+    };
   };
   profile: {
     avatar: {
@@ -273,6 +299,14 @@ export interface UITranslations {
     };
     language: {
       title: string;
+      description: string;
+      label: string;
+      helpText: string;
+    };
+    googleAccount: {
+      title: string;
+      description: string;
+      notConnected: string;
     };
   };
   dashboard: {
@@ -297,6 +331,16 @@ export interface UITranslations {
     search: {
       placeholder: string;
       noResults: string;
+    };
+    searchBar: {
+      searchPlaceholder: string;
+      filter: string;
+      more: string;
+      export: string;
+      clearAll: string;
+      categoryLabel: string;
+      allCategories: string;
+      uncategorized: string;
     };
     filters: {
       all: string;
@@ -341,7 +385,23 @@ export interface UITranslations {
       ok: string;
     };
   };
-  userFallback: string;
+  workspaces: {
+    title: string;
+    description: string;
+    newWorkspace: string;
+    defaultBadge: string;
+    currentBadge: string;
+    personal: string;
+    save: string;
+    cancel: string;
+    workspaceDescription: string;
+    color: string;
+    usageContext: string;
+    professionalUsage: string;
+    professionalDescription: string;
+    searchDocuments: string;
+    uploadDocuments: string;
+  };
   comments: {
     section: {
       titleDefault: string;
@@ -544,6 +604,10 @@ export interface UITranslations {
     pending: string;
     remove: string;
     resend: string;
+    description: string;
+    publicLink: string;
+    publicLinkDescription: string;
+    createLink: string;
   };
   templates_: {
     personal: {
@@ -828,6 +892,8 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       },
       appearance: {
         title: 'Apparence',
+        description: 'Personnalisez l\'apparence de l\'application',
+        themeLabel: 'Choisissez votre thème',
         theme: 'Thème',
         light: 'Clair',
         dark: 'Sombre',
@@ -838,6 +904,21 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         title: 'Compte',
         deleteAccount: 'Supprimer le compte',
         deleteWarning: 'Cette action est irréversible',
+      },
+      data: {
+        title: 'Données et historique',
+        description: 'Gérez vos données et votre historique de décisions',
+        history: {
+          title: 'Historique des décisions',
+          desc: 'Supprimer toutes vos décisions sauvegardées',
+        },
+        clearHistory: 'Effacer l\'historique',
+      },
+      documents: {
+        title: 'Documents',
+        description: 'Gérez vos préférences et paramètres',
+        usage: 'fois',
+        added: 'Ajouté il y a environ',
       },
     },
     templates: {
@@ -874,11 +955,14 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       viewMore: 'Voir plus',
       viewLess: 'Voir moins',
       search: 'Rechercher',
+      browseFiles: 'Parcourir les fichiers',
+      supportedFormats: 'PDF, Word, Excel, CSV, TXT',
     },
     criteria: {
       title: 'Critères de décision',
       description: 'Gérez les critères de votre décision',
       add: 'Ajouter un critère',
+      addButton: 'Ajouter un critère',
       addSuccess: 'Critère ajouté avec succès',
       weight: 'Poids',
       importance: 'Importance',
@@ -908,6 +992,9 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       publicDescription: 'Tout le monde peut voir cette décision',
       privateDecision: 'Décision privée',
       privateDescription: 'Seules les personnes avec le lien peuvent voir',
+      toasts: {
+        linkCopied: 'Lien copié dans le presse-papiers !',
+      },
     },
     profile: {
       avatar: {
@@ -935,6 +1022,13 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       },
       language: {
         title: 'Langue de l\'interface',
+        description: 'Choisissez votre langue préférée',
+        label: 'Langue',
+        helpText: 'Sélectionnez la langue d\'affichage de l\'interface',
+      googleAccount: {
+        title: 'Compte Google',
+        description: 'Gérez votre connexion Google',
+        notConnected: 'Compte Google non connecté',
       },
     },
     dashboard: {
@@ -959,6 +1053,16 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       search: {
         placeholder: 'Rechercher une décision...',
         noResults: 'Aucun résultat trouvé',
+      },
+      searchBar: {
+        searchPlaceholder: 'Rechercher dans l\'historique...',
+        filter: 'Filtrer',
+        more: 'Plus',
+        export: 'Exporter',
+        clearAll: 'Tout effacer',
+        categoryLabel: 'Catégorie',
+        allCategories: 'Toutes les catégories',
+        uncategorized: 'Non catégorisé',
       },
       filters: {
         all: 'Toutes',
@@ -1488,6 +1592,8 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       },
       appearance: {
         title: 'Appearance',
+        description: 'Customize the app appearance',
+        themeLabel: 'Choose your theme',
         theme: 'Theme',
         light: 'Light',
         dark: 'Dark',
@@ -1498,6 +1604,21 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         title: 'Account',
         deleteAccount: 'Delete Account',
         deleteWarning: 'This action cannot be undone',
+      },
+      data: {
+        title: 'Data & History',
+        description: 'Manage your data and decision history',
+        history: {
+          title: 'Decision History',
+          desc: 'Delete all your saved decisions',
+        },
+        clearHistory: 'Clear History',
+      },
+      documents: {
+        title: 'Documents',
+        description: 'Manage your preferences and settings',
+        usage: 'times',
+        added: 'Added about',
       },
     },
     templates: {
@@ -1534,11 +1655,14 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       viewMore: 'View more',
       viewLess: 'View less',
       search: 'Search',
+      browseFiles: 'Browse files',
+      supportedFormats: 'PDF, Word, Excel, CSV, TXT',
     },
     criteria: {
       title: 'Decision Criteria',
       description: 'Manage your decision criteria',
       add: 'Add criterion',
+      addButton: 'Add criterion',
       addSuccess: 'Criterion added successfully',
       weight: 'Weight',
       importance: 'Importance',
@@ -1568,6 +1692,14 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       publicDescription: 'Anyone can view this decision',
       privateDecision: 'Private decision',
       privateDescription: 'Only people with the link can view',
+      toasts: {
+        linkCopied: 'Link copied to clipboard!',
+      },
+      googleAccount: {
+        title: 'Google Account',
+        description: 'Manage your Google connection',
+        notConnected: 'Google account not connected',
+      },
     },
     profile: {
       avatar: {
@@ -1595,6 +1727,14 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       },
       language: {
         title: 'Interface Language',
+        description: 'Choose your preferred language',
+        label: 'Language',
+        helpText: 'Select the interface display language',
+      },
+      googleAccount: {
+        title: 'Google Account',
+        description: 'Manage your Google connection',
+        notConnected: 'Google account not connected',
       },
     },
     dashboard: {
@@ -1619,6 +1759,16 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       search: {
         placeholder: 'Search decisions...',
         noResults: 'No results found',
+      },
+      searchBar: {
+        searchPlaceholder: 'Search history...',
+        filter: 'Filter',
+        more: 'More',
+        export: 'Export',
+        clearAll: 'Clear All',
+        categoryLabel: 'Category',
+        allCategories: 'All Categories',
+        uncategorized: 'Uncategorized',
       },
       filters: {
         all: 'All',
@@ -1981,6 +2131,36 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         confirm: 'Confirm',
         loading: 'Loading...',
       },
+    },
+    // Add missing keys from screenshots
+    workspaces: {
+      title: 'Espaces de travail',
+      description: 'Gérez vos préférences et paramètres',
+      newWorkspace: 'Nouvel espace de travail',
+      defaultBadge: 'Par défaut',
+      currentBadge: 'Actuel',
+      personal: 'Personnel',
+      save: 'Sauvegarder',
+      cancel: 'Annuler',
+      workspaceDescription: 'Description de l\'espace de travail',
+      color: 'Couleur',
+      usageContext: 'Contexte d\'utilisation',
+      professionalUsage: 'Usage professionnel',
+      professionalDescription: 'Pour les décisions commerciales et professionnelles',
+      searchDocuments: 'Rechercher des documents',
+      uploadDocuments: 'Télécharger des documents',
+    },
+    collaboration: {
+      description: 'Invite others to collaborate on this decision',
+      publicLink: 'Public Link',
+      publicLinkDescription: 'Anyone with this link can view and comment',
+      createLink: 'Create Link',
+    },
+    auth: {
+      actions: {
+        linkGoogle: 'Link Google Account',
+      },
+    },
     },
   },
 };
