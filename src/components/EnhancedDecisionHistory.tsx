@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { ChevronRight } from 'lucide-react';
 import { IDecision } from '@/types/decision';
 import { HistorySearchBar } from './history/HistorySearchBar';
 import { HistoryActions } from './history/HistoryActions';
@@ -156,12 +157,13 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
           {/* Bouton "Voir plus" */}
           {hasMoreItems && (
             <div className="flex justify-center pt-4">
-              <Button 
+               <Button 
                 variant="outline" 
                 onClick={loadMoreItems}
-                className="min-w-[120px]"
+                className="min-w-[120px] flex items-center gap-2"
               >
                 {t('history.list.seeMore')}
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           )}

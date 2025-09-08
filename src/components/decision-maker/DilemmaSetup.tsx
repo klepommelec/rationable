@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { BrainCircuit, Paperclip, X, FileText, Image, ArrowRight, Loader2, ExternalLink } from 'lucide-react';
+import { BrainCircuit, Paperclip, X, FileText, Image, ArrowRight, Loader2, ExternalLink, ChevronRight } from 'lucide-react';
 import { DecisionHistory } from '../DecisionHistory';
 import { AnimatedPlaceholder } from '../AnimatedPlaceholder';
 import MainActionButton from './MainActionButton';
@@ -350,7 +350,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         <Button asChild variant="outline" size="sm">
                             <Link to="/templates" className="flex items-center gap-2">
                                 {t('dilemmaSetup.templates.viewAll')}
-                                <ExternalLink className="h-4 w-4" />
+                                <ChevronRight className="h-4 w-4" />
                             </Link>
                         </Button>
                     </div>
