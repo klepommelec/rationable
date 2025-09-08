@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, ExternalLink } from 'lucide-react';
+import { Link, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
 import { ILink, ISocialContent } from '@/types/decision';
 import ValidatedLink from '../ValidatedLink';
 import YouTubeVideoCard from '../YouTubeVideoCard';
 import { I18nService } from '@/services/i18nService';
 import { LinkVerifierService } from '@/services/linkVerifierService';
 import { useI18nUI } from '@/contexts/I18nUIContext';
+import { Button } from '@/components/ui/button';
 
 interface UsefulLinksProps {
   infoLinks?: ILink[];
@@ -28,6 +29,7 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
   const contextText = `${dilemma || ''} ${recommendation || ''}`;
   const detectedVertical = I18nService.detectVertical(contextText, currentLanguage);
   const [verifiedShoppingLinks, setVerifiedShoppingLinks] = useState<ILink[]>([]);
+  const [showAllVideos, setShowAllVideos] = useState(false);
   
   // Enhanced relevance filtering with multiple scoring factors
   const filterRelevantLinks = (links: ILink[]) => {
@@ -143,20 +145,42 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
         {/* Vidéos YouTube populaires */}
         {socialContent?.youtubeVideos && socialContent.youtubeVideos.length > 0 && (
           <div className="space-y-3">
-            <h4 
-              className="font-medium text-sm sm:text-base text-gray-800 dark:text-gray-200 flex items-center gap-2"
-              id="youtube-videos-heading"
-            >
-              <span className="text-base sm:text-lg" aria-hidden="true">📺</span>
-              {t('decision.popularVideos')}
-            </h4>
+            <div className="flex items-center justify-between">
+              <h4 
+                className="font-medium text-sm sm:text-base text-gray-800 dark:text-gray-200 flex items-center gap-2"
+                id="youtube-videos-heading"
+              >
+                <span className="text-base sm:text-lg" aria-hidden="true">📺</span>
+                {t('decision.popularVideos')}
+              </h4>
+              {socialContent.youtubeVideos.length > 3 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAllVideos(!showAllVideos)}
+                  className="text-xs flex items-center gap-1"
+                >
+                  {showAllVideos ? (
+                    <>
+                      {t('decision.seeLess')}
+                      <ChevronUp className="h-3 w-3" />
+                    </>
+                  ) : (
+                    <>
+                      {t('decision.seeMore')}
+                      <ChevronDown className="h-3 w-3" />
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
             <div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr"
               role="list"
               aria-labelledby="youtube-videos-heading"
             >
-              {socialContent.youtubeVideos.map((video) => (
-                <div key={video.id} role="listitem">
+              {(showAllVideos ? socialContent.youtubeVideos : socialContent.youtubeVideos.slice(0, 3)).map((video) => (
+                <div key={video.id} role="listitem" className="h-full">
                   <YouTubeVideoCard video={video} />
                 </div>
               ))}

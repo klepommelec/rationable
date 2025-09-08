@@ -1375,9 +1375,9 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       noResults: 'Aucun résultat disponible',
       pointsOfAttention: 'Points d\'attention',
       usefulLinks: 'Liens utiles',
-      popularVideos: 'Vidéos populaires',
-      seeMore: 'Voir plus',
-      seeLess: 'Voir moins',
+    popularVideos: 'Vidéos populaires',
+    seeMore: 'Voir plus',
+    seeLess: 'Voir moins',
       toasts: {
         alreadyRunning: 'Une analyse est déjà en cours',
         followup: {
