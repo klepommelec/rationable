@@ -42,7 +42,7 @@ const SettingsSidebar = ({
     await signOut();
   };
   return <div className="w-64 border-r bg-sidebar border-sidebar-border flex flex-col h-full">
-      <div className="flex-1 p-6 px-3 pr-4">
+      <div className="flex-1 p-6 px-3 pr-4 py-[12px]">
         <nav className="">
           {settingsSections.map(section => {
           const Icon = section.icon;
