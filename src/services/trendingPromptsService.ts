@@ -36,43 +36,65 @@ const getCountryInfo = (language: SupportedLanguage): { code: string, name: stri
 const parsePromptsFromResponse = (content: string): string[] => {
   if (!content) return [];
   
-  // Extract numbered list items (handles various formats)
-  const lines = content.split('\n');
   const prompts: string[] = [];
   
-  for (const line of lines) {
-    const trimmed = line.trim();
-    // Match patterns like "1. ", "1) ", "- ", etc. and capture only the question part
-    const match = trimmed.match(/^(?:\d+[\.\)]\s*|[-•*]\s*)(.+?)(?:\s*\d+\.|$)/);
-    if (match && match[1]) {
-      let prompt = match[1].trim();
-      // Remove any trailing numbers or punctuation that might be part of next item
-      prompt = prompt.replace(/\s+\d+\.\s*.*$/, '');
-      // Skip empty or very short prompts, and ensure it ends with ?
-      if (prompt.length > 10) {
-        // Add question mark if missing
-        if (!prompt.endsWith('?')) {
-          prompt += '?';
+  // First, try to split by question marks and extract individual questions
+  const potentialQuestions = content.split('?').map(q => q.trim()).filter(q => q.length > 10);
+  
+  for (const question of potentialQuestions) {
+    // Remove leading numbers, bullets, or special characters
+    let cleanQuestion = question
+      .replace(/^\d+[\.\)]\s*/, '') // Remove "1. " or "1) "
+      .replace(/^[-•*]\s*/, '')      // Remove "- " or "• "
+      .replace(/^\s*\d+\.\s*/, '')   // Remove additional numbering
+      .trim();
+    
+    // Only keep the first sentence if there are multiple
+    const sentences = cleanQuestion.split(/[.!]\s+/);
+    if (sentences.length > 0) {
+      cleanQuestion = sentences[0].trim();
+    }
+    
+    // Ensure it's a meaningful question
+    if (cleanQuestion.length > 15 && 
+        cleanQuestion.includes(' ') && 
+        !cleanQuestion.match(/^\d/) && 
+        !cleanQuestion.toLowerCase().includes('voici') &&
+        !cleanQuestion.toLowerCase().includes('liste')) {
+      
+      // Add question mark if missing
+      if (!cleanQuestion.endsWith('?')) {
+        cleanQuestion += '?';
+      }
+      
+      prompts.push(cleanQuestion);
+      
+      // Stop after finding 5 good questions
+      if (prompts.length >= 5) break;
+    }
+  }
+  
+  // Fallback: if no questions found with ?, try splitting by line breaks
+  if (prompts.length === 0) {
+    const lines = content.split('\n').filter(line => line.trim().length > 15);
+    
+    for (const line of lines) {
+      let cleanLine = line
+        .replace(/^\d+[\.\)]\s*/, '')
+        .replace(/^[-•*]\s*/, '')
+        .trim();
+      
+      if (cleanLine.length > 15 && cleanLine.includes(' ')) {
+        if (!cleanLine.endsWith('?')) {
+          cleanLine += '?';
         }
-        prompts.push(prompt);
+        prompts.push(cleanLine);
+        if (prompts.length >= 5) break;
       }
     }
   }
   
-  // If no numbered list found, try to extract individual questions
-  if (prompts.length === 0) {
-    // Look for question patterns
-    const questionMatches = content.match(/[^.!?]*\?/g);
-    if (questionMatches) {
-      const validQuestions = questionMatches
-        .map(q => q.trim())
-        .filter(q => q.length > 10 && q.includes(' '))
-        .map(q => q.replace(/^\d+[\.\)]\s*/, '').trim());
-      return validQuestions.slice(0, 5);
-    }
-  }
-  
-  return prompts.slice(0, 5); // Return max 5 prompts
+  return prompts.slice(0, 5);
 };
 
 export const getTrendingPrompts = async (
