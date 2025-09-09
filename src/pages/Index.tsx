@@ -3,8 +3,10 @@ import DecisionMaker from "@/components/DecisionMaker";
 
 const Index = () => {
   return (
-    <div className="max-w-6xl mx-auto">
-      <DecisionMaker />
+    <div className="max-w-7xl mx-auto">
+      <div className="max-w-none">
+        <DecisionMaker />
+      </div>
     </div>
   );
 };
