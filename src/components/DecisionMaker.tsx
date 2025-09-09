@@ -10,6 +10,7 @@ import ManualOptionsGenerator from './ManualOptionsGenerator';
 import AnalysisNavigation from './decision-maker/AnalysisNavigation';
 import DilemmaSetup from './decision-maker/DilemmaSetup';
 import AnalysisResult from './decision-maker/AnalysisResult';
+import { EditableTitle } from './EditableTitle';
 import { toast } from "sonner";
 import { useI18nUI } from '@/contexts/I18nUIContext';
 // Composant principal pour la prise de décision unifiée
@@ -155,6 +156,31 @@ const DecisionMaker = () => {
     }
   };
 
+  // Fonction pour gérer les changements de titre
+  const handleTitleChange = (newTitle: string) => {
+    if (currentAnalysis) {
+      // Mettre à jour le dilemme dans l'état principal
+      setDilemma(newTitle);
+      
+      // Mettre à jour l'analyse courante avec le nouveau titre
+      updateAnalysisById(currentAnalysis.id, {
+        dilemma: newTitle,
+        displayTitle: newTitle !== currentAnalysis.dilemma ? newTitle : undefined
+      });
+      
+      // Si c'est une décision sauvegardée, la mettre à jour
+      if (currentDecision) {
+        const updatedDecision = {
+          ...currentDecision,
+          dilemma: newTitle
+        };
+        // Note: cette mise à jour sera gérée par l'effet de synchronisation existant
+      }
+      
+      toast.success(t('decision.toasts.titleUpdated'));
+    }
+  };
+
   // Fonction pour gérer la navigation entre analyses
   const handleAnalysisNavigation = (analysisIndex: number) => {
     navigateToAnalysis(analysisIndex);
@@ -247,17 +273,25 @@ const DecisionMaker = () => {
               {/* Layout mobile : emoji au-dessus du titre, aligné à gauche */}
               <div className="sm:hidden space-y-2 w-full px-0">
                 <EmojiPicker emoji={displayEmoji} setEmoji={setEmoji} />
-                <h1 className="text-4xl font-bold text-left break-words px-[8px]">
-                  {getCurrentAnalysis()?.displayTitle || getCurrentAnalysis()?.dilemma || displayDilemma}
-                </h1>
+                <div className="px-[8px]">
+                  <EditableTitle
+                    title={getCurrentAnalysis()?.displayTitle || getCurrentAnalysis()?.dilemma || displayDilemma}
+                    onTitleChange={handleTitleChange}
+                    className="text-4xl font-bold text-left break-words"
+                    disabled={displayStep === 'loading-options' || isLoading || isUpdating || Boolean(isLockedToOther)}
+                  />
+                </div>
               </div>
               
               {/* Layout desktop : emoji et titre côte à côte */}
               <div className="hidden sm:flex items-baseline gap-4 w-full">
                 <EmojiPicker emoji={displayEmoji} setEmoji={setEmoji} />
-                <h1 className="text-4xl sm:text-4xl md:text-4xl lg:text-5xl font-bold text-left break-words flex-1 min-w-0 leading-snug">
-                  {getCurrentAnalysis()?.displayTitle || getCurrentAnalysis()?.dilemma || displayDilemma}
-                </h1>
+                <EditableTitle
+                  title={getCurrentAnalysis()?.displayTitle || getCurrentAnalysis()?.dilemma || displayDilemma}
+                  onTitleChange={handleTitleChange}
+                  className="text-4xl sm:text-4xl md:text-4xl lg:text-5xl font-bold text-left break-words flex-1 min-w-0 leading-snug"
+                  disabled={displayStep === 'loading-options' || isLoading || isUpdating || Boolean(isLockedToOther)}
+                />
               </div>
             </div>
             

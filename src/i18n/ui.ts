@@ -562,6 +562,7 @@ export interface UITranslations {
     seeLess: string;
     toasts: {
       alreadyRunning: string;
+      titleUpdated: string;
       followup: {
         error: string;
       };
@@ -1408,6 +1409,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
     seeLess: 'Voir moins',
       toasts: {
         alreadyRunning: 'Une analyse est déjà en cours',
+        titleUpdated: 'Titre mis à jour avec succès',
         followup: {
           error: 'Erreur lors de la question de suivi',
         },
@@ -2272,6 +2274,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       seeLess: 'See less',
       toasts: {
         alreadyRunning: 'An analysis is already running',
+        titleUpdated: 'Title updated successfully',
         followup: {
           error: 'Error with follow-up question',
         },
