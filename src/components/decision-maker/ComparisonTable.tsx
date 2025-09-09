@@ -39,9 +39,12 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
     if (recommendedOption) {
       const optionKey = recommendedOption.option;
       
-      // Éviter de recharger si les liens sont déjà présents (cache ou état local)
-      if (result?.cachedActionLinks?.[optionKey] || actionLinks[optionKey]) {
-        if (result?.cachedActionLinks?.[optionKey] && !actionLinks[optionKey]) {
+      // Vérifier si on a déjà tenté de charger cette option (succès ou échec)
+      const hasCachedResult = result?.cachedActionLinks && result.cachedActionLinks.hasOwnProperty(optionKey);
+      const hasLocalResult = actionLinks.hasOwnProperty(optionKey);
+      
+      if (hasCachedResult || hasLocalResult) {
+        if (hasCachedResult && !hasLocalResult) {
           console.log(`✅ Using cached action links for ${optionKey}`);
           setActionLinks(prev => ({
             ...prev,
@@ -84,10 +87,34 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
         }
       }).catch(error => {
         console.error(`Failed to get action links for ${optionKey}:`, error);
+        
+        // Créer une sentinelle pour indiquer l'échec
+        const failureSentinel: BestLinksResponse = {
+          official: undefined,
+          merchants: [],
+          maps: undefined,
+          actionType: 'buy',
+          provider: 'google_cse',
+          fromCache: true
+        };
+        
         setActionLinks(prev => ({
           ...prev,
-          [optionKey]: null
+          [optionKey]: failureSentinel
         }));
+        
+        // Sauvegarder l'échec dans le cache pour éviter de re-essayer
+        if (result && onUpdateResult) {
+          const updatedResult = {
+            ...result,
+            cachedActionLinks: {
+              ...result.cachedActionLinks,
+              [optionKey]: failureSentinel
+            }
+          };
+          console.log(`💾 Caching failure for ${optionKey}`);
+          onUpdateResult(updatedResult);
+        }
       }).finally(() => {
         setLoadingStates(prev => ({
           ...prev,
@@ -100,15 +127,19 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   // Lazy load action links for other options on demand
   const loadActionLinksForOption = async (option: IBreakdownItem) => {
     const optionKey = option.option;
-    if (actionLinks[optionKey] !== undefined || loadingStates[optionKey]) return;
     
-    // Vérifier le cache d'abord
-    if (result?.cachedActionLinks?.[optionKey]) {
-      console.log(`✅ Using cached action links for ${optionKey}`);
-      setActionLinks(prev => ({
-        ...prev,
-        [optionKey]: result.cachedActionLinks[optionKey]
-      }));
+    // Vérifier si on a déjà tenté de charger cette option (succès ou échec)
+    const hasCachedResult = result?.cachedActionLinks && result.cachedActionLinks.hasOwnProperty(optionKey);
+    const hasLocalResult = actionLinks.hasOwnProperty(optionKey);
+    
+    if (hasCachedResult || hasLocalResult || loadingStates[optionKey]) {
+      if (hasCachedResult && !hasLocalResult) {
+        console.log(`✅ Using cached action links for ${optionKey}`);
+        setActionLinks(prev => ({
+          ...prev,
+          [optionKey]: result.cachedActionLinks[optionKey]
+        }));
+      }
       return;
     }
 
@@ -143,10 +174,34 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
       }
     } catch (error) {
       console.error(`Failed to get action links for ${optionKey}:`, error);
+      
+      // Créer une sentinelle pour indiquer l'échec
+      const failureSentinel: BestLinksResponse = {
+        official: undefined,
+        merchants: [],
+        maps: undefined,
+        actionType: 'buy',
+        provider: 'google_cse',
+        fromCache: true
+      };
+      
       setActionLinks(prev => ({
         ...prev,
-        [optionKey]: null
+        [optionKey]: failureSentinel
       }));
+      
+      // Sauvegarder l'échec dans le cache pour éviter de re-essayer
+      if (result && onUpdateResult) {
+        const updatedResult = {
+          ...result,
+          cachedActionLinks: {
+            ...result.cachedActionLinks,
+            [optionKey]: failureSentinel
+          }
+        };
+        console.log(`💾 Caching failure for ${optionKey}`);
+        onUpdateResult(updatedResult);
+      }
     } finally {
       setLoadingStates(prev => ({
         ...prev,
