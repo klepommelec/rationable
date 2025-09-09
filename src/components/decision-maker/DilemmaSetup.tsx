@@ -74,10 +74,19 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   const [isAnalysisStarting, setIsAnalysisStarting] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [pendingAnalysis, setPendingAnalysis] = useState(false);
-  const { t } = useI18nUI();
-  const { user } = useAuth();
-  const { context } = useContextualContent();
-  const { realTimeSearchEnabled, setRealTimeSearchEnabled } = useRealTimeSearchSettings();
+  const {
+    t
+  } = useI18nUI();
+  const {
+    user
+  } = useAuth();
+  const {
+    context
+  } = useContextualContent();
+  const {
+    realTimeSearchEnabled,
+    setRealTimeSearchEnabled
+  } = useRealTimeSearchSettings();
 
   // Afficher seulement les 3 premiers modèles
   const displayedTemplates = templates.slice(0, 3);
@@ -85,12 +94,11 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     try {
       // Créer un aperçu temporaire du template dans Supabase
       const previewId = await shareTemplateForPreview(template.decision_data);
-      
       if (!previewId) {
         toast.error('Limite de création de previews atteinte. Veuillez patienter quelques minutes.');
         return;
       }
-      
+
       // Ouvrir l'aperçu dans un nouvel onglet
       const previewUrl = `/template-preview/${previewId}`;
       window.open(previewUrl, '_blank');
@@ -188,7 +196,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
   const isMainButtonDisabled = dilemma.trim() === '' || isLoading || isAnalysisStarting;
-  
   const handleAnalysisClick = async () => {
     if (!user) {
       setPendingAnalysis(true);
@@ -198,9 +205,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
 
     // Clear previous analyses when starting a new question (not a follow-up)
     clearAnalyses();
-    
     setIsAnalysisStarting(true);
-    
     if (realTimeSearchEnabled) {
       // Mode IA automatique
       toast.success(t('dilemmaSetup.analysisStarted'));
@@ -221,7 +226,6 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
       }
     }
   };
-
   const handleAuthSuccess = () => {
     setAuthModalOpen(false);
     if (pendingAnalysis) {
@@ -250,7 +254,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         <div className="space-y-2">
                             <div className="relative">
                                 <Textarea id="dilemma-input" placeholder="" value={dilemma} onChange={e => setDilemma(e.target.value)} onKeyDown={e => {
-                if ((e.key === 'Enter' && e.ctrlKey) || e.key === 'Enter') {
+                if (e.key === 'Enter' && e.ctrlKey || e.key === 'Enter') {
                   if (!isMainButtonDisabled) {
                     e.preventDefault();
                     handleAnalysisClick();
@@ -270,13 +274,8 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 
                                 {/* Toggle IA intégré dans l'input */}
                                 <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                                    <Switch
-                                        id="ai-analysis"
-                                        checked={realTimeSearchEnabled}
-                                        onCheckedChange={setRealTimeSearchEnabled}
-                                        className="scale-75"
-                                    />
-                                    <Label htmlFor="ai-analysis" className="text-sm font-medium cursor-pointer">
+                                    <Switch id="ai-analysis" checked={realTimeSearchEnabled} onCheckedChange={setRealTimeSearchEnabled} className="scale-75" />
+                                    <Label htmlFor="ai-analysis" className="text-xs font-medium cursor-pointer">
                                         Analyse intelligente par IA
                                     </Label>
                                 </div>
@@ -327,49 +326,25 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                             </div>}
 
           {/* Show trending prompts first, fallback to templates if they fail */}
-          <TrendingPrompts
-            onPromptSelect={setDilemma}
-            disabled={isLoading || isUpdating || analysisStep !== 'idle'}
-          />
+          <TrendingPrompts onPromptSelect={setDilemma} disabled={isLoading || isUpdating || analysisStep !== 'idle'} />
           {/* Fallback templates are shown if TrendingPrompts returns null */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {displayedTemplates.map(template => 
-              <Button 
-                key={template.name} 
-                variant="outline" 
-                size="sm" 
-                onClick={() => handleOpenTemplate({
-                  name: template.name,
-                  dilemma: template.dilemma,
-                  decision_data: PERSONAL_TEMPLATES.find(t => t.title === template.name)?.decision_data || 
-                                PROFESSIONAL_TEMPLATES.find(t => t.title === template.name)?.decision_data
-                })} 
-                disabled={isLoading || isUpdating || analysisStep !== 'idle'} 
-                aria-label={`Utiliser le modèle: ${template.name}`} 
-                className="text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-full py-[8px] px-[8px]"
-              >
+            {displayedTemplates.map(template => <Button key={template.name} variant="outline" size="sm" onClick={() => handleOpenTemplate({
+              name: template.name,
+              dilemma: template.dilemma,
+              decision_data: PERSONAL_TEMPLATES.find(t => t.title === template.name)?.decision_data || PROFESSIONAL_TEMPLATES.find(t => t.title === template.name)?.decision_data
+            })} disabled={isLoading || isUpdating || analysisStep !== 'idle'} aria-label={`Utiliser le modèle: ${template.name}`} className="text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-full py-[8px] px-[8px]">
                 <span className="truncate text-sm px-[4px] font-medium text-gray-500">{template.name}</span>
-              </Button>
-            )}
+              </Button>)}
           </div>
                     </CardContent>
                      <CardFooter className="flex flex-col gap-4 px-4 sm:px-6">
-                         <MainActionButton 
-                           analysisStep={analysisStep} 
-                           handleStartAnalysis={handleAnalysisClick} 
-                           isMainButtonDisabled={isMainButtonDisabled} 
-                           progress={progress} 
-                           progressMessage={progressMessage}
-                         />
+                         <MainActionButton analysisStep={analysisStep} handleStartAnalysis={handleAnalysisClick} isMainButtonDisabled={isMainButtonDisabled} progress={progress} progressMessage={progressMessage} />
                      </CardFooter>
                 </Card>
             </div>
 
-            <AuthModal 
-              open={authModalOpen}
-              onOpenChange={setAuthModalOpen}
-              onSuccess={handleAuthSuccess}
-            />
+            <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} onSuccess={handleAuthSuccess} />
 
             {/* Section Templates */}
             <Card className="backdrop-blur-sm">
@@ -390,11 +365,10 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     </div>
                 </CardHeader>
                 <CardContent className="pt-0">
-                    {user ? (
-                        // Utilisateurs connectés : templates basés sur le workspace
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {(context === 'professional' ? PROFESSIONAL_TEMPLATES : PERSONAL_TEMPLATES).slice(0, 6).map(template => 
-                                <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal">
+                    {user ?
+        // Utilisateurs connectés : templates basés sur le workspace
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {(context === 'professional' ? PROFESSIONAL_TEMPLATES : PERSONAL_TEMPLATES).slice(0, 6).map(template => <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal">
                                     <div className="flex items-center gap-2 w-full min-w-0">
                                         <span className="text-lg shrink-0">{template.decision_data.emoji}</span>
                                         <span className="text-sm truncate font-semibold">{template.title}</span>
@@ -402,18 +376,15 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                     <div className="text-xs text-muted-foreground line-clamp-3 text-left w-full leading-relaxed">
                                         {template.description}
                                     </div>
-                                </Button>
-                            )}
-                        </div>
-                    ) : (
-                        // Utilisateurs non connectés : sections séparées
-                        <div className="space-y-8">
+                                </Button>)}
+                        </div> :
+        // Utilisateurs non connectés : sections séparées
+        <div className="space-y-8">
                             {/* Templates personnels */}
                             <div className="mt-4">
                                 <h3 className="text-xs font-medium text-muted-foreground tracking-wide mb-3">Templates personnels</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    {PERSONAL_TEMPLATES.slice(0, 6).map(template => 
-                                        <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal">
+                                    {PERSONAL_TEMPLATES.slice(0, 6).map(template => <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal">
                                             <div className="flex items-center gap-2 w-full min-w-0">
                                                 <span className="text-lg shrink-0">{template.decision_data.emoji}</span>
                                                 <span className="text-sm truncate font-semibold">{template.title}</span>
@@ -421,8 +392,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                             <div className="text-xs text-muted-foreground line-clamp-3 text-left w-full leading-relaxed">
                                                 {template.description}
                                             </div>
-                                        </Button>
-                                    )}
+                                        </Button>)}
                                 </div>
                             </div>
                             
@@ -430,8 +400,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                             <div>
                                 <h3 className="text-xs font-medium text-muted-foreground tracking-wide mb-3">Templates professionnels</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    {PROFESSIONAL_TEMPLATES.slice(0, 6).map(template => 
-                                        <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal">
+                                    {PROFESSIONAL_TEMPLATES.slice(0, 6).map(template => <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal">
                                             <div className="flex items-center gap-2 w-full min-w-0">
                                                 <span className="text-lg shrink-0">{template.decision_data.emoji}</span>
                                                 <span className="text-sm truncate font-semibold">{template.title}</span>
@@ -439,18 +408,15 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                             <div className="text-xs text-muted-foreground line-clamp-3 text-left w-full leading-relaxed">
                                                 {template.description}
                                             </div>
-                                        </Button>
-                                    )}
+                                        </Button>)}
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        </div>}
                 </CardContent>
             </Card>
 
             {/* Historique intégré directement dans la page - seulement pour les utilisateurs connectés */}
-            {user && (
-              <Card className="backdrop-blur-sm">
+            {user && <Card className="backdrop-blur-sm">
                   <CardHeader className="pb-4">
                       <CardTitle className="font-semibold text-2xl">{t('dilemmaSetup.history.title')}</CardTitle>
                       <CardDescription className="text-muted-foreground">
@@ -460,8 +426,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                   <CardContent className="pt-0">
                       <DecisionHistory history={history} onLoad={loadDecision} onDelete={deleteDecision} onClear={clearHistory} onClose={() => {}} onUpdateCategory={onUpdateCategory} />
                   </CardContent>
-              </Card>
-            )}
+              </Card>}
         </div>;
 };
 export default DilemmaSetup;
