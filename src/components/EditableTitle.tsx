@@ -65,7 +65,7 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
   };
   if (isEditing) {
     return (
-      <div className={`${className} relative`}>
+      <h1 className={`${className} relative`}>
         <textarea
           ref={textareaRef}
           value={editValue}
@@ -81,7 +81,7 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
           }}
           rows={1}
         />
-      </div>
+      </h1>
     );
   }
   return <h1 className={`${className} group`}>
