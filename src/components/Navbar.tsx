@@ -9,18 +9,18 @@ import { useDecisionMakerContext } from '@/contexts/DecisionMakerContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { WorkspaceSelector } from '@/components/workspace/WorkspaceSelector';
 import { useI18nUI } from '@/contexts/I18nUIContext';
-
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { t } = useI18nUI();
+  const {
+    t
+  } = useI18nUI();
   const {
     user,
     profile,
     signOut
   } = useAuth();
-  
   const {
     result,
     dilemma,
@@ -28,23 +28,19 @@ const Navbar: React.FC = () => {
     getCurrentDecision,
     clearSession
   } = useDecisionMakerContext();
-  
+
   // Détection d'une décision active (seulement si analyse démarrée)
-  const hasActiveDecision = location.pathname === '/' && user && (
-    result !== null || analysisStep !== 'idle'
-  );
-  
+  const hasActiveDecision = location.pathname === '/' && user && (result !== null || analysisStep !== 'idle');
+
   // Créer l'objet currentDecision pour ShareButton
-  const currentDecision = hasActiveDecision ? (
-    getCurrentDecision() || {
-      id: 'temp-decision',
-      timestamp: Date.now(),
-      dilemma: dilemma || 'Décision en cours',
-      emoji: '🤔',
-      criteria: [],
-      result: result!
-    }
-  ) : null;
+  const currentDecision = hasActiveDecision ? getCurrentDecision() || {
+    id: 'temp-decision',
+    timestamp: Date.now(),
+    dilemma: dilemma || 'Décision en cours',
+    emoji: '🤔',
+    criteria: [],
+    result: result!
+  } : null;
 
   // Check if we're on the settings page
   const isSettingsPage = location.pathname === '/settings';
@@ -69,17 +65,13 @@ const Navbar: React.FC = () => {
     return fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
   return <header className={`sticky top-0 z-50 w-full transition-all duration-150 ${isScrolled ? 'bg-background/95 backdrop-blur border-b border-border supports-[backdrop-filter]:bg-background/90' : isSettingsPage ? 'bg-transparent border-b border-border' : 'bg-transparent'}`}>
-      <div className="w-full flex h-16 items-center px-4">
-        <Link 
-          to="/" 
-          className="flex items-center gap-2 mr-auto hover:underline transition-all duration-200"
-          onClick={(e) => {
-            // TOUJOURS nettoyer la session quand on clique sur le logo
-            e.preventDefault();
-            clearSession();
-            navigate('/');
-          }}
-        >
+      <div className="w-full flex h-16 items-center px-[20px]">
+        <Link to="/" className="flex items-center gap-2 mr-auto hover:underline transition-all duration-200" onClick={e => {
+        // TOUJOURS nettoyer la session quand on clique sur le logo
+        e.preventDefault();
+        clearSession();
+        navigate('/');
+      }}>
           <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-8 w-8 rounded-none " />
           <span className="text-xl font-semibold">Rationable</span>
         </Link>
@@ -124,8 +116,7 @@ const Navbar: React.FC = () => {
               
               {/* Bouton partager en dernier pour les décisions en cours */}
               {currentDecision && <ShareButton decision={currentDecision} />}
-            </> : 
-            <div className="flex items-center gap-2">
+            </> : <div className="flex items-center gap-2">
               <Link to="/auth">
                 <Button variant="ghost" size="sm">
                   {t('navbar.signIn')}
@@ -136,8 +127,7 @@ const Navbar: React.FC = () => {
                   {t('navbar.getStarted')}
                 </Button>
               </Link>
-            </div>
-          }
+            </div>}
         </div>
       </div>
     </header>;
