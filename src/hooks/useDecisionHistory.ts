@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { IDecision } from '@/types/decision';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
@@ -26,11 +25,7 @@ export const useDecisionHistory = () => {
         };
     }
 
-export const useDecisionHistory = () => {
-    const { currentWorkspace } = useWorkspaces();
-    const [allHistory, setAllHistory] = useState<Record<string, IDecision[]>>({});
-    const [history, setHistory] = useState<IDecision[]>([]);
-
+    // Fallback to localStorage for non-authenticated users
     useEffect(() => {
         try {
             // Load all workspace histories
@@ -128,7 +123,7 @@ export const useDecisionHistory = () => {
         return () => clearTimeout(timer);
     }, [allHistory]);
 
-    const addDecision = (decision: IDecision) => {
+    const addDecision = async (decision: IDecision) => {
         const workspaceId = currentWorkspace?.id || 'default';
         setAllHistory(prevAllHistory => {
             const workspaceHistory = prevAllHistory[workspaceId] || [];
@@ -139,7 +134,7 @@ export const useDecisionHistory = () => {
         });
     };
 
-    const updateDecision = (updatedDecision: IDecision) => {
+    const updateDecision = async (updatedDecision: IDecision) => {
         const workspaceId = currentWorkspace?.id || 'default';
         setAllHistory(prevAllHistory => {
             const workspaceHistory = prevAllHistory[workspaceId] || [];
@@ -160,7 +155,7 @@ export const useDecisionHistory = () => {
         });
     };
     
-    const updateDecisionCategory = (decisionId: string, categoryId: string | undefined) => {
+    const updateDecisionCategory = async (decisionId: string, categoryId: string | undefined) => {
         const workspaceId = currentWorkspace?.id || 'default';
         setAllHistory(prevAllHistory => {
             const workspaceHistory = prevAllHistory[workspaceId] || [];
@@ -182,7 +177,7 @@ export const useDecisionHistory = () => {
         });
     };
     
-    const deleteDecision = (decisionId: string) => {
+    const deleteDecision = async (decisionId: string) => {
         const workspaceId = currentWorkspace?.id || 'default';
         setAllHistory(prevAllHistory => {
             const workspaceHistory = prevAllHistory[workspaceId] || [];
@@ -193,7 +188,7 @@ export const useDecisionHistory = () => {
         });
     };
 
-    const clearHistory = () => {
+    const clearHistory = async () => {
         const workspaceId = currentWorkspace?.id || 'default';
         setAllHistory(prevAllHistory => ({
             ...prevAllHistory,
