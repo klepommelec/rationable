@@ -2,23 +2,69 @@ import { useState, useEffect } from 'react';
 import { IDecision } from '@/types/decision';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/hooks/useAuth';
-import { useCloudDecisionHistory } from './useCloudDecisionHistory';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useDecisionHistory = () => {
     const { user } = useAuth();
     const { currentWorkspace } = useWorkspaces();
     
-    // Always call all hooks first (hook rules compliance)
-    const cloudHistory = useCloudDecisionHistory();
-    const [allHistory, setAllHistory] = useState<Record<string, IDecision[]>>({});
+    // Always declare all state hooks (both cloud and local)
+    const [localHistory, setLocalHistory] = useState<Record<string, IDecision[]>>({});
+    const [cloudHistory, setCloudHistory] = useState<IDecision[]>([]);
     const [history, setHistory] = useState<IDecision[]>([]);
+    const [isSyncing, setIsSyncing] = useState(false);
 
-    // Effects for local storage (only runs for non-authenticated users)
+    const isAuthenticated = !!user?.id;
+
+    // Cloud history loading
+    const loadCloudHistory = async () => {
+        if (!user?.id) return;
+        
+        setIsSyncing(true);
+        try {
+            const workspaceId = currentWorkspace?.id;
+            
+            let query = supabase
+                .from('decisions')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('updated_at', { ascending: false });
+            
+            if (workspaceId) {
+                query = query.eq('workspace_id', workspaceId);
+            }
+            
+            const { data, error } = await query;
+            
+            if (error) {
+                console.error('Failed to load cloud history:', error);
+                return;
+            }
+            
+            const decisions: IDecision[] = data?.map(row => {
+                const decisionData = row.decision_data as any;
+                return {
+                    ...decisionData,
+                    id: row.id
+                };
+            }) || [];
+            
+            setCloudHistory(decisions);
+            setHistory(decisions);
+            console.log(`📦 Loaded ${decisions.length} decisions from cloud`);
+            
+        } catch (error) {
+            console.error('Cloud history load error:', error);
+        } finally {
+            setIsSyncing(false);
+        }
+    };
+
+    // Local history loading effect
     useEffect(() => {
-        if (user?.id) return; // Skip if authenticated
+        if (isAuthenticated) return; // Skip for authenticated users
         
         try {
-            // Load all workspace histories
             const storedAllHistory = localStorage.getItem('workspaceDecisionHistory');
             const storedOldHistory = localStorage.getItem('decisionHistory');
             
@@ -28,12 +74,11 @@ export const useDecisionHistory = () => {
                 loadedAllHistory = JSON.parse(storedAllHistory);
             }
             
-            // Migrate old history to default workspace if it exists
             if (storedOldHistory && !storedAllHistory) {
                 const parsedHistory: IDecision[] = JSON.parse(storedOldHistory);
                 const migratedHistory = parsedHistory.map(decision => {
                     let newDecision = { ...decision };
-                    if (!newDecision.result.imageQuery && newDecision.result.recommendation) {
+                    if (!newDecision.result?.imageQuery && newDecision.result?.recommendation) {
                         newDecision = {
                             ...newDecision,
                             result: {
@@ -54,76 +99,145 @@ export const useDecisionHistory = () => {
                     return newDecision;
                 });
                 
-                // Put migrated history in 'default' workspace
                 loadedAllHistory['default'] = migratedHistory;
-                
-                // Remove old storage
                 localStorage.removeItem('decisionHistory');
             }
             
-            setAllHistory(loadedAllHistory);
+            setLocalHistory(loadedAllHistory);
         } catch (error) {
             console.error("Failed to load history from localStorage", error);
         }
-    }, [user?.id]);
+    }, [isAuthenticated]);
 
-    // Update history when workspace changes (local storage only)
+    // Cloud history loading effect
     useEffect(() => {
-        if (user?.id) return; // Skip if authenticated
+        if (isAuthenticated) {
+            loadCloudHistory();
+        }
+    }, [isAuthenticated, user?.id, currentWorkspace?.id]);
+
+    // Update local history when workspace changes
+    useEffect(() => {
+        if (isAuthenticated) return; // Skip for authenticated users
         
         if (currentWorkspace) {
-            const workspaceHistory = allHistory[currentWorkspace.id] || [];
+            const workspaceHistory = localHistory[currentWorkspace.id] || [];
             setHistory(workspaceHistory);
         } else {
-            // Fallback to default workspace or empty array
-            const defaultHistory = allHistory['default'] || [];
+            const defaultHistory = localHistory['default'] || [];
             setHistory(defaultHistory);
         }
-    }, [user?.id, currentWorkspace, allHistory]);
+    }, [isAuthenticated, currentWorkspace, localHistory]);
 
-    // Migration one-shot (local storage only)
+    // Save local history
     useEffect(() => {
-        if (user?.id) return; // Skip if authenticated
+        if (isAuthenticated) return; // Skip for authenticated users
         
-        try {
-            const workspaceId = currentWorkspace?.id || 'default';
-            const migrationFlag = localStorage.getItem('historyMigratedToWorkspace');
-            if (!migrationFlag && workspaceId !== 'default') {
-                const defaultHistory = allHistory['default'] || [];
-                const workspaceHistory = allHistory[workspaceId] || [];
-                if (workspaceHistory.length === 0 && defaultHistory.length > 0) {
-                    setAllHistory(prev => ({
-                        ...prev,
-                        [workspaceId]: [...defaultHistory]
-                    }));
-                    localStorage.setItem('historyMigratedToWorkspace', '1');
-                    console.log('🗂️ Historique migré depuis "default" vers workspace', workspaceId);
-                }
-            }
-        } catch (e) {
-            console.error('Migration history error', e);
-        }
-    }, [user?.id, currentWorkspace, allHistory]);
-
-    // Save to localStorage (local storage only)
-    useEffect(() => {
-        if (user?.id) return; // Skip if authenticated
-        
-        // Debounce saving to localStorage
         const timer = setTimeout(() => {
             try {
-                localStorage.setItem('workspaceDecisionHistory', JSON.stringify(allHistory));
+                localStorage.setItem('workspaceDecisionHistory', JSON.stringify(localHistory));
             } catch (error) {
                 console.error("Failed to save history to localStorage", error);
             }
         }, 500);
         return () => clearTimeout(timer);
-    }, [user?.id, allHistory]);
+    }, [isAuthenticated, localHistory]);
 
-    // Local storage functions
+    // Functions for cloud operations
+    const addDecisionCloud = async (decision: IDecision) => {
+        // Immediate local update
+        setHistory(prev => [decision, ...prev]);
+        
+        try {
+            const { error } = await supabase
+                .from('decisions')
+                .insert({
+                    id: decision.id,
+                    user_id: user!.id,
+                    workspace_id: currentWorkspace?.id || null,
+                    dilemma: decision.dilemma,
+                    emoji: decision.emoji,
+                    category: decision.category,
+                    tags: decision.tags || [],
+                    thread_id: decision.threadId,
+                    decision_data: decision as any,
+                    timestamp: decision.timestamp ? new Date(decision.timestamp).toISOString() : null
+                });
+            
+            if (error) throw error;
+        } catch (error) {
+            console.error('Failed to add decision to cloud:', error);
+        }
+    };
+
+    const updateDecisionCloud = async (updatedDecision: IDecision) => {
+        setHistory(prev => prev.map(d => 
+            d.id === updatedDecision.id ? updatedDecision : d
+        ));
+        
+        try {
+            const { error } = await supabase
+                .from('decisions')
+                .update({
+                    dilemma: updatedDecision.dilemma,
+                    emoji: updatedDecision.emoji,
+                    category: updatedDecision.category,
+                    tags: updatedDecision.tags || [],
+                    thread_id: updatedDecision.threadId,
+                    decision_data: updatedDecision as any,
+                    timestamp: updatedDecision.timestamp ? new Date(updatedDecision.timestamp).toISOString() : null
+                })
+                .eq('id', updatedDecision.id)
+                .eq('user_id', user!.id);
+            
+            if (error) throw error;
+        } catch (error) {
+            console.error('Failed to update decision in cloud:', error);
+        }
+    };
+
+    const deleteDecisionCloud = async (decisionId: string) => {
+        setHistory(prev => prev.filter(d => d.id !== decisionId));
+        
+        try {
+            const { error } = await supabase
+                .from('decisions')
+                .delete()
+                .eq('id', decisionId)
+                .eq('user_id', user!.id);
+            
+            if (error) throw error;
+        } catch (error) {
+            console.error('Failed to delete decision from cloud:', error);
+        }
+    };
+
+    const clearHistoryCloud = async () => {
+        setHistory([]);
+        
+        try {
+            const workspaceId = currentWorkspace?.id;
+            
+            let query = supabase
+                .from('decisions')
+                .delete()
+                .eq('user_id', user!.id);
+            
+            if (workspaceId) {
+                query = query.eq('workspace_id', workspaceId);
+            }
+            
+            const { error } = await query;
+            if (error) throw error;
+        } catch (error) {
+            console.error('Failed to clear history in cloud:', error);
+        }
+    };
+
+    // Functions for local operations
     const addDecisionLocal = async (decision: IDecision) => {
         const workspaceId = currentWorkspace?.id || 'default';
-        setAllHistory(prevAllHistory => {
+        setLocalHistory(prevAllHistory => {
             const workspaceHistory = prevAllHistory[workspaceId] || [];
             return {
                 ...prevAllHistory,
@@ -134,7 +248,7 @@ export const useDecisionHistory = () => {
 
     const updateDecisionLocal = async (updatedDecision: IDecision) => {
         const workspaceId = currentWorkspace?.id || 'default';
-        setAllHistory(prevAllHistory => {
+        setLocalHistory(prevAllHistory => {
             const workspaceHistory = prevAllHistory[workspaceId] || [];
             const index = workspaceHistory.findIndex(d => d.id === updatedDecision.id);
             
@@ -152,10 +266,10 @@ export const useDecisionHistory = () => {
             };
         });
     };
-    
+
     const updateDecisionCategoryLocal = async (decisionId: string, categoryId: string | undefined) => {
         const workspaceId = currentWorkspace?.id || 'default';
-        setAllHistory(prevAllHistory => {
+        setLocalHistory(prevAllHistory => {
             const workspaceHistory = prevAllHistory[workspaceId] || [];
             const index = workspaceHistory.findIndex(d => d.id === decisionId);
             
@@ -174,10 +288,28 @@ export const useDecisionHistory = () => {
             return prevAllHistory;
         });
     };
-    
+
+    const updateDecisionCategoryCloud = async (decisionId: string, categoryId: string | undefined) => {
+        setHistory(prev => prev.map(d => 
+            d.id === decisionId ? { ...d, category: categoryId } : d
+        ));
+        
+        try {
+            const { error } = await supabase
+                .from('decisions')
+                .update({ category: categoryId })
+                .eq('id', decisionId)
+                .eq('user_id', user!.id);
+            
+            if (error) throw error;
+        } catch (error) {
+            console.error('Failed to update category in cloud:', error);
+        }
+    };
+
     const deleteDecisionLocal = async (decisionId: string) => {
         const workspaceId = currentWorkspace?.id || 'default';
-        setAllHistory(prevAllHistory => {
+        setLocalHistory(prevAllHistory => {
             const workspaceHistory = prevAllHistory[workspaceId] || [];
             return {
                 ...prevAllHistory,
@@ -188,32 +320,19 @@ export const useDecisionHistory = () => {
 
     const clearHistoryLocal = async () => {
         const workspaceId = currentWorkspace?.id || 'default';
-        setAllHistory(prevAllHistory => ({
+        setLocalHistory(prevAllHistory => ({
             ...prevAllHistory,
             [workspaceId]: []
         }));
     };
 
     // Return appropriate interface based on authentication
-    if (user?.id) {
-        // Return cloud history interface
-        return {
-            history: cloudHistory.history,
-            addDecision: cloudHistory.addDecision,
-            updateDecision: cloudHistory.updateDecision,
-            updateDecisionCategory: cloudHistory.updateDecisionCategory,
-            deleteDecision: cloudHistory.deleteDecision,
-            clearHistory: cloudHistory.clearHistory
-        };
-    } else {
-        // Return local storage interface
-        return { 
-            history, 
-            addDecision: addDecisionLocal, 
-            updateDecision: updateDecisionLocal, 
-            updateDecisionCategory: updateDecisionCategoryLocal,
-            deleteDecision: deleteDecisionLocal, 
-            clearHistory: clearHistoryLocal 
-        };
-    }
+    return {
+        history,
+        addDecision: isAuthenticated ? addDecisionCloud : addDecisionLocal,
+        updateDecision: isAuthenticated ? updateDecisionCloud : updateDecisionLocal,
+        updateDecisionCategory: isAuthenticated ? updateDecisionCategoryCloud : updateDecisionCategoryLocal,
+        deleteDecision: isAuthenticated ? deleteDecisionCloud : deleteDecisionLocal,
+        clearHistory: isAuthenticated ? clearHistoryCloud : clearHistoryLocal
+    };
 };
