@@ -118,7 +118,7 @@ const SharedDecisionView: React.FC = () => {
         </div>
         
         <div className="text-center mb-4">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight break-words">{decision.dilemma}</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-relaxed break-words">{decision.dilemma}</h1>
           {decision.category && (
             <div className="mt-3 flex justify-center">
               <CategoryBadge categoryId={decision.category} />

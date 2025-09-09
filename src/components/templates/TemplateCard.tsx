@@ -53,7 +53,7 @@ const TemplateCard = ({ template, onOpen }: TemplateCardProps) => {
         {template.decision_data?.dilemma && (
           <div className="mb-4">
             <p className="text-sm font-medium text-foreground mb-1">{t('templates.card.question')} :</p>
-            <p className="text-sm text-muted-foreground line-clamp-2">
+            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
               {template.decision_data.dilemma}
             </p>
           </div>
