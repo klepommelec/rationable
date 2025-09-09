@@ -252,6 +252,8 @@ export interface UITranslations {
     };
     card: {
       open: string;
+      question: string;
+      byAuthor: string;
     };
     filters: {
       searchPlaceholder: string;
@@ -1116,6 +1118,8 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       },
       card: {
         open: 'Ouvrir',
+        question: 'Question',
+        byAuthor: 'par',
       },
       filters: {
         searchPlaceholder: 'Rechercher un template...',
@@ -1978,6 +1982,8 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       },
       card: {
         open: 'Open',
+        question: 'Question',
+        byAuthor: 'by',
       },
       filters: {
         searchPlaceholder: 'Search templates...',

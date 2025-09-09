@@ -16,6 +16,10 @@ interface TemplateCardProps {
     tags: string[];
     like_count?: number;
     author_name?: string;
+    decision_data?: {
+      dilemma?: string;
+      emoji?: string;
+    };
   };
   onOpen: (template: any) => void;
 }
@@ -49,6 +53,15 @@ const TemplateCard = ({ template, onOpen }: TemplateCardProps) => {
         </div>
       </CardHeader>
       <CardContent>
+        {template.decision_data?.dilemma && (
+          <div className="mb-4">
+            <p className="text-sm font-medium text-foreground mb-1">{t('templates.card.question')} :</p>
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {template.decision_data.dilemma}
+            </p>
+          </div>
+        )}
+        
         {template.description && (
           <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
             {template.description}
