@@ -1441,7 +1441,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         contact: {
           title: 'Contact',
           description: 'Pour toute question, contactez-nous',
-          email: 'support@rationable.com',
+        email: 'contact@rationable.ai',
         },
         changes: {
           title: 'Modifications de la politique',
@@ -2277,7 +2277,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
         contact: {
           title: 'Contact',
           description: 'For any questions, contact us',
-          email: 'support@rationable.com',
+          email: 'contact@rationable.ai',
         },
         changes: {
           title: 'Policy Changes',
