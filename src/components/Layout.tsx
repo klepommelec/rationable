@@ -3,7 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { useAuth } from "@/hooks/useAuth";
-import { PerplexityCounter } from "@/components/PerplexityCounter";
+
 import { RealTimeSearchToggle } from "@/components/RealTimeSearchToggle";
 
 const Layout = () => {
@@ -45,7 +45,7 @@ const Layout = () => {
       )}
       
       <div className="relative z-10 flex flex-col min-h-screen">
-        <PerplexityCounter />
+        
         <Navbar />
         <main 
           role="main" 
