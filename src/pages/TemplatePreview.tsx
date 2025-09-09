@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogIn, Copy } from 'lucide-react';
 import { getTemplatePreview } from '@/services/templatePreviewService';
 import { IDecision } from '@/types/decision';
@@ -143,6 +144,21 @@ const TemplatePreviewContent: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {/* Question/Dilemme */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-2xl">{decision.emoji}</span>
+                  Question analysée
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-lg text-foreground font-medium leading-relaxed">
+                  {decision.dilemma}
+                </p>
+              </CardContent>
+            </Card>
 
             {/* Analysis Result */}
             <AnalysisResult 
