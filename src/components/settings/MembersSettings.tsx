@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WorkspaceMembersManager } from "@/components/workspace/WorkspaceMembersManager";
 import { useWorkspaces } from '@/hooks/useWorkspaces';
 import { useI18nUI } from '@/contexts/I18nUIContext';
-import { WorkspaceSelector } from '@/components/workspace/WorkspaceSelector';
 import { Building2 } from 'lucide-react';
 
 export const MembersSettings: React.FC = () => {
@@ -21,7 +20,9 @@ export const MembersSettings: React.FC = () => {
           <p className="text-muted-foreground mb-4">
             Veuillez sélectionner un workspace pour gérer ses membres
           </p>
-          <WorkspaceSelector />
+          <div className="text-sm text-muted-foreground">
+            Allez dans l'onglet "Workspaces" pour créer ou sélectionner un workspace
+          </div>
         </CardContent>
       </Card>
     );
@@ -36,7 +37,6 @@ export const MembersSettings: React.FC = () => {
             Invitez et gérez les membres du workspace "{currentWorkspace.name}"
           </p>
         </div>
-        <WorkspaceSelector />
       </div>
 
       <WorkspaceMembersManager 
