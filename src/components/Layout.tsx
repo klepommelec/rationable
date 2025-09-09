@@ -60,7 +60,6 @@ const Layout = () => {
         </main>
         {!isSettingsPage && (
           <>
-            <RealTimeSearchToggle />
             <Footer />
           </>
         )}

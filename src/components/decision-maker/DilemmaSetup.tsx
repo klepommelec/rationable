@@ -17,6 +17,9 @@ import { useAuth } from '@/hooks/useAuth';
 import AuthModal from '@/components/AuthModal';
 import { useContextualContent } from '@/hooks/useContextualContent';
 import TrendingPrompts from '@/components/TrendingPrompts';
+import { useRealTimeSearchSettings } from '@/hooks/useRealTimeSearchSettings';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 interface DilemmaSetupProps {
   dilemma: string;
   setDilemma: (dilemma: string) => void;
@@ -74,6 +77,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   const { t } = useI18nUI();
   const { user } = useAuth();
   const { context } = useContextualContent();
+  const { realTimeSearchEnabled, setRealTimeSearchEnabled } = useRealTimeSearchSettings();
 
   // Afficher seulement les 3 premiers modèles
   const displayedTemplates = templates.slice(0, 3);
@@ -196,11 +200,25 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     clearAnalyses();
     
     setIsAnalysisStarting(true);
-    toast.success(t('dilemmaSetup.analysisStarted'));
-    try {
-      await handleStartAnalysis();
-    } finally {
-      setIsAnalysisStarting(false);
+    
+    if (realTimeSearchEnabled) {
+      // Mode IA automatique
+      toast.success(t('dilemmaSetup.analysisStarted'));
+      try {
+        await handleStartAnalysis();
+      } finally {
+        setIsAnalysisStarting(false);
+      }
+    } else {
+      // Mode manuel : on passe directement aux critères sans analyse automatique
+      toast.success("Mode manuel activé. Créez vos critères et options.");
+      try {
+        // On peut déclencher directement l'étape de création manuelle
+        // Pour l'instant, on utilise toujours handleStartAnalysis mais on pourrait ajouter une logique différente
+        await handleStartAnalysis();
+      } finally {
+        setIsAnalysisStarting(false);
+      }
     }
   };
 
@@ -229,7 +247,30 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         <CardDescription className="text-muted-foreground text-sm:text-base">{t('dilemmaSetup.hero.subtitle')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6 px-4 sm:px-6">
-                        <div className="space-y-2">
+                        <div className="space-y-4">
+                            {/* Toggle pour l'analyse IA */}
+                            <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border">
+                                <div className="flex items-center space-x-3">
+                                    <BrainCircuit className="h-5 w-5 text-primary" />
+                                    <div>
+                                        <Label htmlFor="ai-analysis" className="font-medium">
+                                            Analyse intelligence par IA
+                                        </Label>
+                                        <p className="text-sm text-muted-foreground">
+                                            {realTimeSearchEnabled 
+                                                ? "L'IA analysera votre dilemme automatiquement"
+                                                : "Mode manuel : créez vos options vous-même"
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                                <Switch
+                                    id="ai-analysis"
+                                    checked={realTimeSearchEnabled}
+                                    onCheckedChange={setRealTimeSearchEnabled}
+                                />
+                            </div>
+                            
                             <div className="relative">
                                 <Textarea id="dilemma-input" placeholder="" value={dilemma} onChange={e => setDilemma(e.target.value)} onKeyDown={e => {
                 if ((e.key === 'Enter' && e.ctrlKey) || e.key === 'Enter') {
@@ -256,10 +297,10 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                         <Paperclip className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                                     </button>
                                     
-                                    {/* Bouton d'analyse avec feedback visuel */}
-                                    {analysisStep === 'idle' && <button type="button" onClick={handleAnalysisClick} disabled={isMainButtonDisabled} aria-label={t('dilemmaSetup.launchAnalysis')} title={t('dilemmaSetup.launchAnalysis')} className="p-2 bg-black hover:bg-black/90 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full hover:scale-105 active:scale-95">
-                                            {isAnalysisStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-                                        </button>}
+                                     {/* Bouton d'analyse avec feedback visuel */}
+                                     {analysisStep === 'idle' && <button type="button" onClick={handleAnalysisClick} disabled={isMainButtonDisabled} aria-label={realTimeSearchEnabled ? t('dilemmaSetup.launchAnalysis') : 'Créer manuellement'} title={realTimeSearchEnabled ? t('dilemmaSetup.launchAnalysis') : 'Créer vos options manuellement'} className="p-2 bg-black hover:bg-black/90 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full hover:scale-105 active:scale-95">
+                                             {isAnalysisStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+                                         </button>}
                                 </div>
                                 
                                 {/* Input file caché */}
@@ -322,8 +363,14 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
           </div>
                     </CardContent>
                      <CardFooter className="flex flex-col gap-4 px-4 sm:px-6">
-                        <MainActionButton analysisStep={analysisStep} handleStartAnalysis={handleAnalysisClick} isMainButtonDisabled={isMainButtonDisabled} progress={progress} progressMessage={progressMessage} />
-                    </CardFooter>
+                         <MainActionButton 
+                           analysisStep={analysisStep} 
+                           handleStartAnalysis={handleAnalysisClick} 
+                           isMainButtonDisabled={isMainButtonDisabled} 
+                           progress={progress} 
+                           progressMessage={progressMessage}
+                         />
+                     </CardFooter>
                 </Card>
             </div>
 
