@@ -247,30 +247,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                         <CardDescription className="text-muted-foreground text-sm:text-base">{t('dilemmaSetup.hero.subtitle')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6 px-4 sm:px-6">
-                        <div className="space-y-4">
-                            {/* Toggle pour l'analyse IA */}
-                            <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border">
-                                <div className="flex items-center space-x-3">
-                                    <BrainCircuit className="h-5 w-5 text-primary" />
-                                    <div>
-                                        <Label htmlFor="ai-analysis" className="font-medium">
-                                            Analyse intelligence par IA
-                                        </Label>
-                                        <p className="text-sm text-muted-foreground">
-                                            {realTimeSearchEnabled 
-                                                ? "L'IA analysera votre dilemme automatiquement"
-                                                : "Mode manuel : créez vos options vous-même"
-                                            }
-                                        </p>
-                                    </div>
-                                </div>
-                                <Switch
-                                    id="ai-analysis"
-                                    checked={realTimeSearchEnabled}
-                                    onCheckedChange={setRealTimeSearchEnabled}
-                                />
-                            </div>
-                            
+                        <div className="space-y-2">
                             <div className="relative">
                                 <Textarea id="dilemma-input" placeholder="" value={dilemma} onChange={e => setDilemma(e.target.value)} onKeyDown={e => {
                 if ((e.key === 'Enter' && e.ctrlKey) || e.key === 'Enter') {
@@ -290,6 +267,20 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                             {t('dilemmaSetup.dropHere')}
                                         </div>
                                     </div>}
+                                
+                                {/* Toggle IA intégré dans l'input */}
+                                <div className="absolute bottom-3 left-3 flex items-center gap-2">
+                                    <Switch
+                                        id="ai-analysis"
+                                        checked={realTimeSearchEnabled}
+                                        onCheckedChange={setRealTimeSearchEnabled}
+                                        className="scale-75"
+                                    />
+                                    <Label htmlFor="ai-analysis" className="text-sm font-medium cursor-pointer">
+                                        Analyse intelligente par IA
+                                    </Label>
+                                </div>
+                                
                                 {/* Boutons d'action à droite */}
                                 <div className="absolute bottom-3 right-3 flex gap-1">
                                     {/* Bouton d'attachement de fichier */}
