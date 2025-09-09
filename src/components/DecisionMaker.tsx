@@ -237,7 +237,7 @@ const DecisionMaker = () => {
   // Note: La synchronisation des états lors de la navigation est gérée par handleAnalysisNavigation
 
   const shouldShowCriteria = true;
-  return <div className="w-full max-w-[896px] mx-auto px-4 sm:px-6 lg:px-0">
+  return <div className={`w-full px-4 sm:px-6 lg:px-0 ${displayStep !== 'idle' ? 'max-w-[896px] mx-auto' : ''}`}>
       <section aria-label="Assistant de décision">
         {/* Navigation entre analyses */}
         {displayStep !== 'idle' && <AnalysisNavigation analyses={analyses} currentAnalysisIndex={currentAnalysisIndex} onNavigate={handleAnalysisNavigation} />}
