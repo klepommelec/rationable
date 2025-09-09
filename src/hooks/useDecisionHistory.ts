@@ -7,26 +7,16 @@ import { useCloudDecisionHistory } from './useCloudDecisionHistory';
 export const useDecisionHistory = () => {
     const { user } = useAuth();
     const { currentWorkspace } = useWorkspaces();
+    
+    // Always call all hooks first (hook rules compliance)
+    const cloudHistory = useCloudDecisionHistory();
     const [allHistory, setAllHistory] = useState<Record<string, IDecision[]>>({});
     const [history, setHistory] = useState<IDecision[]>([]);
 
-    // Use cloud history when authenticated
-    const cloudHistory = useCloudDecisionHistory();
-
-    // Return cloud history if user is authenticated
-    if (user?.id) {
-        return {
-            history: cloudHistory.history,
-            addDecision: cloudHistory.addDecision,
-            updateDecision: cloudHistory.updateDecision,
-            updateDecisionCategory: cloudHistory.updateDecisionCategory,
-            deleteDecision: cloudHistory.deleteDecision,
-            clearHistory: cloudHistory.clearHistory
-        };
-    }
-
-    // Fallback to localStorage for non-authenticated users
+    // Effects for local storage (only runs for non-authenticated users)
     useEffect(() => {
+        if (user?.id) return; // Skip if authenticated
+        
         try {
             // Load all workspace histories
             const storedAllHistory = localStorage.getItem('workspaceDecisionHistory');
@@ -75,10 +65,12 @@ export const useDecisionHistory = () => {
         } catch (error) {
             console.error("Failed to load history from localStorage", error);
         }
-    }, []);
+    }, [user?.id]);
 
-    // Update history when workspace changes
+    // Update history when workspace changes (local storage only)
     useEffect(() => {
+        if (user?.id) return; // Skip if authenticated
+        
         if (currentWorkspace) {
             const workspaceHistory = allHistory[currentWorkspace.id] || [];
             setHistory(workspaceHistory);
@@ -87,10 +79,12 @@ export const useDecisionHistory = () => {
             const defaultHistory = allHistory['default'] || [];
             setHistory(defaultHistory);
         }
-    }, [currentWorkspace, allHistory]);
+    }, [user?.id, currentWorkspace, allHistory]);
 
-    // Migration one-shot: si l'espace courant est vide mais 'default' a de l'historique
+    // Migration one-shot (local storage only)
     useEffect(() => {
+        if (user?.id) return; // Skip if authenticated
+        
         try {
             const workspaceId = currentWorkspace?.id || 'default';
             const migrationFlag = localStorage.getItem('historyMigratedToWorkspace');
@@ -109,9 +103,12 @@ export const useDecisionHistory = () => {
         } catch (e) {
             console.error('Migration history error', e);
         }
-    }, [currentWorkspace, allHistory]);
+    }, [user?.id, currentWorkspace, allHistory]);
 
+    // Save to localStorage (local storage only)
     useEffect(() => {
+        if (user?.id) return; // Skip if authenticated
+        
         // Debounce saving to localStorage
         const timer = setTimeout(() => {
             try {
@@ -121,9 +118,10 @@ export const useDecisionHistory = () => {
             }
         }, 500);
         return () => clearTimeout(timer);
-    }, [allHistory]);
+    }, [user?.id, allHistory]);
 
-    const addDecision = async (decision: IDecision) => {
+    // Local storage functions
+    const addDecisionLocal = async (decision: IDecision) => {
         const workspaceId = currentWorkspace?.id || 'default';
         setAllHistory(prevAllHistory => {
             const workspaceHistory = prevAllHistory[workspaceId] || [];
@@ -134,7 +132,7 @@ export const useDecisionHistory = () => {
         });
     };
 
-    const updateDecision = async (updatedDecision: IDecision) => {
+    const updateDecisionLocal = async (updatedDecision: IDecision) => {
         const workspaceId = currentWorkspace?.id || 'default';
         setAllHistory(prevAllHistory => {
             const workspaceHistory = prevAllHistory[workspaceId] || [];
@@ -155,7 +153,7 @@ export const useDecisionHistory = () => {
         });
     };
     
-    const updateDecisionCategory = async (decisionId: string, categoryId: string | undefined) => {
+    const updateDecisionCategoryLocal = async (decisionId: string, categoryId: string | undefined) => {
         const workspaceId = currentWorkspace?.id || 'default';
         setAllHistory(prevAllHistory => {
             const workspaceHistory = prevAllHistory[workspaceId] || [];
@@ -177,7 +175,7 @@ export const useDecisionHistory = () => {
         });
     };
     
-    const deleteDecision = async (decisionId: string) => {
+    const deleteDecisionLocal = async (decisionId: string) => {
         const workspaceId = currentWorkspace?.id || 'default';
         setAllHistory(prevAllHistory => {
             const workspaceHistory = prevAllHistory[workspaceId] || [];
@@ -188,7 +186,7 @@ export const useDecisionHistory = () => {
         });
     };
 
-    const clearHistory = async () => {
+    const clearHistoryLocal = async () => {
         const workspaceId = currentWorkspace?.id || 'default';
         setAllHistory(prevAllHistory => ({
             ...prevAllHistory,
@@ -196,12 +194,26 @@ export const useDecisionHistory = () => {
         }));
     };
 
-    return { 
-        history, 
-        addDecision, 
-        updateDecision, 
-        updateDecisionCategory,
-        deleteDecision, 
-        clearHistory 
-    };
+    // Return appropriate interface based on authentication
+    if (user?.id) {
+        // Return cloud history interface
+        return {
+            history: cloudHistory.history,
+            addDecision: cloudHistory.addDecision,
+            updateDecision: cloudHistory.updateDecision,
+            updateDecisionCategory: cloudHistory.updateDecisionCategory,
+            deleteDecision: cloudHistory.deleteDecision,
+            clearHistory: cloudHistory.clearHistory
+        };
+    } else {
+        // Return local storage interface
+        return { 
+            history, 
+            addDecision: addDecisionLocal, 
+            updateDecision: updateDecisionLocal, 
+            updateDecisionCategory: updateDecisionCategoryLocal,
+            deleteDecision: deleteDecisionLocal, 
+            clearHistory: clearHistoryLocal 
+        };
+    }
 };
