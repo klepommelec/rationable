@@ -302,8 +302,10 @@ const DecisionMaker = () => {
               </div>
               
               {/* Layout desktop : emoji et titre côte à côte */}
-              <div className="hidden sm:flex items-baseline gap-4 w-full">
-                <EmojiPicker emoji={displayEmoji} setEmoji={setEmoji} />
+              <div className="hidden sm:flex items-start gap-4 w-full">
+                <div className="flex-shrink-0 pt-1">
+                  <EmojiPicker emoji={displayEmoji} setEmoji={setEmoji} />
+                </div>
                 <EditableTitle
                   title={getCurrentAnalysis()?.displayTitle || getCurrentAnalysis()?.dilemma || displayDilemma}
                   onTitleChange={handleTitleChange}
