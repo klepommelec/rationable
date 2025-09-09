@@ -65,8 +65,8 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
   }
   return <h1 className={`${className} group`}>
       {title}
-      {!disabled && <Button variant="ghost" size="sm" onClick={handleStartEdit} className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 shrink-0 ml-3 -mt-4 inline-flex items-center justify-center bg-white border border-border rounded-full hover:bg-gray-50">
-          <Edit2 className="h-4 w-4" />
+      {!disabled && <Button variant="ghost" size="sm" onClick={handleStartEdit} className="opacity-0 group-hover:opacity-70 transition-opacity h-5 w-5 p-0 shrink-0 ml-2 inline-flex items-center justify-center hover:bg-transparent">
+          <Edit2 className="h-3 w-3 text-muted-foreground" />
         </Button>}
     </h1>;
 };
