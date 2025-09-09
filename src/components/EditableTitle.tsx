@@ -61,7 +61,7 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
 
   if (isEditing) {
     return (
-      <div className="flex items-center gap-2 flex-1 min-w-0">
+      <h1 className={className}>
         <input
           ref={inputRef}
           value={editValue}
@@ -77,25 +77,7 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
             boxShadow: 'none'
           }}
         />
-        <div className="flex gap-1 ml-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleSave}
-            className="h-6 w-6 p-0 opacity-70 hover:opacity-100"
-          >
-            <Check className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCancel}
-            className="h-6 w-6 p-0 opacity-70 hover:opacity-100"
-          >
-            <X className="h-3 w-3" />
-          </Button>
-        </div>
-      </div>
+      </h1>
     );
   }
 
@@ -107,9 +89,9 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
           variant="ghost"
           size="sm"
           onClick={handleStartEdit}
-          className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 p-0 shrink-0 ml-1 -mb-0.5 inline-flex items-center justify-center"
+          className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 shrink-0 ml-3 -mb-1 inline-flex items-center justify-center bg-white border border-border rounded-md hover:bg-gray-50"
         >
-          <Edit2 className="h-3 w-3" />
+          <Edit2 className="h-4 w-4" />
         </Button>
       )}
     </h1>
