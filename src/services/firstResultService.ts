@@ -47,7 +47,7 @@ class FirstResultService {
     const TIMEOUT_MS = 3500; // Total timeout for the entire operation
     
     // 1. Detect language and vertical
-    const detectedLanguage = language || I18nService.detectLanguage(dilemma + ' ' + optionName);
+    const detectedLanguage = language || I18nService.getCurrentLanguage();
     const detectedVertical = vertical || I18nService.detectVertical(dilemma + ' ' + optionName);
     
     // 2. Classify action type and extract location context
@@ -232,7 +232,7 @@ class FirstResultService {
 
   async getFirstResultUrl({ optionName, dilemma, language, vertical }: FirstResultOptions): Promise<FirstResultResponse> {
     // 1. Detect language if not provided
-    const detectedLanguage = language || I18nService.detectLanguage(dilemma + ' ' + optionName);
+    const detectedLanguage = language || I18nService.getCurrentLanguage();
     
     // 2. Detect vertical if not provided
     const detectedVertical = vertical || I18nService.detectVertical(dilemma + ' ' + optionName);

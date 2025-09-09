@@ -18,7 +18,7 @@ export const generateQuickAnswer = async ({
   try {
     console.log('🚀 Génération de réponse rapide...');
     
-    const detectedLanguage = language || I18nService.detectLanguage(originalDilemma);
+    const detectedLanguage = language || I18nService.getCurrentLanguage();
     
     // Extraire les données temps réel si disponibles
     let realTimeContext = '';
@@ -36,7 +36,7 @@ export const generateQuickAnswer = async ({
     return response.answer || response.content || fallbackMessages.noAnswerGenerated;
   } catch (error) {
     console.error('❌ Erreur génération réponse rapide:', error);
-    const detectedLanguage = language || I18nService.detectLanguage(originalDilemma);
+    const detectedLanguage = language || I18nService.getCurrentLanguage();
     const fallbackMessages = I18nService.getFallbackMessages(detectedLanguage);
     throw new Error(fallbackMessages.quickAnswerError);
   }

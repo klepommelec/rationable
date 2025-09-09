@@ -11,6 +11,7 @@ import { generateContextualEmoji } from '@/services/contextualEmojiService';
 import { detectQuestionType } from '@/services/questionClassificationService';
 import { useAuth } from '@/hooks/useAuth';
 import { detectLanguage } from '@/utils/languageDetection';
+import { I18nService } from '@/services/i18nService';
 
 interface UseDecisionAPIProps {
     dilemma: string;
@@ -70,7 +71,9 @@ export const useDecisionAPI = ({
     const handleGenerateOptions = async (isRetry = false, forcedType?: 'comparative') => {
         const currentCriteria = criteria;
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
-        const contentLanguage = detectLanguage(dilemma);
+        // Utiliser systématiquement la langue de l'interface utilisateur
+        const userInterfaceLanguage = I18nService.getCurrentLanguage();
+        const contentLanguage = userInterfaceLanguage;
         
         console.log("🔄 [DEBUG] Starting options generation", {
             isRetry,
@@ -206,7 +209,9 @@ export const useDecisionAPI = ({
     const handleStartAnalysis = useCallback(async (forcedType?: 'comparative', options?: { threadFromId?: string; dilemmaOverride?: string }) => {
         const workspaceId = shouldUseWorkspaceDocuments() ? getCurrentWorkspaceId() : undefined;
         const effectiveDilemma = options?.dilemmaOverride ?? dilemma;
-        const contentLanguage = detectLanguage(effectiveDilemma);
+        // Utiliser systématiquement la langue de l'interface utilisateur
+        const userInterfaceLanguage = I18nService.getCurrentLanguage();
+        const contentLanguage = userInterfaceLanguage;
         
         console.log("🚀 [OPTIMIZED] Starting PARALLEL analysis", { 
           dilemma: effectiveDilemma.substring(0, 50) + "...",

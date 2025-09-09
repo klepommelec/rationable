@@ -193,7 +193,7 @@ export const searchWithPerplexity = async (
     const searchPromise = (async () => {
       try {
         // Detect language from query if not provided
-        const detectedLanguage = language || I18nService.detectLanguage(query);
+        const detectedLanguage = language || I18nService.getCurrentLanguage();
         console.log('🌐 Language detected for content:', detectedLanguage);
         
         // Get localized default context
@@ -263,7 +263,7 @@ export interface TemporalIntent {
 }
 
 export const detectTemporalIntent = (dilemma: string, language?: SupportedLanguage): TemporalIntent => {
-  const detectedLanguage = language || I18nService.detectLanguage(dilemma);
+  const detectedLanguage = language || I18nService.getCurrentLanguage();
   const keywords = I18nService.getTemporalKeywords(detectedLanguage);
   const lowerDilemma = dilemma.toLowerCase();
   const currentYear = I18nService.getCurrentYear();

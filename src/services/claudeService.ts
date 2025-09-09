@@ -13,7 +13,7 @@ export interface ClaudeDecisionRequest {
 
 export const makeClaudeDecision = async (request: ClaudeDecisionRequest): Promise<IResult> => {
   try {
-    const detectedLanguage = request.language || I18nService.detectLanguage(request.dilemma);
+    const detectedLanguage = request.language || I18nService.getCurrentLanguage();
     
     console.log('🧠 Appel à Claude pour la décision:', request.dilemma);
     console.log('🌐 Langue détectée:', detectedLanguage);
@@ -61,7 +61,7 @@ export const makeComplexAnalysis = async (
   additionalContext?: string,
   language?: SupportedLanguage
 ): Promise<IResult> => {
-  const detectedLanguage = language || I18nService.detectLanguage(dilemma);
+  const detectedLanguage = language || I18nService.getCurrentLanguage();
   
   // Get context labels in the detected language
   const contextLabels = {
@@ -88,7 +88,7 @@ export const makeQuickDecision = async (
   criteria: ICriterion[],
   language?: SupportedLanguage
 ): Promise<IResult> => {
-  const detectedLanguage = language || I18nService.detectLanguage(dilemma);
+  const detectedLanguage = language || I18nService.getCurrentLanguage();
   
   return makeClaudeDecision({
     dilemma,
