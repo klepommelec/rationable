@@ -32,11 +32,14 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
 
   useEffect(() => {
     const loadQuestions = async () => {
+      // Si les questions existent déjà, les utiliser directement
       if (result.followUpQuestions && result.followUpQuestions.length > 0) {
+        console.log('✅ Using cached follow-up questions');
         setQuestions(result.followUpQuestions);
         return;
       }
 
+      console.log('🤔 Generating new follow-up questions (not cached)');
       setLoadingQuestions(true);
       try {
         const generatedQuestions = await generateFollowUpQuestions({
@@ -45,6 +48,13 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
           category
         });
         setQuestions(generatedQuestions);
+        
+        // Sauvegarder les questions dans le résultat pour éviter la régénération
+        if (generatedQuestions.length > 0 && onQuestionSelect) {
+          // Trigger un callback pour sauvegarder les questions dans l'historique
+          console.log('💾 Caching follow-up questions to avoid future regeneration');
+          result.followUpQuestions = generatedQuestions;
+        }
       } catch (error) {
         console.error('Error loading follow-up questions:', error);
         setQuestions([]);
@@ -54,7 +64,7 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
     };
 
     loadQuestions();
-  }, [dilemma, result, category]);
+  }, [dilemma, result, category, onQuestionSelect]);
 
   const handleQuestionClick = (questionId: string) => {
     if (isLoading || loadingQuestions) {

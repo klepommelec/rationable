@@ -82,6 +82,17 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             <ComparisonTable 
               breakdown={displayedOptions} 
               dilemma={dilemma}
+              result={result}
+              onUpdateResult={(updatedResult) => {
+                // Sauvegarder les liens en cache dans la décision courante
+                if (onUpdateDecision && currentDecision) {
+                  const updatedDecision = {
+                    ...currentDecision,
+                    result: updatedResult
+                  };
+                  onUpdateDecision(updatedDecision);
+                }
+              }}
             />
             {hasMoreOptions && (
               <div className="flex justify-center mt-4">
@@ -113,7 +124,17 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           dilemma={dilemma}
           result={result}
           category={currentDecision?.category}
-          onQuestionSelect={onFollowUpQuestion}
+          onQuestionSelect={(enrichedDilemma: string) => {
+            // Sauvegarder les questions dans l'historique si elles ont été mises à jour
+            if (result.followUpQuestions && onUpdateDecision && currentDecision) {
+              const updatedDecision = {
+                ...currentDecision,
+                result: { ...result }
+              };
+              onUpdateDecision(updatedDecision);
+            }
+            onFollowUpQuestion(enrichedDilemma);
+          }}
           isLoading={isUpdating}
         />
       )}

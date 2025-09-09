@@ -1,4 +1,6 @@
 
+import { BestLinksResponse } from '@/services/firstResultService';
+
 export interface ICriterion {
   id: string;
   name: string;
@@ -68,6 +70,8 @@ export interface IResult {
   };
   dataFreshness?: 'very-fresh' | 'fresh' | 'moderate' | 'stale';
   followUpQuestions?: IFollowUpQuestion[];
+  // Cache pour éviter de re-rechercher les liens dynamiques
+  cachedActionLinks?: Record<string, BestLinksResponse>;
 }
 
 export interface IDecision {
