@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Eye } from "lucide-react";
-import { DEFAULT_CATEGORIES } from '@/types/decision';
+import { DEFAULT_CATEGORIES, IDecision } from '@/types/decision';
 import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface TemplateCardProps {
@@ -16,10 +16,7 @@ interface TemplateCardProps {
     tags: string[];
     like_count?: number;
     author_name?: string;
-    decision_data?: {
-      dilemma?: string;
-      emoji?: string;
-    };
+    decision_data?: IDecision;
   };
   onOpen: (template: any) => void;
 }
