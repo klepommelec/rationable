@@ -274,7 +274,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 
                                 {/* Toggle IA intégré dans l'input */}
                                 <div className="absolute bottom-3 left-3 flex items-center gap-1">
-                                    <Switch id="ai-analysis" checked={realTimeSearchEnabled} onCheckedChange={setRealTimeSearchEnabled} className="scale-75" />
+                                    <Switch id="ai-analysis" checked={realTimeSearchEnabled} onCheckedChange={setRealTimeSearchEnabled} className="scale-75 hover:scale-75 active:scale-75 [&:hover]:translate-y-0 [&:active]:translate-y-0" />
                                     <Label htmlFor="ai-analysis" className="text-xs font-medium cursor-pointer">
                                         Analyse intelligente par IA
                                     </Label>
