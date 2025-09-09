@@ -39,15 +39,20 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
     if (recommendedOption) {
       const optionKey = recommendedOption.option;
       
-      // Vérifier le cache d'abord
-      if (result?.cachedActionLinks?.[optionKey]) {
-        console.log(`✅ Using cached action links for ${optionKey}`);
-        setActionLinks(prev => ({
-          ...prev,
-          [optionKey]: result.cachedActionLinks[optionKey]
-        }));
+      // Éviter de recharger si les liens sont déjà présents (cache ou état local)
+      if (result?.cachedActionLinks?.[optionKey] || actionLinks[optionKey]) {
+        if (result?.cachedActionLinks?.[optionKey] && !actionLinks[optionKey]) {
+          console.log(`✅ Using cached action links for ${optionKey}`);
+          setActionLinks(prev => ({
+            ...prev,
+            [optionKey]: result.cachedActionLinks[optionKey]
+          }));
+        }
         return;
       }
+
+      // Éviter de recharger si déjà en cours de chargement
+      if (loadingStates[optionKey]) return;
 
       console.log(`🔍 Loading action links for ${optionKey} (not cached)`);
       setLoadingStates(prev => ({
@@ -90,7 +95,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
         }));
       });
     }
-  }, [breakdown, dilemma, detectedLanguage, detectedVertical, result, onUpdateResult]);
+  }, [breakdown, dilemma, detectedLanguage, detectedVertical]);
 
   // Lazy load action links for other options on demand
   const loadActionLinksForOption = async (option: IBreakdownItem) => {
