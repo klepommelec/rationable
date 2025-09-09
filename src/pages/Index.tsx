@@ -1,9 +1,14 @@
+
 import DecisionMaker from "@/components/DecisionMaker";
+
 const Index = () => {
-  return <div className="max-w-7xl mx-auto">
-      <div className="">
+  return (
+    <div className="max-w-7xl mx-auto">
+      <div className="max-w-none">
         <DecisionMaker />
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Index;
