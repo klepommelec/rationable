@@ -33,7 +33,10 @@ const SharedDecisionView: React.FC = () => {
       }
 
       try {
-        const decision = await getSharedDecision(publicId);
+        // Extract publicId from URL if it contains a slug (format: slug-publicId)
+        const actualPublicId = publicId.includes('-') ? publicId.split('-').pop() || publicId : publicId;
+        
+        const decision = await getSharedDecision(actualPublicId);
         if (!decision) {
           setError(t('sharedDecisionView.notFoundDescription'));
         } else {

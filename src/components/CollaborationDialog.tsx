@@ -38,7 +38,17 @@ const CollaborationDialog: React.FC<CollaborationDialogProps> = ({
     setIsSharing(true);
     try {
       const publicId = await shareDecision(decision);
-      const url = `${window.location.origin}/shared/${publicId}`;
+      // Create SEO-friendly URL with title slug
+      const titleSlug = decision.dilemma.toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove accents
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Replace multiple hyphens with single
+        .substring(0, 50) // Limit length
+        .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+      
+      const url = `${window.location.origin}/shared/${titleSlug}-${publicId}`;
       setShareUrl(url);
       toast.success(t('collaboration.linkCreatedToast'));
     } catch (error) {
