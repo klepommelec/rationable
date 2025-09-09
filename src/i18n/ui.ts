@@ -836,6 +836,32 @@ export interface UITranslations {
       loading: string;
     };
   };
+  sharedDecision: {
+    signIn: string;
+  };
+  sharedDecisionView: {
+    backToHome: string;
+    sharedOn: string;
+    view: string;
+    views: string;
+    copyLinkButton: string;
+    copyToWorkspace: string;
+    recommended: string;
+    evaluationCriteria: string;
+    detailedAnalysis: string;
+    advantages: string;
+    disadvantages: string;
+    learnMore: string;
+    usefulLinks: string;
+    shoppingLinks: string;
+    commentsTitle: string;
+    commentsPlaceholder: string;
+    copySuccess: string;
+    missingPublicId: string;
+    notFound: string;
+    notFoundDescription: string;
+    loadingError: string;
+  };
 }
 
 export const translations: Record<'fr' | 'en', UITranslations> = {
@@ -1674,6 +1700,32 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       searchDocuments: 'Rechercher des documents',
       uploadDocuments: 'Télécharger des documents',
     },
+    sharedDecision: {
+      signIn: 'Se connecter',
+    },
+    sharedDecisionView: {
+      backToHome: 'Retour à l\'accueil',
+      sharedOn: 'Partagée le',
+      view: 'vue',
+      views: 'vues',
+      copyLinkButton: 'Copier le lien',
+      copyToWorkspace: 'Copier dans l\'espace de travail',
+      recommended: 'Recommandé',
+      evaluationCriteria: 'Critères d\'évaluation',
+      detailedAnalysis: 'Analyse détaillée',
+      advantages: 'Avantages',
+      disadvantages: 'Inconvénients',
+      learnMore: 'En savoir plus',
+      usefulLinks: 'Liens utiles',
+      shoppingLinks: 'Liens d\'achat',
+      commentsTitle: 'Commentaires',
+      commentsPlaceholder: 'Ajoutez un commentaire...',
+      copySuccess: 'Décision copiée dans votre espace de travail !',
+      missingPublicId: 'ID public manquant',
+      notFound: 'Décision non trouvée',
+      notFoundDescription: 'Cette décision n\'existe pas ou a expiré.',
+      loadingError: 'Erreur lors du chargement de la décision',
+    },
   },
   en: {
     analysis: {
@@ -2509,6 +2561,32 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       activate: 'Activate',
       searchDocuments: 'Search documents',
       uploadDocuments: 'Upload documents',
+    },
+    sharedDecision: {
+      signIn: 'Sign In',
+    },
+    sharedDecisionView: {
+      backToHome: 'Back to Home',
+      sharedOn: 'Shared on',
+      view: 'view',
+      views: 'views',
+      copyLinkButton: 'Copy Link',
+      copyToWorkspace: 'Copy to Workspace',
+      recommended: 'Recommended',
+      evaluationCriteria: 'Evaluation Criteria',
+      detailedAnalysis: 'Detailed Analysis',
+      advantages: 'Advantages',
+      disadvantages: 'Disadvantages',
+      learnMore: 'Learn more',
+      usefulLinks: 'Useful Links',
+      shoppingLinks: 'Shopping Links',
+      commentsTitle: 'Comments',
+      commentsPlaceholder: 'Add a comment...',
+      copySuccess: 'Decision copied to your workspace!',
+      missingPublicId: 'Missing public ID',
+      notFound: 'Decision not found',
+      notFoundDescription: 'This decision does not exist or has expired.',
+      loadingError: 'Error loading decision',
     },
   },
 };
