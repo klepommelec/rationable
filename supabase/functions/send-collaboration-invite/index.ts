@@ -58,7 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email
     const { error } = await resend.emails.send({
-      from: "Rationable <onboarding@resend.dev>", // You'll need to update this with a verified domain
+      from: "Rationable <kevin.lepommelec@gmail.com>", // Using your verified email temporarily
       to: [to],
       reply_to: inviterEmail ? [inviterEmail] : undefined,
       subject: locale === 'fr' ? `Invitation à collaborer: ${decisionTitle}` : `Collaboration invite: ${decisionTitle}`,
