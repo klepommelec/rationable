@@ -146,19 +146,12 @@ const TemplatePreviewContent: React.FC = () => {
             </div>
 
             {/* Question/Dilemme */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span className="text-2xl">{decision.emoji}</span>
-                  Question analysée
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-lg text-foreground font-medium leading-relaxed">
-                  {decision.dilemma}
-                </p>
-              </CardContent>
-            </Card>
+            <div className="mb-8">
+              <h1 className="text-3xl font-medium text-foreground leading-relaxed flex items-start gap-3">
+                <span className="text-3xl">{decision.emoji}</span>
+                {decision.dilemma}
+              </h1>
+            </div>
 
             {/* Analysis Result */}
             <AnalysisResult 
