@@ -5,7 +5,7 @@ const Footer = () => {
     t
   } = useI18nUI();
   return <footer className="border-t">
-      <div className="container py-[20px]">
+      <div className="px-[20px]">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable" className="h-6 w-6 rounded-none" />
