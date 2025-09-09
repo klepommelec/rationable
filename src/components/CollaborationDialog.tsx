@@ -94,14 +94,17 @@ const CollaborationDialog: React.FC<CollaborationDialogProps> = ({
 
       if (error) {
         console.error('Error sending invitation:', error);
-        throw error;
+        const errorMessage = error.message || 'Unknown error occurred';
+        toast.error(`Erreur d'envoi: ${errorMessage}`);
+        return;
       }
 
       toast.success(t('collaboration.invitationSent'));
       setEmailInput('');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending invitation:', error);
-      toast.error(t('collaboration.invitationError'));
+      const errorMessage = error.message || error.error?.message || 'Unknown error occurred';
+      toast.error(`Erreur: ${errorMessage}`);
     } finally {
       setIsSending(false);
     }
