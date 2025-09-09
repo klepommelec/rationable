@@ -1,36 +1,26 @@
-
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import { Link } from 'react-router-dom';
-
 const Footer = () => {
-  const { t } = useI18nUI();
-  
-  return (
-    <footer className="border-t">
+  const {
+    t
+  } = useI18nUI();
+  return <footer className="border-t">
       <div className="container py-6">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable" className="h-6 w-6 rounded-none" />
-            <span className="text-sm text-muted-foreground">Rationable</span>
+            <span className="text-sm text-gray-900">Rationable</span>
           </div>
           <div className="flex items-center gap-4 text-sm">
-            <Link 
-              to="/templates"
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
+            <Link to="/templates" className="text-muted-foreground hover:text-primary transition-colors">
               {t('navbar.templates')}
             </Link>
-            <Link 
-              to="/privacy"
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
+            <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
               {t('footer.privacyPolicy')}
             </Link>
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
