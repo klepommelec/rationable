@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import ShareAsTemplateDialog from './ShareAsTemplateDialog';
 import CollaborationDialog from './CollaborationDialog';
 import { useI18nUI } from '@/contexts/I18nUIContext';
+import { APP_CONFIG } from '@/lib/config';
 
 interface ShareButtonProps {
   decision: IDecision;
@@ -39,7 +40,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ decision }) => {
         .substring(0, 50) // Limit length
         .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
       
-      const shareUrl = `${window.location.origin}/shared/${titleSlug}-${publicId}`;
+      const shareUrl = `${APP_CONFIG.getShareDomain()}/shared/${titleSlug}-${publicId}`;
       
       await navigator.clipboard.writeText(shareUrl);
       toast.success(t('share.toasts.linkCopied'));

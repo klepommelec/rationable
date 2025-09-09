@@ -16,6 +16,7 @@ import { IDecision } from '@/types/decision';
 import { shareDecision } from '@/services/sharedDecisionService';
 import { toast } from "sonner";
 import { useI18nUI } from '@/contexts/I18nUIContext';
+import { APP_CONFIG } from '@/lib/config';
 
 interface CollaborationDialogProps {
   decision: IDecision;
@@ -48,7 +49,7 @@ const CollaborationDialog: React.FC<CollaborationDialogProps> = ({
         .substring(0, 50) // Limit length
         .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
       
-      const url = `${window.location.origin}/shared/${titleSlug}-${publicId}`;
+      const url = `${APP_CONFIG.getShareDomain()}/shared/${titleSlug}-${publicId}`;
       setShareUrl(url);
       toast.success(t('collaboration.linkCreatedToast'));
     } catch (error) {
