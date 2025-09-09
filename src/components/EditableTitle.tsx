@@ -18,13 +18,24 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(title);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
   useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
+    if (isEditing && textareaRef.current) {
+      textareaRef.current.focus();
+      textareaRef.current.select();
+      // Auto-resize textarea
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [isEditing]);
+
+  useEffect(() => {
+    if (isEditing && textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [editValue, isEditing]);
   const handleStartEdit = () => {
     if (disabled) return;
     setEditValue(title);
@@ -45,23 +56,33 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
     setIsEditing(false);
   };
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
       handleSave();
     } else if (e.key === 'Escape') {
       handleCancel();
     }
   };
   if (isEditing) {
-    return <h1 className={className}>
-        <input ref={inputRef} value={editValue} onChange={e => setEditValue(e.target.value)} onKeyDown={handleKeyDown} className={`${className} bg-transparent border-none outline-none resize-none w-full ring-0 focus:ring-0 shadow-none`} style={{
-        fontSize: 'inherit',
-        lineHeight: 'inherit',
-        fontFamily: 'inherit',
-        fontWeight: 'inherit',
-        border: 'none',
-        boxShadow: 'none'
-      }} />
-      </h1>;
+    return (
+      <div className={`${className} relative`}>
+        <textarea
+          ref={textareaRef}
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="w-full bg-background/50 border border-border/50 rounded-lg px-4 py-3 text-inherit font-inherit resize-none outline-none focus:border-border focus:bg-background/80 transition-colors overflow-hidden"
+          style={{
+            fontSize: 'inherit',
+            lineHeight: 'inherit',
+            fontFamily: 'inherit',
+            fontWeight: 'inherit',
+            minHeight: '60px'
+          }}
+          rows={1}
+        />
+      </div>
+    );
   }
   return <h1 className={`${className} group`}>
       {title}
