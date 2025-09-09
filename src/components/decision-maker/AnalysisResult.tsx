@@ -145,7 +145,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                   followUpQuestions: questions.map(text => ({ 
                     id: crypto.randomUUID(), 
                     text, 
-                    category: 'general' as const
+                    category: 'practical_info' as const
                   }))
                 }
               };
