@@ -74,13 +74,13 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
       <Card className="animate-fade-in">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            Questions de suivi
+            {t('analysis.followUpSection.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center space-x-2 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm">Génération de questions personnalisées...</span>
+            <span className="text-sm">{t('analysis.followUpSection.loading')}</span>
           </div>
         </CardContent>
       </Card>
@@ -95,10 +95,10 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
     <Card className="animate-fade-in">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          {t('history.followUpSection.title')}
+          {t('analysis.followUpSection.title')}
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          {t('history.followUpSection.subtitle')}
+          {t('analysis.followUpSection.subtitle')}
         </p>
       </CardHeader>
       <CardContent className="space-y-3">

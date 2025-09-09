@@ -69,6 +69,7 @@ export interface UITranslations {
     followUpSection: {
       title: string;
       subtitle: string;
+      loading: string;
     };
     toasts: {
       templateApplied: string;
@@ -914,6 +915,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       followUpSection: {
         title: 'Questions de suivi',
         subtitle: 'Cliquez sur une question pour lancer une nouvelle analyse complète',
+        loading: 'Génération de questions personnalisées...',
       },
       toasts: {
         templateApplied: 'Modèle appliqué !',
@@ -1757,6 +1759,7 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       followUpSection: {
         title: 'Follow-up questions',
         subtitle: 'Click on a question to launch a complete new analysis',
+        loading: 'Generating personalized questions...',
       },
       toasts: {
         templateApplied: 'Template applied!',
