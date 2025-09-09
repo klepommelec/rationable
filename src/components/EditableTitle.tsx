@@ -19,7 +19,6 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(title);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  
   useEffect(() => {
     if (isEditing && textareaRef.current) {
       textareaRef.current.focus();
@@ -29,7 +28,6 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [isEditing]);
-
   useEffect(() => {
     if (isEditing && textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -64,29 +62,19 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
     }
   };
   if (isEditing) {
-    return (
-      <h1 className={`${className} relative`}>
-        <textarea
-          ref={textareaRef}
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="w-full bg-background/50 border border-border/50 rounded-lg px-4 py-3 text-inherit font-inherit resize-none outline-none focus:border-border focus:bg-background/80 transition-colors overflow-hidden"
-          style={{
-            fontSize: 'inherit',
-            lineHeight: 'inherit',
-            fontFamily: 'inherit',
-            fontWeight: 'inherit',
-            minHeight: '60px'
-          }}
-          rows={1}
-        />
-      </h1>
-    );
+    return <h1 className={`${className} relative`}>
+        <textarea ref={textareaRef} value={editValue} onChange={e => setEditValue(e.target.value)} onKeyDown={handleKeyDown} className="w-full bg-background/50 border border-border/50 rounded-lg px-4 py-3 text-inherit font-inherit resize-none outline-none focus:border-border focus:bg-background/80 transition-colors overflow-hidden" style={{
+        fontSize: 'inherit',
+        lineHeight: 'inherit',
+        fontFamily: 'inherit',
+        fontWeight: 'inherit',
+        minHeight: '60px'
+      }} rows={1} />
+      </h1>;
   }
   return <h1 className={`${className} group`}>
       {title}
-      {!disabled && <Button variant="ghost" size="sm" onClick={handleStartEdit} className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 shrink-0 ml-3 -mt-4 inline-flex items-center justify-center bg-white border border-border rounded-full hover:bg-gray-50">
+      {!disabled && <Button variant="ghost" size="sm" onClick={handleStartEdit} className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 shrink-0 ml-3 inline-flex items-center justify-center bg-white border border-border rounded-full hover:bg-gray-50">
           <Edit2 className="h-4 w-4" />
         </Button>}
     </h1>;
