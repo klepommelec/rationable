@@ -156,6 +156,25 @@ const DecisionMaker = () => {
     }
   };
 
+  // Fonction pour gérer les changements de titre avec relancement d'analyse
+  const handleTitleEdit = async (newTitle: string) => {
+    try {
+      // Réinitialiser l'état pour la nouvelle analyse
+      setResult(null);
+      setAnalysisStep('loading-options');
+      
+      // Démarrer une nouvelle analyse avec le nouveau titre
+      await handleStartAnalysis(undefined, {
+        dilemmaOverride: newTitle
+      });
+      
+      toast.success(t('decision.toasts.titleUpdated'));
+    } catch (error) {
+      console.error('Erreur lors du relancement de l\'analyse:', error);
+      toast.error('Erreur lors du relancement de l\'analyse');
+    }
+  };
+
   // Fonction pour gérer les changements de titre
   const handleTitleChange = (newTitle: string) => {
     if (currentAnalysis) {
@@ -176,8 +195,6 @@ const DecisionMaker = () => {
         };
         // Note: cette mise à jour sera gérée par l'effet de synchronisation existant
       }
-      
-      toast.success(t('decision.toasts.titleUpdated'));
     }
   };
 
@@ -277,6 +294,7 @@ const DecisionMaker = () => {
                   <EditableTitle
                     title={getCurrentAnalysis()?.displayTitle || getCurrentAnalysis()?.dilemma || displayDilemma}
                     onTitleChange={handleTitleChange}
+                    onTitleEdit={handleTitleEdit}
                     className="text-4xl font-bold text-left break-words"
                     disabled={displayStep === 'loading-options' || isLoading || isUpdating || Boolean(isLockedToOther)}
                   />
@@ -289,6 +307,7 @@ const DecisionMaker = () => {
                 <EditableTitle
                   title={getCurrentAnalysis()?.displayTitle || getCurrentAnalysis()?.dilemma || displayDilemma}
                   onTitleChange={handleTitleChange}
+                  onTitleEdit={handleTitleEdit}
                   className="text-4xl sm:text-4xl md:text-4xl lg:text-5xl font-bold text-left break-words flex-1 min-w-0 leading-snug"
                   disabled={displayStep === 'loading-options' || isLoading || isUpdating || Boolean(isLockedToOther)}
                 />

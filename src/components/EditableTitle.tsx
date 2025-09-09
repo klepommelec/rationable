@@ -6,6 +6,7 @@ import { Edit2, Check, X } from 'lucide-react';
 interface EditableTitleProps {
   title: string;
   onTitleChange: (newTitle: string) => void;
+  onTitleEdit?: (newTitle: string) => void;
   className?: string;
   disabled?: boolean;
 }
@@ -13,6 +14,7 @@ interface EditableTitleProps {
 export const EditableTitle: React.FC<EditableTitleProps> = ({
   title,
   onTitleChange,
+  onTitleEdit,
   className = "",
   disabled = false
 }) => {
@@ -36,6 +38,10 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
   const handleSave = () => {
     if (editValue.trim() !== title && editValue.trim()) {
       onTitleChange(editValue.trim());
+      // Déclencher une nouvelle analyse si callback fourni
+      if (onTitleEdit) {
+        onTitleEdit(editValue.trim());
+      }
     }
     setIsEditing(false);
   };
@@ -61,12 +67,14 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
           value={editValue}
           onChange={(e) => setEditValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          className={`${className} bg-transparent border-none outline-none resize-none w-full`}
+          className={`${className} bg-transparent border-none outline-none resize-none w-full ring-0 focus:ring-0 shadow-none`}
           style={{ 
             fontSize: 'inherit', 
             lineHeight: 'inherit',
             fontFamily: 'inherit',
-            fontWeight: 'inherit'
+            fontWeight: 'inherit',
+            border: 'none',
+            boxShadow: 'none'
           }}
         />
         <div className="flex gap-1 ml-2">
@@ -92,22 +100,18 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
   }
 
   return (
-    <div className="group flex-1 min-w-0">
-      <div className="flex items-baseline">
-        <h1 className={className}>
-          {title}
-        </h1>
-        {!disabled && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleStartEdit}
-            className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 p-0 shrink-0 ml-2 -mb-1"
-          >
-            <Edit2 className="h-3 w-3" />
-          </Button>
-        )}
-      </div>
-    </div>
+    <h1 className={`${className} group`}>
+      {title}
+      {!disabled && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleStartEdit}
+          className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 p-0 shrink-0 ml-1 -mb-0.5 inline-flex items-center justify-center"
+        >
+          <Edit2 className="h-3 w-3" />
+        </Button>
+      )}
+    </h1>
   );
 };
