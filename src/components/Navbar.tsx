@@ -69,7 +69,7 @@ const Navbar: React.FC = () => {
     return fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
   return <header className={`sticky top-0 z-50 w-full transition-all duration-150 ${isScrolled ? 'bg-background/95 backdrop-blur border-b border-border supports-[backdrop-filter]:bg-background/90' : isSettingsPage ? 'bg-transparent border-b border-border' : 'bg-transparent'}`}>
-      <div className="w-full flex h-16 items-center px-3">
+      <div className="w-full flex h-16 items-center px-4">
         <Link 
           to="/" 
           className="flex items-center gap-2 mr-auto hover:underline transition-all duration-200"
