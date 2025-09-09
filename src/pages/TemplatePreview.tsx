@@ -147,8 +147,8 @@ const TemplatePreviewContent: React.FC = () => {
 
             {/* Question/Dilemme */}
             <div className="mb-8">
-              <h1 className="text-3xl font-medium text-foreground leading-relaxed flex items-start gap-3">
-                <span className="text-3xl">{decision.emoji}</span>
+              <h1 className="text-4xl font-semibold text-foreground leading-relaxed flex items-start gap-3">
+                <span className="text-4xl">{decision.emoji}</span>
                 {decision.dilemma}
               </h1>
             </div>
