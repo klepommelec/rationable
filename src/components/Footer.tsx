@@ -9,9 +9,10 @@ const Footer = () => {
     <footer className="border-t">
       <div className="container py-6">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Rationable. {t('footer.allRightsReserved')}
-          </p>
+          <div className="flex items-center gap-2">
+            <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable" className="h-6 w-6 rounded-none" />
+            <span className="text-sm text-muted-foreground">Rationable</span>
+          </div>
           <div className="flex items-center gap-4 text-sm">
             <Link 
               to="/templates"
