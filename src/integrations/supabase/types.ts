@@ -95,6 +95,51 @@ export type Database = {
         }
         Relationships: []
       }
+      decisions: {
+        Row: {
+          category: string | null
+          created_at: string
+          decision_data: Json
+          dilemma: string
+          emoji: string | null
+          id: string
+          tags: string[] | null
+          thread_id: string | null
+          timestamp: string | null
+          updated_at: string
+          user_id: string
+          workspace_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          decision_data: Json
+          dilemma: string
+          emoji?: string | null
+          id: string
+          tags?: string[] | null
+          thread_id?: string | null
+          timestamp?: string | null
+          updated_at?: string
+          user_id: string
+          workspace_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          decision_data?: Json
+          dilemma?: string
+          emoji?: string | null
+          id?: string
+          tags?: string[] | null
+          thread_id?: string | null
+          timestamp?: string | null
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string | null
+        }
+        Relationships: []
+      }
       document_content: {
         Row: {
           content_chunks: string[] | null

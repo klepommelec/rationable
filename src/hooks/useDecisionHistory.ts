@@ -2,6 +2,29 @@
 import { useState, useEffect } from 'react';
 import { IDecision } from '@/types/decision';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
+import { useAuth } from '@/hooks/useAuth';
+import { useCloudDecisionHistory } from './useCloudDecisionHistory';
+
+export const useDecisionHistory = () => {
+    const { user } = useAuth();
+    const { currentWorkspace } = useWorkspaces();
+    const [allHistory, setAllHistory] = useState<Record<string, IDecision[]>>({});
+    const [history, setHistory] = useState<IDecision[]>([]);
+
+    // Use cloud history when authenticated
+    const cloudHistory = useCloudDecisionHistory();
+
+    // Return cloud history if user is authenticated
+    if (user?.id) {
+        return {
+            history: cloudHistory.history,
+            addDecision: cloudHistory.addDecision,
+            updateDecision: cloudHistory.updateDecision,
+            updateDecisionCategory: cloudHistory.updateDecisionCategory,
+            deleteDecision: cloudHistory.deleteDecision,
+            clearHistory: cloudHistory.clearHistory
+        };
+    }
 
 export const useDecisionHistory = () => {
     const { currentWorkspace } = useWorkspaces();

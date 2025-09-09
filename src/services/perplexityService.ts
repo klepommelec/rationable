@@ -3,6 +3,112 @@ import { supabase } from '@/integrations/supabase/client';
 import { I18nService, SupportedLanguage } from './i18nService';
 import { searchCacheService } from './searchCacheService';
 
+// In-flight deduplication map
+const pendingRequests = new Map<string, Promise<PerplexitySearchResult>>();
+
+// Dynamic cache with different TTLs based on temporal intent
+interface CachedSearchResultWithTTL {
+  content: any;
+  timestamp: number;
+  query: string;
+  provider: string;
+  expiresAt: number;
+}
+
+class DynamicSearchCache {
+  private cache = new Map<string, CachedSearchResultWithTTL>();
+  
+  private getTTL(temporalIntent?: string): number {
+    switch (temporalIntent) {
+      case 'current':
+      case 'recent_past':
+        return 10 * 60 * 1000; // 10 minutes
+      case 'future':
+        return 2 * 60 * 60 * 1000; // 2 hours
+      case 'historical':
+      case 'neutral':
+      default:
+        return 24 * 60 * 60 * 1000; // 24 hours
+    }
+  }
+  
+  generateCacheKey(query: string, context?: string): string {
+    const normalizedQuery = query.toLowerCase().trim();
+    const contextKey = context ? `_${context}` : '';
+    return `perplexity_${normalizedQuery}${contextKey}`;
+  }
+  
+  get(query: string, context?: string): any | null {
+    const key = this.generateCacheKey(query, context);
+    const cached = this.cache.get(key);
+    
+    if (!cached) return null;
+    if (Date.now() > cached.expiresAt) {
+      this.cache.delete(key);
+      return null;
+    }
+    
+    return cached.content;
+  }
+  
+  set(query: string, context: string | undefined, content: any, temporalIntent?: string): void {
+    const key = this.generateCacheKey(query, context);
+    const ttl = this.getTTL(temporalIntent);
+    const expiresAt = Date.now() + ttl;
+    
+    this.cache.set(key, {
+      content,
+      timestamp: Date.now(),
+      query,
+      provider: 'perplexity',
+      expiresAt
+    });
+    
+    // Persist to localStorage with expiration
+    try {
+      const persistentCache = JSON.parse(localStorage.getItem('perplexity_cache') || '{}');
+      persistentCache[key] = {
+        content,
+        timestamp: Date.now(),
+        query,
+        provider: 'perplexity',
+        expiresAt
+      };
+      localStorage.setItem('perplexity_cache', JSON.stringify(persistentCache));
+    } catch (error) {
+      console.warn('Failed to persist Perplexity cache:', error);
+    }
+  }
+  
+  loadFromPersistentCache(): void {
+    try {
+      const persistentCache = JSON.parse(localStorage.getItem('perplexity_cache') || '{}');
+      const now = Date.now();
+      
+      Object.entries(persistentCache).forEach(([key, cached]) => {
+        const item = cached as CachedSearchResultWithTTL;
+        if (now < item.expiresAt) {
+          this.cache.set(key, item);
+        }
+      });
+    } catch (error) {
+      console.warn('Failed to load persistent Perplexity cache:', error);
+    }
+  }
+  
+  cleanup(): void {
+    const now = Date.now();
+    for (const [key, cached] of this.cache.entries()) {
+      if (now > cached.expiresAt) {
+        this.cache.delete(key);
+      }
+    }
+  }
+}
+
+const dynamicCache = new DynamicSearchCache();
+dynamicCache.loadFromPersistentCache();
+
 export interface PerplexitySearchResult {
   content: string;
   sources: string[];
@@ -52,118 +158,87 @@ export const searchWithPerplexity = async (
     console.log('🔍 Perplexity search - Query:', query);
     console.log('📝 Perplexity search - Context:', context);
     
-    // Vérifier le cache d'abord
-    const cached = searchCacheService.get(query, context);
-    if (cached) {
-      console.log('⚡ Using cached search result');
-      return {
-        content: cached.content.content || cached.content,
-        sources: cached.content.sources || [],
-        timestamp: new Date(cached.timestamp).toISOString(),
-        searchQuery: query,
-        requiresRealTimeData: true
-      };
+    // Check dynamic cache first
+    const cachedResult = dynamicCache.get(query, context);
+    if (cachedResult) {
+      console.log('⚡ Using cached Perplexity result');
+      return cachedResult;
     }
     
-    // Detect language from query if not provided
-    const detectedLanguage = language || I18nService.detectLanguage(query);
-    // Remove language mutation - keep UI language independent
-    console.log('🌐 Language detected for content:', detectedLanguage);
+    // Check for in-flight request (deduplication)
+    const pendingKey = dynamicCache.generateCacheKey(query, context);
+    const pendingRequest = pendingRequests.get(pendingKey);
+    if (pendingRequest) {
+      console.log('⏳ Returning pending Perplexity request');
+      return pendingRequest;
+    }
     
-    // Détecter l'intention temporelle et adapter la requête
-    const temporalIntent = detectTemporalIntent(query, detectedLanguage);
-    console.log('⏰ Intention temporelle détectée:', temporalIntent.type);
-    
-    // Get localized context suffixes
-    const contextSuffixes = {
-      current: {
-        fr: 'informations actuelles et disponibles maintenant',
-        en: 'current information available now',
-        es: 'información actual disponible ahora',
-        it: 'informazioni attuali disponibili ora',
-        de: 'aktuelle verfügbare Informationen'
-      },
-      recent_past: {
-        fr: 'événements récemment terminés',
-        en: 'recently concluded events',
-        es: 'eventos recientemente concluidos',
-        it: 'eventi recentemente conclusi',
-        de: 'kürzlich abgeschlossene Ereignisse'
-      },
-      future: {
-        fr: 'événements programmés à venir',
-        en: 'scheduled upcoming events',
-        es: 'eventos programados próximos',
-        it: 'eventi programmati in arrivo',
-        de: 'geplante bevorstehende Ereignisse'
-      },
-      historical: {
-        fr: 'données historiques précises',
-        en: 'precise historical data',
-        es: 'datos históricos precisos',
-        it: 'dati storici precisi',
-        de: 'präzise historische Daten'
-      },
-      neutral: {
-        fr: 'informations vérifiées et précises',
-        en: 'verified and precise information',
-        es: 'información verificada y precisa',
-        it: 'informazioni verificate e precise',
-        de: 'verifizierte und präzise Informationen'
+    // Detect temporal intent for caching TTL
+    const temporalIntent = detectTemporalIntent(query, language);
+    console.log('⏰ Temporal intent for caching:', temporalIntent.type);
+
+    // Create and store the pending request
+    const searchPromise = (async () => {
+      try {
+        // Detect language from query if not provided
+        const detectedLanguage = language || I18nService.detectLanguage(query);
+        console.log('🌐 Language detected for content:', detectedLanguage);
+        
+        // Get localized default context
+        const defaultContexts = {
+          fr: 'Recherche d\'informations récentes et à jour',
+          en: 'Search for recent and up-to-date information',
+          es: 'Búsqueda de información reciente y actualizada',
+          it: 'Ricerca di informazioni recenti e aggiornate',
+          de: 'Suche nach aktuellen und up-to-date Informationen'
+        };
+        
+        const { data, error } = await supabase.functions.invoke('perplexity-search', {
+          body: { 
+            query, 
+            context: context || defaultContexts[detectedLanguage] || defaultContexts.fr,
+            temporalIntent: temporalIntent.type,
+            language: detectedLanguage
+          },
+        });
+
+        if (error) {
+          console.error('❌ Perplexity search error:', error);
+          const fallbackMessages = I18nService.getFallbackMessages(detectedLanguage);
+          throw new Error(`${fallbackMessages.perplexityError}: ${error.message}`);
+        }
+
+        if (!data || !data.content) {
+          console.error('❌ Perplexity returned empty data:', data);
+          throw new Error('Perplexity returned no content');
+        }
+
+        // Clean response and prepare result
+        const cleanedContent = cleanPerplexityResponse(data.content);
+        const result = {
+          content: cleanedContent,
+          sources: data.sources || [],
+          timestamp: data.timestamp || new Date().toISOString(),
+          searchQuery: query,
+          requiresRealTimeData: true
+        };
+
+        // Cache the result with dynamic TTL based on temporal intent
+        dynamicCache.set(query, context, result, temporalIntent.type);
+        
+        console.log('✅ Perplexity search successful - Content cached');
+        return result;
+      } finally {
+        // Remove from pending requests and cleanup
+        pendingRequests.delete(pendingKey);
+        dynamicCache.cleanup();
       }
-    };
-    
-    // Requête directe sans suffixes verbeux pour plus de pertinence
-    let optimizedQuery = query;
-    
-    // Get localized default context
-    const defaultContexts = {
-      fr: 'Recherche d\'informations récentes et à jour',
-      en: 'Search for recent and up-to-date information',
-      es: 'Búsqueda de información reciente y actualizada',
-      it: 'Ricerca di informazioni recenti e aggiornate',
-      de: 'Suche nach aktuellen und up-to-date Informationen'
-    };
-    
-    const { data, error } = await supabase.functions.invoke('perplexity-search', {
-      body: { 
-        query: optimizedQuery, 
-        context: context || defaultContexts[detectedLanguage] || defaultContexts.fr,
-        temporalIntent: temporalIntent.type,
-        language: detectedLanguage
-      },
-    });
+    })();
 
-    if (error) {
-      console.error('❌ Perplexity search error:', error);
-      const fallbackMessages = I18nService.getFallbackMessages(detectedLanguage);
-      throw new Error(`${fallbackMessages.perplexityError}: ${error.message}`);
-    }
-
-    if (!data || !data.content) {
-      console.error('❌ Perplexity returned empty data:', data);
-      throw new Error('Perplexity returned no content');
-    }
-
-    // Nettoyer la réponse avant de la retourner
-    const cleanedContent = cleanPerplexityResponse(data.content);
-    console.log('✅ Perplexity search successful - Content cleaned and ready');
+    // Store the pending request for deduplication
+    pendingRequests.set(pendingKey, searchPromise);
     
-    const result = {
-      content: cleanedContent,
-      sources: data.sources || [],
-      timestamp: data.timestamp || new Date().toISOString(),
-      searchQuery: query,
-      requiresRealTimeData: true
-    };
-
-    // Mettre en cache le résultat
-    searchCacheService.set(query, context, {
-      content: cleanedContent,
-      sources: data.sources || []
-    }, 'perplexity');
-    
-    return result;
+    return searchPromise;
   } catch (error) {
     console.error('❌ Perplexity service error:', error);
     throw error;
@@ -264,22 +339,56 @@ export const detectTemporalIntent = (dilemma: string, language?: SupportedLangua
 };
 
 export const detectRealTimeQuery = (dilemma: string, language?: SupportedLanguage): boolean => {
-  const detectedLanguage = language || I18nService.detectLanguage(dilemma);
-  const keywords = I18nService.getTemporalKeywords(detectedLanguage);
+  const currentYear = new Date().getFullYear();
   
-  // Use dynamic year detection instead of hardcoded years
-  const detectedYears = I18nService.detectYearsInText(dilemma);
-  const currentYear = I18nService.getCurrentYear();
+  // Real-time indicators by language (more specific)
+  const realTimeKeywords = {
+    fr: [
+      'aujourd\'hui', 'maintenant', 'actuellement', 'ce matin', 'cet après-midi', 'ce soir',
+      'cette semaine', 'ce mois-ci', 'en ce moment', 'présentement', 'horaires',
+      'ouvert maintenant', 'fermé maintenant', 'disponible maintenant', 'stock actuel',
+      'tarif actuel', 'prix actuel', 'météo aujourd\'hui', 'trafic maintenant',
+      'actualité', 'dernières nouvelles', 'récemment', 'cette année'
+    ],
+    en: [
+      'today', 'right now', 'currently', 'this morning', 'this afternoon', 'tonight',
+      'this week', 'this month', 'at the moment', 'schedule today', 'hours today',
+      'open now', 'closed now', 'available now', 'current stock', 'current price',
+      'current rate', 'weather today', 'traffic now', 'latest news', 'recent news',
+      'this year', 'recently'
+    ],
+    es: [
+      'hoy', 'ahora mismo', 'actualmente', 'esta mañana', 'esta tarde', 'esta noche',
+      'esta semana', 'este mes', 'en este momento', 'horario hoy',
+      'abierto ahora', 'cerrado ahora', 'disponible ahora', 'precio actual',
+      'clima hoy', 'tráfico ahora', 'noticias recientes', 'este año'
+    ]
+  };
   
-  // Check for recent years (current year and next 2 years)
-  const relevantYears = detectedYears.some(year => 
-    year >= currentYear && year <= currentYear + 2
-  );
-  
+  const keywords = realTimeKeywords[language || 'en'] || realTimeKeywords.en;
   const lowerDilemma = dilemma.toLowerCase();
   
-  // Combine all real-time keywords from the language config
-  const allRealTimeKeywords = keywords.realTime;
+  // Check for explicit real-time keywords (more strict matching)
+  const hasRealTimeKeywords = keywords.some(keyword => 
+    lowerDilemma.includes(keyword.toLowerCase())
+  );
   
-  return relevantYears || allRealTimeKeywords.some(keyword => lowerDilemma.includes(keyword));
+  // Check for current year with specific context (more strict)
+  const hasCurrentYearWithContext = lowerDilemma.includes(`${currentYear}`) && 
+    (lowerDilemma.includes('horaire') || lowerDilemma.includes('schedule') || 
+     lowerDilemma.includes('price') || lowerDilemma.includes('prix') ||
+     lowerDilemma.includes('ouvert') || lowerDilemma.includes('open') ||
+     lowerDilemma.includes('disponible') || lowerDilemma.includes('available'));
+  
+  // More specific temporal expressions
+  const hasSpecificTimeReference = /\b(ce soir|tonight|this morning|cet après-midi|this afternoon)\b/i.test(dilemma);
+  
+  console.log('🕐 Real-time detection (strict):', {
+    hasRealTimeKeywords,
+    hasCurrentYearWithContext,
+    hasSpecificTimeReference,
+    result: hasRealTimeKeywords || hasCurrentYearWithContext || hasSpecificTimeReference
+  });
+  
+  return hasRealTimeKeywords || hasCurrentYearWithContext || hasSpecificTimeReference;
 };

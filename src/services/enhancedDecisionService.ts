@@ -190,8 +190,14 @@ Exemple de format:
   }
 };
 
-// Fonction utilitaire pour détecter les requêtes nécessitant des données externes (OPTIMISÉE)
-const detectExternalDataNeeded = (dilemma: string): boolean => {
+// Fonction utilitaire pour détecter les requêtes nécessitant des données externes (OPTIMISÉE avec kill switch)
+const detectExternalDataNeeded = (dilemma: string, realTimeSearchEnabled: boolean = true): boolean => {
+  // Si la recherche en temps réel est désactivée, pas de données externes
+  if (!realTimeSearchEnabled) {
+    console.log('🚫 Real-time search disabled - no external search');
+    return false;
+  }
+  
   const lowerDilemma = dilemma.toLowerCase();
   
   // Mots-clés négatifs - questions génériques qui n'ont PAS besoin de données externes
@@ -210,35 +216,35 @@ const detectExternalDataNeeded = (dilemma: string): boolean => {
     return false;
   }
   
-  // Questions nécessitant des données factuelles récentes ou spécifiques (RÉDUITE)
+  // Questions nécessitant des données factuelles récentes ou spécifiques (TRÈS RÉDUITE)
   const factualKeywords = [
-    // Questions temporelles critiques
-    'qui a gagné', 'vainqueur', 'gagnant', 'résultat', 'classement',
+    // Questions temporelles critiques uniquement
+    'qui a gagné', 'vainqueur', 'gagnant', 'résultat aujourd\'hui', 'classement actuel',
     
-    // Événements actuels précis
-    'exposition actuellement', 'programme du moment', 'en cours maintenant',
+    // Événements actuels très précis
+    'exposition actuellement', 'programme ce soir', 'en cours maintenant',
+    'ouvert aujourd\'hui', 'fermé aujourd\'hui',
     
-    // Questions directes factuelles
-    'quel est le', 'où est', 'combien coûte actuellement',
-    
-    // Sports récents
-    'draft 202', 'saison 202', 'championnat 202'
+    // Prix et disponibilité actuels
+    'prix actuel', 'stock actuel', 'disponible maintenant'
   ];
   
-  // Détection d'années (plus restrictive - seulement année courante +/- 1)
+  // Détection d'années (plus restrictive - seulement année courante avec contexte)
   const currentYear = new Date().getFullYear();
-  const yearPattern = new RegExp(`(${currentYear - 1}|${currentYear}|${currentYear + 1})`, 'i');
-  const hasRelevantYear = yearPattern.test(dilemma);
+  const hasCurrentYearWithRealTimeContext = lowerDilemma.includes(`${currentYear}`) && 
+    (lowerDilemma.includes('horaire') || lowerDilemma.includes('prix') || 
+     lowerDilemma.includes('programme') || lowerDilemma.includes('résultat'));
   
   const hasFactualKeyword = factualKeywords.some(keyword => lowerDilemma.includes(keyword));
   
-  const needsExternalData = hasFactualKeyword || hasRelevantYear;
+  const needsExternalData = hasFactualKeyword || hasCurrentYearWithRealTimeContext;
   
-  console.log('🔍 External data detection (optimized):', {
+  console.log('🔍 External data detection (optimized with kill switch):', {
     dilemma: dilemma.substring(0, 50) + '...',
+    realTimeSearchEnabled,
     isGenericQuestion,
     hasFactualKeyword,
-    hasRelevantYear,
+    hasCurrentYearWithRealTimeContext,
     needsExternalData
   });
   
@@ -250,7 +256,8 @@ export const generateOptionsWithFallback = async (
   criteria: ICriterion[], 
   files?: UploadedFileInfo[], 
   workspaceId?: string,
-  language?: 'fr' | 'en' | 'es' | 'it' | 'de'
+  language?: 'fr' | 'en' | 'es' | 'it' | 'de',
+  realTimeSearchEnabled: boolean = true
 ): Promise<IResult> => {
   console.log('🎯 Generating options with multi-provider fallback');
 
@@ -261,7 +268,7 @@ export const generateOptionsWithFallback = async (
   const criteriaList = criteria.map(c => c.name).join(', ');
   
   // Vérifier si on a besoin de données externes (temps réel ou factuelles)
-  const needsExternalData = detectExternalDataNeeded(dilemma);
+  const needsExternalData = detectExternalDataNeeded(dilemma, realTimeSearchEnabled);
   let realTimeContext = '';
   let realTimeData = null;
 
