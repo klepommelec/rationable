@@ -16,6 +16,7 @@ import { shareDecision } from '@/services/sharedDecisionService';
 import { toast } from "sonner";
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import { APP_CONFIG } from '@/lib/config';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CollaborationDialogProps {
   decision: IDecision;
@@ -28,6 +29,7 @@ const CollaborationDialog: React.FC<CollaborationDialogProps> = ({
 }) => {
   const { t } = useI18nUI();
   const [isSharing, setIsSharing] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>('');
   const [emailInput, setEmailInput] = useState('');
 
@@ -58,26 +60,50 @@ const CollaborationDialog: React.FC<CollaborationDialogProps> = ({
     }
   };
 
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleSendInvitation = async () => {
-    if (!emailInput.trim()) {
+    const email = emailInput.trim();
+    
+    if (!email) {
       toast.error(t('collaboration.emailRequired'));
       return;
     }
 
+    if (!isValidEmail(email)) {
+      toast.error(t('collaboration.invalidEmail'));
+      return;
+    }
+
+    setIsSending(true);
     try {
       const url = await ensureShareUrl();
       
-      // Open email client with pre-filled link
-      const subject = encodeURIComponent(`Invitation à consulter: ${decision.dilemma}`);
-      const body = encodeURIComponent(
-        `Salut !\n\nJe souhaite partager avec toi mon analyse de décision : "${decision.dilemma}"\n\nTu peux la consulter ici : ${url}\n\nN'hésite pas à laisser tes commentaires !\n\nBonne journée !`
-      );
-      
-      window.open(`mailto:${emailInput}?subject=${subject}&body=${body}`);
-      toast.success(t('collaboration.emailClientOpened'));
+      const { error } = await supabase.functions.invoke('send-collaboration-invite', {
+        body: {
+          to: email,
+          shareUrl: url,
+          decisionTitle: decision.dilemma,
+          inviterName: '', // Could be retrieved from user profile if available
+          inviterEmail: '', // Could be retrieved from user profile if available
+          locale: 'fr', // Could use t('i18n.locale') or detect from context
+        },
+      });
+
+      if (error) {
+        console.error('Error sending invitation:', error);
+        throw error;
+      }
+
+      toast.success(t('collaboration.invitationSent'));
       setEmailInput('');
     } catch (error) {
-      toast.error('Erreur lors de la création du lien de partage');
+      console.error('Error sending invitation:', error);
+      toast.error(t('collaboration.invitationError'));
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -119,9 +145,9 @@ const CollaborationDialog: React.FC<CollaborationDialogProps> = ({
             <Button 
               onClick={handleSendInvitation}
               className="w-full"
-              disabled={isSharing || !emailInput.trim()}
+              disabled={isSharing || isSending || !emailInput.trim() || !isValidEmail(emailInput.trim())}
             >
-              {isSharing ? 'Préparation...' : t('collaboration.sendInvitation')}
+              {isSending ? 'Envoi en cours...' : isSharing ? 'Préparation...' : t('collaboration.sendInvitation')}
             </Button>
           </div>
         </div>

@@ -717,7 +717,9 @@ export interface UITranslations {
     emailPlaceholder: string;
     sendInvitation: string;
     emailRequired: string;
-    emailClientOpened: string;
+    invalidEmail: string;
+    invitationSent: string;
+    invitationError: string;
   };
   templates_: {
     personal: {
@@ -1526,14 +1528,16 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       remove: 'Supprimer',
     },
     collaboration: {
-      title: 'Collaboration',
-      description: 'Invitez d\'autres personnes à collaborer sur cette décision',
+      title: 'Inviter à collaborer',
+      description: 'Partagez cette décision avec vos proches pour recueillir leurs avis.',
       inviteByEmail: 'Inviter par email',
-      inviteDescription: 'Envoyez une invitation par email pour partager cette décision',
+      inviteDescription: 'Envoyez un lien de partage par email pour inviter quelqu\'un à consulter et commenter cette décision.',
       emailPlaceholder: 'email@exemple.com',
       sendInvitation: 'Envoyer l\'invitation',
-      emailRequired: 'Veuillez entrer une adresse email',
-      emailClientOpened: 'Client email ouvert avec l\'invitation',
+      emailRequired: 'Veuillez saisir une adresse email.',
+      invalidEmail: 'Veuillez saisir une adresse email valide.',
+      invitationSent: 'Invitation envoyée par email.',
+      invitationError: 'Impossible d\'envoyer l\'invitation pour le moment.'
     },
     templates_: {
       personal: {
@@ -2360,14 +2364,16 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
       remove: 'Remove',
     },
     collaboration: {
-      title: 'Collaboration',
-      description: 'Invite others to collaborate on this decision',
+      title: 'Invite to Collaborate',
+      description: 'Share this decision with your contacts to gather their feedback.',
       inviteByEmail: 'Invite by email',
-      inviteDescription: 'Send an email invitation to share this decision',
+      inviteDescription: 'Send a sharing link by email to invite someone to view and comment on this decision.',
       emailPlaceholder: 'email@example.com',
-      sendInvitation: 'Send invitation',
-      emailRequired: 'Please enter an email address',
-      emailClientOpened: 'Email client opened with invitation',
+      sendInvitation: 'Send Invitation',
+      emailRequired: 'Please enter an email address.',
+      invalidEmail: 'Please enter a valid email address.',
+      invitationSent: 'Invitation sent by email.',
+      invitationError: 'Unable to send invitation at the moment.'
     },
     templates_: {
       personal: {
