@@ -711,23 +711,13 @@ export interface UITranslations {
   };
   collaboration: {
     title: string;
-    subtitle: string;
-    invite: string;
-    inviteEmail: string;
-    invitePlaceholder: string;
-    permissions: {
-      view: string;
-      comment: string;
-      edit: string;
-    };
-    members: string;
-    pending: string;
-    remove: string;
-    resend: string;
     description: string;
-    publicLink: string;
-    publicLinkDescription: string;
-    createLink: string;
+    inviteByEmail: string;
+    inviteDescription: string;
+    emailPlaceholder: string;
+    sendInvitation: string;
+    emailRequired: string;
+    emailClientOpened: string;
   };
   templates_: {
     personal: {
@@ -1537,23 +1527,13 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
     },
     collaboration: {
       title: 'Collaboration',
-      subtitle: 'Travaillez ensemble sur cette décision',
-      invite: 'Inviter des collaborateurs',
-      inviteEmail: 'Email',
-      invitePlaceholder: 'email@exemple.com',
-      permissions: {
-        view: 'Lecture seule',
-        comment: 'Commenter',
-        edit: 'Modifier',
-      },
-      members: 'Membres',
-      pending: 'En attente',
-      remove: 'Retirer',
-      resend: 'Renvoyer',
       description: 'Invitez d\'autres personnes à collaborer sur cette décision',
-      publicLink: 'Lien public',
-      publicLinkDescription: 'Toute personne avec ce lien peut voir et commenter',
-      createLink: 'Créer un lien',
+      inviteByEmail: 'Inviter par email',
+      inviteDescription: 'Envoyez une invitation par email pour partager cette décision',
+      emailPlaceholder: 'email@exemple.com',
+      sendInvitation: 'Envoyer l\'invitation',
+      emailRequired: 'Veuillez entrer une adresse email',
+      emailClientOpened: 'Client email ouvert avec l\'invitation',
     },
     templates_: {
       personal: {
@@ -2381,23 +2361,13 @@ export const translations: Record<'fr' | 'en', UITranslations> = {
     },
     collaboration: {
       title: 'Collaboration',
-      subtitle: 'Work together on this decision',
-      invite: 'Invite collaborators',
-      inviteEmail: 'Email',
-      invitePlaceholder: 'email@example.com',
-      permissions: {
-        view: 'View only',
-        comment: 'Comment',
-        edit: 'Edit',
-      },
-      members: 'Members',
-      pending: 'Pending',
-      remove: 'Remove',
-      resend: 'Resend',
       description: 'Invite others to collaborate on this decision',
-      publicLink: 'Public Link',
-      publicLinkDescription: 'Anyone with this link can view and comment',
-      createLink: 'Create Link',
+      inviteByEmail: 'Invite by email',
+      inviteDescription: 'Send an email invitation to share this decision',
+      emailPlaceholder: 'email@example.com',
+      sendInvitation: 'Send invitation',
+      emailRequired: 'Please enter an email address',
+      emailClientOpened: 'Email client opened with invitation',
     },
     templates_: {
       personal: {
