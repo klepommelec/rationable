@@ -5,6 +5,7 @@ import { useI18nUI } from '@/contexts/I18nUIContext';
 import ProfileSettings from '@/components/settings/ProfileSettings';
 import AppearanceSettings from '@/components/settings/AppearanceSettings';
 import { WorkspacesSettings } from '@/components/settings/WorkspacesSettings';
+import { MembersSettings } from '@/components/settings/MembersSettings';
 import DocumentsSettings from '@/components/workspace/DocumentsSettings';
 import AdminSettings from '@/components/settings/AdminSettings';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
@@ -20,6 +21,8 @@ const Settings = () => {
         return <ProfileSettings />;
       case 'workspaces':
         return <WorkspacesSettings />;
+      case 'members':
+        return <MembersSettings />;
       case 'documents':
         return currentWorkspace ? <DocumentsSettings workspaceId={currentWorkspace.id} /> : <div>{t('settings.header.selectWorkspace')}</div>;
       case 'appearance':
@@ -35,12 +38,13 @@ const Settings = () => {
     const titleKeys = {
       profile: 'settings.sidebar.profile',
       workspaces: 'settings.sidebar.workspaces',
+      members: 'Membres',
       documents: 'settings.sidebar.documents',
       appearance: 'settings.sidebar.appearance',
       admin: 'settings.sidebar.admin'
     };
     const titleKey = titleKeys[activeSection as keyof typeof titleKeys];
-    return titleKey ? t(titleKey) : t('settings.sidebar.profile');
+    return titleKey ? (titleKey.startsWith('settings.') ? t(titleKey) : titleKey) : t('settings.sidebar.profile');
   };
 
   return (

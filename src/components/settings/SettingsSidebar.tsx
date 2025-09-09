@@ -1,4 +1,4 @@
-import { User, Lightbulb, Bell, Shield, Database, LogOut, Building2, FileText, Settings } from 'lucide-react';
+import { User, Lightbulb, Bell, Shield, Database, LogOut, Building2, FileText, Settings, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useI18nUI } from '@/contexts/I18nUIContext';
@@ -14,6 +14,10 @@ const getSettingsSections = (t: (key: string) => string) => [{
   id: 'workspaces',
   label: t('settings.sidebar.workspaces'),
   icon: Building2
+}, {
+  id: 'members',
+  label: 'Membres',
+  icon: Users
 }, {
   id: 'appearance',
   label: t('settings.sidebar.appearance'),

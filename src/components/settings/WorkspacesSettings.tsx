@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Palette, Plus, Edit3, Trash2, Crown, Building2, Briefcase, Users } from 'lucide-react';
+import { Palette, Plus, Edit3, Trash2, Crown, Building2, Briefcase } from 'lucide-react';
 import { toast } from "sonner";
 import { CreateWorkspaceDialog } from "@/components/workspace/CreateWorkspaceDialog";
-import { WorkspaceMembersManager } from "@/components/workspace/WorkspaceMembersManager";
 import { useWorkspaces } from '@/hooks/useWorkspaces';
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import {
@@ -28,7 +27,6 @@ export const WorkspacesSettings: React.FC = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [workspaceToDelete, setWorkspaceToDelete] = useState<string | null>(null);
   const [editingWorkspace, setEditingWorkspace] = useState<string | null>(null);
-  const [viewingMembers, setViewingMembers] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ 
     name: '', 
     description: '', 
@@ -167,21 +165,13 @@ export const WorkspacesSettings: React.FC = () => {
                           {t('workspaces.activate')}
                         </Button>
                       )}
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setViewingMembers(workspace.id)}
-                          title="Gérer les membres"
-                        >
-                          <Users className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleEditWorkspace(workspace)}
-                        >
-                          <Edit3 className="h-4 w-4" />
-                        </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleEditWorkspace(workspace)}
+                      >
+                        <Edit3 className="h-4 w-4" />
+                      </Button>
                       {!workspace.is_default && (
                         <Button
                           size="sm"
@@ -266,36 +256,6 @@ export const WorkspacesSettings: React.FC = () => {
           </Card>
         ))}
       </div>
-
-      {/* Members management modal */}
-      {viewingMembers && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
-          <div className="fixed left-[50%] top-[50%] z-50 w-full max-w-4xl translate-x-[-50%] translate-y-[-50%] border bg-background p-6 shadow-lg duration-200 rounded-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-lg font-semibold">
-                  Gestion des membres - {workspaces.find(w => w.id === viewingMembers)?.name}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Invitez et gérez les membres de ce workspace
-                </p>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => setViewingMembers(null)}
-              >
-                ✕
-              </Button>
-            </div>
-            
-            <WorkspaceMembersManager 
-              workspaceId={viewingMembers}
-              workspaceName={workspaces.find(w => w.id === viewingMembers)?.name || ''}
-            />
-          </div>
-        </div>
-      )}
 
       <CreateWorkspaceDialog
         open={showCreateDialog}
