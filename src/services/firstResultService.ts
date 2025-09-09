@@ -28,6 +28,21 @@ export interface FirstResultOptions {
 
 class FirstResultService {
   async getBestLinks({ optionName, dilemma, language, vertical }: FirstResultOptions): Promise<BestLinksResponse> {
+    // Check if real-time search is enabled
+    const realTimeSearchEnabled = localStorage.getItem('realTimeSearchEnabled');
+    if (realTimeSearchEnabled === 'false') {
+      console.log('🚫 Best links search disabled by user preference');
+      // Return negative cache to prevent re-attempts
+      return {
+        official: undefined,
+        merchants: [],
+        maps: undefined,
+        actionType: 'buy',
+        provider: 'disabled' as any,
+        fromCache: true
+      };
+    }
+
     const startTime = Date.now();
     const TIMEOUT_MS = 3500; // Total timeout for the entire operation
     

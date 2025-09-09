@@ -135,6 +135,23 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
             }
             onFollowUpQuestion(enrichedDilemma);
           }}
+          onCacheQuestions={(questions) => {
+            // Persist follow-up questions immediately
+            if (currentDecision && onUpdateDecision) {
+              const updatedDecision = {
+                ...currentDecision,
+                result: {
+                  ...currentDecision.result,
+                  followUpQuestions: questions.map(text => ({ 
+                    id: crypto.randomUUID(), 
+                    text, 
+                    category: 'general' as const
+                  }))
+                }
+              };
+              onUpdateDecision(updatedDecision);
+            }
+          }}
           isLoading={isUpdating}
         />
       )}

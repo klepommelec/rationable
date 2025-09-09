@@ -48,6 +48,7 @@ const DecisionMaker = () => {
     handleCategoryChange,
     handleUpdateCategory,
     getCurrentDecision,
+    updateDecision,
     uploadedFiles,
     setUploadedFiles
   } = useDecisionMakerContext();
@@ -332,9 +333,10 @@ const DecisionMaker = () => {
         
         {displayStep === 'loading-options' && <OptionsLoadingSkeleton />}
         
-        {displayStep === 'done' && <AnalysisResult result={displayResult} isUpdating={isUpdating} analysisStep={displayStep} currentDecision={getCurrentDecision()} dilemma={displayDilemma} onUpdateDecision={updatedDecision => {
-        // Mettre à jour la décision dans l'état global
-        console.log('Decision updated:', updatedDecision);
+        {displayStep === 'done' && <AnalysisResult result={displayResult} isUpdating={isUpdating} analysisStep={displayStep} currentDecision={getCurrentDecision()} dilemma={displayDilemma} onUpdateDecision={(updatedDecision) => {
+        // Actually update the decision in history (local + cloud)
+        console.log('Decision updated with cached data:', updatedDecision);
+        updateDecision(updatedDecision);
       }} onFollowUpQuestion={handleFollowUpQuestion} />}
 
         {/* Section commentaires généraux - uniquement en bas de page */}

@@ -32,32 +32,57 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   } = useI18nUI();
   const topOption = result.breakdown?.[0];
   const [actionLinks, setActionLinks] = useState<BestLinksResponse | null>(null);
-  const [isLoadingAction, setIsLoadingAction] = useState(false);
+  const [loadingLinks, setLoadingLinks] = useState(false);
   const detectedLanguage = I18nService.getCurrentLanguage();
   const detectedVertical = dilemma ? I18nService.detectVertical(dilemma) : null;
 
-  // Load action button for top option
+  // Load action links for the top option
   useEffect(() => {
-    if (!topOption?.option || !dilemma) return;
-    const loadActionButton = async () => {
-      setIsLoadingAction(true);
+    const loadActionLinks = async () => {
+      if (!result?.breakdown?.[0]) return;
+      
+      const topOption = result.breakdown[0];
+      
+      // Check if we already have cached action links for this option (including negative cache)
+      const cachedLinks = result?.cachedActionLinks?.[topOption.option];
+      if (cachedLinks) {
+        console.log('✅ Using cached action links for recommendation:', topOption.option);
+        setActionLinks(cachedLinks);
+        setLoadingLinks(false);
+        return;
+      }
+      
       try {
-        const result = await firstResultService.getBestLinks({
+        setLoadingLinks(true);
+        const links = await firstResultService.getBestLinks({
           optionName: topOption.option,
           dilemma: dilemma,
-          language: detectedLanguage,
-          vertical: detectedVertical as any
+          language: 'fr' // TODO: detect language
         });
-        setActionLinks(result);
+        setActionLinks(links);
+        
+        // Cache the result (this would need to be passed up to parent for persistence)
+        // For now, just store in memory
       } catch (error) {
-        console.error(`Failed to get action links for ${topOption.option}:`, error);
-        setActionLinks(null);
+        console.error('Error loading action links:', error);
+        
+        // Store negative cache to prevent re-attempts
+        const negativeCache = {
+          official: undefined,
+          merchants: [],
+          maps: undefined,
+          actionType: 'buy' as const,
+          provider: 'error' as any,
+          fromCache: true
+        };
+        setActionLinks(negativeCache);
       } finally {
-        setIsLoadingAction(false);
+        setLoadingLinks(false);
       }
     };
-    loadActionButton();
-  }, [topOption?.option, dilemma, detectedLanguage, detectedVertical]);
+
+    loadActionLinks();
+  }, [result?.breakdown, result?.cachedActionLinks, dilemma]);
 
   // Configuration unifiée pour tous les types de résultats
   const config = {
@@ -129,7 +154,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
             {/* Action buttons for top option - moved to bottom */}
             {topOption?.option && <div className="w-full pt-4">{/* Added pt-4 for more spacing */}
-                {isLoadingAction ? <Button variant="secondary" size="sm" disabled className="w-full sm:w-auto">
+                {loadingLinks ? <Button variant="secondary" size="sm" disabled className="w-full sm:w-auto">
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     {I18nService.getSearchingLabel(detectedLanguage)}
                   </Button> : actionLinks && (actionLinks.official || actionLinks.merchants && actionLinks.merchants.length > 0 || actionLinks.maps) ? <div className="flex flex-wrap gap-3">

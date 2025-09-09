@@ -11,6 +11,7 @@ interface FollowUpQuestionsProps {
   result: IResult;
   category?: string;
   onQuestionSelect?: (enrichedDilemma: string, questionText?: string) => void;
+  onCacheQuestions?: (questions: string[]) => void;
   isLoading?: boolean;
 }
 
@@ -19,12 +20,13 @@ interface QuestionItem extends IFollowUpQuestion {
   // Plus besoin de answer, isLoadingAnswer, isOpen
 }
 
-const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
-  dilemma,
-  result,
+const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({ 
+  dilemma, 
+  result, 
   category,
   onQuestionSelect,
-  isLoading = false
+  onCacheQuestions,
+  isLoading = false 
 }) => {
   const { t } = useI18nUI();
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
@@ -50,10 +52,10 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
         setQuestions(generatedQuestions);
         
         // Sauvegarder les questions dans le résultat pour éviter la régénération
-        if (generatedQuestions.length > 0 && onQuestionSelect) {
-          // Trigger un callback pour sauvegarder les questions dans l'historique
+        if (generatedQuestions.length > 0 && onCacheQuestions) {
           console.log('💾 Caching follow-up questions to avoid future regeneration');
           result.followUpQuestions = generatedQuestions;
+          onCacheQuestions(generatedQuestions.map(q => q.text));
         }
       } catch (error) {
         console.error('Error loading follow-up questions:', error);
@@ -64,7 +66,7 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
     };
 
     loadQuestions();
-  }, [dilemma, result, category, onQuestionSelect]);
+  }, [dilemma, result, category, onQuestionSelect, onCacheQuestions]);
 
   const handleQuestionClick = (questionId: string) => {
     if (isLoading || loadingQuestions) {

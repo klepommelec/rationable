@@ -128,6 +128,7 @@ export const useDecisionMaker = () => {
         deleteDecision: handleDeleteDecision,
         clearHistory: handleClearHistory,
         getCurrentDecision,
+        updateDecision,
         templates,
         uploadedFiles,
         setUploadedFiles

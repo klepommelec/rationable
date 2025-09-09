@@ -155,6 +155,18 @@ export const searchWithPerplexity = async (
   language?: SupportedLanguage
 ): Promise<PerplexitySearchResult> => {
   try {
+    // Check if real-time search is enabled
+    const realTimeSearchEnabled = localStorage.getItem('realTimeSearchEnabled');
+    if (realTimeSearchEnabled === 'false') {
+      console.log('🚫 Perplexity search disabled by user preference');
+      throw new Error('Real-time search is disabled. Enable it in settings to use web search.');
+    }
+
+    // Emit event for credit tracking
+    window.dispatchEvent(new CustomEvent('perplexity-call', { 
+      detail: { query, context, timestamp: Date.now() } 
+    }));
+    
     console.log('🔍 Perplexity search - Query:', query);
     console.log('📝 Perplexity search - Context:', context);
     
