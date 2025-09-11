@@ -175,6 +175,45 @@ export type Database = {
           },
         ]
       }
+      monthly_templates: {
+        Row: {
+          context: string
+          created_at: string
+          generated_at: string
+          id: string
+          is_active: boolean
+          language: string
+          month_key: string
+          news_sources: Json | null
+          prompt: string
+          updated_at: string
+        }
+        Insert: {
+          context: string
+          created_at?: string
+          generated_at?: string
+          id?: string
+          is_active?: boolean
+          language: string
+          month_key: string
+          news_sources?: Json | null
+          prompt: string
+          updated_at?: string
+        }
+        Update: {
+          context?: string
+          created_at?: string
+          generated_at?: string
+          id?: string
+          is_active?: boolean
+          language?: string
+          month_key?: string
+          news_sources?: Json | null
+          prompt?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -563,6 +602,10 @@ export type Database = {
       is_valid_shared_decision_access: {
         Args: { public_id_param: string }
         Returns: boolean
+      }
+      rotate_monthly_templates: {
+        Args: { new_month_key: string }
+        Returns: undefined
       }
       update_document_usage: {
         Args: { doc_id: string }

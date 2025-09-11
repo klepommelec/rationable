@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { TrendingUp } from 'lucide-react';
-import { getMonthlyTrendingTemplates, getLocalizedLabels } from '@/services/monthlyTemplatesService';
+import { getMonthlyTrendingTemplates, getLocalizedLabels, MonthlyTemplate } from '@/services/monthlyTemplatesService';
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
 
@@ -16,13 +16,31 @@ const MonthlyTrendingTemplates: React.FC<MonthlyTrendingTemplatesProps> = ({
 }) => {
   const { currentLanguage } = useI18nUI();
   const { currentWorkspace } = useWorkspaces();
+  const [templates, setTemplates] = useState<MonthlyTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
   
   // Get current context from workspace, default to personal
   const currentContext = currentWorkspace?.use_context || 'personal';
   
-  // Get templates for current context and language
-  const templates = getMonthlyTrendingTemplates(currentContext, currentLanguage);
   const labels = getLocalizedLabels(currentLanguage);
+
+  // Load templates from database
+  useEffect(() => {
+    const loadTemplates = async () => {
+      try {
+        setLoading(true);
+        const fetchedTemplates = await getMonthlyTrendingTemplates(currentContext, currentLanguage);
+        setTemplates(fetchedTemplates);
+      } catch (error) {
+        console.error('Error loading monthly templates:', error);
+        setTemplates([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTemplates();
+  }, [currentContext, currentLanguage]);
 
   const handlePromptClick = (prompt: string) => {
     onPromptSelect(prompt);
@@ -39,8 +57,8 @@ const MonthlyTrendingTemplates: React.FC<MonthlyTrendingTemplatesProps> = ({
     }, 100);
   };
 
-  // Don't render if no templates available
-  if (templates.length === 0) {
+  // Don't render if loading or no templates available
+  if (loading || templates.length === 0) {
     return null;
   }
 
