@@ -25,7 +25,26 @@ const TemplateCard = ({ template, onOpen }: TemplateCardProps) => {
   const { t } = useI18nUI();
   
   const getCategoryInfo = (categoryId: string) => {
-    return DEFAULT_CATEGORIES.find(cat => cat.id === categoryId) || { name: categoryId, emoji: '🤔' };
+    const category = DEFAULT_CATEGORIES.find(cat => cat.id === categoryId);
+    if (category) {
+      return { name: category.name, emoji: category.emoji };
+    }
+    // Fallback pour les anciennes catégories
+    const fallbackEmojis: Record<string, string> = {
+      'tech': '📱',
+      'travel': '✈️', 
+      'lifestyle': '🏠',
+      'finance': '💰',
+      'health': '🏥',
+      'gaming': '🎮',
+      'food': '🍽️',
+      'entertainment': '🎬',
+      'education': '📚'
+    };
+    return { 
+      name: categoryId, 
+      emoji: fallbackEmojis[categoryId] || '🤔' 
+    };
   };
 
   const categoryInfo = getCategoryInfo(template.category || 'other');
