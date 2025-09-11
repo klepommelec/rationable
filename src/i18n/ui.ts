@@ -1,6 +1,9 @@
 // Complete UI translations interface and implementations
 import type { SupportedLanguage } from '../services/i18nService';
 
+// Re-export SupportedLanguage for external use
+export type { SupportedLanguage } from '../services/i18nService';
+
 export interface UITranslations {
   analysis: {
     title: string;

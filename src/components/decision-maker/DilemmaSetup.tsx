@@ -16,7 +16,7 @@ import { shareTemplateForPreview } from '@/services/templatePreviewService';
 import { useAuth } from '@/hooks/useAuth';
 import AuthModal from '@/components/AuthModal';
 import { useContextualContent } from '@/hooks/useContextualContent';
-import TrendingPrompts from '@/components/TrendingPrompts';
+import MonthlyTrendingTemplates from '@/components/MonthlyTrendingTemplates';
 import { useRealTimeSearchSettings } from '@/hooks/useRealTimeSearchSettings';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -325,9 +325,9 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 </div>
                             </div>}
 
-          {/* Show trending prompts first, fallback to templates if they fail */}
-          <TrendingPrompts onPromptSelect={setDilemma} disabled={isLoading || isUpdating || analysisStep !== 'idle'} />
-          {/* Fallback templates are shown if TrendingPrompts returns null */}
+          {/* Show monthly trending templates */}
+          <MonthlyTrendingTemplates onPromptSelect={setDilemma} disabled={isLoading || isUpdating || analysisStep !== 'idle'} />
+          {/* Additional predefined templates */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {displayedTemplates.map(template => <Button key={template.name} variant="outline" size="sm" onClick={() => handleOpenTemplate({
               name: template.name,
