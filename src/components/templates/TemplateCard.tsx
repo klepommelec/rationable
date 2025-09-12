@@ -54,7 +54,7 @@ const TemplateCard = ({ template, onOpen }: TemplateCardProps) => {
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle className="text-lg line-clamp-2">{template.title}</CardTitle>
+            <CardTitle className="text-lg line-clamp-2 flex items-center gap-2"><span className="text-lg shrink-0">{template.decision_data?.emoji || categoryInfo.emoji}</span>{template.title}</CardTitle>
             <div className="flex items-center gap-2 mt-2">
               <Badge variant="secondary">
                 {categoryInfo.emoji} {categoryInfo.name}
