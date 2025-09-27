@@ -7,48 +7,17 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { Suspense } from "react";
 import { createLazyComponent, SkeletonFallback } from "./components/LazyComponent";
-import { PageTransition } from "./components/animations/PageTransition";
+// import { PageTransition } from "./components/animations/PageTransition";
 
-// Lazy loading avancé des pages avec préchargement intelligent
-const Index = createLazyComponent(
-  () => import("./pages/Index"),
-  { preload: true, preloadDelay: 1000 }
-);
-
-const NotFound = createLazyComponent(
-  () => import("./pages/NotFound"),
-  { preload: false }
-);
-
-const SharedDecision = createLazyComponent(
-  () => import("./pages/SharedDecision"),
-  { preload: true, preloadDelay: 2000 }
-);
-
-const TemplatePreview = createLazyComponent(
-  () => import("./pages/TemplatePreview"),
-  { preload: true, preloadDelay: 1500 }
-);
-
-const CommunityTemplates = createLazyComponent(
-  () => import("./pages/CommunityTemplates"),
-  { preload: true, preloadDelay: 2000 }
-);
-
-const Settings = createLazyComponent(
-  () => import("./pages/Settings"),
-  { preload: false, retryCount: 3 }
-);
-
-const Auth = createLazyComponent(
-  () => import("./pages/Auth"),
-  { preload: false }
-);
-
-const Privacy = createLazyComponent(
-  () => import("./pages/Privacy"),
-  { preload: false }
-);
+// Import direct des pages (temporaire pour debug)
+import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
+import SharedDecision from "./pages/SharedDecision";
+import TemplatePreview from "./pages/TemplatePreview";
+import CommunityTemplates from "./pages/CommunityTemplates";
+import Settings from "./pages/Settings";
+import Auth from "./pages/Auth";
+import Privacy from "./pages/Privacy";
 
 // Dashboard des fonctionnalités avancées (développement uniquement)
 import { SimpleDashboard } from "./components/SimpleDashboard";
@@ -90,8 +59,8 @@ const App = () => (
                 <I18nUIProvider>
                   <DecisionMakerProvider>
                   {/* <PerformanceMonitor /> */}
-                  <Suspense fallback={<PageLoader />}>
-                    <PageTransition>
+                  {/* <Suspense fallback={<PageLoader />}> */}
+                    {/* <PageTransition> */}
                       <Routes>
                         <Route path="/auth" element={<Auth />} />
                         <Route path="/shared/:publicId" element={<SharedDecision />} />
@@ -112,8 +81,8 @@ const App = () => (
                         </Route>
                         <Route path="*" element={<NotFound />} />
                       </Routes>
-                    </PageTransition>
-                  </Suspense>
+                    {/* </PageTransition> */}
+                  {/* </Suspense> */}
                   </DecisionMakerProvider>
                 </I18nUIProvider>
               </WorkspacesProvider>
