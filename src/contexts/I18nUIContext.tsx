@@ -65,6 +65,8 @@ export const I18nUIProvider = ({ children }: I18nUIProviderProps) => {
   const setLanguage = (language: SupportedLanguage) => {
     I18nService.setLanguage(language);
     setCurrentLanguage(language);
+    // Force a complete re-render by updating the document title
+    document.title = document.title; // This triggers a re-render
   };
 
   return (

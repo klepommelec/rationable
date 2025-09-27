@@ -60,7 +60,7 @@ import { I18nUIProvider } from "./contexts/I18nUIContext";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AppErrorBoundary } from "./components/core/AppErrorBoundary";
-import { PerformanceMonitor } from "./components/PerformanceMonitor";
+// import { PerformanceMonitor } from "./components/PerformanceMonitor";
 
 const queryClient = new QueryClient();
 
@@ -89,7 +89,7 @@ const App = () => (
               <WorkspacesProvider>
                 <I18nUIProvider>
                   <DecisionMakerProvider>
-                  <PerformanceMonitor />
+                  {/* <PerformanceMonitor /> */}
                   <Suspense fallback={<PageLoader />}>
                     <PageTransition>
                       <Routes>
