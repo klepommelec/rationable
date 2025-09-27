@@ -409,7 +409,7 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 
 ## 🙏 Remerciements
 
-- **Lovable** pour la plateforme de développement
+- **Cursor& ** pour la plateforme de développement
 - **Supabase** pour le backend
 - **shadcn/ui** pour les composants
 - **Vercel** pour l'hébergement
