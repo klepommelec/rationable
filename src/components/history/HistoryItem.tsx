@@ -104,9 +104,9 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
                                   Q{index + 1}: {followUp.dilemma}
                                 </p>
                                 <p className="text-muted-foreground text-xs leading-relaxed">
-                                  {followUp.result.recommendation.length > 160 
+                                  {followUp.result?.recommendation && followUp.result.recommendation.length > 160 
                                     ? `${followUp.result.recommendation.substring(0, 160)}...` 
-                                    : followUp.result.recommendation}
+                                    : followUp.result?.recommendation || "Décision en cours"}
                                 </p>
                               </div>
                             ))}
@@ -125,7 +125,19 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
               
               {/* Réponse principale */}
               <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                {rootRecommendation || decision.result.recommendation}
+                {(() => {
+                  // Vérifier d'abord si c'est une décision manuelle
+                  if (decision.result?.recommendation?.includes(t('decision.manualOptions.manualAnalysisDescription'))) {
+                    const firstOption = decision.result?.breakdown?.[0]?.option;
+                    return firstOption || decision.result?.recommendation;
+                  }
+                  
+                  if (rootRecommendation) {
+                    return rootRecommendation;
+                  }
+                  
+                  return decision.result?.recommendation || "Décision en cours";
+                })()}
               </p>
               
               {/* Date avec espacement */}
@@ -172,9 +184,9 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
                               Q{index + 1}: {followUp.dilemma}
                             </p>
                             <p className="text-muted-foreground text-xs leading-relaxed">
-                              {followUp.result.recommendation.length > 160 
+                              {followUp.result?.recommendation && followUp.result.recommendation.length > 160 
                                 ? `${followUp.result.recommendation.substring(0, 160)}...` 
-                                : followUp.result.recommendation}
+                                : followUp.result?.recommendation || "Décision en cours"}
                             </p>
                           </div>
                         ))}
@@ -191,7 +203,18 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
               
               {/* 4ème niveau: Réponse avec plus d'espace au dessus */}
               <p className="text-sm text-muted-foreground line-clamp-2 pt-2">
-                {rootRecommendation || decision.result.recommendation}
+                {(() => {
+                  if (rootRecommendation) {
+                    return rootRecommendation;
+                  }
+                  
+                  if (decision.result?.recommendation?.includes(t('decision.manualOptions.manualAnalysisDescription'))) {
+                    const firstOption = decision.result?.breakdown?.[0]?.option;
+                    return firstOption || decision.result?.recommendation;
+                  }
+                  
+                  return decision.result?.recommendation || "Décision en cours";
+                })()}
               </p>
               
               {/* 5ème niveau: Date */}

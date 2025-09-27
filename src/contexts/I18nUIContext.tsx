@@ -6,6 +6,7 @@ import { getDateFnsLocale, getLocaleTag } from '@/utils/i18nHelpers';
 interface I18nUIContextType {
   currentLanguage: SupportedLanguage;
   t: (key: string) => string;
+  setLanguage: (language: SupportedLanguage) => void;
   getLocaleTag: () => string;
   getDateFnsLocale: () => import('date-fns').Locale;
 }
@@ -17,9 +18,11 @@ interface I18nUIProviderProps {
 }
 
 export const I18nUIProvider = ({ children }: I18nUIProviderProps) => {
-  const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>(() => 
-    I18nService.getCurrentLanguage()
-  );
+  const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>(() => {
+    const lang = I18nService.getCurrentLanguage();
+    console.log('I18nUIContext - initial language:', lang);
+    return lang;
+  });
 
   useEffect(() => {
     // Listen for language changes
@@ -43,7 +46,7 @@ export const I18nUIProvider = ({ children }: I18nUIProviderProps) => {
       if (current && typeof current === 'object' && k in current) {
         current = current[k];
       } else {
-        // Fallback to French if key not found
+        // Fallback to French if key not found in current language
         let fallback: any = translations.fr;
         for (const fallbackKey of keys) {
           if (fallback && typeof fallback === 'object' && fallbackKey in fallback) {
@@ -59,10 +62,16 @@ export const I18nUIProvider = ({ children }: I18nUIProviderProps) => {
     return typeof current === 'string' ? current : key;
   };
 
+  const setLanguage = (language: SupportedLanguage) => {
+    I18nService.setLanguage(language);
+    setCurrentLanguage(language);
+  };
+
   return (
     <I18nUIContext.Provider value={{ 
       currentLanguage, 
       t,
+      setLanguage,
       getLocaleTag: () => getLocaleTag(currentLanguage),
       getDateFnsLocale: () => getDateFnsLocale(currentLanguage),
     }}>

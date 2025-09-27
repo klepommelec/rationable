@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
+import { ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
 import { ILink, ISocialContent } from '@/types/decision';
 import ValidatedLink from '../ValidatedLink';
 import YouTubeVideoCard from '../YouTubeVideoCard';
@@ -135,49 +135,18 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
     >
       <h3 
         id="useful-links-heading"
-        className="flex items-center gap-2 text-base sm:text-lg font-semibold mb-4 text-gray-900 dark:text-white"
+        className="text-base sm:text-lg font-semibold mb-4 text-gray-900 dark:text-white"
       >
-        <Link className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" aria-hidden="true" />
-        {t('decision.usefulLinks')}
+        {t('decision.popularVideos')}
       </h3>
       
       <div className="space-y-6">
         {/* Vidéos YouTube populaires */}
         {socialContent?.youtubeVideos && socialContent.youtubeVideos.length > 0 && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 
-                className="font-medium text-sm sm:text-base text-gray-800 dark:text-gray-200 flex items-center gap-2"
-                id="youtube-videos-heading"
-              >
-                <span className="text-base sm:text-lg" aria-hidden="true">📺</span>
-                {t('decision.popularVideos')}
-              </h4>
-              {socialContent.youtubeVideos.length > 3 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowAllVideos(!showAllVideos)}
-                  className="text-xs flex items-center gap-1"
-                >
-                  {showAllVideos ? (
-                    <>
-                      {t('decision.seeLess')}
-                      <ChevronUp className="h-3 w-3" />
-                    </>
-                  ) : (
-                    <>
-                      {t('decision.seeMore')}
-                      <ChevronDown className="h-3 w-3" />
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
             <div 
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr"
               role="list"
-              aria-labelledby="youtube-videos-heading"
             >
               {(showAllVideos ? socialContent.youtubeVideos : socialContent.youtubeVideos.slice(0, 3)).map((video) => (
                 <div key={video.id} role="listitem" className="h-full">
@@ -185,9 +154,29 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
                 </div>
               ))}
             </div>
+            {socialContent.youtubeVideos.length > 3 && (
+              <div className="flex justify-center pb-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAllVideos(!showAllVideos)}
+                  className="flex items-center gap-2"
+                >
+                  {showAllVideos ? (
+                    <>
+                      <ChevronUp className="h-4 w-4" />
+                      {t('decision.seeLess')}
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-4 w-4" />
+                      {t('decision.seeMore')}
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         )}
-
 
         {/* Fallback search when no shopping links */}
         {shouldShowFallbackSearch && recommendation && (

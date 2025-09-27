@@ -117,8 +117,7 @@ const MonthlyTemplatesSettings: React.FC = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
+          <CardTitle>
             Templates Mensuels Automatisés
           </CardTitle>
           <CardDescription>

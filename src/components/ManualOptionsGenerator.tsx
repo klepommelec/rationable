@@ -2,16 +2,18 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { RefreshCw, AlertCircle } from 'lucide-react';
+import { RefreshCw, AlertCircle, Plus } from 'lucide-react';
 
 interface ManualOptionsGeneratorProps {
   onGenerateOptions: () => void;
+  onAddManualOption?: () => void;
   isLoading: boolean;
   hasChanges: boolean;
 }
 
 const ManualOptionsGenerator: React.FC<ManualOptionsGeneratorProps> = ({
   onGenerateOptions,
+  onAddManualOption,
   isLoading,
   hasChanges
 }) => {
@@ -30,24 +32,37 @@ const ManualOptionsGenerator: React.FC<ManualOptionsGeneratorProps> = ({
             : "Cliquez pour générer les options basées sur vos critères actuels."
           }
         </p>
-        <Button 
-          onClick={onGenerateOptions}
-          disabled={isLoading}
-          className="w-full"
-          size="lg"
-        >
-          {isLoading ? (
-            <>
-              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-              Génération en cours...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              {hasChanges ? "Mettre à jour les options" : "Générer les options"}
-            </>
+        <div className="flex gap-2">
+          {onAddManualOption && (
+            <Button 
+              onClick={onAddManualOption}
+              variant="outline"
+              className="flex-1"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Ajouter une option
+            </Button>
           )}
-        </Button>
+          
+          <Button 
+            onClick={onGenerateOptions}
+            disabled={isLoading}
+            className="flex-1"
+            size="lg"
+          >
+            {isLoading ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Génération en cours...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                {hasChanges ? "Mettre à jour les options" : "Générer les options"}
+              </>
+            )}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

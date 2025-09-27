@@ -28,6 +28,7 @@ interface UseDecisionAPIProps {
     resetRetry: () => void;
     initialCriteriaRef: React.MutableRefObject<ICriterion[]>;
     setHasChanges: (hasChanges: boolean) => void;
+    realTimeSearchEnabled: boolean;
     currentDecisionId: string | null;
     setCurrentDecisionId: (id: string | null) => void;
     history: IDecision[];
@@ -51,6 +52,7 @@ export const useDecisionAPI = ({
     resetRetry,
     initialCriteriaRef,
     setHasChanges,
+    realTimeSearchEnabled,
     currentDecisionId,
     setCurrentDecisionId,
     history,
@@ -117,7 +119,7 @@ export const useDecisionAPI = ({
           console.log("📡 [DEBUG] Calling generateOptions API...");
           const startTime = Date.now();
           
-          const apiResult = await generateOptionsWithFallback(dilemma, currentCriteria, uploadedFileInfos, workspaceId, contentLanguage);
+          const apiResult = await generateOptionsWithFallback(dilemma, currentCriteria, uploadedFileInfos, workspaceId, contentLanguage, realTimeSearchEnabled);
           
           const endTime = Date.now();
           console.log("✅ [DEBUG] API call successful", {
@@ -248,14 +250,15 @@ export const useDecisionAPI = ({
             setAnalysisStep('loading-options');
             setProgressMessage('Génération des critères...');
             
-            const criteriaPromise = generateCriteriaWithFallback(effectiveDilemma, [], workspaceId, contentLanguage);
+            const criteriaPromise = generateCriteriaWithFallback(effectiveDilemma, [], workspaceId, contentLanguage, realTimeSearchEnabled);
             
             // Attendre seulement les critères (rapide)
             const criteriaResponse = await criteriaPromise;
             console.log("✅ Criteria generated quickly");
             
             // Mise à jour immédiate de l'interface avec les critères
-            const newCriteria = criteriaResponse.criteria.map((criterionName: string) => ({
+            const criteriaArray = criteriaResponse?.criteria || [];
+            const newCriteria = criteriaArray.map((criterionName: string) => ({
                 id: crypto.randomUUID(),
                 name: criterionName,
             }));
@@ -279,7 +282,7 @@ export const useDecisionAPI = ({
             
             // Générer les options avec tous les éléments prêts
             console.log("📡 Generating options with all assets ready...");
-            const optionsResult = await generateOptionsWithFallback(effectiveDilemma, newCriteria, uploadedFileInfos, workspaceId, contentLanguage);
+            const optionsResult = await generateOptionsWithFallback(effectiveDilemma, newCriteria, uploadedFileInfos, workspaceId, contentLanguage, realTimeSearchEnabled);
             console.log("✅ Options generated successfully");
             
             setResult(optionsResult);
@@ -318,6 +321,13 @@ export const useDecisionAPI = ({
         } catch (error) {
             console.error("❌ Optimized analysis failed:", error);
             setAnalysisStep('idle');
+            
+            // En mode manuel, ne pas retry automatiquement
+            if (!realTimeSearchEnabled) {
+                console.log('📝 Manual mode - no retry needed');
+                setProgressMessage('Mode manuel activé');
+                return;
+            }
             
             if (retryCount < 2) {
                 console.log('🔄 Retrying optimized analysis...');

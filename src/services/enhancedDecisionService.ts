@@ -82,9 +82,17 @@ export const generateCriteriaWithFallback = async (
   dilemma: string, 
   files?: UploadedFileInfo[], 
   workspaceId?: string,
-  language?: 'fr' | 'en' | 'es' | 'it' | 'de'
+  language?: 'fr' | 'en' | 'es' | 'it' | 'de',
+  realTimeSearchEnabled: boolean = true
 ) => {
   console.log('🎯 Generating criteria with multi-provider fallback');
+  console.log(`🤖 AI Analysis enabled: ${realTimeSearchEnabled}`);
+
+  // Si l'IA est désactivée, utiliser des critères manuels basiques
+  if (!realTimeSearchEnabled) {
+    console.log('🚫 AI disabled - using manual criteria');
+    return generateManualCriteria(dilemma, language);
+  }
 
   // Récupérer les documents du workspace si disponibles
   let workspaceContext = '';
@@ -251,6 +259,72 @@ const detectExternalDataNeeded = (dilemma: string, realTimeSearchEnabled: boolea
   return needsExternalData;
 };
 
+// Critères manuels basiques quand l'IA est désactivée
+const generateManualCriteria = async (
+  dilemma: string, 
+  language: 'fr' | 'en' | 'es' | 'it' | 'de' = 'fr'
+): Promise<{ criteria: string[], suggestedCategory?: string }> => {
+  console.log('📝 Generating manual criteria (AI disabled)');
+  
+  // Critères génériques basiques (format string pour compatibilité)
+  const basicCriteria = [
+    'Coût',
+    'Temps', 
+    'Qualité',
+    'Risque',
+    'Impact',
+    'Faisabilité'
+  ];
+
+  return {
+    criteria: basicCriteria,
+    suggestedCategory: 'manual'
+  };
+};
+
+// Mode manuel simplifié quand l'IA est désactivée
+const generateManualOptions = async (
+  dilemma: string, 
+  criteria: ICriterion[], 
+  language: 'fr' | 'en' | 'es' | 'it' | 'de' = 'fr'
+): Promise<IResult> => {
+  console.log('📝 Generating manual options (AI disabled)');
+  
+  const criteriaList = criteria.map(c => c.name).join(', ');
+  
+  // Générer des options basiques sans IA
+  const basicOptions = [
+    {
+      title: "Option 1",
+      description: "Première option à considérer pour votre décision",
+      pros: ["Avantage 1", "Avantage 2"],
+      cons: ["Inconvénient 1", "Inconvénient 2"]
+    },
+    {
+      title: "Option 2", 
+      description: "Deuxième option à considérer pour votre décision",
+      pros: ["Avantage 1", "Avantage 2"],
+      cons: ["Inconvénient 1", "Inconvénient 2"]
+    },
+    {
+      title: "Option 3",
+      description: "Troisième option à considérer pour votre décision", 
+      pros: ["Avantage 1", "Avantage 2"],
+      cons: ["Inconvénient 1", "Inconvénient 2"]
+    }
+  ];
+
+  return {
+    options: basicOptions,
+    recommendation: "Mode manuel activé - Veuillez personnaliser ces options selon vos besoins",
+    description: `Analyse manuelle de votre décision : "${dilemma}". Critères considérés : ${criteriaList}`,
+    criteria: criteria,
+    questionType: 'manual',
+    realTimeData: null,
+    workspaceData: null
+  };
+};
+
 export const generateOptionsWithFallback = async (
   dilemma: string, 
   criteria: ICriterion[], 
@@ -260,6 +334,13 @@ export const generateOptionsWithFallback = async (
   realTimeSearchEnabled: boolean = true
 ): Promise<IResult> => {
   console.log('🎯 Generating options with multi-provider fallback');
+  console.log(`🤖 AI Analysis enabled: ${realTimeSearchEnabled}`);
+
+  // Si l'IA est désactivée, utiliser un mode manuel simplifié
+  if (!realTimeSearchEnabled) {
+    console.log('🚫 AI disabled - using manual mode');
+    return generateManualOptions(dilemma, criteria, language);
+  }
 
   // Déterminer le type de question en utilisant le service de classification
   const questionType = await detectQuestionType(dilemma);

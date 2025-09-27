@@ -10,35 +10,34 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { useI18nUI } from '@/contexts/I18nUIContext';
+import WorkspaceImageUpload from '@/components/WorkspaceImageUpload';
 
 interface CreateWorkspaceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreateWorkspace: (name: string, description?: string, color?: string) => Promise<any>;
+  onCreateWorkspace: (name: string, description?: string, image?: File) => Promise<any>;
 }
-
-const colors = [
-  '#3b82f6', // blue
-  '#10b981', // emerald
-  '#f59e0b', // amber
-  '#ef4444', // red
-  '#8b5cf6', // violet
-  '#06b6d4', // cyan
-  '#84cc16', // lime
-  '#f97316', // orange
-];
 
 export const CreateWorkspaceDialog: React.FC<CreateWorkspaceDialogProps> = ({
   open,
   onOpenChange,
   onCreateWorkspace,
 }) => {
+  const { t } = useI18nUI();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedColor, setSelectedColor] = useState(colors[0]);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+
+  const handleImageChange = async (file: File) => {
+    setSelectedImage(file);
+  };
+
+  const handleImageDelete = async () => {
+    setSelectedImage(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,10 +45,10 @@ export const CreateWorkspaceDialog: React.FC<CreateWorkspaceDialogProps> = ({
 
     setIsCreating(true);
     try {
-      await onCreateWorkspace(name.trim(), description.trim() || undefined, selectedColor);
+      await onCreateWorkspace(name.trim(), description.trim() || undefined, selectedImage || undefined);
       setName('');
       setDescription('');
-      setSelectedColor(colors[0]);
+      setSelectedImage(null);
       onOpenChange(false);
     } finally {
       setIsCreating(false);
@@ -60,52 +59,44 @@ export const CreateWorkspaceDialog: React.FC<CreateWorkspaceDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Créer un nouveau workspace</DialogTitle>
+          <DialogTitle>{t('workspaces.createDialog.title')}</DialogTitle>
           <DialogDescription>
-            Organisez vos décisions dans des espaces séparés pour différents projets ou contextes.
+            {t('workspaces.createDialog.description')}
           </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Nom du workspace</Label>
+            <Label htmlFor="name">{t('workspaces.createDialog.nameLabel')}</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="ex: Projet X, Personnel, Équipe..."
+              placeholder={t('workspaces.createDialog.namePlaceholder')}
               required
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description">Description (optionnel)</Label>
+            <Label htmlFor="description">{t('workspaces.createDialog.descriptionLabel')}</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Décrivez l'objectif de ce workspace..."
+              placeholder={t('workspaces.createDialog.descriptionPlaceholder')}
               rows={3}
             />
           </div>
           
           <div className="space-y-2">
-            <Label>Couleur</Label>
-            <div className="flex gap-2 flex-wrap">
-              {colors.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  className={`w-8 h-8 rounded-full border-2 transition-transform ${
-                    selectedColor === color 
-                      ? 'border-foreground scale-110' 
-                      : 'border-border hover:scale-105'
-                  }`}
-                  style={{ backgroundColor: color }}
-                  onClick={() => setSelectedColor(color)}
-                />
-              ))}
-            </div>
+            <Label>{t('workspaces.image.changeImage')}</Label>
+            <WorkspaceImageUpload
+              currentImageUrl={null}
+              workspaceName={name || 'Nouveau workspace'}
+              onImageChange={handleImageChange}
+              onImageDelete={handleImageDelete}
+              disabled={isCreating}
+            />
           </div>
           
           <DialogFooter>
@@ -115,10 +106,10 @@ export const CreateWorkspaceDialog: React.FC<CreateWorkspaceDialogProps> = ({
               onClick={() => onOpenChange(false)}
               disabled={isCreating}
             >
-              Annuler
+              {t('workspaces.createDialog.cancel')}
             </Button>
             <Button type="submit" disabled={!name.trim() || isCreating}>
-              {isCreating ? 'Création...' : 'Créer'}
+              {isCreating ? t('workspaces.createDialog.creating') : t('workspaces.createDialog.create')}
             </Button>
           </DialogFooter>
         </form>

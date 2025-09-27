@@ -8,12 +8,12 @@ import { DataAccuracyIndicator } from './DataAccuracyIndicator';
 import { WorkspaceDocumentIndicator } from './WorkspaceDocumentIndicator';
 import { AIProviderIndicator } from './AIProviderIndicator';
 import ValidatedLink from '@/components/ValidatedLink';
-import { ExternalLink, Lightbulb, CheckCircle, ShoppingBag, Loader2, Navigation, Search } from 'lucide-react';
+import { ExternalLink, Lightbulb, CheckCircle, ShoppingBag, Loader2, Navigation, Search, Edit3 } from 'lucide-react';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 import { ExpandableText } from '@/components/ExpandableText';
 import { firstResultService, BestLinksResponse } from '@/services/firstResultService';
 import { I18nService } from '@/services/i18nService';
 import { MerchantLogo } from '@/components/MerchantLogo';
-import { useI18nUI } from '@/contexts/I18nUIContext';
 import { UsefulLinks } from './UsefulLinks';
 import { generateOptionSearchLinks } from '@/services/expandOptionsService';
 import { handleExternalLinkClick } from '@/utils/navigation';
@@ -21,11 +21,13 @@ interface RecommendationCardProps {
   result: IResult;
   dilemma: string;
   currentDecision: any;
+  onEditOptions?: () => void;
 }
 export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   result,
   dilemma,
-  currentDecision
+  currentDecision,
+  onEditOptions
 }) => {
   const {
     t
@@ -94,63 +96,111 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     badgeColor: 'bg-primary/10 text-primary',
     titleColor: 'text-primary'
   };
+  
+  // Détecter si la card est "vide" (pas de description, avantages, inconvénients)
+  const isCardEmpty = !topOption?.description || 
+    topOption.description.trim() === '' ||
+    (!topOption.pros?.length && !topOption.cons?.length);
+  
   return <Card className={`border-2 ${config.borderColor} ${config.bgGradient} w-full`}>
-      <CardContent className="space-y-6 pt-4 sm:pt-2">
+      <CardContent className={`space-y-6 pt-4 sm:pt-2 ${isCardEmpty ? 'pb-2' : ''}`}>
         <div className="flex flex-col gap-6">
           <div className="w-full space-y-4">
             {/* Layout mobile : badge centré */}
             <div className="sm:hidden">
-              <Badge variant="secondary" className={`${config.badgeColor} w-fit`}>
-                {config.badge}
-              </Badge>
+              <div className="flex items-center justify-between">
+                <Badge variant="secondary" className={`${config.badgeColor} w-fit`}>
+                  {config.badge}
+                </Badge>
+                {/* Bouton Modifier options pour les décisions manuelles - mobile */}
+                {onEditOptions && result.recommendation?.includes(t('decision.manualOptions.manualAnalysisDescription')) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onEditOptions}
+                    className="flex items-center gap-2"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                        {t('decision.manualOptions.modify')}
+                  </Button>
+                )}
+              </div>
             </div>
             
             {/* Layout desktop : badge simple */}
             <div className="hidden sm:block">
-              <Badge variant="secondary" className={`${config.badgeColor}`}>
-                {config.badge}
-              </Badge>
+              <div className="flex items-center justify-between">
+                <Badge variant="secondary" className={`${config.badgeColor}`}>
+                  {config.badge}
+                </Badge>
+                {/* Bouton Modifier options pour les décisions manuelles */}
+                {onEditOptions && result.recommendation?.includes(t('decision.manualOptions.manualAnalysisDescription')) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onEditOptions}
+                    className="flex items-center gap-2"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                        {t('decision.manualOptions.editOptions')}
+                  </Button>
+                )}
+              </div>
             </div>
             
             <h2 className={`text-2xl font-semibold leading-snug ${config.titleColor} w-full max-w-full sm:max-w-[75%]`}>
-              {result.recommendation?.replace(/^Option\s+\d+:\s*/i, '').trim()}
+              {topOption?.option || result.recommendation?.replace(/^Option\s+\d+:\s*/i, '').trim()}
             </h2>
             
             <div className="w-full">
               <ConfidenceIndicator breakdown={result.breakdown} topOption={topOption} result={result} />
             </div>
             
-            <div className="w-full">
-              <ExpandableText text={result.description} />
-            </div>
+            {result?.description && result.description.trim() !== '' && (
+              <div className="w-full">
+                <ExpandableText text={result.description} />
+              </div>
+            )}
 
-            {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && <div className="grid md:grid-cols-2 gap-4 w-full py-[8px]">
-                {topOption.pros?.length > 0 && <div className="space-y-2">
+            {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && (
+              <div className="grid md:grid-cols-2 gap-4 w-full py-[8px]">
+                {/* Avantages - affiché seulement s'il y a des avantages */}
+                {topOption.pros?.length > 0 && (
+                  <div className="space-y-2">
                     <h4 className="font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
                       <CheckCircle className="h-4 w-4" />
                       {t('decision.advantages')}
                     </h4>
                     <ul className="space-y-1">
-                      {topOption.pros.map((pro, index) => <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                      {topOption.pros.map((pro, index) => (
+                        <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
                           <span className="text-green-500 mt-1">•</span>
                           <span>{pro}</span>
-                        </li>)}
+                        </li>
+                      ))}
                     </ul>
-                  </div>}
+                  </div>
+                )}
                 
-                {topOption.cons?.length > 0 && <div className="space-y-2">
+                {/* Points d'attention - affiché seulement s'il y a des inconvénients */}
+                {topOption.cons?.length > 0 && (
+                  <div className="space-y-2">
                     <h4 className="font-medium text-orange-700 dark:text-orange-300 flex items-center gap-2">
                       <ExternalLink className="h-4 w-4" />
                       {t('decision.pointsOfAttention')}
                     </h4>
                     <ul className="space-y-1">
-                      {topOption.cons.map((con, index) => <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                      {topOption.cons.map((con, index) => (
+                        <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
                           <span className="text-orange-500 mt-1">•</span>
                           <span>{con}</span>
-                        </li>)}
+                        </li>
+                      ))}
                     </ul>
-                  </div>}
-              </div>}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Action buttons for top option - moved to bottom */}
             {topOption?.option && <div className="w-full pt-4">{/* Added pt-4 for more spacing */}

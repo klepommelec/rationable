@@ -5,19 +5,25 @@ import { detectQuestionType } from '@/services/questionClassificationService';
 import { EmojiPicker } from './EmojiPicker';
 import { CriteriaManager } from './CriteriaManager';
 import { OptionsLoadingSkeleton } from './OptionsLoadingSkeleton';
-import { CommentSection } from './comments/CommentSection';
 import ManualOptionsGenerator from './ManualOptionsGenerator';
+import ManualOptionsCreator from './ManualOptionsCreator';
 import AnalysisNavigation from './decision-maker/AnalysisNavigation';
 import DilemmaSetup from './decision-maker/DilemmaSetup';
 import AnalysisResult from './decision-maker/AnalysisResult';
 import { EditableTitle } from './EditableTitle';
 import { toast } from "sonner";
 import { useI18nUI } from '@/contexts/I18nUIContext';
+import { useRealTimeSearchSettings } from '@/hooks/useRealTimeSearchSettings';
+import { useAuth } from '@/hooks/useAuth';
 // Composant principal pour la prise de décision unifiée
 const DecisionMaker = () => {
   const {
     t
   } = useI18nUI();
+  
+  const { realTimeSearchEnabled } = useRealTimeSearchSettings();
+  
+  // Destructuration du hook useDecisionMaker
   const {
     dilemma,
     setDilemma,
@@ -27,6 +33,7 @@ const DecisionMaker = () => {
     setAnalysisStep,
     progress,
     progressMessage,
+    setProgressMessage,
     criteria,
     setCriteria,
     result,
@@ -49,9 +56,21 @@ const DecisionMaker = () => {
     handleUpdateCategory,
     getCurrentDecision,
     updateDecision,
+    addDecision,
+    setCurrentDecisionId,
     uploadedFiles,
     setUploadedFiles
   } = useDecisionMakerContext();
+  
+  const { user, profile } = useAuth();
+  
+  // Get user display name helper
+  const getUserDisplayName = () => {
+    if (profile?.full_name) return profile.full_name;
+    if (profile?.email) return profile.email;
+    return 'Utilisateur';
+  };
+  
   const {
     analyses,
     currentAnalysisIndex,
@@ -66,6 +85,96 @@ const DecisionMaker = () => {
 
   // Lock analysis by id for safe writes during follow-ups
   const pendingWriteAnalysisIdRef = React.useRef<string | null>(null);
+  
+  // Fonction pour gérer la création manuelle des options
+  const handleManualOptionsCreated = (options: any[]) => {
+    console.log('🔧 [DEBUG] handleManualOptionsCreated appelé avec:', {
+      options,
+      currentDecisionId: currentDecision?.id,
+      dilemma,
+      criteria
+    });
+    
+    // Convertir les options manuelles au format attendu par l'application
+    const breakdown = options.map(option => ({
+      option: option.title || 'Option sans titre',
+      description: option.description || '', // Ajouter la description
+      pros: option.pros || [],
+      cons: option.cons || [],
+      score: 0 // Score neutre pour les options manuelles
+    }));
+    
+    const formattedResult = {
+      recommendation: t('decision.manualOptions.manualAnalysisDescription'),
+      description: `Analyse manuelle de votre décision : "${dilemma}". ${options.length} option(s) créée(s) manuellement.`,
+      breakdown: breakdown,
+      realTimeData: null,
+      workspaceData: null
+    };
+    
+    console.log('🔧 [DEBUG] formattedResult créé:', formattedResult);
+    
+    // Si on n'a pas encore de décision, en créer une
+    if (!currentDecision?.id) {
+      const newId = crypto.randomUUID();
+      const newDecision = {
+        id: newId,
+        timestamp: Date.now(),
+        dilemma: dilemma,
+        emoji: emoji || '🤔',
+        criteria: criteria,
+        result: formattedResult,
+        category: selectedCategory,
+        threadId: newId,
+        parentId: undefined,
+        createdById: user?.id,
+        createdByName: getUserDisplayName(),
+        language: 'fr'
+      };
+      
+      console.log('🔧 [DEBUG] Création nouvelle décision:', newDecision);
+      
+      // Sauvegarder la décision
+      addDecision(newDecision);
+      setCurrentDecisionId(newId);
+    } else {
+      // Mettre à jour la décision existante
+      const currentDecision = getCurrentDecision();
+      if (currentDecision) {
+        const updatedDecision = {
+          ...currentDecision,
+          criteria: criteria, // Sauvegarder les critères
+          result: formattedResult
+        };
+        console.log('🔧 [DEBUG] Mise à jour décision existante:', updatedDecision);
+        updateDecision(updatedDecision);
+      }
+    }
+    
+    setResult(formattedResult);
+    setAnalysisStep('done');
+    toast.success(t('decision.toasts.optionsCreatedSuccessfully'));
+  };
+
+  // Fonction pour ajouter une option manuelle
+  const handleAddManualOption = () => {
+    // Créer une option vide et passer à l'étape de création manuelle
+    const emptyOption = {
+      id: crypto.randomUUID(),
+      title: '',
+      description: '',
+      pros: [''],
+      cons: ['']
+    };
+    
+    handleManualOptionsCreated([emptyOption]);
+  };
+
+  // Fonction pour revenir au mode édition des options
+  const handleEditOptions = () => {
+    // Revenir à l'étape de création des options
+    setAnalysisStep('criteria-loaded');
+  };
 
   // Réinitialiser complètement l'état (analyses + session)
   const clearAll = React.useCallback(() => {
@@ -228,9 +337,42 @@ const DecisionMaker = () => {
   const displayDilemma = isLockedToOther ? currentAnalysis?.dilemma ?? dilemma : dilemma;
   const displayEmoji = isLockedToOther ? currentAnalysis?.emoji ?? emoji : emoji;
   const displayResult = isLockedToOther ? currentAnalysis?.result ?? result : result;
-  const displayStep = isLockedToOther ? currentAnalysis?.analysisStep ?? analysisStep : analysisStep;
+  // Logique d'affichage : si on a un résultat, afficher le résultat, sinon afficher la création
+  const baseStep = isLockedToOther ? currentAnalysis?.analysisStep ?? analysisStep : analysisStep;
+  
+  // Pour les décisions manuelles chargées depuis l'historique, vérifier si elles ont des critères et options
+  const hasManualContent = currentDecision && 
+    currentDecision.criteria && 
+    currentDecision.criteria.length > 0 && 
+    currentDecision.result && 
+    currentDecision.result.breakdown && 
+    currentDecision.result.breakdown.length > 0;
+  
+  // Si on a du contenu manuel, forcer le mode 'done' pour afficher le tableau comparatif
+  const displayStep = hasManualContent ? 'done' : baseStep;
   const displayCriteria = isLockedToOther ? currentAnalysis?.criteria ?? criteria : criteria;
   const displayCategory = isLockedToOther ? currentAnalysis?.category ?? selectedCategory : selectedCategory;
+  
+  // Debug: afficher l'état de la décision courante
+  console.log('🔍 [DEBUG] Current decision state:');
+  console.log('  - currentDecision:', currentDecision ? {
+    id: currentDecision.id,
+    dilemma: currentDecision.dilemma,
+    hasResult: !!currentDecision.result,
+    criteria: currentDecision.criteria?.length || 0,
+    criteriaDetails: currentDecision.criteria,
+    resultBreakdown: currentDecision.result?.breakdown?.length || 0
+  } : null);
+  console.log('  - currentAnalysis:', currentAnalysis ? {
+    id: currentAnalysis.id,
+    dilemma: currentAnalysis.dilemma,
+    hasResult: !!currentAnalysis.result,
+    analysisStep: currentAnalysis.analysisStep
+  } : null);
+  console.log('  - displayStep:', displayStep);
+  console.log('  - displayResult:', !!displayResult);
+  console.log('  - hasManualContent:', hasManualContent);
+  console.log('  - baseStep:', baseStep);
 
   // État unifié : toutes les questions sont traitées de manière comparative
   const questionType = 'comparative';
@@ -320,15 +462,39 @@ const DecisionMaker = () => {
             
             {/* Afficher les critères uniquement pour les questions comparatives */}
             {shouldShowCriteria && <div className="w-full mb-6 px-0">
-                <CriteriaManager criteria={displayCriteria} setCriteria={setCriteria} isInteractionDisabled={displayStep === 'loading-options' || isLoading || isUpdating || Boolean(isLockedToOther)} onUpdateAnalysis={handleManualUpdate} hasChanges={hasChanges} currentDecisionId={currentDecision?.id} isNewDecision={displayStep === 'criteria-loaded' && !currentDecision?.id} />
+                <CriteriaManager criteria={displayCriteria} setCriteria={setCriteria} isInteractionDisabled={displayStep === 'loading-options' || isLoading || isUpdating || Boolean(isLockedToOther)} onUpdateAnalysis={handleManualUpdate} hasChanges={hasChanges} currentDecisionId={currentDecision?.id} isNewDecision={displayStep === 'criteria-loaded' && !currentDecision?.id} isManualDecision={!realTimeSearchEnabled} />
               </div>}
           </>}
 
-        {displayStep === 'idle' && <DilemmaSetup dilemma={dilemma} setDilemma={setDilemma} analysisStep={analysisStep} isLoading={isLoading} isUpdating={isUpdating} applyTemplate={applyTemplate} clearSession={clearAll} clearAnalyses={clearAnalyses} history={history} loadDecision={loadDecisionWithThread} deleteDecision={deleteDecision} clearHistory={clearHistory} handleStartAnalysis={handleStartAnalysis} progress={progress} progressMessage={progressMessage} templates={templates} selectedCategory={selectedCategory} onCategoryChange={handleCategoryChange} onUpdateCategory={handleUpdateCategory} uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} />}
+        {displayStep === 'idle' && <DilemmaSetup dilemma={dilemma} setDilemma={setDilemma} analysisStep={analysisStep} setAnalysisStep={setAnalysisStep} isLoading={isLoading} isUpdating={isUpdating} applyTemplate={applyTemplate} clearSession={clearAll} clearAnalyses={clearAnalyses} history={history} loadDecision={loadDecisionWithThread} deleteDecision={deleteDecision} clearHistory={clearHistory} handleStartAnalysis={handleStartAnalysis} progress={progress} progressMessage={progressMessage} setProgressMessage={setProgressMessage} templates={templates} selectedCategory={selectedCategory} onCategoryChange={handleCategoryChange} onUpdateCategory={handleUpdateCategory} uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} addDecision={addDecision} setCurrentDecisionId={setCurrentDecisionId} />}
         
-        {/* Bouton de génération manuelle uniquement pour les questions comparatives */}
+        {/* Générateur d'options selon le mode */}
         {displayStep === 'criteria-loaded' && shouldShowCriteria && <div className="mb-6">
-            <ManualOptionsGenerator onGenerateOptions={handleManualUpdate} isLoading={isUpdating} hasChanges={hasChanges} />
+            {realTimeSearchEnabled ? (
+              <ManualOptionsGenerator 
+                onGenerateOptions={handleManualUpdate} 
+                onAddManualOption={handleAddManualOption}
+                isLoading={isUpdating} 
+                hasChanges={hasChanges} 
+              />
+            ) : (
+              <ManualOptionsCreator 
+                onOptionsCreated={handleManualOptionsCreated} 
+                isLoading={isUpdating}
+                decisionId={currentDecision?.id}
+                // Debug: afficher l'ID de la décision
+                debugDecisionId={currentDecision?.id}
+                dilemma={dilemma}
+                onFollowUpQuestion={handleFollowUpQuestion}
+                existingOptions={currentDecision?.result?.breakdown?.map((item: any) => ({
+                  id: crypto.randomUUID(), // Générer un nouvel ID pour chaque option
+                  title: item.option || '',
+                  description: item.description || '',
+                  pros: item.pros || [],
+                  cons: item.cons || []
+                }))}
+              />
+            )}
           </div>}
         
         {displayStep === 'loading-options' && <OptionsLoadingSkeleton />}
@@ -337,12 +503,8 @@ const DecisionMaker = () => {
         // Actually update the decision in history (local + cloud)
         console.log('Decision updated with cached data:', updatedDecision);
         updateDecision(updatedDecision);
-      }} onFollowUpQuestion={handleFollowUpQuestion} />}
+      }} onFollowUpQuestion={handleFollowUpQuestion} onEditOptions={handleEditOptions} />}
 
-        {/* Section commentaires généraux - uniquement en bas de page */}
-        {currentDecision && displayStep !== 'idle' && <div className="mt-12 mb-8 border-t pt-8">
-            <CommentSection decisionId={currentDecision.id} commentType="general" title={t('comments.section.titleDefault')} placeholder={t('comments.section.placeholderDefault')} />
-          </div>}
       </section>
     </div>;
 };

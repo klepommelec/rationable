@@ -2,6 +2,123 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Aceternity UI Background Gradient Animation */
+@keyframes moveHorizontal {
+  0% {
+    transform: translateX(-50%) translateY(-10%);
+  }
+  50% {
+    transform: translateX(50%) translateY(10%);
+  }
+  100% {
+    transform: translateX(-50%) translateY(-10%);
+  }
+}
+
+@keyframes moveInCircle {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes moveVertical {
+  0% {
+    transform: translateY(-50%);
+  }
+  50% {
+    transform: translateY(50%);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  50% {
+    transform: translateY(-10px) translateX(-5px);
+  }
+  75% {
+    transform: translateY(-30px) translateX(15px);
+  }
+}
+
+/* Custom styles for workspace selector dropdown - Force width at all times */
+.workspace-dropdown,
+[data-radix-popper-content-wrapper] .workspace-dropdown,
+[role="menu"] .workspace-dropdown,
+[data-radix-dropdown-menu-sub-content].workspace-dropdown {
+  width: 256px !important;
+  min-width: 256px !important;
+  max-width: 256px !important;
+}
+
+/* Force width for all dropdown menus containing workspace content */
+[data-radix-popper-content-wrapper] [role="menu"]:has(.workspace-dropdown),
+[data-radix-popper-content-wrapper] [role="menu"]:has([data-radix-dropdown-menu-item]),
+[data-radix-dropdown-menu-sub-content]:has(.workspace-dropdown) {
+  width: 256px !important;
+  min-width: 256px !important;
+  max-width: 256px !important;
+}
+
+/* Override any hover states that might be affecting the width */
+.workspace-dropdown:hover,
+[data-radix-dropdown-menu-sub-content].workspace-dropdown:hover {
+  width: 256px !important;
+  min-width: 256px !important;
+  max-width: 256px !important;
+}
+
+/* Nuclear option - target all Radix dropdown sub-content that contains workspace content */
+[data-radix-dropdown-menu-sub-content]:has([data-radix-dropdown-menu-item]) {
+  width: 256px !important;
+  min-width: 256px !important;
+  max-width: 256px !important;
+}
+
+/* Ultra-specific targeting for Radix UI dropdowns */
+[data-radix-dropdown-menu-sub-content][data-side="right"] {
+  width: 256px !important;
+  min-width: 256px !important;
+  max-width: 256px !important;
+}
+
+/* Target the actual dropdown content container */
+[data-radix-dropdown-menu-sub-content] {
+  width: 256px !important;
+  min-width: 256px !important;
+  max-width: 256px !important;
+}
+
+/* Global override for all Radix dropdown sub-content */
+[data-radix-dropdown-menu-sub-content] {
+  width: 256px !important;
+  min-width: 256px !important;
+  max-width: 256px !important;
+}
+
+/* Force width on all states */
+[data-radix-dropdown-menu-sub-content]:not(:hover),
+[data-radix-dropdown-menu-sub-content]:hover,
+[data-radix-dropdown-menu-sub-content]:focus,
+[data-radix-dropdown-menu-sub-content]:active {
+  width: 256px !important;
+  min-width: 256px !important;
+  max-width: 256px !important;
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
 
 @layer base {
@@ -159,14 +276,14 @@
   @keyframes pulsing-glow-dark {
     0%, 100% {
       box-shadow: 
-        0 0 12px rgba(71, 85, 105, 0.2),
-        0 0 24px rgba(71, 85, 105, 0.1);
+        0 0 12px rgba(0, 0, 0, 0.3),
+        0 0 24px rgba(0, 0, 0, 0.2);
       border-color: hsl(215 25% 18%);
     }
     50% {
       box-shadow: 
-        0 0 16px rgba(71, 85, 105, 0.3),
-        0 0 32px rgba(71, 85, 105, 0.15);
+        0 0 16px rgba(0, 0, 0, 0.4),
+        0 0 32px rgba(0, 0, 0, 0.3);
       border-color: hsl(215 25% 22%);
     }
   }
@@ -227,8 +344,8 @@
     
     .dark .pulsing-glow {
       box-shadow: 
-        0 0 6px rgba(71, 85, 105, 0.2),
-        0 0 12px rgba(71, 85, 105, 0.1);
+        0 0 6px rgba(0, 0, 0, 0.3),
+        0 0 12px rgba(0, 0, 0, 0.2);
       border-color: hsl(var(--border));
     }
   }

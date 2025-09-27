@@ -3,34 +3,69 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { uploadUserAvatar, deleteUserAvatar, AvatarUploadResult } from '@/services/avatarService';
 
+/**
+ * Interface représentant le profil utilisateur
+ * @interface Profile
+ */
 interface Profile {
+  /** Identifiant unique de l'utilisateur */
   id: string;
+  /** Nom complet de l'utilisateur */
   full_name: string | null;
+  /** Adresse email de l'utilisateur */
   email: string | null;
+  /** URL de l'avatar de l'utilisateur */
   avatar_url: string | null;
+  /** Indique si l'onboarding est terminé */
   onboarding_completed: boolean | null;
+  /** Contexte d'utilisation (personnel ou professionnel) */
   use_context: 'personal' | 'professional' | null;
+  /** Date de création du profil */
   created_at: string;
+  /** Date de dernière mise à jour */
   updated_at: string;
 }
 
+/**
+ * Interface du contexte d'authentification
+ * @interface AuthContextType
+ */
 interface AuthContextType {
+  /** Utilisateur actuellement connecté */
   user: User | null;
+  /** Session active */
   session: Session | null;
+  /** Profil utilisateur complet */
   profile: Profile | null;
+  /** État de chargement */
   loading: boolean;
+  /** Fonction d'inscription */
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
+  /** Fonction de connexion */
   signIn: (email: string, password: string) => Promise<{ error: any }>;
+  /** Connexion avec Google */
   signInWithGoogle: () => Promise<{ error: any }>;
+  /** Lier le compte avec Google */
   linkWithGoogle: () => Promise<{ error: any }>;
+  /** Délier le compte Google */
+  unlinkGoogle: () => Promise<{ error: any }>;
+  /** Fonction de déconnexion */
   signOut: () => Promise<void>;
+  /** Mise à jour du profil */
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: any }>;
+  /** Mise à jour de l'avatar */
   updateAvatar: (file: File) => Promise<{ error: any }>;
+  /** Suppression de l'avatar */
   deleteAvatar: () => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Provider d'authentification qui gère l'état global de l'utilisateur
+ * @param children - Composants enfants
+ * @returns JSX.Element
+ */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -116,6 +151,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
+  const unlinkGoogle = async () => {
+    if (!user) return { error: 'Not authenticated' };
+
+    // Trouver l'identité Google
+    const googleIdentity = user.identities?.find(identity => identity.provider === 'google');
+    if (!googleIdentity) return { error: 'No Google account linked' };
+
+    const { error } = await supabase.auth.unlinkIdentity({
+      provider: 'google',
+      identityId: googleIdentity.id
+    });
+    return { error };
+  };
+
   const signOut = async () => {
     try {
       // Force sign out even if session is corrupted
@@ -188,6 +237,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signIn,
       signInWithGoogle,
       linkWithGoogle,
+      unlinkGoogle,
       signOut,
       updateProfile,
       updateAvatar,

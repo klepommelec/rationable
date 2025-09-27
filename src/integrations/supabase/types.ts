@@ -421,6 +421,7 @@ export type Database = {
           expires_at: string
           id: string
           invited_by: string
+          role: string | null
           status: string
           token: string | null
           updated_at: string
@@ -432,6 +433,7 @@ export type Database = {
           expires_at?: string
           id?: string
           invited_by: string
+          role?: string | null
           status?: string
           token?: string | null
           updated_at?: string
@@ -443,6 +445,7 @@ export type Database = {
           expires_at?: string
           id?: string
           invited_by?: string
+          role?: string | null
           status?: string
           token?: string | null
           updated_at?: string
@@ -488,6 +491,69 @@ export type Database = {
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      workspace_documents: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          last_used_at: string | null
+          name: string
+          size: number
+          tags: string[]
+          type: string
+          updated_at: string
+          url: string
+          usage_count: number
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          last_used_at?: string | null
+          name: string
+          size: number
+          tags?: string[]
+          type: string
+          updated_at?: string
+          url: string
+          usage_count?: number
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          last_used_at?: string | null
+          name?: string
+          size?: number
+          tags?: string[]
+          type?: string
+          updated_at?: string
+          url?: string
+          usage_count?: number
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_documents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_documents_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          }
         ]
       }
       workspaces: {
@@ -567,6 +633,10 @@ export type Database = {
       generate_template_public_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      update_document_usage: {
+        Args: { doc_id: string }
+        Returns: undefined
       }
       get_shared_decision_by_id: {
         Args: { p_public_id: string }

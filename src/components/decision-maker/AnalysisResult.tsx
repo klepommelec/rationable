@@ -7,10 +7,12 @@ import { ComparisonTable } from './ComparisonTable';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Table2, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import FollowUpQuestions from './FollowUpQuestions';
 import { DataAccuracyIndicator } from './DataAccuracyIndicator';
 import { useI18nUI } from '@/contexts/I18nUIContext';
+import { CommentSection } from '../comments/CommentSection';
+import { OptionsLoadingSkeleton } from '../OptionsLoadingSkeleton';
 
 interface AnalysisResultProps {
   result: IResult | null;
@@ -20,6 +22,7 @@ interface AnalysisResultProps {
   dilemma: string;
   onUpdateDecision?: (updatedDecision: IDecision) => void;
   onFollowUpQuestion?: (enrichedDilemma: string) => void;
+  onEditOptions?: () => void;
 }
 
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
@@ -29,14 +32,28 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   currentDecision,
   dilemma,
   onUpdateDecision,
-  onFollowUpQuestion
+  onFollowUpQuestion,
+  onEditOptions
 }) => {
   const { t } = useI18nUI();
   const [showAllOptions, setShowAllOptions] = useState(false);
+  const [hasComments, setHasComments] = useState(false);
+  const [isAddingComment, setIsAddingComment] = useState(false);
+  const [commentsCount, setCommentsCount] = useState(0);
+  
+  const handleAddCommentClick = () => {
+    setIsAddingComment(true);
+  };
   
   // Nombre d'options à afficher initialement (5)
   const initialOptionsCount = 5;
   if (!result) {
+    // Si on est en train de mettre à jour, afficher le skeleton de chargement
+    if (isUpdating) {
+      return <OptionsLoadingSkeleton />;
+    }
+    
+    // Sinon, afficher le message "Aucun résultat disponible"
     return (
       <div className="space-y-6 animate-fade-in">
         <div className="text-center p-8">
@@ -63,14 +80,14 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         result={result}
         dilemma={dilemma}
         currentDecision={currentDecision}
+        onEditOptions={onEditOptions}
       />
       
       {hasMultipleOptions && (
         <Card>
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <CardTitle className="flex items-center gap-2">
-                <Table2 className="h-5 w-5" />
+              <CardTitle className="text-lg">
                 {t('decision.comparisonTable')}
               </CardTitle>
               <Badge variant="outline" className="self-start sm:self-center">
@@ -119,7 +136,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         </Card>
       )}
       
-      {onFollowUpQuestion && (
+      {/* Questions de suivi automatiques pour les décisions intelligentes */}
+      {onFollowUpQuestion && !result.recommendation?.includes("Options créées manuellement") && (
         <FollowUpQuestions
           dilemma={dilemma}
           result={result}
@@ -154,6 +172,69 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           }}
           isLoading={isUpdating}
         />
+      )}
+
+      {/* Questions de suivi manuelles pour les décisions manuelles - seulement le bouton */}
+      {onFollowUpQuestion && result.recommendation?.includes(t('decision.manualOptions.manualAnalysisDescription')) && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>{t('decision.manualOptions.createFollowUpQuestion')}</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              {t('decision.manualOptions.followUpDescription')}
+            </p>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={() => onFollowUpQuestion(dilemma)}
+              disabled={isUpdating}
+              className="w-full"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {t('decision.manualOptions.createFollowUpQuestion')}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Section Commentaires */}
+      {currentDecision?.id && (
+        <Card className="mt-6">
+          {hasComments && (
+            <CardHeader className="h-16 pt-6">
+              <div className="flex items-center justify-between h-full">
+                <CardTitle className="text-lg">
+                  {t('decision.manualOptions.comments')} ({commentsCount})
+                </CardTitle>
+                {!isAddingComment && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddCommentClick}
+                    className="text-black border-gray-300 hover:text-black hover:border-gray-400"
+                  >
+                    <Plus className="h-4 w-4 mr-2 text-black" />
+                    {t('comments.section.addButton')}
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+          )}
+          <CardContent>
+            <CommentSection
+              decisionId={currentDecision.id}
+              commentType="general"
+              title={t('decision.manualOptions.comments')}
+              placeholder={t('decision.manualOptions.commentsPlaceholder')}
+              onCommentsChange={(hasComments, isAddingComment, count) => {
+                setHasComments(hasComments);
+                setIsAddingComment(isAddingComment);
+                setCommentsCount(count);
+              }}
+              externalIsAddingComment={isAddingComment}
+              onSetIsAddingComment={setIsAddingComment}
+            />
+          </CardContent>
+        </Card>
       )}
     </div>
   );

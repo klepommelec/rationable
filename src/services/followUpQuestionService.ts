@@ -1,5 +1,6 @@
 import { IResult, IFollowUpQuestion, FollowUpCategory } from '@/types/decision';
 import { callOpenAiApi } from './openai';
+import { I18nService } from './i18nService';
 
 interface QuestionGenerationRequest {
   dilemma: string;
@@ -13,7 +14,10 @@ export const generateFollowUpQuestions = async ({
   category
 }: QuestionGenerationRequest): Promise<IFollowUpQuestion[]> => {
   try {
-    console.log('🤔 Génération des questions de suivi...');
+    // Détecter la langue de la question initiale au lieu de la langue de l'interface
+    const isEnglish = detectLanguage(dilemma);
+    const detectedLanguage = isEnglish ? 'en' : 'fr';
+    console.log('🤔 Génération des questions de suivi pour la langue de la question:', detectedLanguage);
 
     // Analyser le contexte pour adapter les questions
     const context = detectQuestionContext(dilemma, category);
@@ -25,7 +29,8 @@ export const generateFollowUpQuestions = async ({
       console.log('📊 Utilisation des données temps réel pour les questions de suivi');
     }
     
-    const prompt = buildFollowUpPrompt(dilemma, result, context, realTimeContext);
+    const prompt = buildFollowUpPrompt(dilemma, result, context, realTimeContext, isEnglish);
+    console.log('📝 Prompt utilisé:', prompt.substring(0, 200) + '...');
     
     const response = await callOpenAiApi(prompt);
     
@@ -36,7 +41,7 @@ export const generateFollowUpQuestions = async ({
         category: q.category || 'context'
       }));
       
-      console.log(`✅ ${questions.length} questions de suivi générées avec contexte à jour`);
+      console.log(`✅ ${questions.length} questions de suivi générées en ${detectedLanguage}:`, questions.map(q => q.text));
       return questions;
     }
     
@@ -45,6 +50,16 @@ export const generateFollowUpQuestions = async ({
     console.error('❌ Erreur lors de la génération des questions de suivi:', error);
     return [];
   }
+};
+
+const detectLanguage = (text: string): boolean => {
+  // Détecter si le texte est en anglais
+  const englishWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'should', 'would', 'could', 'will', 'can', 'what', 'where', 'when', 'how', 'why', 'which', 'who'];
+  const words = text.toLowerCase().split(/\s+/);
+  const englishWordCount = words.filter(word => englishWords.includes(word)).length;
+  
+  // Si plus de 20% des mots sont des mots anglais courants, considérer comme anglais
+  return englishWordCount / words.length > 0.2;
 };
 
 const detectQuestionContext = (dilemma: string, category?: string): string => {
@@ -84,12 +99,59 @@ const detectQuestionContext = (dilemma: string, category?: string): string => {
   return 'général';
 };
 
-const buildFollowUpPrompt = (dilemma: string, result: IResult, context: string, realTimeContext: string = ''): string => {
+const buildFollowUpPrompt = (dilemma: string, result: IResult, context: string, realTimeContext: string = '', isEnglish: boolean): string => {
   const recommendedOption = result.recommendation;
-  const breakdown = result.breakdown.find(item => 
+  const breakdown = result.breakdown?.find(item => 
     item.option.toLowerCase().includes(recommendedOption.toLowerCase()) ||
     recommendedOption.toLowerCase().includes(item.option.toLowerCase())
   );
+
+  if (isEnglish) {
+    return `
+You are a decision-making expert. Based on this specific recommendation, generate 3-4 ACTIONABLE follow-up questions that help the user take action with this recommendation.
+
+CRITICAL: ALL QUESTIONS MUST BE IN ENGLISH ONLY. Do not use French or any other language.
+
+ORIGINAL DILEMMA: "${dilemma}"
+RECOMMENDATION: "${recommendedOption}"
+DESCRIPTION: "${result.description}"
+${breakdown ? `
+PROS OF THIS OPTION: ${breakdown.pros.join(', ')}
+CONS OF THIS OPTION: ${breakdown.cons.join(', ')}
+SCORE: ${breakdown.score}/5
+` : ''}
+
+CONTEXT: ${context}${realTimeContext}
+
+Important instructions:
+1. Questions must be ACTIONABLE and help the user TAKE ACTION
+2. Focus on next steps, practical information, and concrete advice
+3. Avoid validation questions - prioritize questions that help take action
+4. Be specific to the recommendation "${recommendedOption}"
+5. MANDATORY: Write ALL questions in English language only
+
+Types of questions to prioritize:
+- Next steps: "What to do after choosing ${recommendedOption}?", "How to proceed with ${recommendedOption}?"
+- Practical information: "How to get/access ${recommendedOption}?", "When to use ${recommendedOption}?"
+- Optimization: "How to get the most out of ${recommendedOption}?", "Best time for ${recommendedOption}?"
+- Plan B: "Alternatives if ${recommendedOption} is not available?", "What to do if ${recommendedOption} doesn't suit?"
+- Preparation: "What to prepare before using ${recommendedOption}?", "What accessories/complements for ${recommendedOption}?"
+
+EXAMPLES OF GOOD QUESTIONS (ALL IN ENGLISH):
+- For a restaurant: "How to book at [Restaurant]?", "What to order as specialty?", "What time to go?"
+- For a tech product: "Where to buy [Product] at the best price?", "What accessories to get?", "How to install it?"
+- For travel: "How to get to [Place]?", "What to do after [Place]?", "Best times to avoid crowds?"
+
+Respond only with a JSON array of questions in English:
+{
+  "questions": [
+    {
+      "text": "Specific actionable question in English...",
+      "category": "next_steps|practical_info|alternatives|optimization|preparation"
+    }
+  ]
+}`;
+  }
 
   return `
 Tu es un expert en prise de décision. Basé sur cette recommandation spécifique, génère 3-4 questions de suivi ACTIONABLES qui aident l'utilisateur à passer à l'action avec cette recommandation.

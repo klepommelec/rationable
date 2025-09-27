@@ -1,171 +1,113 @@
-// Complete UI translations interface and implementations
+// UI translations interface and implementations
 import type { SupportedLanguage } from '../services/i18nService';
 
-// Re-export SupportedLanguage for external use
 export type { SupportedLanguage } from '../services/i18nService';
 
 export interface UITranslations {
-  analysis: {
-    title: string;
-    status: {
-      analyzing: string;
-      complete: string;
-    };
-    loadingMessages: {
-      criteria: string;
-      options: string;
-      analysis: string;
-      finalizing: string;
-    };
+  common: {
+    cancel: string;
+    save: string;
+    edit: string;
+    delete: string;
+    confirm: string;
+    loading: string;
     error: string;
-    retry: string;
-    criteriaSection: {
+    success: string;
+    search: string;
+  };
+  profile: {
+    avatar: {
       title: string;
       description: string;
-      add: string;
+      change: string;
+      formatSupport: string;
+    };
+    info: {
+      title: string;
+      description: string;
+      email: string;
+      fullName: string;
+      fullNamePlaceholder: string;
+      save: string;
+      saving: string;
+      savedError: string;
+      savedSuccess: string;
+    };
+    language: {
+      title: string;
+      description: string;
+      label: string;
       placeholder: string;
-      weight: string;
-      importance: string;
-      low: string;
-      medium: string;
-      high: string;
-      expandDescription: string;
+      helpText: string;
+      toastTitle: string;
+      toastDesc: string;
     };
-    optionsSection: {
+    googleAccount: {
       title: string;
       description: string;
-      expandOptions: string;
-      collapseOptions: string;
-      viewMore: string;
-      viewLess: string;
-      pros: string;
-      cons: string;
-      showMore: string;
-      showLess: string;
-    };
-    resultsSection: {
-      title: string;
-      winner: string;
-      score: string;
-      recommendation: string;
-      confidence: string;
-      confidenceLevel: {
-        low: string;
-        medium: string;
-        high: string;
-        veryHigh: string;
+      lastActivity: string;
+      connected: string;
+      disconnectAccount: string;
+      toasts: {
+        connectError: string;
+        connectSuccess: string;
+        disconnectError: string;
       };
-      viewDetails: string;
-      comparisonTable: string;
-      exportResults: string;
-    };
-    charts: {
-      radar: {
-        title: string;
-        description: string;
-      };
-      comparison: {
-        title: string;
-        description: string;
-      };
-    };
-    followUpSection: {
-      title: string;
-      subtitle: string;
-      loading: string;
-    };
-    toasts: {
-      templateApplied: string;
-      decisionLoaded: string;
     };
   };
   navbar: {
     home: string;
-    templates: string;
+    history: string;
     settings: string;
-    signIn: string;
+    logout: string;
+    login: string;
+    templates: string;
     signOut: string;
-    profile: string;
+    signIn: string;
     getStarted: string;
-    userFallback: string;
   };
-  hero: {
+  dilemmaSetup: {
     title: string;
-    titleHighlight: string;
-    subtitle: string;
-    cta: string;
-  };
-  features: {
-    title: string;
-    ai: {
-      title: string;
-      description: string;
+    placeholder: string;
+    analyzeButton: string;
+    launchAnalysis: string;
+    manualModeButton: string;
+    aiToggleLabel: string;
+    toast: {
+      decisionCreated: string;
     };
-    criteria: {
-      title: string;
-      description: string;
+    fileTooLarge: string;
+    analysisStarted: string;
+    manualModeActivated: string;
+    dropHere: string;
+    attachFile: string;
+    hero: {
+      titleLine1: string;
+      titleLine2: string;
+      brand: string;
+      subtitle: string;
     };
-    comparison: {
+    templates: {
+      description: string;
+      viewAll: string;
+    };
+    history: {
       title: string;
       description: string;
+      toasts: {
+        templateApplied: string;
+        templateError: string;
+        decisionDeleted: string;
+        historyCleared: string;
+      };
     };
   };
   auth: {
-    signIn: {
-      title: string;
-      subtitle: string;
-      email: string;
-      password: string;
-      submit: string;
-      switchToSignUp: string;
-      forgotPassword: string;
-    };
-    signUp: {
-      title: string;
-      subtitle: string;
-      fullName: string;
-      email: string;
-      password: string;
-      confirmPassword: string;
-      submit: string;
-      switchToSignIn: string;
-    };
-    forgotPassword: {
-      title: string;
-      subtitle: string;
-      email: string;
-      submit: string;
-      backToSignIn: string;
-      success: string;
-    };
-    errors: {
-      invalidCredentials: string;
-      emailExists: string;
-      passwordMismatch: string;
-      weakPassword: string;
-      userNotFound: string;
-      invalidEmail: string;
-      generic: string;
-      passwordsMismatch: string;
-      passwordTooShort: string;
-    };
+    signOut: string;
     actions: {
-      linkGoogle: string;
       signIn: string;
       createAccount: string;
       continueWithGoogle: string;
-    };
-    fields: {
-      email: string;
-      password: string;
-      fullName: string;
-      confirmPassword: string;
-    };
-    messages: {
-      accountCreated: string;
-    };
-    separator: {
-      or: string;
     };
     toggleText: {
       signUpPrompt: string;
@@ -173,43 +115,252 @@ export interface UITranslations {
       signInPrompt: string;
       signInLink: string;
     };
+    separator: {
+      or: string;
+    };
+    fields: {
+      fullName: string;
+      email: string;
+      password: string;
+      confirmPassword: string;
+    };
+  };
+  decision: {
+    disadvantages: string;
+    learnMore: string;
+    seeMoreOptions: string;
+    seeMore: string;
+    seeLess: string;
+    manualOptions: {
+      title: string;
+      description: string;
+      addOption: string;
+      optionTitle: string;
+      optionDescription: string;
+      generateDescription: string;
+      generatePros: string;
+      generateCons: string;
+      pros: string;
+      cons: string;
+      addPro: string;
+      addCon: string;
+      finishAndSave: string;
+      saving: string;
+      createFollowUpQuestion: string;
+      comments: string;
+      commentsPlaceholder: string;
+      commentsUnavailable: string;
+      optionTitlePlaceholder: string;
+      optionDescriptionPlaceholder: string;
+      proPlaceholder: string;
+      conPlaceholder: string;
+      followUpDescription: string;
+      manualAnalysisDescription: string;
+      editOptions: string;
+      modify: string;
+    };
+    toasts: {
+      optionsCreatedSuccessfully: string;
+      optionGenerationError: string;
+      descriptionGenerationError: string;
+      prosGenerationError: string;
+      consGenerationError: string;
+      criteriaMinError: string;
+      descriptionGenerated: string;
+      prosGenerated: string;
+      consGenerated: string;
+    };
+    analysisResult: {
+      recommendation: string;
+      followUpQuestions: string;
+      comments: string;
+      noAdvantages: string;
+      noDisadvantages: string;
+      advantages: string;
+      disadvantages: string;
+      searchButton: string;
+    };
+    history: {
+      manualDecisionInProgress: string;
+      manualDecisionTitle: string;
+      authorUnknown: string;
+      item: {
+        followUp: {
+          singular: string;
+          plural: string;
+        };
+        more: {
+          singular: string;
+          plural: string;
+        };
+      };
+    };
+    recommended: string;
+    advantages: string;
+    pointsOfAttention: string;
+    usefulLinks: string;
+    popularVideos: string;
+    seeMore: string;
+    comparisonTable: string;
   };
   settings: {
-    title: string;
-    sidebar: {
-      profile: string;
-      workspaces: string;
-      appearance: string;
-      documents: string;
-      admin: string;
-    };
+        sidebar: {
+          profile: string;
+          accounts: string;
+          workspaces: string;
+          documents: string;
+          members: string;
+          realTimeSearch: string;
+          monthlyTemplates: string;
+          preferences: string;
+          admin: string;
+          personal: string;
+          organization: string;
+          system: string;
+        };
     header: {
       subtitle: string;
     };
     profile: {
       title: string;
-      fullName: string;
+      subtitle: string;
+      name: string;
       email: string;
-      avatar: string;
-      uploadAvatar: string;
-      removeAvatar: string;
+      theme: string;
+      light: string;
+      dark: string;
+      system: string;
+      avatar: {
+        title: string;
+        description: string;
+        change: string;
+        formatSupport: string;
+      };
+      info: {
+        title: string;
+        description: string;
+        email: string;
+        fullName: string;
+        fullNamePlaceholder: string;
+        save: string;
+        saving: string;
+        savedError: string;
+        savedSuccess: string;
+      };
+      language: {
+        title: string;
+        description: string;
+        label: string;
+        placeholder: string;
+        helpText: string;
+        toastTitle: string;
+        toastDesc: string;
+      };
+      googleAccount: {
+        title: string;
+        description: string;
+        lastActivity: string;
+        connected: string;
+        disconnectAccount: string;
+        toasts: {
+          connectError: string;
+          connectSuccess: string;
+          disconnectError: string;
+        };
+      };
+    };
+    workspaces: {
+      title: string;
+      subtitle: string;
+      defaultWorkspace: string;
+      name: string;
+      namePlaceholder: string;
+      description: string;
+      descriptionPlaceholder: string;
+      color: string;
+      usageContext: string;
+      deleteTitle: string;
+      deleteDescription: string;
+      delete: string;
       save: string;
       cancel: string;
+    };
+    documents: {
+      title: string;
+      subtitle: string;
+      addDocuments: string;
+      searchDocuments: string;
+      noDocuments: string;
+      addFirstDocument: string;
+      upload: string;
+      dragDrop: string;
+      supported: string;
+      maxSize: string;
+      processing: string;
+      processed: string;
+      error: string;
+      view: string;
+      delete: string;
+      deleteConfirmTitle: string;
+      deleteConfirmDescription: string;
+      deleteConfirmButton: string;
+      uploadSuccess: string;
+      uploadError: string;
+      management: string;
+      managementDescription: string;
+      noWorkspaceSelected: string;
+      noWorkspaceSelectedError: string;
+      uploading: string;
+      searchPlaceholder: string;
+      documents: string;
+      noResult: string;
+      addDocumentsDescription: string;
+      deleteSuccess: string;
+      noDocument: string;
+    };
+    members: {
+      title: string;
+      subtitle: string;
+      invite: string;
+      inviteEmailPlaceholder: string;
+      inviteRoleLabel: string;
+      contributorRole: string;
+      viewerRole: string;
+      inviteButton: string;
+      inviteEmailSent: string;
+      membersListTitle: string;
+      noWorkspaceSelected: string;
+      selectWorkspaceMessage: string;
+      pendingInvitations: string;
+      invitedOn: string;
+      expiresOn: string;
+      resendInvitation: string;
+      cancelInvitation: string;
+      removeMember: string;
+      removeMemberConfirmTitle: string;
+      removeMemberConfirmDescription: string;
+      removeMemberConfirmButton: string;
+      roleUpdated: string;
+      invitationSent: string;
+      invitationError: string;
+      invitationCanceled: string;
+      memberRemoved: string;
+      management: string;
+      managementDescription: string;
+      contributor: string;
+      observer: string;
+      workspaceMembers: string;
+      pending: string;
+      admin: string;
+      noMembers: string;
     };
     appearance: {
       title: string;
       description: string;
       themeLabel: string;
-      theme: string;
       light: string;
       dark: string;
       system: string;
-      language: string;
-    };
-    account: {
-      title: string;
-      deleteAccount: string;
-      deleteWarning: string;
     };
     data: {
       title: string;
@@ -219,44 +370,151 @@ export interface UITranslations {
         desc: string;
       };
       clearHistory: string;
+      toast: {
+        cleared: string;
+        clearedDesc: string;
+      };
     };
-    documents: {
+  };
+  criteriaManager: {
+    title: string;
+    addCriterion: string;
+    criterionPlaceholder: string;
+    updateAnalysis: string;
+    edit: string;
+  };
+  criteria: {
+    title: string;
+    addButton: string;
+    tooltip: string;
+  };
+  comments: {
+    section: {
+      empty: string;
+      addButton: string;
+      add: string;
+      cancel: string;
+      toasts: {
+        addSuccess: string;
+        updateSuccess: string;
+        deleteSuccess: string;
+      };
+    };
+    item: {
+      types: {
+        general: string;
+      };
+      createdOn: string;
+      modifiedOn: string;
+      reply: string;
+      replies: string;
+      showReplies: string;
+      hideReplies: string;
+      addReply: string;
+      replyPlaceholder: string;
+      reactions: string;
+      addReaction: string;
+      removeReaction: string;
+    };
+    mentions: {
+      searchPlaceholder: string;
+      noMembersFound: string;
+      loading: string;
+      owner: string;
+      contributor: string;
+      viewer: string;
+    };
+  };
+  analysis: {
+    followUpSection: {
       title: string;
-      description: string;
-      usage: string;
-      added: string;
+      subtitle: string;
+      loading: string;
+    };
+  };
+  optionsLoading: {
+    title: string;
+    subtitle: string;
+  };
+  dataAccuracy: {
+    sources: {
+      one: string;
+      other: string;
+    };
+    createdOn: string;
+    by: string;
+    updatedOn: string;
+    viewSources: string;
+  };
+  notifications: {
+    previousDecisionLoaded: string;
+    sourceVerification: string;
+  };
+  share: {
+    button: {
+      share: string;
+      simpleShare: string;
+      collaborate: string;
+      shareAsTemplate: string;
+    };
+    toasts: {
+      linkCopied: string;
+    };
+  };
+  collaboration: {
+    title: string;
+    description: string;
+    inviteByEmail: string;
+    inviteDescription: string;
+    emailPlaceholder: string;
+    sendInvitation: string;
+  };
+  history: {
+    searchBar: {
+      filter: string;
+      more: string;
+      categoryLabel: string;
+      allCategori: string;
+      allCategories: string;
+      uncategorized: string;
+      searchPlaceholder: string;
+      sortBy: string;
+      sort: {
+        date: string;
+        category: string;
+      };
+      exportPdf: string;
+      exportJson: string;
+      copyText: string;
+      export: string;
+      clearAll: string;
+      toasts: {
+        export: {
+          success: string;
+        };
+        json: {
+          success: string;
+        };
+      };
+      confirm: {
+        title: string;
+        desc: string;
+        cancel: string;
+        ok: string;
+      };
+    };
+    list: {
+      seeMore: string;
+    };
+    item: {
+      share: string;
+      delete: string;
     };
   };
   templates: {
-    title: string;
-    subtitle: string;
     page: {
       title: string;
       description: string;
-    };
-    categories: {
-      all: string;
-      personal: string;
-      professional: string;
-    };
-    use: string;
-    preview: string;
-    share: string;
-    create: string;
-    featured: string;
-    community: string;
-    myTemplates: string;
-    grid: {
-      personalTitle: string;
-      professionalTitle: string;
-      recommendedBadge: string;
-      emptyMessage: string;
-      resetFilters: string;
-    };
-    card: {
-      open: string;
-      question: string;
-      byAuthor: string;
     };
     filters: {
       searchPlaceholder: string;
@@ -267,314 +525,91 @@ export interface UITranslations {
         mostCopied: string;
       };
     };
-    errors: {
-      loadError: string;
-      openError: string;
-      rateLimitError: string;
+    grid: {
+      personalTitle: string;
+      professionalTitle: string;
+      recommendedBadge: string;
     };
-  };
-  common: {
-    loading: string;
-    error: string;
-    success: string;
-    cancel: string;
-    save: string;
-    delete: string;
-    edit: string;
-    close: string;
-    back: string;
-    next: string;
-    previous: string;
-    done: string;
-    confirm: string;
-    retry: string;
-    viewMore: string;
-    viewLess: string;
-    search: string;
-    browseFiles: string;
-    supportedFormats: string;
-  };
-  criteria: {
-    title: string;
-    description: string;
-    add: string;
-    addButton: string;
-    addSuccess: string;
-    weight: string;
-    importance: string;
-    placeholder: string;
-    save: string;
-    cancel: string;
-    delete: string;
-    edit: string;
-    low: string;
-    medium: string;
-    high: string;
-    updateAnalysis: string;
-    tooltip: string;
-  };
-  share: {
-    button: {
-      share: string;
-      simpleShare: string;
-      collaborate: string;
-      shareAsTemplate: string;
-    };
-    title: string;
-    subtitle: string;
-    copyLink: string;
-    linkCopied: string;
-    emailShare: string;
-    socialShare: string;
-    publicDecision: string;
-    publicDescription: string;
-    privateDecision: string;
-    privateDescription: string;
-    toasts: {
-      linkCopied: string;
-    };
-  };
-  profile: {
-    avatar: {
-      title: string;
-      description: string;
-      change: string;
-      formatSupport: string;
-      dropHere: string;
-      tooBig: string;
-      uploadSuccess: string;
-      uploadError: string;
-      deleteSuccess: string;
-      deleteError: string;
-    };
-    info: {
-      title: string;
-      description: string;
-      email: string;
-      fullName: string;
-      fullNamePlaceholder: string;
-      save: string;
-      saving: string;
-      savedSuccess: string;
-      savedError: string;
-    };
-    language: {
-      title: string;
-      description: string;
-      label: string;
-      helpText: string;
-      toastTitle: string;
-      toastDesc: string;
-    };
-    googleAccount: {
-      title: string;
-      description: string;
-      notConnected: string;
-    };
-  };
-  dashboard: {
-    title: string;
-    subtitle: string;
-    recentDecisions: string;
-    quickActions: string;
-    stats: {
-      decisionsCount: string;
-      avgConfidence: string;
-      timesSaved: string;
-    };
-  };
-  history: {
-    title: string;
-    subtitle: string;
-    empty: {
-      title: string;
-      description: string;
-      cta: string;
-    };
-    search: {
-      placeholder: string;
-      noResults: string;
-    };
-    list: {
-      emptyTitle: string;
-      emptyDescription: string;
-      seeMore: string;
-    };
-    searchBar: {
-      searchPlaceholder: string;
-      filter: string;
-      more: string;
-      export: string;
-      clearAll: string;
-      categoryLabel: string;
-      allCategories: string;
-      uncategorized: string;
-      sortBy: string;
-      sort: {
-        date: string;
-        category: string;
-      };
-      exportPdf: string;
-      exportJson: string;
-      copyText: string;
-      confirm: {
-        title: string;
-        desc: string;
-        cancel: string;
-        ok: string;
-      };
-      toasts: {
-        export: {
-          success: string;
-          error: string;
-        };
-        json: {
-          success: string;
-          error: string;
-        };
-        copy: {
-          success: string;
-          error: string;
-        };
-      };
-    };
-    filters: {
-      all: string;
-      personal: string;
-      professional: string;
-      recent: string;
-      highConfidence: string;
-    };
-    actions: {
-      view: string;
-      load: string;
-      delete: string;
-      export: string;
-      share: string;
-    };
-    sort: {
-      date: string;
-      category: string;
-    };
-    item: {
-      share: string;
-      delete: string;
-      followUp: {
-        singular: string;
-        plural: string;
-      };
-      more: {
-        singular: string;
-        plural: string;
-      };
-    };
-    more: string;
-    export: string;
-    exportPdf: string;
-    exportJson: string;
-    copyText: string;
-    clearAll: string;
-    confirm: {
-      title: string;
-      desc: string;
-      cancel: string;
-      ok: string;
-    };
-  };
-  workspaces: {
-    title: string;
-    description: string;
-    newWorkspace: string;
-    defaultBadge: string;
-    currentBadge: string;
-    personal: string;
-    save: string;
-    cancel: string;
-    workspaceDescription: string;
-    color: string;
-    usageContext: string;
-    professionalUsage: string;
-    professionalDescription: string;
-    personalUsage: string;
-    personalDescription: string;
-    activate: string;
-    searchDocuments: string;
-    uploadDocuments: string;
-  };
-  comments: {
-    section: {
-      titleDefault: string;
-      placeholderDefault: string;
-      loading: string;
-      empty: string;
-      add: string;
-      cancel: string;
-      addButton: string;
-      toasts: {
-        loadError: string;
-        emptyError: string;
-        addSuccess: string;
-        addError: string;
-      };
-    };
-    item: {
-      types: {
-        general: string;
-        criteria: string;
-        option: string;
-        follow_up: string;
-      };
-      createdOn: string;
-      modifiedOn: string;
-    };
-  };
-  dataAccuracy: {
-    unknown: {
-      date: string;
-      datetime: string;
-      author: string;
-      user: string;
-    };
-    createdOn: string;
-    updatedOn: string;
-    by: string;
-    viewSources: string;
-    noExternalSources: string;
-    sources: {
-      one: string;
-      other: string;
-    };
-  };
-  decision: {
-    title: string;
-    recommended: string;
-    advantages: string;
-    disadvantages: string;
-    learnMore: string;
-    moreAdvantages: string;
-    moreDisadvantages: string;
-    search: string;
-    comparisonTableCaption: string;
-    comparisonTable: string;
-    seeMoreOptions: string;
-    noResults: string;
-    pointsOfAttention: string;
-    usefulLinks: string;
-    popularVideos: string;
-    seeMore: string;
-    seeLess: string;
-    toasts: {
-      alreadyRunning: string;
-      titleUpdated: string;
-      followup: {
-        error: string;
-      };
+    card: {
+      question: string;
+      open: string;
     };
   };
   footer: {
-    allRightsReserved: string;
     privacyPolicy: string;
+    templates: string;
   };
+  workspaces: {
+    newWorkspace: string;
+    title: string;
+    subtitle: string;
+    yourWorkspaces: string;
+    createNew: string;
+    current: string;
+    owner: string;
+    select: string;
+    defaultPersonalWorkspace: string;
+    createdOn: string;
+    noWorkspaces: string;
+    createFirstWorkspace: string;
+    createWorkspace: string;
+    deleting: string;
+    delete: string;
+    createSuccess: string;
+    createError: string;
+    deleteSuccess: string;
+    deleteError: string;
+    selectSuccess: string;
+      createDialog: {
+        title: string;
+        description: string;
+        nameLabel: string;
+        namePlaceholder: string;
+        descriptionLabel: string;
+        descriptionPlaceholder: string;
+        colorLabel: string;
+        cancel: string;
+        create: string;
+        creating: string;
+      };
+      image: {
+        title: string;
+        subtitle: string;
+        tooBig: string;
+        uploadSuccess: string;
+        uploadError: string;
+        deleteSuccess: string;
+        deleteError: string;
+        uploading: string;
+        changeImage: string;
+        supportedFormats: string;
+      };
+      edit: {
+        title: string;
+        description: string;
+        nameLabel: string;
+        namePlaceholder: string;
+        descriptionLabel: string;
+        descriptionPlaceholder: string;
+        save: string;
+        saving: string;
+        savedSuccess: string;
+        savedError: string;
+        manageCurrent: string;
+      };
+      information: {
+        title: string;
+        subtitle: string;
+        nameLabel: string;
+        namePlaceholder: string;
+        descriptionLabel: string;
+        descriptionPlaceholder: string;
+        save: string;
+        saving: string;
+        savedSuccess: string;
+        savedError: string;
+      };
+    };
   privacy: {
     title: string;
     lastUpdated: string;
@@ -610,10 +645,6 @@ export interface UITranslations {
         item3: string;
         item4: string;
       };
-      cookies: {
-        title: string;
-        description: string;
-      };
       rights: {
         title: string;
         description: string;
@@ -621,6 +652,10 @@ export interface UITranslations {
         item2: string;
         item3: string;
         item4: string;
+      };
+      cookies: {
+        title: string;
+        description: string;
       };
       retention: {
         title: string;
@@ -637,1968 +672,1358 @@ export interface UITranslations {
       };
     };
   };
-  analysisResult: {
-    confidence: string;
-    winner: string;
-    score: string;
-    reasons: string;
-    criteria: string;
-    options: string;
-    analysis: string;
-    recommendation: string;
-    nextSteps: string;
-    chartTitle: string;
-    comparisonTitle: string;
-    radarChartTitle: string;
-    usefulLinks: string;
-    popularVideos: string;
-    seeMore: string;
-    seeLess: string;
-    pointsOfAttention: string;
-    moreAdvantages: string;
-    comparisonTableCaption: string;
-    seeMoreOptions: string;
-  };
-  dilemmaSetup: {
-    hero: {
-      titleLine1: string;
-      brand: string;
-      subtitle: string;
-    };
-    dropHere: string;
-    attachFile: string;
-    launchAnalysis: string;
-    helpText: string;
-    attachedDocs: string;
-    history: {
-      title: string;
-      description: string;
-    };
-    templates: {
-      description: string;
-      viewAll: string;
-    };
-    trending: {
-      title: string;
-      refresh: string;
-    };
-    analysisStarted: string;
-    fileTooLarge: string;
-  };
-  optionsLoading: {
-    title: string;
-    subtitle: string;
-    analyzing: string;
-    generatingOptions: string;
-    evaluatingCriteria: string;
-    almostDone: string;
-  };
-  criteriaManager: {
-    title: string;
-    subtitle: string;
-    addCriterion: string;
-    placeholder: string;
-    importance: string;
-    weight: string;
-    save: string;
-    cancel: string;
-    delete: string;
-    edit: string;
-  };
-  fileUpload: {
-    dropZone: string;
-    selectFiles: string;
-    supportedFormats: string;
-    maxSize: string;
-    uploading: string;
-    success: string;
-    error: string;
-    remove: string;
-  };
-  collaboration: {
-    title: string;
-    description: string;
-    inviteByEmail: string;
-    inviteDescription: string;
-    emailPlaceholder: string;
-    sendInvitation: string;
-    emailRequired: string;
-    invalidEmail: string;
-    invitationSent: string;
-    invitationError: string;
-  };
-  templates_: {
-    personal: {
-      title: string;
-      description: string;
-      examples: string[];
-    };
-    professional: {
-      title: string;
-      description: string;
-      examples: string[];
-    };
-    custom: {
-      title: string;
-      description: string;
-      create: string;
-      name: string;
-      namePlaceholder: string;
-      description_: string;
-      descriptionPlaceholder: string;
-      category: string;
-      dilemma: string;
-      dilemmaPlaceholder: string;
-      criteria: string;
-      addCriterion: string;
-      criterionName: string;
-      criterionWeight: string;
-      cancel: string;
-      submit: string;
-      submitting: string;
-      success: string;
-      error: string;
-      required: string;
-    };
-  };
-  export: {
-    menuButton: {
-      idle: string;
-      busy: string;
-    };
-    menu: {
-      pdf: string;
-      pdfStandard: string;
-      pdfCustom: string;
-      image: string;
-      json: string;
-      copy: string;
-    };
-    pdfDialog: {
-      title: string;
-      subtitle: string;
-      includeCharts: string;
-      includeDetails: string;
-      format: string;
-      standardFormat: string;
-      customFormat: string;
-      cancel: string;
-      export: string;
-      exporting: string;
-    };
-    success: {
-      title: string;
-      subtitle: string;
-    };
-    error: {
-      title: string;
-      subtitle: string;
-    };
-  };
-  workspace: {
-    selector: {
-      title: string;
-      personal: string;
-      professional: string;
-      create: string;
-      manage: string;
-    };
-    create: {
-      title: string;
-      subtitle: string;
-      name: string;
-      namePlaceholder: string;
-      description: string;
-      descriptionPlaceholder: string;
-      color: string;
-      usageContext: string;
-      deleteTitle: string;
-      deleteDescription: string;
-      delete: string;
-      save: string;
-      cancel: string;
-    };
-    settings: {
-      title: string;
-      subtitle: string;
-      defaultWorkspace: string;
-      setDefault: string;
-    };
-    documents: {
-      title: string;
-      subtitle: string;
-      upload: string;
-      dragDrop: string;
-      supported: string;
-      maxSize: string;
-      processing: string;
-      processed: string;
-      error: string;
-      view: string;
-      download: string;
-      delete: string;
-      cancel: string;
-      confirm: string;
-      loading: string;
-    };
-  };
-  sharedDecision: {
-    signIn: string;
-  };
-  sharedDecisionView: {
-    backToHome: string;
-    sharedOn: string;
-    view: string;
-    views: string;
-    copyLinkButton: string;
-    copyToWorkspace: string;
-    recommended: string;
-    evaluationCriteria: string;
-    detailedAnalysis: string;
-    advantages: string;
-    disadvantages: string;
-    learnMore: string;
-    usefulLinks: string;
-    shoppingLinks: string;
-    commentsTitle: string;
-    commentsPlaceholder: string;
-    copySuccess: string;
-    missingPublicId: string;
-    notFound: string;
-    notFoundDescription: string;
-    loadingError: string;
-  };
 }
 
+// French translations
+const fr: UITranslations = {
+  common: {
+    cancel: "Annuler",
+    save: "Sauvegarder",
+    edit: "Modifier",
+    delete: "Supprimer",
+    confirm: "Confirmer",
+    loading: "Chargement...",
+    error: "Erreur",
+    success: "Succès",
+    search: "Rechercher",
+  },
+  profile: {
+    avatar: {
+      title: "Photo de profil",
+      description: "Gérez votre photo de profil",
+      change: "Changer la photo",
+      formatSupport: "Formats supportés : JPG, PNG, GIF",
+    },
+    info: {
+      title: "Informations personnelles",
+      description: "Gérez vos informations personnelles",
+      email: "Adresse email",
+      fullName: "Nom complet",
+      fullNamePlaceholder: "Entrez votre nom complet",
+      save: "Sauvegarder",
+      saving: "Sauvegarde...",
+      savedError: "Erreur lors de la sauvegarde",
+      savedSuccess: "Informations sauvegardées avec succès",
+    },
+    language: {
+      title: "Langue",
+      description: "Choisissez votre langue préférée",
+      label: "Langue d'affichage",
+      placeholder: "Sélectionnez une langue",
+      helpText: "La langue sera appliquée à toute l'interface",
+      toastTitle: "Langue mise à jour",
+      toastDesc: "La langue a été changée avec succès",
+    },
+    googleAccount: {
+      title: "Compte Google",
+      description: "Connectez votre compte Google pour synchroniser vos données",
+      lastActivity: "Dernière activité",
+      connected: "Connecté",
+      disconnectAccount: "Déconnecter le compte",
+      toasts: {
+        connectError: "Erreur lors de la connexion",
+        connectSuccess: "Compte Google connecté avec succès",
+        disconnectError: "Erreur lors de la déconnexion",
+      },
+    },
+  },
+  navbar: {
+    home: "Accueil",
+    history: "Historique",
+    settings: "Paramètres",
+    logout: "Déconnexion",
+    login: "Connexion",
+    templates: "Modèles",
+    signOut: "Déconnexion",
+    signIn: "Se connecter",
+    getStarted: "Commencer",
+  },
+  dilemmaSetup: {
+    title: "Quel est votre dilemme ?",
+    placeholder: "Ex: Acheter une maison ou louer un appartement",
+    analyzeButton: "Analyser",
+    launchAnalysis: "Lancer l'analyse",
+    manualModeButton: "Mode manuel",
+    aiToggleLabel: "Analyse intelligente par IA",
+    toast: {
+      decisionCreated: "Décision manuelle créée avec succès !",
+    },
+    fileTooLarge: "est trop volumineux (max 10MB)",
+    analysisStarted: "Analyse démarrée !",
+    manualModeActivated: "Mode manuel activé !",
+    dropHere: "Déposez vos fichiers ici",
+    attachFile: "Joindre un fichier",
+    hero: {
+      titleLine1: "Rendez chaque décision",
+      titleLine2: "Rationable",
+      brand: "Rationable",
+      subtitle: "Transformez vos dilemmes en décisions claires grâce à l'analyse intelligente",
+    },
+    templates: {
+      description: "Découvrez nos modèles de décision populaires",
+      viewAll: "Voir tous les modèles",
+    },
+    history: {
+      title: "Historique des décisions",
+      description: "Consultez et gérez vos décisions précédentes",
+      toasts: {
+        templateApplied: "Template appliqué avec succès !",
+        templateError: "Erreur lors de l'application du template",
+        decisionDeleted: "Décision supprimée de l'historique",
+        historyCleared: "L'historique des décisions a été effacé",
+      },
+    },
+  },
+  auth: {
+    signOut: "Déconnexion",
+    actions: {
+      signIn: "Se connecter",
+      createAccount: "Créer un compte",
+      continueWithGoogle: "Continuer avec Google",
+    },
+    toggleText: {
+      signUpPrompt: "Pas encore de compte ?",
+      signUpLink: "S'inscrire",
+      signInPrompt: "Déjà un compte ?",
+      signInLink: "Se connecter",
+    },
+    separator: {
+      or: "ou",
+    },
+    fields: {
+      fullName: "Nom complet",
+      email: "Email",
+      password: "Mot de passe",
+      confirmPassword: "Confirmer le mot de passe",
+    },
+  },
+  decision: {
+    disadvantages: "Points d'attention",
+    moreDisadvantages: "points d'attention supplémentaires",
+    moreAdvantages: "avantages supplémentaires",
+    learnMore: "En savoir plus",
+    seeMoreOptions: "Voir plus d'options",
+    seeMore: "Voir plus",
+    seeLess: "Voir moins",
+    manualOptions: {
+      title: "Options manuelles",
+      description: "Créez vos propres options manuellement ou générez des options automatiquement. En mode manuel, vous gardez le contrôle total sur le contenu.",
+      addOption: "Ajouter une option",
+      optionTitle: "Titre de l'option",
+      optionDescription: "Description de l'option",
+      generateDescription: "Générer la description",
+      generatePros: "Générer les avantages",
+      generateCons: "Générer les inconvénients",
+      pros: "Avantages",
+      cons: "Inconvénients",
+      addPro: "Ajouter un avantage",
+      addCon: "Ajouter un inconvénient",
+      finishAndSave: "Terminer et sauvegarder",
+      saving: "Sauvegarde en cours...",
+      createFollowUpQuestion: "Créer une question de suivi",
+      comments: "Commentaires",
+      commentsPlaceholder: "Ajouter un commentaire...",
+      commentsUnavailable: "Les commentaires seront disponibles une fois la décision créée.",
+      optionTitlePlaceholder: "Ex: Acheter une maison",
+      optionDescriptionPlaceholder: "Ex: Une maison offre plus d'espace et de stabilité.",
+      proPlaceholder: "Ex: Plus d'espace",
+      conPlaceholder: "Ex: Coût initial élevé",
+      followUpDescription: "Créez une question de suivi pour approfondir votre analyse.",
+      manualAnalysisDescription: "Options créées manuellement",
+      editOptions: "Modifier options",
+      modify: "Modifier",
+    },
+    toasts: {
+      optionsCreatedSuccessfully: "Options créées avec succès !",
+      optionGenerationError: "Erreur lors de la génération de l'option.",
+      descriptionGenerationError: "Erreur lors de la génération de la description.",
+      prosGenerationError: "Erreur lors de la génération des avantages.",
+      consGenerationError: "Erreur lors de la génération des inconvénients.",
+      criteriaMinError: "Vous devez avoir au moins deux critères.",
+      descriptionGenerated: "Description générée avec succès !",
+      prosGenerated: "Avantages générés avec succès !",
+      consGenerated: "Inconvénients générés avec succès !",
+    },
+    analysisResult: {
+      recommendation: "Recommandé",
+      followUpQuestions: "Questions de suivi",
+      comments: "Commentaires",
+      noAdvantages: "Aucun avantage spécifié pour cette option",
+      noDisadvantages: "Aucun point d'attention spécifié pour cette option",
+      advantages: "Avantages",
+      disadvantages: "Points d'attention",
+      searchButton: "Rechercher",
+    },
+    history: {
+      manualDecisionInProgress: "Décision en cours",
+      manualDecisionTitle: "Décision manuelle",
+      authorUnknown: "Auteur inconnu",
+      item: {
+        followUp: {
+          singular: "question de suivi",
+          plural: "questions de suivi",
+        },
+        more: {
+          singular: "autre",
+          plural: "autres",
+        },
+      },
+    },
+    recommended: "Recommandé",
+    advantages: "Avantages",
+    pointsOfAttention: "Points d'attention",
+    usefulLinks: "Liens utiles",
+    popularVideos: "Vidéos populaires",
+    seeMore: "Voir plus",
+    comparisonTable: "Tableau de comparaison",
+  },
+  settings: {
+        sidebar: {
+          profile: "Profil",
+          accounts: "Comptes",
+          workspaces: "Espaces de travail",
+          documents: "Documents",
+          members: "Membres",
+          realTimeSearch: "Recherche en temps réel",
+          monthlyTemplates: "Modèles mensuels",
+          preferences: "Préférences",
+          admin: "Administration",
+          personal: "Personnel",
+          organization: "Organisation",
+          system: "Système",
+        },
+    header: {
+      subtitle: "Gérez vos paramètres et préférences",
+    },
+    profile: {
+      title: "Paramètres du profil",
+      subtitle: "Gérez les informations de votre profil.",
+      name: "Nom",
+      email: "Email",
+      theme: "Thème",
+      light: "Clair",
+      dark: "Sombre",
+      system: "Système",
+      avatar: {
+        title: "Photo de profil",
+        description: "Gérez votre photo de profil",
+        change: "Changer la photo",
+        formatSupport: "Formats supportés : JPG, PNG, GIF",
+      },
+      info: {
+        title: "Informations personnelles",
+        description: "Gérez vos informations personnelles",
+        email: "Adresse email",
+        fullName: "Nom complet",
+        fullNamePlaceholder: "Entrez votre nom complet",
+        save: "Sauvegarder",
+        saving: "Sauvegarde...",
+        savedError: "Erreur lors de la sauvegarde",
+        savedSuccess: "Informations sauvegardées avec succès",
+      },
+      language: {
+        title: "Langue",
+        description: "Choisissez votre langue préférée",
+        label: "Langue d'affichage",
+        placeholder: "Sélectionnez une langue",
+        helpText: "La langue sera appliquée à toute l'interface",
+        toastTitle: "Langue mise à jour",
+        toastDesc: "La langue a été changée avec succès",
+      },
+      googleAccount: {
+        title: "Compte Google",
+        description: "Connectez votre compte Google pour synchroniser vos données",
+        lastActivity: "Dernière activité",
+        connected: "Connecté",
+        disconnectAccount: "Déconnecter le compte",
+        toasts: {
+          connectError: "Erreur lors de la connexion",
+          connectSuccess: "Compte Google connecté avec succès",
+          disconnectError: "Erreur lors de la déconnexion",
+        },
+      },
+    },
+    workspaces: {
+      title: "Gestion des espaces de travail",
+      subtitle: "Gérez vos espaces de travail.",
+      defaultWorkspace: "Espace de travail par défaut",
+      name: "Nom de l'espace de travail",
+      namePlaceholder: "Ex: Mon espace de travail personnel",
+      description: "Description",
+      descriptionPlaceholder: "Ex: Espace pour mes projets personnels",
+      color: "Couleur",
+      usageContext: "Contexte d'utilisation",
+      deleteTitle: "Supprimer l'espace de travail",
+      deleteDescription: "Êtes-vous sûr de vouloir supprimer cet espace de travail ? Cette action est irréversible.",
+      delete: "Supprimer",
+      save: "Sauvegarder",
+      cancel: "Annuler",
+    },
+    documents: {
+      title: "Gestion des documents",
+      subtitle: "Gérez les documents de votre espace de travail.",
+      addDocuments: "Ajouter des documents",
+      searchDocuments: "Rechercher des documents...",
+      noDocuments: "Aucun document",
+      addFirstDocument: "Ajouter le premier document",
+      upload: "Télécharger",
+      dragDrop: "Glissez et déposez vos fichiers ici, ou cliquez pour sélectionner",
+      supported: "Fichiers supportés : PDF, DOCX, TXT",
+      maxSize: "Taille maximale : 10 Mo",
+      processing: "Traitement du document...",
+      processed: "Document traité",
+      error: "Erreur lors du traitement du document",
+      view: "Voir",
+      delete: "Supprimer",
+      deleteConfirmTitle: "Supprimer le document",
+      deleteConfirmDescription: "Êtes-vous sûr de vouloir supprimer ce document ? Cette action est irréversible.",
+      deleteConfirmButton: "Supprimer",
+      uploadSuccess: "Document téléchargé avec succès !",
+      uploadError: "Erreur lors du téléchargement du document.",
+      management: "Gestion des documents",
+      managementDescription: "Gérez les documents de votre espace de travail",
+      noWorkspaceSelected: "Aucun espace de travail sélectionné",
+      noWorkspaceSelectedError: "Veuillez sélectionner un espace de travail",
+      uploading: "Téléchargement en cours...",
+      searchPlaceholder: "Rechercher des documents...",
+      documents: "Documents",
+      noResult: "Aucun résultat",
+      addDocumentsDescription: "Ajoutez des documents pour enrichir vos analyses",
+      deleteSuccess: "Document supprimé avec succès !",
+      noDocument: "Aucun document",
+    },
+    members: {
+      title: "Gestion des membres",
+      subtitle: "Gérez les membres de votre espace de travail.",
+      invite: "Inviter",
+      inviteEmailPlaceholder: "Email du membre",
+      inviteRoleLabel: "Rôle",
+      contributorRole: "Contributeur",
+      viewerRole: "Lecteur",
+      inviteButton: "Envoyer l'invitation",
+      inviteEmailSent: "Un email d'invitation sera envoyé à cette adresse avec le rôle sélectionné.",
+      membersListTitle: "Membres de l'espace de travail",
+      noWorkspaceSelected: "Aucun workspace sélectionné",
+      selectWorkspaceMessage: "Veuillez sélectionner un workspace pour gérer ses membres",
+      pendingInvitations: "Invitations en attente",
+      invitedOn: "Invité le",
+      expiresOn: "Expire le",
+      resendInvitation: "Renvoyer l'invitation",
+      cancelInvitation: "Annuler l'invitation",
+      removeMember: "Supprimer le membre",
+      removeMemberConfirmTitle: "Supprimer le membre",
+      removeMemberConfirmDescription: "Êtes-vous sûr de vouloir supprimer ce membre de l'espace de travail ? Cette action est irréversible.",
+      removeMemberConfirmButton: "Supprimer",
+      roleUpdated: "Rôle mis à jour avec succès !",
+      invitationSent: "Invitation envoyée avec succès !",
+      invitationError: "Erreur lors de l'envoi de l'invitation.",
+      invitationCanceled: "Invitation annulée avec succès !",
+      memberRemoved: "Membre supprimé avec succès !",
+      management: "Gestion des membres",
+      managementDescription: "Gérez les membres de votre espace de travail",
+      contributor: "Contributeur",
+      observer: "Observateur",
+      workspaceMembers: "Membres du workspace",
+      pending: "En attente",
+      admin: "Administrateur",
+      noMembers: "Aucun membre dans ce workspace",
+    },
+    appearance: {
+      title: "Apparence",
+      description: "Personnalisez l'apparence de l'application",
+      themeLabel: "Thème",
+      light: "Clair",
+      dark: "Sombre",
+      system: "Système",
+    },
+    data: {
+      title: "Données",
+      description: "Gérez vos données et votre historique",
+      history: {
+        title: "Historique",
+        desc: "Effacez votre historique de décisions",
+      },
+      clearHistory: "Effacer l'historique",
+      toast: {
+        cleared: "Historique effacé",
+        clearedDesc: "Votre historique a été effacé avec succès",
+      },
+    },
+  },
+  criteriaManager: {
+    title: "Critères",
+    addCriterion: "Ajouter un critère",
+    criterionPlaceholder: "Ex: Coût",
+    updateAnalysis: "Mettre à jour l'analyse",
+    edit: "Modifier",
+  },
+  criteria: {
+    title: "Critères",
+    addButton: "Ajouter un critère",
+    tooltip: "Les critères vous aident à évaluer vos options de manière objective",
+  },
+  comments: {
+    section: {
+      empty: "Aucun commentaire pour le moment",
+      addButton: "Ajouter un commentaire",
+      add: "Ajouter",
+      cancel: "Annuler",
+      toasts: {
+        addSuccess: "Commentaire ajouté avec succès",
+        updateSuccess: "Commentaire mis à jour",
+        deleteSuccess: "Commentaire supprimé",
+      },
+    },
+    item: {
+      types: {
+        general: "Général",
+      },
+      createdOn: "Créé le",
+      modifiedOn: "Modifié le",
+      reply: "Répondre",
+      replies: "réponses",
+      showReplies: "Voir les réponses",
+      hideReplies: "Masquer les réponses",
+      addReply: "Ajouter une réponse",
+      replyPlaceholder: "Écrire une réponse...",
+      reactions: "Réactions",
+      addReaction: "Ajouter une réaction",
+      removeReaction: "Retirer la réaction",
+    },
+    mentions: {
+      searchPlaceholder: "Rechercher un membre...",
+      noMembersFound: "Aucun membre trouvé",
+      loading: "Chargement...",
+      owner: "Propriétaire",
+      contributor: "Contributeur",
+      viewer: "Observateur",
+    },
+  },
+  analysis: {
+    followUpSection: {
+      title: "Questions de suivi",
+      subtitle: "Explorez des aspects supplémentaires de votre décision",
+      loading: "Génération des questions de suivi...",
+    },
+  },
+  optionsLoading: {
+    title: "Génération des options...",
+    subtitle: "Analyse en cours, veuillez patienter",
+  },
+  dataAccuracy: {
+    sources: {
+      one: "Source",
+      other: "Autres sources",
+    },
+    createdOn: "Créé le",
+    by: "par",
+    updatedOn: "Mis à jour le",
+    viewSources: "Voir les sources",
+  },
+  notifications: {
+    previousDecisionLoaded: "Décision précédente chargée.",
+    sourceVerification: "Vérification des sources...",
+  },
+  share: {
+    button: {
+      share: "Partager",
+      simpleShare: "Partage simple",
+      collaborate: "Collaborer",
+      shareAsTemplate: "Partager comme template",
+    },
+    toasts: {
+      linkCopied: "Lien copié dans le presse-papiers",
+    },
+  },
+  collaboration: {
+    title: "Inviter des collaborateurs",
+    description: "Partagez cette décision avec d'autres personnes pour obtenir leurs avis et suggestions.",
+    inviteByEmail: "Inviter par email",
+    inviteDescription: "Envoyez un lien d'invitation par email à vos collaborateurs.",
+    emailPlaceholder: "Adresse email du collaborateur",
+    sendInvitation: "Envoyer l'invitation",
+  },
+  history: {
+    searchBar: {
+      filter: "Filtrer",
+      more: "Plus",
+      categoryLabel: "Catégorie",
+      allCategori: "Toutes les catégories",
+      allCategories: "Toutes les catégories",
+      uncategorized: "Non catégorisé",
+      searchPlaceholder: "Rechercher dans l'historique...",
+      sortBy: "Trier par",
+      sort: {
+        date: "Date",
+        category: "Catégorie",
+      },
+      exportPdf: "Exporter en PDF",
+      exportJson: "Exporter en JSON",
+      copyText: "Copier le texte",
+      export: "Exporter",
+      clearAll: "Tout effacer",
+      toasts: {
+        export: {
+          success: "Export réussi",
+        },
+        json: {
+          success: "Export JSON réussi",
+        },
+      },
+      confirm: {
+        title: "Confirmer l'action",
+        desc: "Êtes-vous sûr de vouloir effectuer cette action ?",
+        cancel: "Annuler",
+        ok: "Confirmer",
+      },
+    },
+    list: {
+      seeMore: "Voir plus",
+    },
+    item: {
+      share: "Partager",
+      delete: "Supprimer",
+    },
+  },
+  templates: {
+    page: {
+      title: "Modèles de décision",
+      description: "Découvrez et utilisez nos modèles de décision populaires",
+    },
+    filters: {
+      searchPlaceholder: "Rechercher des modèles...",
+      categoryAll: "Toutes les catégories",
+      sort: {
+        newest: "Plus récents",
+        popular: "Populaires",
+        mostCopied: "Plus copiés",
+      },
+    },
+    grid: {
+      personalTitle: "Vos modèles personnels",
+      professionalTitle: "Modèles professionnels",
+      recommendedBadge: "Recommandé",
+    },
+    card: {
+      question: "Question",
+      open: "Ouvrir",
+    },
+  },
+  footer: {
+    privacyPolicy: "Politique de confidentialité",
+    templates: "Modèles",
+  },
+  workspaces: {
+    newWorkspace: "Nouveau workspace",
+    title: "Gestion des Workspaces",
+    subtitle: "Créez et gérez vos espaces de travail",
+    yourWorkspaces: "Vos Workspaces",
+    createNew: "Nouveau workspace",
+    current: "Actuel",
+    owner: "Propriétaire",
+    select: "Sélectionner",
+    defaultPersonalWorkspace: "Votre workspace personnel par défaut",
+    createdOn: "Créé le",
+    noWorkspaces: "Aucun workspace",
+    createFirstWorkspace: "Créez votre premier workspace pour organiser vos décisions",
+    createWorkspace: "Créer un workspace",
+    deleting: "Suppression...",
+    delete: "Supprimer",
+    createSuccess: "Workspace créé avec succès",
+    createError: "Impossible de créer le workspace",
+    deleteSuccess: "Workspace supprimé avec succès",
+    deleteError: "Impossible de supprimer le workspace",
+    selectSuccess: "Workspace sélectionné",
+    createDialog: {
+      title: "Créer un nouveau workspace",
+      description: "Organisez vos décisions dans des espaces séparés pour différents projets ou contextes.",
+      nameLabel: "Nom du workspace",
+      namePlaceholder: "ex: Projet X, Personnel, Équipe...",
+      descriptionLabel: "Description (optionnel)",
+      descriptionPlaceholder: "Décrivez l'objectif de ce workspace...",
+      colorLabel: "Couleur",
+      cancel: "Annuler",
+        create: "Créer",
+        creating: "Création...",
+      },
+      image: {
+        title: "Image du workspace",
+        subtitle: "Gérez l'image de votre workspace",
+        tooBig: "L'image est trop volumineuse (max 5MB)",
+        uploadSuccess: "Image du workspace mise à jour avec succès !",
+        uploadError: "Erreur lors de l'upload de l'image",
+        deleteSuccess: "Image du workspace supprimée avec succès !",
+        deleteError: "Erreur lors de la suppression de l'image",
+        uploading: "Upload en cours...",
+        changeImage: "Changer l'image",
+        supportedFormats: "Formats supportés : JPG, PNG, GIF, WebP",
+      },
+      edit: {
+        title: "Modifier le workspace",
+        description: "Modifiez les informations de votre workspace",
+        nameLabel: "Nom du workspace",
+        namePlaceholder: "ex: Projet X, Personnel, Équipe...",
+        descriptionLabel: "Description",
+        descriptionPlaceholder: "Décrivez l'objectif de ce workspace...",
+        save: "Enregistrer",
+        saving: "Enregistrement...",
+        savedSuccess: "Workspace mis à jour avec succès !",
+        savedError: "Erreur lors de la mise à jour du workspace",
+        manageCurrent: "Gérez votre workspace actuel",
+      },
+      information: {
+        title: "Informations du workspace",
+        subtitle: "Gérez les informations de votre workspace",
+        nameLabel: "Nom du workspace",
+        namePlaceholder: "ex: Projet X, Personnel, Équipe...",
+        descriptionLabel: "Description",
+        descriptionPlaceholder: "Décrivez l'objectif de ce workspace...",
+        save: "Enregistrer",
+        saving: "Enregistrement...",
+        savedSuccess: "Workspace mis à jour avec succès !",
+        savedError: "Erreur lors de la mise à jour du workspace",
+      },
+    },
+  privacy: {
+    title: "Politique de confidentialité",
+    lastUpdated: "Dernière mise à jour",
+    sections: {
+      dataCollection: {
+        title: "Collecte de données",
+        description: "Nous collectons les données suivantes",
+        item1: "Informations de profil",
+        item2: "Décisions et analyses",
+        item3: "Données d'utilisation",
+        item4: "Cookies et technologies similaires",
+      },
+      dataUsage: {
+        title: "Utilisation des données",
+        description: "Vos données sont utilisées pour",
+        item1: "Fournir nos services",
+        item2: "Améliorer l'expérience utilisateur",
+        item3: "Analyser les tendances",
+        item4: "Personnaliser le contenu",
+      },
+      dataSharing: {
+        title: "Partage des données",
+        description: "Nous ne partageons vos données qu'avec",
+        item1: "Votre consentement explicite",
+        item2: "Les services tiers nécessaires",
+        item3: "Les autorités légales si requis",
+      },
+      security: {
+        title: "Sécurité",
+        description: "Nous protégeons vos données avec",
+        item1: "Chiffrement des données sensibles",
+        item2: "Accès sécurisé et authentifié",
+        item3: "Surveillance continue des systèmes",
+        item4: "Formation du personnel à la sécurité",
+      },
+      rights: {
+        title: "Vos droits",
+        description: "Vous disposez des droits suivants",
+        item1: "Accès à vos données personnelles",
+        item2: "Rectification des données inexactes",
+        item3: "Suppression de vos données",
+        item4: "Portabilité de vos données",
+      },
+      cookies: {
+        title: "Cookies",
+        description: "Nous utilisons des cookies pour améliorer votre expérience",
+      },
+      retention: {
+        title: "Conservation des données",
+        description: "Vos données sont conservées selon nos politiques de rétention",
+      },
+      contact: {
+        title: "Contact",
+        description: "Pour toute question concernant cette politique",
+        email: "Email",
+      },
+      changes: {
+        title: "Modifications",
+        description: "Cette politique peut être modifiée à tout moment",
+      },
+    },
+  },
+};
+
+// English translations
+const en: UITranslations = {
+  common: {
+    cancel: "Cancel",
+    save: "Save",
+    edit: "Edit",
+    delete: "Delete",
+    confirm: "Confirm",
+    loading: "Loading...",
+    error: "Error",
+    success: "Success",
+    search: "Search",
+  },
+  profile: {
+    avatar: {
+      title: "Profile picture",
+      description: "Manage your profile picture",
+      change: "Change picture",
+      formatSupport: "Supported formats: JPG, PNG, GIF",
+    },
+    info: {
+      title: "Personal information",
+      description: "Manage your personal information",
+      email: "Email address",
+      fullName: "Full name",
+      fullNamePlaceholder: "Enter your full name",
+      save: "Save",
+      saving: "Saving...",
+      savedError: "Error saving information",
+      savedSuccess: "Information saved successfully",
+    },
+    language: {
+      title: "Language",
+      description: "Choose your preferred language",
+      label: "Display language",
+      placeholder: "Select a language",
+      helpText: "The language will be applied to the entire interface",
+      toastTitle: "Language updated",
+      toastDesc: "Language changed successfully",
+    },
+    googleAccount: {
+      title: "Google Account",
+      description: "Connect your Google account to sync your data",
+      lastActivity: "Last activity",
+      connected: "Connected",
+      disconnectAccount: "Disconnect account",
+      toasts: {
+        connectError: "Error connecting account",
+        connectSuccess: "Google account connected successfully",
+        disconnectError: "Error disconnecting account",
+      },
+    },
+  },
+  navbar: {
+    home: "Home",
+    history: "History",
+    settings: "Settings",
+    logout: "Logout",
+    login: "Login",
+    templates: "Templates",
+    signOut: "Sign out",
+    signIn: "Sign in",
+    getStarted: "Get started",
+  },
+  dilemmaSetup: {
+    title: "What is your dilemma?",
+    placeholder: "Ex: Buy a house or rent an apartment",
+    analyzeButton: "Analyze",
+    launchAnalysis: "Launch analysis",
+    manualModeButton: "Manual mode",
+    aiToggleLabel: "AI intelligent analysis",
+    toast: {
+      decisionCreated: "Manual decision created successfully!",
+    },
+    fileTooLarge: "is too large (max 10MB)",
+    analysisStarted: "Analysis started!",
+    manualModeActivated: "Manual mode activated!",
+    dropHere: "Drop your files here",
+    attachFile: "Attach file",
+    hero: {
+      titleLine1: "Make every decision",
+      titleLine2: "Rationable",
+      brand: "Rationable",
+      subtitle: "Transform your dilemmas into clear decisions through intelligent analysis",
+    },
+    templates: {
+      description: "Discover our popular decision templates",
+      viewAll: "View all templates",
+    },
+    history: {
+      title: "Decision history",
+      description: "View and manage your previous decisions",
+      toasts: {
+        templateApplied: "Template applied successfully!",
+        templateError: "Error applying template",
+        decisionDeleted: "Decision deleted from history",
+        historyCleared: "Decision history has been cleared",
+      },
+    },
+  },
+  auth: {
+    signOut: "Sign out",
+    actions: {
+      signIn: "Sign in",
+      createAccount: "Create account",
+      continueWithGoogle: "Continue with Google",
+    },
+    toggleText: {
+      signUpPrompt: "Don't have an account?",
+      signUpLink: "Sign up",
+      signInPrompt: "Already have an account?",
+      signInLink: "Sign in",
+    },
+    separator: {
+      or: "or",
+    },
+    fields: {
+      fullName: "Full name",
+      email: "Email",
+      password: "Password",
+      confirmPassword: "Confirm password",
+    },
+  },
+  decision: {
+    disadvantages: "Points of attention",
+    moreDisadvantages: "more points of attention",
+    moreAdvantages: "more advantages",
+    learnMore: "Learn more",
+    seeMoreOptions: "See more options",
+    seeMore: "See more",
+    seeLess: "See less",
+    manualOptions: {
+      title: "Manual Options",
+      description: "Create your own options manually or generate options automatically. In manual mode, you retain full control over the content.",
+      addOption: "Add option",
+      optionTitle: "Option title",
+      optionDescription: "Option description",
+      generateDescription: "Generate description",
+      generatePros: "Generate pros",
+      generateCons: "Generate cons",
+      pros: "Pros",
+      cons: "Cons",
+      addPro: "Add pro",
+      addCon: "Add con",
+      finishAndSave: "Finish and save",
+      saving: "Saving...",
+      createFollowUpQuestion: "Create follow-up question",
+      comments: "Comments",
+      commentsPlaceholder: "Add a comment...",
+      commentsUnavailable: "Comments will be available once the decision is created.",
+      optionTitlePlaceholder: "Ex: Buy a house",
+      optionDescriptionPlaceholder: "Ex: A house offers more space and stability.",
+      proPlaceholder: "Ex: More space",
+      conPlaceholder: "Ex: High initial cost",
+      followUpDescription: "Create a follow-up question to deepen your analysis.",
+      manualAnalysisDescription: "Manually created options",
+      editOptions: "Edit options",
+      modify: "Modify",
+    },
+    toasts: {
+      optionsCreatedSuccessfully: "Options created successfully!",
+      optionGenerationError: "Error generating option.",
+      descriptionGenerationError: "Error generating description.",
+      prosGenerationError: "Error generating pros.",
+      consGenerationError: "Error generating cons.",
+      criteriaMinError: "You must have at least two criteria.",
+      descriptionGenerated: "Description generated successfully!",
+      prosGenerated: "Pros generated successfully!",
+      consGenerated: "Cons generated successfully!",
+    },
+    analysisResult: {
+      recommendation: "Recommended",
+      followUpQuestions: "Follow-up questions",
+      comments: "Comments",
+      noAdvantages: "No advantages specified for this option",
+      noDisadvantages: "No points of attention specified for this option",
+      advantages: "Advantages",
+      disadvantages: "Points of attention",
+      searchButton: "Search",
+    },
+    history: {
+      manualDecisionInProgress: "Decision in progress",
+      manualDecisionTitle: "Manual decision",
+      authorUnknown: "Unknown author",
+      item: {
+        followUp: {
+          singular: "follow-up question",
+          plural: "follow-up questions",
+        },
+        more: {
+          singular: "other",
+          plural: "others",
+        },
+      },
+    },
+    recommended: "Recommended",
+    advantages: "Advantages",
+    pointsOfAttention: "Points of attention",
+    usefulLinks: "Useful links",
+    popularVideos: "Popular videos",
+    seeMore: "See more",
+    comparisonTable: "Comparison table",
+  },
+  settings: {
+        sidebar: {
+          profile: "Profile",
+          accounts: "Accounts",
+          workspaces: "Workspaces",
+          documents: "Documents",
+          members: "Members",
+          realTimeSearch: "Real-time search",
+          monthlyTemplates: "Monthly templates",
+          preferences: "Preferences",
+          admin: "Administration",
+          personal: "Personal",
+          organization: "Organization",
+          system: "System",
+        },
+    header: {
+      subtitle: "Manage your settings and preferences",
+    },
+    profile: {
+      title: "Profile settings",
+      subtitle: "Manage your profile information.",
+      name: "Name",
+      email: "Email",
+      theme: "Theme",
+      light: "Light",
+      dark: "Dark",
+      system: "System",
+      avatar: {
+        title: "Profile picture",
+        description: "Manage your profile picture",
+        change: "Change picture",
+        formatSupport: "Supported formats: JPG, PNG, GIF",
+      },
+      info: {
+        title: "Personal information",
+        description: "Manage your personal information",
+        email: "Email address",
+        fullName: "Full name",
+        fullNamePlaceholder: "Enter your full name",
+        save: "Save",
+        saving: "Saving...",
+        savedError: "Error saving information",
+        savedSuccess: "Information saved successfully",
+      },
+      language: {
+        title: "Language",
+        description: "Choose your preferred language",
+        label: "Display language",
+        placeholder: "Select a language",
+        helpText: "The language will be applied to the entire interface",
+        toastTitle: "Language updated",
+        toastDesc: "Language changed successfully",
+      },
+      googleAccount: {
+        title: "Google Account",
+        description: "Connect your Google account to sync your data",
+        lastActivity: "Last activity",
+        connected: "Connected",
+        disconnectAccount: "Disconnect account",
+        toasts: {
+          connectError: "Error connecting account",
+          connectSuccess: "Google account connected successfully",
+          disconnectError: "Error disconnecting account",
+        },
+      },
+    },
+    workspaces: {
+      title: "Workspace management",
+      subtitle: "Manage your workspaces.",
+      defaultWorkspace: "Default workspace",
+      name: "Workspace name",
+      namePlaceholder: "Ex: My personal workspace",
+      description: "Description",
+      descriptionPlaceholder: "Ex: Space for my personal projects",
+      color: "Color",
+      usageContext: "Usage context",
+      deleteTitle: "Delete workspace",
+      deleteDescription: "Are you sure you want to delete this workspace? This action is irreversible.",
+      delete: "Delete",
+      save: "Save",
+      cancel: "Cancel",
+    },
+    documents: {
+      title: "Document management",
+      subtitle: "Manage your workspace documents.",
+      addDocuments: "Add documents",
+      searchDocuments: "Search documents...",
+      noDocuments: "No documents",
+      addFirstDocument: "Add the first document",
+      upload: "Upload",
+      dragDrop: "Drag and drop your files here, or click to select",
+      supported: "Supported files: PDF, DOCX, TXT",
+      maxSize: "Max size: 10 MB",
+      processing: "Processing document...",
+      processed: "Document processed",
+      error: "Error processing document",
+      view: "View",
+      delete: "Delete",
+      deleteConfirmTitle: "Delete document",
+      deleteConfirmDescription: "Are you sure you want to delete this document? This action is irreversible.",
+      deleteConfirmButton: "Delete",
+      uploadSuccess: "Document uploaded successfully!",
+      uploadError: "Error uploading document.",
+      management: "Document management",
+      managementDescription: "Manage your workspace documents",
+      noWorkspaceSelected: "No workspace selected",
+      noWorkspaceSelectedError: "Please select a workspace",
+      uploading: "Uploading...",
+      searchPlaceholder: "Search documents...",
+      documents: "Documents",
+      noResult: "No results",
+      addDocumentsDescription: "Add documents to enrich your analyses",
+      deleteSuccess: "Document deleted successfully!",
+      noDocument: "No document",
+    },
+    members: {
+      title: "Member management",
+      subtitle: "Manage your workspace members.",
+      invite: "Invite",
+      inviteEmailPlaceholder: "Member email",
+      inviteRoleLabel: "Role",
+      contributorRole: "Contributor",
+      viewerRole: "Viewer",
+      inviteButton: "Send invitation",
+      inviteEmailSent: "An invitation email will be sent to this address with the selected role.",
+      membersListTitle: "Workspace members",
+      noWorkspaceSelected: "No workspace selected",
+      selectWorkspaceMessage: "Please select a workspace to manage its members",
+      pendingInvitations: "Pending invitations",
+      invitedOn: "Invited on",
+      expiresOn: "Expires on",
+      resendInvitation: "Resend invitation",
+      cancelInvitation: "Cancel invitation",
+      removeMember: "Remove member",
+      removeMemberConfirmTitle: "Remove member",
+      removeMemberConfirmDescription: "Are you sure you want to remove this member from the workspace? This action is irreversible.",
+      removeMemberConfirmButton: "Remove",
+      roleUpdated: "Role updated successfully!",
+      invitationSent: "Invitation sent successfully!",
+      invitationError: "Error sending invitation.",
+      invitationCanceled: "Invitation canceled successfully!",
+      memberRemoved: "Member removed successfully!",
+      management: "Member management",
+      managementDescription: "Manage your workspace members",
+      contributor: "Contributor",
+      observer: "Observer",
+      workspaceMembers: "Workspace members",
+      pending: "Pending",
+      admin: "Administrator",
+      noMembers: "No members in this workspace",
+    },
+    appearance: {
+      title: "Appearance",
+      description: "Customize the application appearance",
+      themeLabel: "Theme",
+      light: "Light",
+      dark: "Dark",
+      system: "System",
+    },
+    data: {
+      title: "Data",
+      description: "Manage your data and history",
+      history: {
+        title: "History",
+        desc: "Clear your decision history",
+      },
+      clearHistory: "Clear history",
+      toast: {
+        cleared: "History cleared",
+        clearedDesc: "Your history has been cleared successfully",
+      },
+    },
+  },
+  criteriaManager: {
+    title: "Criteria",
+    addCriterion: "Add criterion",
+    criterionPlaceholder: "Ex: Cost",
+    updateAnalysis: "Update analysis",
+    edit: "Edit",
+  },
+  criteria: {
+    title: "Criteria",
+    addButton: "Add a criterion",
+    tooltip: "Criteria help you evaluate your options objectively",
+  },
+  comments: {
+    section: {
+      empty: "No comments yet",
+      addButton: "Add a comment",
+      add: "Add",
+      cancel: "Cancel",
+      toasts: {
+        addSuccess: "Comment added successfully",
+        updateSuccess: "Comment updated",
+        deleteSuccess: "Comment deleted",
+      },
+    },
+    item: {
+      types: {
+        general: "General",
+      },
+      createdOn: "Created on",
+      modifiedOn: "Modified on",
+      reply: "Reply",
+      replies: "replies",
+      showReplies: "Show replies",
+      hideReplies: "Hide replies",
+      addReply: "Add a reply",
+      replyPlaceholder: "Write a reply...",
+      reactions: "Reactions",
+      addReaction: "Add reaction",
+      removeReaction: "Remove reaction",
+    },
+    mentions: {
+      searchPlaceholder: "Search for a member...",
+      noMembersFound: "No members found",
+      loading: "Loading...",
+      owner: "Owner",
+      contributor: "Contributor",
+      viewer: "Viewer",
+    },
+  },
+  analysis: {
+    followUpSection: {
+      title: "Follow-up questions",
+      subtitle: "Explore additional aspects of your decision",
+      loading: "Generating follow-up questions...",
+    },
+  },
+  optionsLoading: {
+    title: "Generating options...",
+    subtitle: "Analysis in progress, please wait",
+  },
+  dataAccuracy: {
+    sources: {
+      one: "Source",
+      other: "Other sources",
+    },
+    createdOn: "Created on",
+    by: "by",
+    updatedOn: "Updated on",
+    viewSources: "View sources",
+  },
+  notifications: {
+    previousDecisionLoaded: "Previous decision loaded.",
+    sourceVerification: "Source verification...",
+  },
+  share: {
+    button: {
+      share: "Share",
+      simpleShare: "Simple share",
+      collaborate: "Collaborate",
+      shareAsTemplate: "Share as template",
+    },
+    toasts: {
+      linkCopied: "Link copied to clipboard",
+    },
+  },
+  collaboration: {
+    title: "Invite collaborators",
+    description: "Share this decision with others to get their opinions and suggestions.",
+    inviteByEmail: "Invite by email",
+    inviteDescription: "Send an invitation link by email to your collaborators.",
+    emailPlaceholder: "Collaborator's email address",
+    sendInvitation: "Send invitation",
+  },
+  history: {
+    searchBar: {
+      filter: "Filter",
+      more: "More",
+      categoryLabel: "Category",
+      allCategori: "All categories",
+      allCategories: "All categories",
+      uncategorized: "Uncategorized",
+      searchPlaceholder: "Search history...",
+      sortBy: "Sort by",
+      sort: {
+        date: "Date",
+        category: "Category",
+      },
+      exportPdf: "Export to PDF",
+      exportJson: "Export to JSON",
+      copyText: "Copy text",
+      export: "Export",
+      clearAll: "Clear all",
+      toasts: {
+        export: {
+          success: "Export successful",
+        },
+        json: {
+          success: "JSON export successful",
+        },
+      },
+      confirm: {
+        title: "Confirm action",
+        desc: "Are you sure you want to perform this action?",
+        cancel: "Cancel",
+        ok: "Confirm",
+      },
+    },
+    list: {
+      seeMore: "See more",
+    },
+    item: {
+      share: "Share",
+      delete: "Delete",
+    },
+  },
+  templates: {
+    page: {
+      title: "Decision templates",
+      description: "Discover and use our popular decision templates",
+    },
+    filters: {
+      searchPlaceholder: "Search templates...",
+      categoryAll: "All categories",
+      sort: {
+        newest: "Newest",
+        popular: "Popular",
+        mostCopied: "Most copied",
+      },
+    },
+    grid: {
+      personalTitle: "Your personal templates",
+      professionalTitle: "Professional templates",
+      recommendedBadge: "Recommended",
+    },
+    card: {
+      question: "Question",
+      open: "Open",
+    },
+  },
+  footer: {
+    privacyPolicy: "Privacy policy",
+    templates: "Templates",
+  },
+  workspaces: {
+    newWorkspace: "New workspace",
+    title: "Workspace Management",
+    subtitle: "Create and manage your workspaces",
+    yourWorkspaces: "Your Workspaces",
+    createNew: "New workspace",
+    current: "Current",
+    owner: "Owner",
+    select: "Select",
+    defaultPersonalWorkspace: "Your default personal workspace",
+    createdOn: "Created on",
+    noWorkspaces: "No workspaces",
+    createFirstWorkspace: "Create your first workspace to organize your decisions",
+    createWorkspace: "Create workspace",
+    deleting: "Deleting...",
+    delete: "Delete",
+    createSuccess: "Workspace created successfully",
+    createError: "Unable to create workspace",
+    deleteSuccess: "Workspace deleted successfully",
+    deleteError: "Unable to delete workspace",
+    selectSuccess: "Workspace selected",
+    createDialog: {
+      title: "Create a new workspace",
+      description: "Organize your decisions in separate spaces for different projects or contexts.",
+      nameLabel: "Workspace name",
+      namePlaceholder: "e.g.: Project X, Personal, Team...",
+      descriptionLabel: "Description (optional)",
+      descriptionPlaceholder: "Describe the objective of this workspace...",
+      colorLabel: "Color",
+      cancel: "Cancel",
+        create: "Create",
+        creating: "Creating...",
+      },
+      image: {
+        title: "Workspace picture",
+        subtitle: "Manage your workspace picture",
+        tooBig: "Image is too large (max 5MB)",
+        uploadSuccess: "Workspace image updated successfully!",
+        uploadError: "Error uploading image",
+        deleteSuccess: "Workspace image deleted successfully!",
+        deleteError: "Error deleting image",
+        uploading: "Uploading...",
+        changeImage: "Change image",
+        supportedFormats: "Supported formats: JPG, PNG, GIF, WebP",
+      },
+      edit: {
+        title: "Edit workspace",
+        description: "Edit your workspace information",
+        nameLabel: "Workspace name",
+        namePlaceholder: "e.g.: Project X, Personal, Team...",
+        descriptionLabel: "Description",
+        descriptionPlaceholder: "Describe the objective of this workspace...",
+        save: "Save",
+        saving: "Saving...",
+        savedSuccess: "Workspace updated successfully!",
+        savedError: "Error updating workspace",
+        manageCurrent: "Manage your current workspace",
+      },
+      information: {
+        title: "Workspace information",
+        subtitle: "Manage your workspace information",
+        nameLabel: "Workspace name",
+        namePlaceholder: "e.g.: Project X, Personal, Team...",
+        descriptionLabel: "Description",
+        descriptionPlaceholder: "Describe the objective of this workspace...",
+        save: "Save",
+        saving: "Saving...",
+        savedSuccess: "Workspace updated successfully!",
+        savedError: "Error updating workspace",
+      },
+    },
+  privacy: {
+    title: "Privacy policy",
+    lastUpdated: "Last updated",
+    sections: {
+      dataCollection: {
+        title: "Data collection",
+        description: "We collect the following data",
+        item1: "Profile information",
+        item2: "Decisions and analyses",
+        item3: "Usage data",
+        item4: "Cookies and similar technologies",
+      },
+      dataUsage: {
+        title: "Data usage",
+        description: "Your data is used to",
+        item1: "Provide our services",
+        item2: "Improve user experience",
+        item3: "Analyze trends",
+        item4: "Personalize content",
+      },
+      dataSharing: {
+        title: "Data sharing",
+        description: "We only share your data with",
+        item1: "Your explicit consent",
+        item2: "Necessary third-party services",
+        item3: "Legal authorities when required",
+      },
+      security: {
+        title: "Security",
+        description: "We protect your data with",
+        item1: "Encryption of sensitive data",
+        item2: "Secure and authenticated access",
+        item3: "Continuous system monitoring",
+        item4: "Security training for staff",
+      },
+      rights: {
+        title: "Your rights",
+        description: "You have the following rights",
+        item1: "Access to your personal data",
+        item2: "Rectification of inaccurate data",
+        item3: "Deletion of your data",
+        item4: "Data portability",
+      },
+      cookies: {
+        title: "Cookies",
+        description: "We use cookies to improve your experience",
+      },
+      retention: {
+        title: "Data retention",
+        description: "Your data is retained according to our retention policies",
+      },
+      contact: {
+        title: "Contact",
+        description: "For any questions about this policy",
+        email: "Email",
+      },
+      changes: {
+        title: "Changes",
+        description: "This policy may be modified at any time",
+      },
+    },
+  },
+};
+
+// Export translations
 export const translations: Record<'fr' | 'en', UITranslations> = {
-  fr: {
-    analysis: {
-      title: 'Analyse de décision',
-      status: {
-        analyzing: 'Analyse en cours...',
-        complete: 'Analyse terminée',
-      },
-      loadingMessages: {
-        criteria: 'Identification des critères de décision...',
-        options: 'Génération des options disponibles...',
-        analysis: 'Analyse comparative en cours...',
-        finalizing: 'Finalisation de la recommandation...',
-      },
-      error: 'Une erreur s\'est produite lors de l\'analyse',
-      retry: 'Réessayer',
-      criteriaSection: {
-        title: 'Critères de décision',
-        description: 'Facteurs importants pour votre décision',
-        add: 'Ajouter un critère',
-        placeholder: 'Nouveau critère...',
-        weight: 'Poids',
-        importance: 'Importance',
-        low: 'Faible',
-        medium: 'Moyenne',
-        high: 'Élevée',
-        expandDescription: 'Développer la description',
-      },
-      optionsSection: {
-        title: 'Options disponibles',
-        description: 'Alternatives identifiées pour votre décision',
-        expandOptions: 'Développer les options',
-        collapseOptions: 'Réduire les options',
-        viewMore: 'Voir plus',
-        viewLess: 'Voir moins',
-        pros: 'Avantages',
-        cons: 'Inconvénients',
-        showMore: 'Afficher plus',
-        showLess: 'Afficher moins',
-      },
-      resultsSection: {
-        title: 'Recommandation',
-        winner: 'Meilleure option',
-        score: 'Score',
-        recommendation: 'Recommandation',
-        confidence: 'Confiance',
-        confidenceLevel: {
-          low: 'Faible',
-          medium: 'Moyenne',
-          high: 'Élevée',
-          veryHigh: 'Très élevée',
-        },
-        viewDetails: 'Voir les détails',
-        comparisonTable: 'Tableau comparatif',
-        exportResults: 'Exporter les résultats',
-      },
-      charts: {
-        radar: {
-          title: 'Vue d\'ensemble des critères',
-          description: 'Performance de chaque option selon les critères',
-        },
-        comparison: {
-          title: 'Comparaison des scores',
-          description: 'Scores totaux de chaque option',
-        },
-      },
-      followUpSection: {
-        title: 'Questions de suivi',
-        subtitle: 'Cliquez sur une question pour lancer une nouvelle analyse complète',
-        loading: 'Génération de questions personnalisées...',
-      },
-      toasts: {
-        templateApplied: 'Modèle appliqué !',
-        decisionLoaded: 'Décision précédente chargée.',
-      },
-    },
-    navbar: {
-      home: 'Accueil',
-      templates: 'Modèles',
-      settings: 'Paramètres',
-      signIn: 'Se connecter',
-      signOut: 'Se déconnecter',
-      profile: 'Profil',
-      getStarted: 'Commencer',
-      userFallback: 'Utilisateur',
-    },
-    hero: {
-      title: 'Prenez des décisions',
-      titleHighlight: 'éclairées',
-      subtitle: 'Utilisez l\'IA pour analyser vos options et prendre les meilleures décisions',
-      cta: 'Commencer maintenant',
-    },
-    features: {
-      title: 'Comment ça marche',
-      ai: {
-        title: 'Analyse IA',
-        description: 'Notre IA analyse votre situation et identifie les critères clés',
-      },
-      criteria: {
-        title: 'Critères personnalisés',
-        description: 'Définissez vos propres critères selon vos priorités',
-      },
-      comparison: {
-        title: 'Comparaison intelligente',
-        description: 'Comparez objectivement toutes vos options',
-      },
-    },
-    auth: {
-      signIn: {
-        title: 'Connexion',
-        subtitle: 'Connectez-vous à votre compte',
-        email: 'Email',
-        password: 'Mot de passe',
-        submit: 'Se connecter',
-        switchToSignUp: 'Pas encore de compte ? Inscrivez-vous',
-        forgotPassword: 'Mot de passe oublié ?',
-      },
-      signUp: {
-        title: 'Inscription',
-        subtitle: 'Créez votre compte',
-        fullName: 'Nom complet',
-        email: 'Email',
-        password: 'Mot de passe',
-        confirmPassword: 'Confirmer le mot de passe',
-        submit: 'S\'inscrire',
-        switchToSignIn: 'Déjà un compte ? Connectez-vous',
-      },
-      forgotPassword: {
-        title: 'Mot de passe oublié',
-        subtitle: 'Entrez votre email pour réinitialiser votre mot de passe',
-        email: 'Email',
-        submit: 'Envoyer',
-        backToSignIn: 'Retour à la connexion',
-        success: 'Email de réinitialisation envoyé !',
-      },
-      errors: {
-        invalidCredentials: 'Email ou mot de passe incorrect',
-        emailExists: 'Cet email est déjà utilisé',
-        passwordMismatch: 'Les mots de passe ne correspondent pas',
-        weakPassword: 'Le mot de passe est trop faible',
-        userNotFound: 'Utilisateur non trouvé',
-        invalidEmail: 'Email invalide',
-        generic: 'Une erreur s\'est produite',
-        passwordsMismatch: 'Les mots de passe ne correspondent pas',
-        passwordTooShort: 'Le mot de passe doit contenir au moins 6 caractères',
-      },
-      actions: {
-        linkGoogle: 'Associer un compte Google',
-        signIn: 'Se connecter',
-        createAccount: 'Créer un compte',
-        continueWithGoogle: 'Continuer avec Google',
-      },
-      fields: {
-        email: 'Adresse email',
-        password: 'Mot de passe',
-        fullName: 'Nom complet',
-        confirmPassword: 'Confirmer le mot de passe',
-      },
-      messages: {
-        accountCreated: 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.',
-      },
-      separator: {
-        or: 'OU',
-      },
-      toggleText: {
-        signUpPrompt: 'Pas encore de compte ?',
-        signUpLink: 'Créer un compte',
-        signInPrompt: 'Déjà un compte ?',
-        signInLink: 'Se connecter',
-      },
-    },
-    settings: {
-      title: 'Paramètres',
-      sidebar: {
-        profile: 'Profil',
-        workspaces: 'Espaces de travail',
-        appearance: 'Apparence',
-        documents: 'Documents',
-        admin: 'Administration',
-      },
-      header: {
-        subtitle: 'Gérez vos préférences et paramètres',
-      },
-      profile: {
-        title: 'Profil',
-        fullName: 'Nom complet',
-        email: 'Email',
-        avatar: 'Photo de profil',
-        uploadAvatar: 'Changer la photo',
-        removeAvatar: 'Supprimer la photo',
-        save: 'Sauvegarder',
-        cancel: 'Annuler',
-      },
-      appearance: {
-        title: 'Apparence',
-        description: 'Personnalisez l\'apparence de l\'application',
-        themeLabel: 'Choisissez votre thème',
-        theme: 'Thème',
-        light: 'Clair',
-        dark: 'Sombre',
-        system: 'Système',
-        language: 'Langue',
-      },
-      account: {
-        title: 'Compte',
-        deleteAccount: 'Supprimer le compte',
-        deleteWarning: 'Cette action est irréversible',
-      },
-      data: {
-        title: 'Données et historique',
-        description: 'Gérez vos données et votre historique de décisions',
-        history: {
-          title: 'Historique des décisions',
-          desc: 'Supprimer toutes vos décisions sauvegardées',
-        },
-        clearHistory: 'Effacer l\'historique',
-      },
-      documents: {
-        title: 'Documents',
-        description: 'Gérez vos préférences et paramètres',
-        usage: 'fois',
-        added: 'Ajouté il y a environ',
-      },
-    },
-    templates: {
-      title: 'Modèles de décision',
-      subtitle: 'Utilisez nos modèles prêts à l\'emploi pour démarrer rapidement',
-      page: {
-        title: 'Templates de décision',
-        description: 'Découvrez des modèles de décision prêts à utiliser pour différentes situations.',
-      },
-      categories: {
-        all: 'Tous',
-        personal: 'Personnel',
-        professional: 'Professionnel',
-      },
-      use: 'Utiliser',
-      preview: 'Aperçu',
-      share: 'Partager',
-      create: 'Créer',
-      featured: 'À la une',
-      community: 'Communauté',
-      myTemplates: 'Mes modèles',
-      grid: {
-        personalTitle: 'Templates personnels',
-        professionalTitle: 'Templates professionnels',
-        recommendedBadge: 'Recommandé',
-        emptyMessage: 'Aucun template trouvé avec ces critères.',
-        resetFilters: 'Réinitialiser les filtres',
-      },
-      card: {
-        open: 'Ouvrir',
-        question: 'Question',
-        byAuthor: 'par',
-      },
-      filters: {
-        searchPlaceholder: 'Rechercher un template...',
-        categoryAll: 'Toutes les catégories',
-        sort: {
-          newest: 'Plus récents',
-          popular: 'Plus populaires',
-          mostCopied: 'Plus copiés',
-        },
-      },
-      errors: {
-        loadError: 'Erreur lors du chargement des templates',
-        openError: 'Erreur lors de l\'ouverture du template',
-        rateLimitError: 'Limite de création de previews atteinte. Veuillez patienter quelques minutes.',
-      },
-    },
-    common: {
-      loading: 'Chargement...',
-      error: 'Erreur',
-      success: 'Succès',
-      cancel: 'Annuler',
-      save: 'Sauvegarder',
-      delete: 'Supprimer',
-      edit: 'Modifier',
-      close: 'Fermer',
-      back: 'Retour',
-      next: 'Suivant',
-      previous: 'Précédent',
-      done: 'Terminé',
-      confirm: 'Confirmer',
-      retry: 'Réessayer',
-      viewMore: 'Voir plus',
-      viewLess: 'Voir moins',
-      search: 'Rechercher',
-      browseFiles: 'Parcourir les fichiers',
-      supportedFormats: 'PDF, Word, Excel, CSV, TXT',
-    },
-    criteria: {
-      title: 'Critères de décision',
-      description: 'Gérez les critères de votre décision',
-      add: 'Ajouter un critère',
-      addButton: 'Ajouter un critère',
-      addSuccess: 'Critère ajouté avec succès',
-      weight: 'Poids',
-      importance: 'Importance',
-      placeholder: 'Nom du critère...',
-      save: 'Sauvegarder',
-      cancel: 'Annuler',
-      delete: 'Supprimer',
-      edit: 'Modifier',
-      low: 'Faible',
-      medium: 'Moyen',
-      high: 'Élevé',
-      updateAnalysis: 'Mettre à jour l\'analyse',
-      tooltip: 'Les critères vous permettent d\'évaluer vos options selon différents aspects importants pour votre décision.',
-    },
-    share: {
-      button: {
-        share: 'Partager',
-        simpleShare: 'Partager le lien',
-        collaborate: 'Collaborer',
-        shareAsTemplate: 'Partager comme modèle',
-      },
-      title: 'Partager la décision',
-      subtitle: 'Partagez votre analyse avec d\'autres',
-      copyLink: 'Copier le lien',
-      linkCopied: 'Lien copié !',
-      emailShare: 'Partager par email',
-      socialShare: 'Partager sur les réseaux',
-      publicDecision: 'Décision publique',
-      publicDescription: 'Tout le monde peut voir cette décision',
-      privateDecision: 'Décision privée',
-      privateDescription: 'Seules les personnes avec le lien peuvent voir',
-      toasts: {
-        linkCopied: 'Lien copié dans le presse-papiers !',
-      },
-    },
-    profile: {
-      avatar: {
-        title: 'Photo de profil',
-        description: 'Personnalisez votre avatar',
-        change: 'Changer la photo',
-        formatSupport: 'JPG, PNG, GIF jusqu\'à 2MB',
-        dropHere: 'Déposez votre image ici',
-        tooBig: 'Le fichier est trop volumineux (max 2MB)',
-        uploadSuccess: 'Photo mise à jour avec succès',
-        uploadError: 'Erreur lors du téléchargement',
-        deleteSuccess: 'Photo supprimée avec succès',
-        deleteError: 'Erreur lors de la suppression',
-      },
-      info: {
-        title: 'Informations personnelles',
-        description: 'Gérez vos informations de profil',
-        email: 'Adresse email',
-        fullName: 'Nom complet',
-        fullNamePlaceholder: 'Votre nom complet',
-        save: 'Sauvegarder',
-        saving: 'Sauvegarde...',
-        savedSuccess: 'Profil sauvegardé avec succès',
-        savedError: 'Erreur lors de la sauvegarde',
-      },
-      language: {
-        title: 'Langue de l\'interface',
-        description: 'Choisissez votre langue préférée',
-        label: 'Langue',
-        helpText: 'Sélectionnez la langue d\'affichage de l\'interface',
-        toastTitle: 'Langue mise à jour',
-        toastDesc: 'La langue de l\'interface a été modifiée avec succès',
-      },
-      googleAccount: {
-        title: 'Compte Google',
-        description: 'Gérez votre connexion Google',
-        notConnected: 'Compte Google non connecté',
-      },
-    },
-    dashboard: {
-      title: 'Tableau de bord',
-      subtitle: 'Gérez vos décisions et analyses',
-      recentDecisions: 'Décisions récentes',
-      quickActions: 'Actions rapides',
-      stats: {
-        decisionsCount: 'Décisions prises',
-        avgConfidence: 'Confiance moyenne',
-        timesSaved: 'Temps économisé',
-      },
-    },
-    history: {
-      title: 'Historique',
-      subtitle: 'Consultez vos décisions passées',
-      empty: {
-        title: 'Aucune décision',
-        description: 'Vous n\'avez pas encore pris de décisions',
-        cta: 'Commencer une analyse',
-      },
-      search: {
-        placeholder: 'Rechercher une décision...',
-        noResults: 'Aucun résultat trouvé',
-      },
-      list: {
-        emptyTitle: 'Aucune décision dans l\'historique',
-        emptyDescription: 'Vos analyses passées apparaîtront ici.',
-        seeMore: 'Voir plus',
-      },
-      searchBar: {
-        searchPlaceholder: 'Rechercher dans l\'historique...',
-        filter: 'Filtrer',
-        more: 'Plus',
-        export: 'Exporter',
-        clearAll: 'Tout effacer',
-        categoryLabel: 'Catégorie',
-        allCategories: 'Toutes les catégories',
-        uncategorized: 'Non catégorisé',
-        sortBy: 'Trier par',
-        sort: {
-          date: 'Date',
-          category: 'Catégorie',
-        },
-        exportPdf: 'Exporter en PDF',
-        exportJson: 'Exporter en JSON',
-        copyText: 'Copier le texte',
-        confirm: {
-          title: 'Confirmer la suppression',
-          desc: 'Cette action supprimera définitivement tout votre historique de décisions. Cette action est irréversible.',
-          cancel: 'Annuler',
-          ok: 'Confirmer',
-        },
-        toasts: {
-          export: {
-            success: 'Historique exporté en PDF avec succès',
-            error: 'Erreur lors de l\'export PDF',
-          },
-          json: {
-            success: 'Historique exporté en JSON avec succès',
-            error: 'Erreur lors de l\'export JSON',
-          },
-          copy: {
-            success: 'Texte copié dans le presse-papiers',
-            error: 'Erreur lors de la copie',
-          },
-        },
-      },
-      filters: {
-        all: 'Toutes',
-        personal: 'Personnel',
-        professional: 'Professionnel',
-        recent: 'Récentes',
-        highConfidence: 'Confiance élevée',
-      },
-      actions: {
-        view: 'Voir',
-        load: 'Charger',
-        delete: 'Supprimer',
-        export: 'Exporter',
-        share: 'Partager',
-      },
-      sort: {
-        date: 'Date',
-        category: 'Catégorie',
-      },
-      item: {
-        share: 'Partager',
-        delete: 'Supprimer',
-        followUp: {
-          singular: 'question de suivi',
-          plural: 'questions de suivi',
-        },
-        more: {
-          singular: 'autre',
-          plural: 'autres',
-        },
-      },
-      more: 'Plus',
-      export: 'Exporter',
-      exportPdf: 'Exporter en PDF',
-      exportJson: 'Exporter en JSON',
-      copyText: 'Copier le texte',
-      clearAll: 'Tout effacer',
-      confirm: {
-        title: 'Confirmer la suppression',
-        desc: 'Êtes-vous sûr de vouloir supprimer cette décision ?',
-        cancel: 'Annuler',
-        ok: 'Supprimer',
-      },
-    },
-    comments: {
-      section: {
-        titleDefault: 'Commentaires',
-        placeholderDefault: 'Ajouter un commentaire...',
-        loading: 'Chargement des commentaires...',
-        empty: 'Aucun commentaire pour le moment',
-        add: 'Ajouter',
-        cancel: 'Annuler',
-        addButton: 'Ajouter un commentaire',
-        toasts: {
-          loadError: 'Erreur lors du chargement des commentaires',
-          emptyError: 'Le commentaire ne peut pas être vide',
-          addSuccess: 'Commentaire ajouté avec succès',
-          addError: 'Erreur lors de l\'ajout du commentaire',
-        },
-      },
-      item: {
-        types: {
-          general: 'Général',
-          criteria: 'Critère',
-          option: 'Option',
-          follow_up: 'Question de suivi',
-        },
-        createdOn: 'Créé le',
-        modifiedOn: 'Modifié le',
-      },
-    },
-    dataAccuracy: {
-      unknown: {
-        date: 'Date inconnue',
-        datetime: 'Date et heure inconnues',
-        author: 'Auteur inconnu',
-        user: 'Utilisateur inconnu',
-      },
-      createdOn: 'Créé le',
-      updatedOn: 'mis à jour le',
-      by: 'par',
-      viewSources: 'Voir les sources',
-      noExternalSources: 'Aucune source externe disponible',
-      sources: {
-        one: 'source',
-        other: 'sources',
-      },
-    },
-    decision: {
-      title: 'Décision',
-      recommended: 'Recommandé',
-      advantages: 'Avantages',
-      disadvantages: 'Inconvénients',
-      learnMore: 'En savoir plus',
-      moreAdvantages: 'avantages supplémentaires',
-      moreDisadvantages: 'inconvénients supplémentaires',
-      search: 'Rechercher',
-      comparisonTableCaption: 'Tableau de comparaison de {count} options',
-      comparisonTable: 'Tableau de comparaison',
-      seeMoreOptions: 'Voir plus d\'options',
-      noResults: 'Aucun résultat disponible',
-      pointsOfAttention: 'Points d\'attention',
-      usefulLinks: 'Liens utiles',
-    popularVideos: 'Vidéos populaires',
-    seeMore: 'Voir plus',
-    seeLess: 'Voir moins',
-      toasts: {
-        alreadyRunning: 'Une analyse est déjà en cours',
-        titleUpdated: 'Titre mis à jour avec succès',
-        followup: {
-          error: 'Erreur lors de la question de suivi',
-        },
-      },
-    },
-    footer: {
-      allRightsReserved: 'Tous droits réservés',
-      privacyPolicy: 'Politique de confidentialité',
-    },
-    privacy: {
-      title: 'Politique de confidentialité',
-      lastUpdated: 'Dernière mise à jour',
-      sections: {
-        dataCollection: {
-          title: 'Collecte de données',
-          description: 'Nous collectons les informations suivantes',
-          item1: 'Données de décision et critères',
-          item2: 'Informations de profil utilisateur',
-          item3: 'Données d\'usage de l\'application',
-          item4: 'Métadonnées de sessions et préférences',
-        },
-        dataUsage: {
-          title: 'Utilisation des données',
-          description: 'Vos données sont utilisées pour',
-          item1: 'Améliorer nos algorithmes de décision',
-          item2: 'Personnaliser votre expérience',
-          item3: 'Fournir un support technique',
-          item4: 'Analyser l\'utilisation de l\'application',
-        },
-        dataSharing: {
-          title: 'Partage de données',
-          description: 'Nous ne partageons pas vos données personnelles avec des tiers',
-          item1: 'Aucun partage avec des tiers sans consentement',
-          item2: 'Données anonymisées pour des statistiques générales',
-          item3: 'Respect strict de votre vie privée',
-        },
-        security: {
-          title: 'Sécurité des données',
-          description: 'Nous protégeons vos données avec des mesures de sécurité avancées',
-          item1: 'Chiffrement de bout en bout',
-          item2: 'Serveurs sécurisés et certifiés',
-          item3: 'Accès restreint aux données personnelles',
-          item4: 'Sauvegardes régulières et sécurisées',
-        },
-        cookies: {
-          title: 'Cookies',
-          description: 'Nous utilisons des cookies pour améliorer votre expérience',
-        },
-        rights: {
-          title: 'Vos droits',
-          description: 'Vous avez le droit d\'accéder, modifier ou supprimer vos données',
-          item1: 'Droit d\'accès à vos données personnelles',
-          item2: 'Droit de rectification des informations incorrectes',
-          item3: 'Droit à l\'effacement de vos données',
-          item4: 'Droit à la portabilité de vos données',
-        },
-        retention: {
-          title: 'Conservation des données',
-          description: 'Nous conservons vos données uniquement le temps nécessaire',
-        },
-        contact: {
-          title: 'Contact',
-          description: 'Pour toute question, contactez-nous',
-        email: 'contact@rationable.ai',
-        },
-        changes: {
-          title: 'Modifications de la politique',
-          description: 'Nous vous informerons de tout changement important',
-        },
-      },
-    },
-    analysisResult: {
-      confidence: 'Confiance',
-      winner: 'Meilleure option',
-      score: 'Score',
-      reasons: 'Raisons',
-      criteria: 'Critères',
-      options: 'Options',
-      analysis: 'Analyse',
-      recommendation: 'Recommandation',
-      nextSteps: 'Prochaines étapes',
-      chartTitle: 'Analyse comparative',
-      comparisonTitle: 'Comparaison des options',
-      radarChartTitle: 'Vue radar des critères',
-      usefulLinks: 'Liens utiles',
-      popularVideos: 'Vidéos populaires',
-      seeMore: 'Voir plus',
-      seeLess: 'Voir moins',
-      pointsOfAttention: 'Points d\'attention',
-      moreAdvantages: 'Autres avantages',
-      comparisonTableCaption: 'Tableau de comparaison des options',
-      seeMoreOptions: 'Voir plus d\'options',
-    },
-    dilemmaSetup: {
-      hero: {
-        titleLine1: 'Vos décisions seront',
-        brand: 'Rationable',
-        subtitle: 'De l\'incertitude à la clarté : exploitez la puissance de l\'IA',
-      },
-      dropHere: 'Déposez vos fichiers ici',
-      attachFile: 'Joindre un fichier',
-      launchAnalysis: 'Lancer l\'analyse',
-      helpText: 'Décrivez le problème ou la décision que vous devez prendre. Vous pouvez aussi glisser-déposer des documents directement dans cette zone.',
-      attachedDocs: 'Documents joints',
-      history: {
-        title: 'Historique des décisions',
-        description: 'Chargez ou supprimez vos analyses passées.',
-      },
-      templates: {
-        description: 'Utilisez des modèles prêts à l\'emploi pour commencer rapidement',
-        viewAll: 'Voir tout',
-      },
-      trending: {
-        title: 'Tendances de la semaine en {country}',
-        refresh: 'Actualiser',
-      },
-      analysisStarted: 'Analyse démarrée !',
-      fileTooLarge: 'est trop volumineux (max 10MB)',
-    },
-    optionsLoading: {
-      title: 'Génération des options',
-      subtitle: 'L\'IA analyse votre situation...',
-      analyzing: 'Analyse en cours...',
-      generatingOptions: 'Génération des options...',
-      evaluatingCriteria: 'Évaluation des critères...',
-      almostDone: 'Presque terminé...',
-    },
-    criteriaManager: {
-      title: 'Gestionnaire de critères',
-      subtitle: 'Ajoutez et gérez vos critères de décision',
-      addCriterion: 'Ajouter un critère',
-      placeholder: 'Nom du critère...',
-      importance: 'Importance',
-      weight: 'Poids',
-      save: 'Sauvegarder',
-      cancel: 'Annuler',
-      delete: 'Supprimer',
-      edit: 'Modifier',
-    },
-    fileUpload: {
-      dropZone: 'Glissez-déposez vos fichiers ici',
-      selectFiles: 'Sélectionner des fichiers',
-      supportedFormats: 'Formats supportés',
-      maxSize: 'Taille max',
-      uploading: 'Téléchargement...',
-      success: 'Fichier téléchargé',
-      error: 'Erreur de téléchargement',
-      remove: 'Supprimer',
-    },
-    collaboration: {
-      title: 'Inviter à collaborer',
-      description: 'Partagez cette décision avec vos proches pour recueillir leurs avis.',
-      inviteByEmail: 'Inviter par email',
-      inviteDescription: 'Envoyez un lien de partage par email pour inviter quelqu\'un à consulter et commenter cette décision.',
-      emailPlaceholder: 'email@exemple.com',
-      sendInvitation: 'Envoyer l\'invitation',
-      emailRequired: 'Veuillez saisir une adresse email.',
-      invalidEmail: 'Veuillez saisir une adresse email valide.',
-      invitationSent: 'Invitation envoyée par email.',
-      invitationError: 'Impossible d\'envoyer l\'invitation pour le moment.'
-    },
-    templates_: {
-      personal: {
-        title: 'Modèles personnels',
-        description: 'Décisions de la vie quotidienne',
-        examples: ['Choix de logement', 'Décision d\'achat', 'Choix de carrière'],
-      },
-      professional: {
-        title: 'Modèles professionnels',
-        description: 'Décisions business et stratégiques',
-        examples: ['Stratégie marketing', 'Recrutement', 'Investissement'],
-      },
-      custom: {
-        title: 'Modèles personnalisés',
-        description: 'Créez vos propres modèles',
-        create: 'Créer un modèle',
-        name: 'Nom du modèle',
-        namePlaceholder: 'Mon modèle de décision',
-        description_: 'Description',
-        descriptionPlaceholder: 'Décrivez à quoi sert ce modèle',
-        category: 'Catégorie',
-        dilemma: 'Dilemme type',
-        dilemmaPlaceholder: 'Décrivez le type de décision',
-        criteria: 'Critères prédéfinis',
-        addCriterion: 'Ajouter un critère',
-        criterionName: 'Nom du critère',
-        criterionWeight: 'Poids',
-        cancel: 'Annuler',
-        submit: 'Créer le modèle',
-        submitting: 'Création...',
-        success: 'Modèle créé !',
-        error: 'Erreur lors de la création',
-        required: 'Ce champ est requis',
-      },
-    },
-    export: {
-      menuButton: {
-        idle: 'Exporter',
-        busy: 'Export...',
-      },
-      menu: {
-        pdf: 'PDF',
-        pdfStandard: 'PDF Standard',
-        pdfCustom: 'PDF Personnalisé',
-        image: 'Image',
-        json: 'JSON',
-        copy: 'Copier le texte',
-      },
-      pdfDialog: {
-        title: 'Exporter en PDF',
-        subtitle: 'Personnalisez votre export',
-        includeCharts: 'Inclure les graphiques',
-        includeDetails: 'Inclure les détails',
-        format: 'Format',
-        standardFormat: 'Standard',
-        customFormat: 'Personnalisé',
-        cancel: 'Annuler',
-        export: 'Exporter',
-        exporting: 'Export en cours...',
-      },
-      success: {
-        title: 'Export réussi',
-        subtitle: 'Votre fichier a été téléchargé',
-      },
-      error: {
-        title: 'Erreur d\'export',
-        subtitle: 'Une erreur s\'est produite',
-      },
-    },
-    workspace: {
-      selector: {
-        title: 'Espace de travail',
-        personal: 'Personnel',
-        professional: 'Professionnel',
-        create: 'Créer',
-        manage: 'Gérer',
-      },
-      create: {
-        title: 'Créer un espace de travail',
-        subtitle: 'Organisez vos décisions par contexte',
-        name: 'Nom',
-        namePlaceholder: 'Mon espace de travail',
-        description: 'Description',
-        descriptionPlaceholder: 'Description de l\'espace',
-        color: 'Couleur',
-        usageContext: 'Contexte d\'usage',
-        deleteTitle: 'Supprimer l\'espace',
-        deleteDescription: 'Cette action est irréversible',
-        delete: 'Supprimer',
-        save: 'Sauvegarder',
-        cancel: 'Annuler',
-      },
-      settings: {
-        title: 'Paramètres des espaces',
-        subtitle: 'Gérez vos espaces de travail',
-        defaultWorkspace: 'Espace par défaut',
-        setDefault: 'Définir par défaut',
-      },
-      documents: {
-        title: 'Documents',
-        subtitle: 'Gérez les documents de cet espace',
-        upload: 'Télécharger',
-        dragDrop: 'Glisser-déposer',
-        supported: 'Formats supportés',
-        maxSize: 'Taille max',
-        processing: 'Traitement...',
-        processed: 'Traité',
-        error: 'Erreur',
-        view: 'Voir',
-        download: 'Télécharger',
-        delete: 'Supprimer',
-        cancel: 'Annuler',
-        confirm: 'Confirmer',
-        loading: 'Chargement...',
-      },
-    },
-    workspaces: {
-      title: 'Espaces de travail',
-      description: 'Gérez vos préférences et paramètres',
-      newWorkspace: 'Nouvel espace de travail',
-      defaultBadge: 'Par défaut',
-      currentBadge: 'Actuel',
-      personal: 'Personnel',
-      save: 'Sauvegarder',
-      cancel: 'Annuler',
-      workspaceDescription: 'Description de l\'espace de travail',
-      color: 'Couleur',
-      usageContext: 'Contexte d\'utilisation',
-      professionalUsage: 'Usage professionnel',
-      professionalDescription: 'Pour les décisions commerciales et professionnelles',
-      personalUsage: 'Usage personnel',
-      personalDescription: 'Pour vos décisions personnelles quotidiennes',
-      activate: 'Activer',
-      searchDocuments: 'Rechercher des documents',
-      uploadDocuments: 'Télécharger des documents',
-    },
-    sharedDecision: {
-      signIn: 'Se connecter',
-    },
-    sharedDecisionView: {
-      backToHome: 'Retour à l\'accueil',
-      sharedOn: 'Partagée le',
-      view: 'vue',
-      views: 'vues',
-      copyLinkButton: 'Copier le lien',
-      copyToWorkspace: 'Copier dans l\'espace de travail',
-      recommended: 'Recommandé',
-      evaluationCriteria: 'Critères d\'évaluation',
-      detailedAnalysis: 'Analyse détaillée',
-      advantages: 'Avantages',
-      disadvantages: 'Inconvénients',
-      learnMore: 'En savoir plus',
-      usefulLinks: 'Liens utiles',
-      shoppingLinks: 'Liens d\'achat',
-      commentsTitle: 'Commentaires',
-      commentsPlaceholder: 'Ajoutez un commentaire...',
-      copySuccess: 'Décision copiée dans votre espace de travail !',
-      missingPublicId: 'ID public manquant',
-      notFound: 'Décision non trouvée',
-      notFoundDescription: 'Cette décision n\'existe pas ou a expiré.',
-      loadingError: 'Erreur lors du chargement de la décision',
-    },
-  },
-  en: {
-    analysis: {
-      title: 'Decision Analysis',
-      status: {
-        analyzing: 'Analyzing...',
-        complete: 'Analysis Complete',
-      },
-      loadingMessages: {
-        criteria: 'Identifying decision criteria...',
-        options: 'Generating available options...',
-        analysis: 'Performing comparative analysis...',
-        finalizing: 'Finalizing recommendation...',
-      },
-      error: 'An error occurred during analysis',
-      retry: 'Retry',
-      criteriaSection: {
-        title: 'Decision Criteria',
-        description: 'Important factors for your decision',
-        add: 'Add criteria',
-        placeholder: 'New criteria...',
-        weight: 'Weight',
-        importance: 'Importance',
-        low: 'Low',
-        medium: 'Medium',
-        high: 'High',
-        expandDescription: 'Expand description',
-      },
-      optionsSection: {
-        title: 'Available Options',
-        description: 'Identified alternatives for your decision',
-        expandOptions: 'Expand options',
-        collapseOptions: 'Collapse options',
-        viewMore: 'View more',
-        viewLess: 'View less',
-        pros: 'Pros',
-        cons: 'Cons',
-        showMore: 'Show more',
-        showLess: 'Show less',
-      },
-      resultsSection: {
-        title: 'Recommendation',
-        winner: 'Best option',
-        score: 'Score',
-        recommendation: 'Recommendation',
-        confidence: 'Confidence',
-        confidenceLevel: {
-          low: 'Low',
-          medium: 'Medium',
-          high: 'High',
-          veryHigh: 'Very High',
-        },
-        viewDetails: 'View details',
-        comparisonTable: 'Comparison table',
-        exportResults: 'Export results',
-      },
-      charts: {
-        radar: {
-          title: 'Criteria Overview',
-          description: 'Performance of each option across criteria',
-        },
-        comparison: {
-          title: 'Score Comparison',
-          description: 'Total scores for each option',
-        },
-      },
-      followUpSection: {
-        title: 'Follow-up questions',
-        subtitle: 'Click on a question to launch a complete new analysis',
-        loading: 'Generating personalized questions...',
-      },
-      toasts: {
-        templateApplied: 'Template applied!',
-        decisionLoaded: 'Previous decision loaded.',
-      },
-    },
-    navbar: {
-      home: 'Home',
-      templates: 'Templates',
-      settings: 'Settings',
-      signIn: 'Sign In',
-      signOut: 'Sign Out',
-      profile: 'Profile',
-      getStarted: 'Get Started',
-      userFallback: 'User',
-    },
-    hero: {
-      title: 'Make',
-      titleHighlight: 'informed decisions',
-      subtitle: 'Use AI to analyze your options and make the best decisions',
-      cta: 'Get Started Now',
-    },
-    features: {
-      title: 'How it works',
-      ai: {
-        title: 'AI Analysis',
-        description: 'Our AI analyzes your situation and identifies key criteria',
-      },
-      criteria: {
-        title: 'Custom Criteria',
-        description: 'Define your own criteria based on your priorities',
-      },
-      comparison: {
-        title: 'Smart Comparison',
-        description: 'Objectively compare all your options',
-      },
-    },
-    auth: {
-      signIn: {
-        title: 'Sign In',
-        subtitle: 'Sign in to your account',
-        email: 'Email',
-        password: 'Password',
-        submit: 'Sign In',
-        switchToSignUp: 'Don\'t have an account? Sign up',
-        forgotPassword: 'Forgot password?',
-      },
-      signUp: {
-        title: 'Sign Up',
-        subtitle: 'Create your account',
-        fullName: 'Full Name',
-        email: 'Email',
-        password: 'Password',
-        confirmPassword: 'Confirm Password',
-        submit: 'Sign Up',
-        switchToSignIn: 'Already have an account? Sign in',
-      },
-      forgotPassword: {
-        title: 'Forgot Password',
-        subtitle: 'Enter your email to reset your password',
-        email: 'Email',
-        submit: 'Send Reset Email',
-        backToSignIn: 'Back to Sign In',
-        success: 'Reset email sent!',
-      },
-      errors: {
-        invalidCredentials: 'Invalid email or password',
-        emailExists: 'Email already exists',
-        passwordMismatch: 'Passwords do not match',
-        weakPassword: 'Password is too weak',
-        userNotFound: 'User not found',
-        invalidEmail: 'Invalid email',
-        generic: 'An error occurred',
-        passwordsMismatch: 'Passwords do not match',
-        passwordTooShort: 'Password must be at least 6 characters long',
-      },
-      actions: {
-        linkGoogle: 'Link Google Account',
-        signIn: 'Sign In',
-        createAccount: 'Create Account',
-        continueWithGoogle: 'Continue with Google',
-      },
-      fields: {
-        email: 'Email address',
-        password: 'Password',
-        fullName: 'Full name',
-        confirmPassword: 'Confirm password',
-      },
-      messages: {
-        accountCreated: 'Account created successfully! You can now sign in.',
-      },
-      separator: {
-        or: 'OR',
-      },
-      toggleText: {
-        signUpPrompt: 'Don\'t have an account?',
-        signUpLink: 'Create account',
-        signInPrompt: 'Already have an account?',
-        signInLink: 'Sign in',
-      },
-    },
-    settings: {
-      title: 'Settings',
-      sidebar: {
-        profile: 'Profile',
-        workspaces: 'Workspaces',
-        appearance: 'Appearance',
-        documents: 'Documents',
-        admin: 'Admin',
-      },
-      header: {
-        subtitle: 'Manage your preferences and settings',
-      },
-      profile: {
-        title: 'Profile',
-        fullName: 'Full Name',
-        email: 'Email',
-        avatar: 'Avatar',
-        uploadAvatar: 'Upload Avatar',
-        removeAvatar: 'Remove Avatar',
-        save: 'Save',
-        cancel: 'Cancel',
-      },
-      appearance: {
-        title: 'Appearance',
-        description: 'Customize the app appearance',
-        themeLabel: 'Choose your theme',
-        theme: 'Theme',
-        light: 'Light',
-        dark: 'Dark',
-        system: 'System',
-        language: 'Language',
-      },
-      account: {
-        title: 'Account',
-        deleteAccount: 'Delete Account',
-        deleteWarning: 'This action cannot be undone',
-      },
-      data: {
-        title: 'Data & History',
-        description: 'Manage your data and decision history',
-        history: {
-          title: 'Decision History',
-          desc: 'Delete all your saved decisions',
-        },
-        clearHistory: 'Clear History',
-      },
-      documents: {
-        title: 'Documents',
-        description: 'Manage your preferences and settings',
-        usage: 'times',
-        added: 'Added about',
-      },
-    },
-    templates: {
-      title: 'Decision Templates',
-      subtitle: 'Use our ready-made templates to get started quickly',
-      page: {
-        title: 'Decision Templates',
-        description: 'Discover ready-to-use decision templates for different situations.',
-      },
-      categories: {
-        all: 'All',
-        personal: 'Personal',
-        professional: 'Professional',
-      },
-      use: 'Use',
-      preview: 'Preview',
-      share: 'Share',
-      create: 'Create',
-      featured: 'Featured',
-      community: 'Community',
-      myTemplates: 'My Templates',
-      grid: {
-        personalTitle: 'Personal Templates',
-        professionalTitle: 'Professional Templates',
-        recommendedBadge: 'Recommended',
-        emptyMessage: 'No templates found with these criteria.',
-        resetFilters: 'Reset Filters',
-      },
-      card: {
-        open: 'Open',
-        question: 'Question',
-        byAuthor: 'by',
-      },
-      filters: {
-        searchPlaceholder: 'Search templates...',
-        categoryAll: 'All categories',
-        sort: {
-          newest: 'Newest',
-          popular: 'Most popular',
-          mostCopied: 'Most copied',
-        },
-      },
-      errors: {
-        loadError: 'Error loading templates',
-        openError: 'Error opening template',
-        rateLimitError: 'Preview creation limit reached. Please wait a few minutes.',
-      },
-    },
-    common: {
-      loading: 'Loading...',
-      error: 'Error',
-      success: 'Success',
-      cancel: 'Cancel',
-      save: 'Save',
-      delete: 'Delete',
-      edit: 'Edit',
-      close: 'Close',
-      back: 'Back',
-      next: 'Next',
-      previous: 'Previous',
-      done: 'Done',
-      confirm: 'Confirm',
-      retry: 'Retry',
-      viewMore: 'View more',
-      viewLess: 'View less',
-      search: 'Search',
-      browseFiles: 'Browse files',
-      supportedFormats: 'PDF, Word, Excel, CSV, TXT',
-    },
-    criteria: {
-      title: 'Decision Criteria',
-      description: 'Manage your decision criteria',
-      add: 'Add criterion',
-      addButton: 'Add criterion',
-      addSuccess: 'Criterion added successfully',
-      weight: 'Weight',
-      importance: 'Importance',
-      placeholder: 'Criterion name...',
-      save: 'Save',
-      cancel: 'Cancel',
-      delete: 'Delete',
-      edit: 'Edit',
-      low: 'Low',
-      medium: 'Medium',
-      high: 'High',
-      updateAnalysis: 'Update Analysis',
-      tooltip: 'Criteria help you evaluate your options based on different aspects important to your decision.',
-    },
-    share: {
-      button: {
-        share: 'Share',
-        simpleShare: 'Share Link',
-        collaborate: 'Collaborate',
-        shareAsTemplate: 'Share as Template',
-      },
-      title: 'Share Decision',
-      subtitle: 'Share your analysis with others',
-      copyLink: 'Copy link',
-      linkCopied: 'Link copied!',
-      emailShare: 'Share by email',
-      socialShare: 'Share on social',
-      publicDecision: 'Public decision',
-      publicDescription: 'Anyone can view this decision',
-      privateDecision: 'Private decision',
-      privateDescription: 'Only people with the link can view',
-      toasts: {
-        linkCopied: 'Link copied to clipboard!',
-      },
-    },
-    profile: {
-      avatar: {
-        title: 'Profile Picture',
-        description: 'Customize your avatar',
-        change: 'Change Picture',
-        formatSupport: 'JPG, PNG, GIF up to 2MB',
-        dropHere: 'Drop your image here',
-        tooBig: 'File is too large (max 2MB)',
-        uploadSuccess: 'Picture updated successfully',
-        uploadError: 'Error during upload',
-        deleteSuccess: 'Picture deleted successfully',
-        deleteError: 'Error during deletion',
-      },
-      info: {
-        title: 'Personal Information',
-        description: 'Manage your profile information',
-        email: 'Email Address',
-        fullName: 'Full Name',
-        fullNamePlaceholder: 'Your full name',
-        save: 'Save',
-        saving: 'Saving...',
-        savedSuccess: 'Profile saved successfully',
-        savedError: 'Error saving profile',
-      },
-      language: {
-        title: 'Interface Language',
-        description: 'Choose your preferred language',
-        label: 'Language',
-        helpText: 'Select the interface display language',
-        toastTitle: 'Language updated',
-        toastDesc: 'Interface language has been successfully changed',
-      },
-      googleAccount: {
-        title: 'Google Account',
-        description: 'Manage your Google connection',
-        notConnected: 'Google account not connected',
-      },
-    },
-    dashboard: {
-      title: 'Dashboard',
-      subtitle: 'Manage your decisions and analyses',
-      recentDecisions: 'Recent Decisions',
-      quickActions: 'Quick Actions',
-      stats: {
-        decisionsCount: 'Decisions Made',
-        avgConfidence: 'Average Confidence',
-        timesSaved: 'Time Saved',
-      },
-    },
-    history: {
-      title: 'History',
-      subtitle: 'View your past decisions',
-      empty: {
-        title: 'No decisions yet',
-        description: 'You haven\'t made any decisions yet',
-        cta: 'Start an analysis',
-      },
-      search: {
-        placeholder: 'Search decisions...',
-        noResults: 'No results found',
-      },
-      list: {
-        emptyTitle: 'No decisions in history',
-        emptyDescription: 'Your past analyses will appear here.',
-        seeMore: 'See more',
-      },
-      searchBar: {
-        searchPlaceholder: 'Search history...',
-        filter: 'Filter',
-        more: 'More',
-        export: 'Export',
-        clearAll: 'Clear All',
-        categoryLabel: 'Category',
-        allCategories: 'All Categories',
-        uncategorized: 'Uncategorized',
-        sortBy: 'Sort by',
-        sort: {
-          date: 'Date',
-          category: 'Category',
-        },
-        exportPdf: 'Export as PDF',
-        exportJson: 'Export as JSON',
-        copyText: 'Copy text',
-        confirm: {
-          title: 'Confirm deletion',
-          desc: 'This action will permanently delete your entire decision history. This action cannot be undone.',
-          cancel: 'Cancel',
-          ok: 'Confirm',
-        },
-        toasts: {
-          export: {
-            success: 'History exported to PDF successfully',
-            error: 'Error during PDF export',
-          },
-          json: {
-            success: 'History exported to JSON successfully',
-            error: 'Error during JSON export',
-          },
-          copy: {
-            success: 'Text copied to clipboard',
-            error: 'Error during copy',
-          },
-        },
-      },
-      filters: {
-        all: 'All',
-        personal: 'Personal',
-        professional: 'Professional',
-        recent: 'Recent',
-        highConfidence: 'High Confidence',
-      },
-      actions: {
-        view: 'View',
-        load: 'Load',
-        delete: 'Delete',
-        export: 'Export',
-        share: 'Share',
-      },
-      sort: {
-        date: 'Date',
-        category: 'Category',
-      },
-      item: {
-        share: 'Share',
-        delete: 'Delete',
-        followUp: {
-          singular: 'follow-up question',
-          plural: 'follow-up questions',
-        },
-        more: {
-          singular: 'other',
-          plural: 'others',
-        },
-      },
-      more: 'More',
-      export: 'Export',
-      exportPdf: 'Export as PDF',
-      exportJson: 'Export as JSON',
-      copyText: 'Copy text',
-      clearAll: 'Clear all',
-      confirm: {
-        title: 'Confirm deletion',
-        desc: 'Are you sure you want to delete this decision?',
-        cancel: 'Cancel',
-        ok: 'Delete',
-      },
-    },
-    comments: {
-      section: {
-        titleDefault: 'Comments',
-        placeholderDefault: 'Add a comment...',
-        loading: 'Loading comments...',
-        empty: 'No comments yet',
-        add: 'Add',
-        cancel: 'Cancel',
-        addButton: 'Add comment',
-        toasts: {
-          loadError: 'Error loading comments',
-          emptyError: 'Comment cannot be empty',
-          addSuccess: 'Comment added successfully',
-          addError: 'Error adding comment',
-        },
-      },
-      item: {
-        types: {
-          general: 'General',
-          criteria: 'Criteria',
-          option: 'Option',
-          follow_up: 'Follow-up',
-        },
-        createdOn: 'Created on',
-        modifiedOn: 'Modified on',
-      },
-    },
-    dataAccuracy: {
-      unknown: {
-        date: 'Unknown date',
-        datetime: 'Unknown date and time',
-        author: 'Unknown author',
-        user: 'Unknown user',
-      },
-      createdOn: 'Created on',
-      updatedOn: 'updated on',
-      by: 'by',
-      viewSources: 'View sources',
-      noExternalSources: 'No external sources available',
-      sources: {
-        one: 'source',
-        other: 'sources',
-      },
-    },
-    decision: {
-      title: 'Decision',
-      recommended: 'Recommended',
-      advantages: 'Advantages',
-      disadvantages: 'Disadvantages',
-      learnMore: 'Learn more',
-      moreAdvantages: 'more advantages',
-      moreDisadvantages: 'more disadvantages',
-      search: 'Search',
-      comparisonTableCaption: 'Comparison table of {count} options',
-      comparisonTable: 'Comparison table',
-      seeMoreOptions: 'See more options',
-      noResults: 'No results available',
-      pointsOfAttention: 'Points of attention',
-      usefulLinks: 'Useful links',
-      popularVideos: 'Popular videos',
-      seeMore: 'See more',
-      seeLess: 'See less',
-      toasts: {
-        alreadyRunning: 'An analysis is already running',
-        titleUpdated: 'Title updated successfully',
-        followup: {
-          error: 'Error with follow-up question',
-        },
-      },
-    },
-    footer: {
-      allRightsReserved: 'All rights reserved',
-      privacyPolicy: 'Privacy Policy',
-    },
-    privacy: {
-      title: 'Privacy Policy',
-      lastUpdated: 'Last updated',
-      sections: {
-        dataCollection: {
-          title: 'Data Collection',
-          description: 'We collect the following information',
-          item1: 'Decision data and criteria',
-          item2: 'User profile information',
-          item3: 'Application usage data',
-          item4: 'Session metadata and preferences',
-        },
-        dataUsage: {
-          title: 'Data Usage',
-          description: 'Your data is used to',
-          item1: 'Improve our decision algorithms',
-          item2: 'Personalize your experience',
-          item3: 'Provide technical support',
-          item4: 'Analyze application usage',
-        },
-        dataSharing: {
-          title: 'Data Sharing',
-          description: 'We do not share your personal data with third parties',
-          item1: 'No sharing with third parties without consent',
-          item2: 'Anonymized data for general statistics',
-          item3: 'Strict respect for your privacy',
-        },
-        security: {
-          title: 'Data Security',
-          description: 'We protect your data with advanced security measures',
-          item1: 'End-to-end encryption',
-          item2: 'Secure and certified servers',
-          item3: 'Restricted access to personal data',
-          item4: 'Regular and secure backups',
-        },
-        cookies: {
-          title: 'Cookies',
-          description: 'We use cookies to improve your experience',
-        },
-        rights: {
-          title: 'Your Rights',
-          description: 'You have the right to access, modify or delete your data',
-          item1: 'Right to access your personal data',
-          item2: 'Right to rectify incorrect information',
-          item3: 'Right to erasure of your data',
-          item4: 'Right to data portability',
-        },
-        retention: {
-          title: 'Data Retention',
-          description: 'We keep your data only as long as necessary',
-        },
-        contact: {
-          title: 'Contact',
-          description: 'For any questions, contact us',
-          email: 'contact@rationable.ai',
-        },
-        changes: {
-          title: 'Policy Changes',
-          description: 'We will notify you of any important changes',
-        },
-      },
-    },
-    analysisResult: {
-      confidence: 'Confidence',
-      winner: 'Best option',
-      score: 'Score',
-      reasons: 'Reasons',
-      criteria: 'Criteria',
-      options: 'Options',
-      analysis: 'Analysis',
-      recommendation: 'Recommendation',
-      nextSteps: 'Next steps',
-      chartTitle: 'Comparative analysis',
-      comparisonTitle: 'Option comparison',
-      radarChartTitle: 'Criteria radar view',
-      usefulLinks: 'Useful links',
-      popularVideos: 'Popular videos',
-      seeMore: 'See more',
-      seeLess: 'See less',
-      pointsOfAttention: 'Points of attention',
-      moreAdvantages: 'Other advantages',
-      comparisonTableCaption: 'Options comparison table',
-      seeMoreOptions: 'See more options',
-    },
-    dilemmaSetup: {
-      hero: {
-        titleLine1: 'Make every decision',
-        brand: 'Rationable',
-        subtitle: 'From uncertainty to clarity: harness the power of AI',
-      },
-      dropHere: 'Drop your files here',
-      attachFile: 'Attach file',
-      launchAnalysis: 'Launch analysis',
-      helpText: 'Describe the problem or decision you need to make. You can also drag and drop documents directly in this area.',
-      attachedDocs: 'Attached documents',
-      history: {
-        title: 'Decision History',
-        description: 'Load or delete your past analyses.',
-      },
-      templates: {
-        description: 'Use ready-to-use templates to get started quickly',
-        viewAll: 'View all',
-      },
-      trending: {
-        title: 'Trending this week in {country}',
-        refresh: 'Refresh',
-      },
-      analysisStarted: 'Analysis started!',
-      fileTooLarge: 'is too large (max 10MB)',
-    },
-    optionsLoading: {
-      title: 'Generating Options',
-      subtitle: 'AI is analyzing your situation...',
-      analyzing: 'Analyzing...',
-      generatingOptions: 'Generating options...',
-      evaluatingCriteria: 'Evaluating criteria...',
-      almostDone: 'Almost done...',
-    },
-    criteriaManager: {
-      title: 'Criteria Manager',
-      subtitle: 'Add and manage your decision criteria',
-      addCriterion: 'Add criterion',
-      placeholder: 'Criterion name...',
-      importance: 'Importance',
-      weight: 'Weight',
-      save: 'Save',
-      cancel: 'Cancel',
-      delete: 'Delete',
-      edit: 'Edit',
-    },
-    fileUpload: {
-      dropZone: 'Drag and drop your files here',
-      selectFiles: 'Select files',
-      supportedFormats: 'Supported formats',
-      maxSize: 'Max size',
-      uploading: 'Uploading...',
-      success: 'File uploaded',
-      error: 'Upload error',
-      remove: 'Remove',
-    },
-    collaboration: {
-      title: 'Invite to Collaborate',
-      description: 'Share this decision with your contacts to gather their feedback.',
-      inviteByEmail: 'Invite by email',
-      inviteDescription: 'Send a sharing link by email to invite someone to view and comment on this decision.',
-      emailPlaceholder: 'email@example.com',
-      sendInvitation: 'Send Invitation',
-      emailRequired: 'Please enter an email address.',
-      invalidEmail: 'Please enter a valid email address.',
-      invitationSent: 'Invitation sent by email.',
-      invitationError: 'Unable to send invitation at the moment.'
-    },
-    templates_: {
-      personal: {
-        title: 'Personal Templates',
-        description: 'Daily life decisions',
-        examples: ['Housing choice', 'Purchase decision', 'Career choice'],
-      },
-      professional: {
-        title: 'Professional Templates',
-        description: 'Business and strategic decisions',
-        examples: ['Marketing strategy', 'Recruitment', 'Investment'],
-      },
-      custom: {
-        title: 'Custom Templates',
-        description: 'Create your own templates',
-        create: 'Create template',
-        name: 'Template name',
-        namePlaceholder: 'My decision template',
-        description_: 'Description',
-        descriptionPlaceholder: 'Describe what this template is for',
-        category: 'Category',
-        dilemma: 'Typical dilemma',
-        dilemmaPlaceholder: 'Describe the type of decision',
-        criteria: 'Predefined criteria',
-        addCriterion: 'Add criterion',
-        criterionName: 'Criterion name',
-        criterionWeight: 'Weight',
-        cancel: 'Cancel',
-        submit: 'Create template',
-        submitting: 'Creating...',
-        success: 'Template created!',
-        error: 'Error creating template',
-        required: 'This field is required',
-      },
-    },
-    export: {
-      menuButton: {
-        idle: 'Export',
-        busy: 'Exporting...',
-      },
-      menu: {
-        pdf: 'PDF',
-        pdfStandard: 'Standard PDF',
-        pdfCustom: 'Custom PDF',
-        image: 'Image',
-        json: 'JSON',
-        copy: 'Copy text',
-      },
-      pdfDialog: {
-        title: 'Export to PDF',
-        subtitle: 'Customize your export',
-        includeCharts: 'Include charts',
-        includeDetails: 'Include details',
-        format: 'Format',
-        standardFormat: 'Standard',
-        customFormat: 'Custom',
-        cancel: 'Cancel',
-        export: 'Export',
-        exporting: 'Exporting...',
-      },
-      success: {
-        title: 'Export successful',
-        subtitle: 'Your file has been downloaded',
-      },
-      error: {
-        title: 'Export error',
-        subtitle: 'An error occurred',
-      },
-    },
-    workspace: {
-      selector: {
-        title: 'Workspace',
-        personal: 'Personal',
-        professional: 'Professional',
-        create: 'Create',
-        manage: 'Manage',
-      },
-      create: {
-        title: 'Create workspace',
-        subtitle: 'Organize your decisions by context',
-        name: 'Name',
-        namePlaceholder: 'My workspace',
-        description: 'Description',
-        descriptionPlaceholder: 'Workspace description',
-        color: 'Color',
-        usageContext: 'Usage context',
-        deleteTitle: 'Delete workspace',
-        deleteDescription: 'This action cannot be undone',
-        delete: 'Delete',
-        save: 'Save',
-        cancel: 'Cancel',
-      },
-      settings: {
-        title: 'Workspace settings',
-        subtitle: 'Manage your workspaces',
-        defaultWorkspace: 'Default workspace',
-        setDefault: 'Set as default',
-      },
-      documents: {
-        title: 'Documents',
-        subtitle: 'Manage documents for this workspace',
-        upload: 'Upload',
-        dragDrop: 'Drag and drop',
-        supported: 'Supported formats',
-        maxSize: 'Max size',
-        processing: 'Processing...',
-        processed: 'Processed',
-        error: 'Error',
-        view: 'View',
-        download: 'Download',
-        delete: 'Delete',
-        cancel: 'Cancel',
-        confirm: 'Confirm',
-        loading: 'Loading...',
-      },
-    },
-    workspaces: {
-      title: 'Workspaces',
-      description: 'Manage your preferences and settings',
-      newWorkspace: 'New workspace',
-      defaultBadge: 'Default',
-      currentBadge: 'Current',
-      personal: 'Personal',
-      save: 'Save',
-      cancel: 'Cancel',
-      workspaceDescription: 'Workspace description',
-      color: 'Color',
-      usageContext: 'Usage context',
-      professionalUsage: 'Professional usage',
-      professionalDescription: 'For commercial and professional decisions',
-      personalUsage: 'Personal usage',
-      personalDescription: 'For your daily personal decisions',
-      activate: 'Activate',
-      searchDocuments: 'Search documents',
-      uploadDocuments: 'Upload documents',
-    },
-    sharedDecision: {
-      signIn: 'Sign In',
-    },
-    sharedDecisionView: {
-      backToHome: 'Back to Home',
-      sharedOn: 'Shared on',
-      view: 'view',
-      views: 'views',
-      copyLinkButton: 'Copy Link',
-      copyToWorkspace: 'Copy to Workspace',
-      recommended: 'Recommended',
-      evaluationCriteria: 'Evaluation Criteria',
-      detailedAnalysis: 'Detailed Analysis',
-      advantages: 'Advantages',
-      disadvantages: 'Disadvantages',
-      learnMore: 'Learn more',
-      usefulLinks: 'Useful Links',
-      shoppingLinks: 'Shopping Links',
-      commentsTitle: 'Comments',
-      commentsPlaceholder: 'Add a comment...',
-      copySuccess: 'Decision copied to your workspace!',
-      missingPublicId: 'Missing public ID',
-      notFound: 'Decision not found',
-      notFoundDescription: 'This decision does not exist or has expired.',
-      loadingError: 'Error loading decision',
-    },
-  },
+  fr,
+  en,
 };

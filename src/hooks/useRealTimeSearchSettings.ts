@@ -7,8 +7,9 @@ interface RealTimeSearchSettings {
 
 export const useRealTimeSearchSettings = (): RealTimeSearchSettings => {
   const [realTimeSearchEnabled, setRealTimeSearchEnabled] = useState<boolean>(() => {
-    // Default to always enabled
-    return true;
+    // Lire depuis localStorage ou default à false (mode manuel)
+    const saved = localStorage.getItem('realTimeSearchEnabled');
+    return saved ? JSON.parse(saved) : false;
   });
 
   useEffect(() => {

@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Palette, Plus, Edit3, Trash2, Crown, Building2, Briefcase } from 'lucide-react';
-import { toast } from "sonner";
-import { CreateWorkspaceDialog } from "@/components/workspace/CreateWorkspaceDialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Building2, Settings, Users, Trash2, Crown, Edit } from 'lucide-react';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
+import { useAuth } from '@/hooks/useAuth';
+import WorkspaceImageUpload from '@/components/WorkspaceImageUpload';
+import { toast } from "sonner";
+import { supabase } from '@/integrations/supabase/client';
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import {
   AlertDialog,
@@ -17,267 +22,388 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 
 export const WorkspacesSettings: React.FC = () => {
-  const { workspaces, currentWorkspace, switchWorkspace, createWorkspace, updateWorkspace, deleteWorkspace } = useWorkspaces();
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [workspaceToDelete, setWorkspaceToDelete] = useState<string | null>(null);
-  const [editingWorkspace, setEditingWorkspace] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ 
-    name: '', 
-    description: '', 
-    color: '', 
-    use_context: 'personal' as 'personal' | 'professional'
-  });
+  const { workspaces, currentWorkspace, switchWorkspace, createWorkspace, refreshWorkspaces } = useWorkspaces();
+  const { user } = useAuth();
   const { t } = useI18nUI();
+  const [workspaceToDelete, setWorkspaceToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const handleEditWorkspace = (workspace: any) => {
-    setEditingWorkspace(workspace.id);
-    setEditForm({
-      name: workspace.name,
-      description: workspace.description || '',
-      color: workspace.color,
-      use_context: workspace.use_context || 'personal',
-    });
-  };
+  // Initialiser les valeurs d'édition avec le workspace actuel
+  useEffect(() => {
+    if (currentWorkspace) {
+      setEditName(currentWorkspace.name);
+      setEditDescription(currentWorkspace.description || '');
+    }
+  }, [currentWorkspace]);
 
-  const handleSaveEdit = async () => {
-    if (!editingWorkspace) return;
+  const saveWorkspace = useCallback(async (name: string, description: string) => {
+    if (!currentWorkspace) return;
     
-    await updateWorkspace(editingWorkspace, {
-      name: editForm.name,
-      description: editForm.description || undefined,
-      color: editForm.color,
-      use_context: editForm.use_context,
-    });
+    // Vérifier s'il y a des changements
+    const hasChanges = name !== currentWorkspace.name || 
+                      (description.trim() || null) !== (currentWorkspace.description || null);
     
-    setEditingWorkspace(null);
-  };
+    if (!hasChanges) return; // Pas de changement
 
-  const handleCancelEdit = () => {
-    setEditingWorkspace(null);
-    setEditForm({ name: '', description: '', color: '', use_context: 'personal' });
-  };
+    setIsUpdating(true);
+    try {
+      const { error: updateError } = await supabase
+        .from('workspaces')
+        .update({
+          name: name,
+          description: description.trim() || null
+        })
+        .eq('id', currentWorkspace.id)
+        .eq('user_id', user?.id);
+
+      if (updateError) throw updateError;
+
+      await refreshWorkspaces();
+      setHasUnsavedChanges(false);
+      // Toast discret pour la sauvegarde automatique
+      toast.success(t('workspaces.information.savedSuccess'));
+    } catch (error) {
+      console.error('Error updating workspace:', error);
+      toast.error(t('workspaces.information.savedError'));
+    } finally {
+      setIsUpdating(false);
+    }
+  }, [currentWorkspace, user?.id, refreshWorkspaces, toast, t]);
+
+  // Sauvegarde automatique avec debounce
+  useEffect(() => {
+    if (!currentWorkspace) return;
+    
+    const hasChanges = editName !== currentWorkspace.name || 
+                      (editDescription.trim() || null) !== (currentWorkspace.description || null);
+    
+    setHasUnsavedChanges(hasChanges);
+    
+    if (!hasChanges) return;
+    
+    const timeoutId = setTimeout(() => {
+      saveWorkspace(editName, editDescription);
+    }, 1000); // Debounce de 1 seconde
+    
+    return () => clearTimeout(timeoutId);
+  }, [editName, editDescription, currentWorkspace, saveWorkspace]);
 
   const handleDeleteWorkspace = async () => {
     if (!workspaceToDelete) return;
-    
-    await deleteWorkspace(workspaceToDelete);
-    setWorkspaceToDelete(null);
+
+    setDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('workspaces')
+        .delete()
+        .eq('id', workspaceToDelete)
+        .eq('user_id', user?.id); // Seul le propriétaire peut supprimer
+
+      if (error) throw error;
+
+      toast.success(t('workspaces.deleteSuccess'));
+      await refreshWorkspaces();
+    } catch (error) {
+      console.error('Error deleting workspace:', error);
+      toast.error(t('workspaces.deleteError'));
+    } finally {
+      setDeleting(false);
+      setWorkspaceToDelete(null);
+    }
   };
 
-  const colors = [
-    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', 
-    '#8b5cf6', '#06b6d4', '#84cc16', '#f97316'
-  ];
+  const handleSwitchWorkspace = (workspace: any) => {
+    if (workspace.id !== currentWorkspace?.id) {
+      switchWorkspace(workspace);
+      toast.success(t('workspaces.selectSuccess', { name: workspace.name }));
+    }
+  };
+
+
+  const handleImageChange = async (file: File) => {
+    if (!currentWorkspace) return;
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `workspace-${currentWorkspace.id}-${Date.now()}.${fileExt}`;
+      const filePath = `${user?.id}/${fileName}`;
+
+      let bucketName = 'workspace-images';
+      let uploadError;
+
+      // Essayer d'abord le bucket workspace-images
+      const { error: workspaceImagesError } = await supabase.storage
+        .from('workspace-images')
+        .upload(filePath, file);
+
+      if (workspaceImagesError) {
+        console.log('workspace-images bucket not available, using avatars bucket');
+        bucketName = 'avatars';
+        const { error: avatarsError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, file);
+        uploadError = avatarsError;
+      } else {
+        uploadError = workspaceImagesError;
+      }
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw new Error(`Erreur d'upload: ${uploadError.message}`);
+      }
+
+      // Mettre à jour l'URL de l'image
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(filePath);
+
+      const { error: imageError } = await supabase
+        .from('workspaces')
+        .update({ image_url: publicUrl })
+        .eq('id', currentWorkspace.id)
+        .eq('user_id', user?.id);
+
+      if (imageError) {
+        console.error('Database update error:', imageError);
+        throw new Error(`Erreur de mise à jour: ${imageError.message}`);
+      }
+
+      await refreshWorkspaces();
+    } catch (error) {
+      console.error('Error updating workspace image:', error);
+      throw error;
+    }
+  };
+
+  const handleImageDelete = async () => {
+    if (!currentWorkspace) return;
+
+    try {
+      const { error: imageError } = await supabase
+        .from('workspaces')
+        .update({ image_url: null })
+        .eq('id', currentWorkspace.id)
+        .eq('user_id', user?.id);
+
+      if (imageError) throw imageError;
+
+      await refreshWorkspaces();
+    } catch (error) {
+      console.error('Error deleting workspace image:', error);
+      throw error;
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-medium">{t('workspaces.title')}</h3>
-          <p className="text-sm text-muted-foreground">
-            {t('workspaces.description')}
-          </p>
-        </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          {t('workspaces.newWorkspace')}
-        </Button>
-      </div>
 
-      <div className="grid gap-4">
-        {workspaces.map((workspace) => (
-          <Card key={workspace.id} className={`transition-all ${
-            currentWorkspace?.id === workspace.id 
-              ? 'ring-2 ring-primary border-primary' 
-              : ''
-          }`}>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="w-4 h-4 rounded-full border-2 border-background shadow-sm"
-                    style={{ backgroundColor: workspace.color }}
-                  />
-                  {editingWorkspace === workspace.id ? (
-                    <div className="space-y-2">
-                      <Input
-                        value={editForm.name}
-                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                        className="font-semibold"
-                      />
+      {/* Section Workspace actuel */}
+      {currentWorkspace && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('workspaces.image.title')}</CardTitle>
+            <CardDescription>
+              {t('workspaces.image.subtitle')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Section Image */}
+            <div className="space-y-4">
+              <WorkspaceImageUpload
+                currentImageUrl={currentWorkspace.image_url}
+                workspaceName={currentWorkspace.name}
+                onImageChange={handleImageChange}
+                onImageDelete={handleImageDelete}
+                disabled={isUpdating}
+              />
+            </div>
+
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Section Workspace Information */}
+      {currentWorkspace && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('workspaces.information.title')}</CardTitle>
+            <CardDescription>
+              {t('workspaces.information.subtitle')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Section Informations */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="workspace-name">{t('workspaces.information.nameLabel')}</Label>
+                <Input
+                  id="workspace-name"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder={t('workspaces.information.namePlaceholder')}
+                  disabled={isUpdating}
+                />
+                {hasUnsavedChanges && (
+                  <p className="text-xs text-muted-foreground">
+                    {t('workspaces.information.saving')}...
+                  </p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="workspace-description">{t('workspaces.information.descriptionLabel')}</Label>
+                <Textarea
+                  id="workspace-description"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  placeholder={t('workspaces.information.descriptionPlaceholder')}
+                  disabled={isUpdating}
+                  rows={3}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Section Tous les workspaces */}
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            {t('workspaces.yourWorkspaces')} ({workspaces.length})
+          </CardTitle>
+          <CardDescription>
+            Gérez tous vos workspaces
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {workspaces.length === 0 ? (
+            <div className="text-center py-8">
+              <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">
+                {t('workspaces.noWorkspaces')}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {t('workspaces.createFirstWorkspace')}
+              </p>
+              <Button onClick={() => setShowCreateDialog(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                {t('workspaces.createWorkspace')}
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {workspaces.map((workspace) => (
+                <div 
+                  key={workspace.id} 
+                  className={`flex items-center justify-between p-4 border rounded-lg transition-colors ${
+                    currentWorkspace?.id === workspace.id 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-border hover:bg-muted/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      {workspace.image_url ? (
+                        <img 
+                          src={workspace.image_url} 
+                          alt={workspace.name}
+                          className="h-10 w-10 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <Building2 className="h-5 w-5 text-primary" />
+                      )}
                     </div>
-                  ) : (
                     <div>
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-base">{workspace.name}</CardTitle>
-                        {workspace.is_default && (
+                        <h4 className="font-medium">{workspace.name}</h4>
+                        {workspace.user_id === user?.id && (
                           <Badge variant="secondary" className="text-xs">
                             <Crown className="h-3 w-3 mr-1" />
-                            {t('workspaces.defaultBadge')}
+                            {t('workspaces.owner')}
                           </Badge>
                         )}
                         {currentWorkspace?.id === workspace.id && (
                           <Badge variant="default" className="text-xs">
-                            {t('workspaces.currentBadge')}
+                            {t('workspaces.current')}
                           </Badge>
                         )}
                       </div>
                       {workspace.description && (
-                        <CardDescription className="mt-1">
+                        <p className="text-sm text-muted-foreground">
                           {workspace.description}
-                        </CardDescription>
+                        </p>
                       )}
-                      <div className="flex items-center gap-1 mt-1">
-                        <Briefcase className="h-3 w-3" />
-                        <span className="text-xs text-muted-foreground">
-                          {workspace.use_context === 'professional' ? t('workspaces.professional') : t('workspaces.personal')}
-                        </span>
-                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t('workspaces.createdOn')} {new Date(workspace.created_at).toLocaleDateString('fr-FR')}
+                      </p>
                     </div>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  {editingWorkspace === workspace.id ? (
-                    <>
-                       <Button size="sm" onClick={handleSaveEdit}>
-                        {t('workspaces.save')}
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={handleCancelEdit}>
-                        {t('workspaces.cancel')}
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      {currentWorkspace?.id !== workspace.id && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => switchWorkspace(workspace)}
-                        >
-                          <Building2 className="h-4 w-4 mr-2" />
-                          {t('workspaces.activate')}
-                        </Button>
-                      )}
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {currentWorkspace?.id !== workspace.id && (
                       <Button
+                        variant="outline"
                         size="sm"
-                        variant="ghost"
-                        onClick={() => handleEditWorkspace(workspace)}
+                        onClick={() => handleSwitchWorkspace(workspace)}
                       >
-                        <Edit3 className="h-4 w-4" />
+                        <Settings className="h-4 w-4 mr-2" />
+                        {t('workspaces.select')}
                       </Button>
-                      {!workspace.is_default && (
+                    )}
+                    
+                    {workspace.user_id === user?.id && (
+                      <>
                         <Button
-                          size="sm"
                           variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditWorkspace(workspace)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => setWorkspaceToDelete(workspace.id)}
-                          className="text-destructive hover:text-destructive"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-            
-            {editingWorkspace === workspace.id && (
-              <CardContent className="pt-0">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="description">{t('workspaces.workspaceDescription')}</Label>
-                    <Textarea
-                      id="description"
-                      value={editForm.description}
-                      onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                      placeholder={t('workspaces.descriptionPlaceholder')}
-                      rows={2}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label>{t('workspaces.color')}</Label>
-                    <div className="flex gap-2 mt-2">
-                      {colors.map((color) => (
-                        <button
-                          key={color}
-                          type="button"
-                          className={`w-6 h-6 rounded-full border-2 transition-transform ${
-                            editForm.color === color 
-                              ? 'border-foreground scale-110' 
-                              : 'border-border hover:scale-105'
-                          }`}
-                          style={{ backgroundColor: color }}
-                          onClick={() => setEditForm({ ...editForm, color })}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="editContext">{t('workspaces.usageContext')}</Label>
-                    <Select 
-                      value={editForm.use_context} 
-                      onValueChange={(value) => setEditForm({ ...editForm, use_context: value as 'personal' | 'professional' })}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="personal">
-                          <div className="flex flex-col items-start">
-                            <span className="font-medium">{t('workspaces.personalUsage')}</span>
-                            <span className="text-sm text-muted-foreground">
-                              {t('workspaces.personalDescription')}
-                            </span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="professional">
-                          <div className="flex flex-col items-start">
-                            <span className="font-medium">{t('workspaces.professionalUsage')}</span>
-                            <span className="text-sm text-muted-foreground">
-                              {t('workspaces.professionalDescription')}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                      </>
+                    )}
                   </div>
                 </div>
-              </CardContent>
-            )}
-          </Card>
-        ))}
-      </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-      <CreateWorkspaceDialog
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
-        onCreateWorkspace={createWorkspace}
-      />
+
 
       <AlertDialog open={!!workspaceToDelete} onOpenChange={() => setWorkspaceToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('workspaces.deleteTitle')}</AlertDialogTitle>
+            <AlertDialogTitle>Supprimer ce workspace ?</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('workspaces.deleteDescription')}
+              Cette action supprimera définitivement le workspace et toutes ses données. 
+              Cette action est irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('workspaces.cancel')}</AlertDialogCancel>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteWorkspace}
+              disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {t('workspaces.delete')}
+              {deleting ? t('workspaces.deleting') : t('workspaces.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -285,3 +411,5 @@ export const WorkspacesSettings: React.FC = () => {
     </div>
   );
 };
+
+export default WorkspacesSettings;

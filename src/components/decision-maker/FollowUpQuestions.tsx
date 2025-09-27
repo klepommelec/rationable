@@ -34,14 +34,14 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
 
   useEffect(() => {
     const loadQuestions = async () => {
-      // Si les questions existent déjà, les utiliser directement
+      // Si des questions existent déjà, les utiliser directement
       if (result.followUpQuestions && result.followUpQuestions.length > 0) {
-        console.log('✅ Using cached follow-up questions');
+        console.log('📋 Using existing follow-up questions from cache');
         setQuestions(result.followUpQuestions);
         return;
       }
 
-      console.log('🤔 Generating new follow-up questions (not cached)');
+      console.log('🤔 Generating new follow-up questions based on question language');
       setLoadingQuestions(true);
       try {
         const generatedQuestions = await generateFollowUpQuestions({
@@ -66,7 +66,7 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
     };
 
     loadQuestions();
-  }, [dilemma, result, category, onQuestionSelect, onCacheQuestions]);
+  }, [dilemma, result.id, category]);
 
   const handleQuestionClick = (questionId: string) => {
     if (isLoading || loadingQuestions) {
@@ -85,7 +85,7 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
     return (
       <Card className="animate-fade-in">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="text-lg">
             {t('analysis.followUpSection.title')}
           </CardTitle>
         </CardHeader>
@@ -106,7 +106,7 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
   return (
     <Card className="animate-fade-in">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="text-lg">
           {t('analysis.followUpSection.title')}
         </CardTitle>
         <p className="text-sm text-muted-foreground">

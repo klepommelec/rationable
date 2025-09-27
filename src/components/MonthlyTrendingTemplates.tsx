@@ -72,10 +72,10 @@ const MonthlyTrendingTemplates: React.FC<MonthlyTrendingTemplatesProps> = ({
             size="sm"
             onClick={() => handlePromptClick(template.prompt)}
             disabled={disabled}
-            className="text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-full py-[8px] hover:bg-primary/5 px-[13px]"
+            className="text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-full py-[8px] hover:bg-primary/5 px-[13px] group"
           >
             <TrendingUp className="h-3 w-3 text-primary/70 flex-shrink-0" />
-            <span className="truncate text-sm px-[4px] font-medium text-gray-500 line-clamp-2">
+            <span className="truncate text-sm px-[4px] font-medium text-gray-500 line-clamp-2 group-hover:text-primary/70">
               {template.prompt}
             </span>
           </Button>

@@ -108,6 +108,7 @@ export const useDecisionMaker = () => {
         setAnalysisStep,
         progress,
         progressMessage,
+        setProgressMessage,
         criteria,
         setCriteria,
         result,
@@ -129,6 +130,8 @@ export const useDecisionMaker = () => {
         clearHistory: handleClearHistory,
         getCurrentDecision,
         updateDecision,
+        addDecision,
+        setCurrentDecisionId,
         templates,
         uploadedFiles,
         setUploadedFiles

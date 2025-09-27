@@ -97,10 +97,10 @@ export const useDecisionActions = ({
             // Increment copy count
             await copyTemplate(templateId);
             
-            toast.success("Template communautaire appliqué !");
+            toast.success(t('history.toasts.templateApplied'));
         } catch (error) {
             console.error('Error applying community template:', error);
-            toast.error("Erreur lors de l'application du template");
+            toast.error(t('history.toasts.templateError'));
         }
     };
 
@@ -136,7 +136,7 @@ export const useDecisionActions = ({
             initialCriteriaRef.current = decisionToLoad.criteria;
             setHasChanges(false);
             
-            toast.info("Décision précédente chargée.");
+            toast.info(t('notifications.previousDecisionLoaded'));
         } else {
             console.error('Decision not found with id:', decisionId);
         }
@@ -147,13 +147,13 @@ export const useDecisionActions = ({
             clearSession();
         }
         deleteDecision(decisionId);
-        toast.success("Décision supprimée de l'historique.");
+        toast.success(t('history.toasts.decisionDeleted'));
     };
 
     const handleClearHistory = () => {
         clearSession();
         clearHistory();
-        toast.info("L'historique des décisions a été effacé.");
+        toast.info(t('history.toasts.historyCleared'));
     };
 
     const getCurrentDecision = () => {

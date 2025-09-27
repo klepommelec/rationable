@@ -197,7 +197,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                   <Database className="h-3 w-3" />
                    {!isVerifying && verifiedSources.length === 0 ? 
                     t('dataAccuracy.viewSources') : 
-                    isVerifying ? 'Vérification...' :
+                    isVerifying ? t('notifications.sourceVerification') :
                     `${displayedSourceCount} ${displayedSourceCount > 1 ? t('dataAccuracy.sources.other') : t('dataAccuracy.sources.one')}`
                   }
                   {isSourcesExpanded ? (
@@ -253,7 +253,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                 <Database className="h-3 w-3" />
                 {!isVerifying && verifiedSources.length === 0 ? 
                   t('dataAccuracy.viewSources') : 
-                  isVerifying ? 'Vérification...' :
+                  isVerifying ? t('notifications.sourceVerification') :
                   `${displayedSourceCount} ${displayedSourceCount > 1 ? t('dataAccuracy.sources.other') : t('dataAccuracy.sources.one')}`
                 }
                 {isSourcesExpanded ? (
@@ -271,7 +271,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
               {allSources.length === 0 ? (
                 <div className="text-xs text-muted-foreground">{t('dataAccuracy.noExternalSources')}</div>
               ) : isVerifying ? (
-                <div className="text-xs text-muted-foreground">Vérification des sources...</div>
+                <div className="text-xs text-muted-foreground">{t('notifications.sourceVerification')}</div>
               ) : (
                 (verifiedSources.length > 0 ? verifiedSources : allSources)
                   .filter(source => {

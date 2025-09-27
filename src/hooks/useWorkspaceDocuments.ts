@@ -1,207 +1,127 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
-import { useToast } from './use-toast';
 
 export interface WorkspaceDocument {
   id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
   workspace_id: string;
-  file_name: string;
-  file_size: number;
-  file_type: string;
-  file_url: string;
-  content_extracted?: string;
-  tags: string[];
-  category?: string;
-  uploaded_at: string;
+  user_id: string;
+  created_at: string;
+  description?: string;
+  tags?: string[];
+  usage_count?: number;
   last_used_at?: string;
-  usage_count: number;
-  metadata: any;
 }
 
 export const useWorkspaceDocuments = (workspaceId?: string) => {
   const [documents, setDocuments] = useState<WorkspaceDocument[]>([]);
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
 
   const fetchDocuments = async () => {
-    if (!workspaceId || !user) return;
-    
+    if (!workspaceId) {
+      setDocuments([]);
+      return;
+    }
+
     setLoading(true);
+    setError(null);
+
     try {
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('workspace_documents')
         .select('*')
         .eq('workspace_id', workspaceId)
-        .order('uploaded_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (fetchError) {
+        throw fetchError;
+      }
+
       setDocuments(data || []);
-    } catch (error) {
-      console.error('Erreur lors du chargement des documents:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les documents",
-        variant: "destructive"
-      });
+    } catch (err) {
+      console.error('Error fetching workspace documents:', err);
+      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des documents');
     } finally {
       setLoading(false);
     }
   };
 
-  const uploadDocument = async (file: File, category?: string, tags: string[] = []) => {
-    if (!workspaceId || !user) return null;
-
-    setUploading(true);
+  const addDocument = async (document: Omit<WorkspaceDocument, 'id' | 'created_at'>) => {
     try {
-      // Upload file to storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${workspaceId}/${Date.now()}.${fileExt}`;
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('decision-files')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('decision-files')
-        .getPublicUrl(fileName);
-
-      // Save document metadata
-      const { data, error } = await supabase
+      const { data, error: insertError } = await supabase
         .from('workspace_documents')
-        .insert({
-          workspace_id: workspaceId,
-          file_name: file.name,
-          file_size: file.size,
-          file_type: file.type,
-          file_url: publicUrl,
-          category,
-          tags,
-          metadata: { original_name: file.name }
-        })
+        .insert(document)
         .select()
         .single();
 
-      if (error) throw error;
-
-      // Trigger content extraction
-      try {
-        await supabase.functions.invoke('extract-document-content', {
-          body: {
-            documentId: data.id,
-            fileUrl: publicUrl,
-            fileType: file.type
-          }
-        });
-      } catch (extractError) {
-        console.error('Content extraction failed:', extractError);
-        // Continue anyway, the document is still uploaded
+      if (insertError) {
+        throw insertError;
       }
 
-      await fetchDocuments();
-      toast({
-        title: "Succès",
-        description: "Document téléchargé avec succès"
-      });
-
+      setDocuments(prev => [data, ...prev]);
       return data;
-    } catch (error) {
-      console.error('Erreur lors du téléchargement:', error);
-      toast({
-        title: "Erreur",
-        description: "Échec du téléchargement du document",
-        variant: "destructive"
-      });
-      return null;
-    } finally {
-      setUploading(false);
+    } catch (err) {
+      console.error('Error adding document:', err);
+      throw err;
     }
   };
 
-  const updateDocument = async (documentId: string, updates: Partial<WorkspaceDocument>) => {
+  const updateDocument = async (id: string, updates: Partial<WorkspaceDocument>) => {
     try {
-      const { error } = await supabase
+      const { data, error: updateError } = await supabase
         .from('workspace_documents')
         .update(updates)
-        .eq('id', documentId);
+        .eq('id', id)
+        .select()
+        .single();
 
-      if (error) throw error;
-
-      await fetchDocuments();
-      toast({
-        title: "Succès",
-        description: "Document mis à jour"
-      });
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour le document",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const deleteDocument = async (documentId: string) => {
-    try {
-      // Get document to delete file from storage
-      const document = documents.find(d => d.id === documentId);
-      if (document) {
-        const fileName = document.file_url.split('/').pop();
-        if (fileName) {
-          await supabase.storage
-            .from('decision-files')
-            .remove([`${workspaceId}/${fileName}`]);
-        }
+      if (updateError) {
+        throw updateError;
       }
 
-      const { error } = await supabase
-        .from('workspace_documents')
-        .delete()
-        .eq('id', documentId);
-
-      if (error) throw error;
-
-      await fetchDocuments();
-      toast({
-        title: "Succès",
-        description: "Document supprimé"
-      });
-    } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de supprimer le document",
-        variant: "destructive"
-      });
+      setDocuments(prev => 
+        prev.map(doc => doc.id === id ? data : doc)
+      );
+      return data;
+    } catch (err) {
+      console.error('Error updating document:', err);
+      throw err;
     }
   };
 
-  const updateDocumentUsage = async (documentId: string) => {
+  const deleteDocument = async (id: string) => {
     try {
-      await supabase.rpc('update_document_usage', { doc_id: documentId });
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour des statistiques:', error);
+      const { error: deleteError } = await supabase
+        .from('workspace_documents')
+        .delete()
+        .eq('id', id);
+
+      if (deleteError) {
+        throw deleteError;
+      }
+
+      setDocuments(prev => prev.filter(doc => doc.id !== id));
+    } catch (err) {
+      console.error('Error deleting document:', err);
+      throw err;
     }
   };
 
   useEffect(() => {
     fetchDocuments();
-  }, [workspaceId, user]);
+  }, [workspaceId]);
 
   return {
     documents,
     loading,
-    uploading,
-    uploadDocument,
+    error,
+    fetchDocuments,
+    addDocument,
     updateDocument,
-    deleteDocument,
-    updateDocumentUsage,
-    refetch: fetchDocuments
+    deleteDocument
   };
 };

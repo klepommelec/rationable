@@ -14,7 +14,7 @@ export interface WorkspaceMember {
   id: string;
   workspace_id: string;
   user_id: string;
-  role: 'owner' | 'member';
+  role: 'owner' | 'contributor' | 'viewer';
   created_at: string;
 }
 

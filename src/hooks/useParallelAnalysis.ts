@@ -44,7 +44,7 @@ export const useParallelAnalysis = ({
       const currentLanguage = I18nService.getCurrentLanguage();
       console.log(`🌐 Using forced language: ${currentLanguage}`);
       
-      const criteriaPromise = generateCriteriaWithFallback(dilemma, files, workspaceId, currentLanguage);
+      const criteriaPromise = generateCriteriaWithFallback(dilemma, files, workspaceId, currentLanguage, true);
       
       // Attendre la génération des critères (rapide)
       const criteriaResult = await criteriaPromise;

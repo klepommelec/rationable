@@ -17,6 +17,7 @@ interface CriteriaManagerProps {
   hasChanges?: boolean;
   currentDecisionId?: string | null;
   isNewDecision?: boolean;
+  isManualDecision?: boolean; // Indique si c'est une décision manuelle
 }
 export const CriteriaManager = ({
   criteria,
@@ -25,7 +26,8 @@ export const CriteriaManager = ({
   onUpdateAnalysis,
   hasChanges = false,
   currentDecisionId,
-  isNewDecision = false
+  isNewDecision = false,
+  isManualDecision = false
 }: CriteriaManagerProps) => {
   const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
   const [lastCriteriaCount, setLastCriteriaCount] = useState(0);
@@ -84,7 +86,9 @@ export const CriteriaManager = ({
     } : item));
   };
   const handleRemove = (id: string) => {
-    if (criteria.length <= 2) {
+    // En mode manuel, on peut supprimer tous les critères
+    // En mode intelligent, on garde au moins 2 critères
+    if (!isManualDecision && criteria.length <= 2) {
       toast.error(t('criteria.minCriteriaError'));
       return;
     }
@@ -132,7 +136,7 @@ export const CriteriaManager = ({
           <SortableContext items={criteria} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
               {criteria.map(criterion => <div key={criterion.id} className={`transition-all duration-300 ease-out ${visibleCriteria.includes(criterion.id) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'}`}>
-                  <CriterionRow criterion={criterion} onNameChange={handleNameChange} onRemove={handleRemove} isRemoveDisabled={criteria.length <= 2} isDragDisabled={isInteractionDisabled} />
+                  <CriterionRow criterion={criterion} onNameChange={handleNameChange} onRemove={handleRemove} isRemoveDisabled={!isManualDecision && criteria.length <= 2} isDragDisabled={isInteractionDisabled} />
                 </div>)}
             </div>
           </SortableContext>
@@ -144,7 +148,7 @@ export const CriteriaManager = ({
             {t('criteria.addButton')}
           </Button>
           
-          {hasChanges && onUpdateAnalysis && <Button onClick={onUpdateAnalysis} disabled={isInteractionDisabled} variant="default" size="sm" className="bg-black hover:bg-black/90 text-white">
+          {hasChanges && onUpdateAnalysis && !isManualDecision && <Button onClick={onUpdateAnalysis} disabled={isInteractionDisabled} variant="default" size="sm" className="bg-black hover:bg-black/90 text-white">
               <RefreshCw className="h-4 w-4 mr-2" />
               {t('criteria.updateAnalysis')}
             </Button>}

@@ -1,64 +1,82 @@
 
-import { useState, useEffect } from 'react';
-import { User, Globe, Trash2 } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Trash2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import AvatarUpload from '@/components/AvatarUpload';
-import { I18nService, SupportedLanguage } from '@/services/i18nService';
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import { useDecisionHistory } from '@/hooks/useDecisionHistory';
-import GoogleAccountSettings from './GoogleAccountSettings';
 
 const ProfileSettings = () => {
   const { user, profile, updateProfile, updateAvatar, deleteAvatar } = useAuth();
   const { toast } = useToast();
   const { t } = useI18nUI();
   const { clearHistory } = useDecisionHistory();
+  
   const [fullName, setFullName] = useState(profile?.full_name || '');
-  const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>('fr');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const languages = I18nService.getSupportedLanguages();
-
+  // Synchroniser fullName avec profile?.full_name quand le profile change
   useEffect(() => {
-    setCurrentLanguage(I18nService.getCurrentLanguage());
-  }, []);
+    if (profile?.full_name !== undefined) {
+      setFullName(profile.full_name || '');
+    }
+  }, [profile?.full_name]);
 
-  const handleSaveProfile = async () => {
+  const saveProfile = useCallback(async (name: string) => {
+    if (name === (profile?.full_name || '')) return; // Pas de changement
+    
     setIsUpdating(true);
     try {
       const { error } = await updateProfile({ 
-        full_name: fullName
+        full_name: name
       });
       
       if (error) {
         toast({
-          title: "Erreur",
+          title: t('common.error'),
           description: t('profile.info.savedError'),
           variant: "destructive",
         });
       } else {
+        setHasUnsavedChanges(false);
+        // Toast discret pour la sauvegarde automatique
         toast({
-          title: "Profil mis à jour",
-          description: t('profile.info.savedSuccess'),
+          title: t('profile.info.savedSuccess'),
+          description: "",
+          duration: 2000,
         });
       }
     } catch (error) {
       toast({
-        title: "Erreur",
+        title: t('common.error'),
         description: t('profile.info.savedError'),
         variant: "destructive",
       });
     } finally {
       setIsUpdating(false);
     }
-  };
+  }, [profile?.full_name, updateProfile, toast, t]);
+
+  // Sauvegarde automatique avec debounce
+  useEffect(() => {
+    const hasChanges = fullName !== (profile?.full_name || '');
+    setHasUnsavedChanges(hasChanges);
+    
+    if (!hasChanges) return;
+    
+    const timeoutId = setTimeout(() => {
+      saveProfile(fullName);
+    }, 1000); // Debounce de 1 seconde
+    
+    return () => clearTimeout(timeoutId);
+  }, [fullName, profile?.full_name, saveProfile]);
 
   const handleAvatarChange = async (file: File) => {
     const { error } = await updateAvatar(file);
@@ -77,16 +95,6 @@ const ProfileSettings = () => {
   };
 
 
-  const handleLanguageChange = (language: SupportedLanguage) => {
-    I18nService.setLanguage(language);
-    setCurrentLanguage(language);
-    toast({
-      title: t('profile.language.toastTitle'),
-      description: t('profile.language.toastDesc'),
-    });
-    // Rechargement pour appliquer la langue partout
-    setTimeout(() => window.location.reload(), 100);
-  };
 
   const handleClearHistory = () => {
     clearHistory();
@@ -97,17 +105,14 @@ const ProfileSettings = () => {
     });
   };
 
-  const hasChanges = fullName !== (profile?.full_name || '');
-
   return (
     <div className="space-y-6 mb-8">
       {/* Section Avatar */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            {t('profile.avatar.title')}
-          </CardTitle>
+        <CardTitle>
+          {t('profile.avatar.title')}
+        </CardTitle>
           <CardDescription>
             {t('profile.avatar.description')}
           </CardDescription>
@@ -127,10 +132,9 @@ const ProfileSettings = () => {
       {/* Section Informations */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            {t('profile.info.title')}
-          </CardTitle>
+        <CardTitle>
+          {t('profile.info.title')}
+        </CardTitle>
           <CardDescription>
             {t('profile.info.description')}
           </CardDescription>
@@ -155,47 +159,14 @@ const ProfileSettings = () => {
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder={t('profile.info.fullNamePlaceholder')}
                 className="mt-1"
+                disabled={isUpdating}
               />
+              {hasUnsavedChanges && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t('profile.info.saving')}...
+                </p>
+              )}
             </div>
-          </div>
-          <Button 
-            onClick={handleSaveProfile}
-            disabled={isUpdating || !hasChanges}
-          >
-            {isUpdating ? t('profile.info.saving') : t('profile.info.save')}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Section Langue */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5" />
-            {t('profile.language.title')}
-          </CardTitle>
-          <CardDescription>
-            {t('profile.language.description')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Label htmlFor="language">{t('profile.language.label')}</Label>
-            <Select value={currentLanguage} onValueChange={handleLanguageChange}>
-              <SelectTrigger className="w-full max-w-xs">
-                <SelectValue placeholder={t('profile.language.placeholder')} />
-              </SelectTrigger>
-              <SelectContent>
-                {languages.map((language) => (
-                  <SelectItem key={language.code} value={language.code}>
-                    {language.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-sm text-muted-foreground">
-              {t('profile.language.helpText')}
-            </p>
           </div>
         </CardContent>
       </Card>
@@ -203,10 +174,9 @@ const ProfileSettings = () => {
       {/* Section Gestion des données */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trash2 className="h-5 w-5" />
-            {t('settings.data.title')}
-          </CardTitle>
+        <CardTitle>
+          {t('settings.data.title')}
+        </CardTitle>
           <CardDescription>
             {t('settings.data.description')}
           </CardDescription>
@@ -227,8 +197,6 @@ const ProfileSettings = () => {
         </CardContent>
       </Card>
 
-      {/* Section Compte Google */}
-      <GoogleAccountSettings />
     </div>
   );
 };

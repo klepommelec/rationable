@@ -27,6 +27,8 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   const { t } = useI18nUI();
   const [actionLinks, setActionLinks] = useState<Record<string, BestLinksResponse | null>>({});
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+  const [expandedPros, setExpandedPros] = useState<Record<string, boolean>>({});
+  const [expandedCons, setExpandedCons] = useState<Record<string, boolean>>({});
   const detectedLanguage = I18nService.getCurrentLanguage();
   const detectedVertical = dilemma ? I18nService.detectVertical(dilemma) : null;
 
@@ -210,6 +212,21 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
     }
   };
 
+  // Fonctions pour gérer l'expansion des avantages et inconvénients
+  const toggleProsExpansion = (optionKey: string) => {
+    setExpandedPros(prev => ({
+      ...prev,
+      [optionKey]: !prev[optionKey]
+    }));
+  };
+
+  const toggleConsExpansion = (optionKey: string) => {
+    setExpandedCons(prev => ({
+      ...prev,
+      [optionKey]: !prev[optionKey]
+    }));
+  };
+
   if (!breakdown || breakdown.length === 0) {
     return (
       <div className="flex items-center justify-center p-8 text-muted-foreground">
@@ -317,31 +334,43 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                   </TableCell>
                   <TableCell className="align-top vertical-align-top border-r">
                     <div className="space-y-1">
-                      {option.pros?.slice(0, 3).map((pro, proIndex) => (
+                      {(expandedPros[optionKey] ? option.pros : option.pros?.slice(0, 3))?.map((pro, proIndex) => (
                         <div key={proIndex} className="flex items-start gap-2 text-sm">
                           <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
                           <span className="text-muted-foreground">{pro}</span>
                         </div>
                       ))}
                       {option.pros?.length > 3 && (
-                        <p className="text-xs text-muted-foreground italic">
-                          +{option.pros.length - 3} {t('decision.moreAdvantages')}
-                        </p>
+                        <button
+                          onClick={() => toggleProsExpansion(optionKey)}
+                          className="text-xs text-muted-foreground italic hover:text-foreground transition-colors cursor-pointer"
+                        >
+                          {expandedPros[optionKey] 
+                            ? t('decision.seeLess') 
+                            : `+${option.pros.length - 3} ${t('decision.moreAdvantages')}`
+                          }
+                        </button>
                       )}
                     </div>
                   </TableCell>
                   <TableCell className="align-top vertical-align-top border-r">
                     <div className="space-y-1">
-                      {option.cons?.slice(0, 3).map((con, conIndex) => (
+                      {(expandedCons[optionKey] ? option.cons : option.cons?.slice(0, 3))?.map((con, conIndex) => (
                         <div key={conIndex} className="flex items-start gap-2 text-sm">
                           <XCircle className="h-3 w-3 text-red-500 mt-0.5 flex-shrink-0" />
                           <span className="text-muted-foreground">{con}</span>
                         </div>
                       ))}
                       {option.cons?.length > 3 && (
-                        <p className="text-xs text-muted-foreground italic">
-                          +{option.cons.length - 3} {t('decision.moreDisadvantages')}
-                        </p>
+                        <button
+                          onClick={() => toggleConsExpansion(optionKey)}
+                          className="text-xs text-muted-foreground italic hover:text-foreground transition-colors cursor-pointer"
+                        >
+                          {expandedCons[optionKey] 
+                            ? t('decision.seeLess') 
+                            : `+${option.cons.length - 3} ${t('decision.moreDisadvantages')}`
+                          }
+                        </button>
                       )}
                     </div>
                   </TableCell>

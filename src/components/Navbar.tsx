@@ -67,9 +67,13 @@ const Navbar: React.FC = () => {
   return <header className={`sticky top-0 z-50 w-full transition-all duration-150 ${isScrolled ? 'bg-background/95 backdrop-blur border-b border-border supports-[backdrop-filter]:bg-background/90' : isSettingsPage ? 'bg-transparent border-b border-border' : 'bg-transparent'}`}>
       <div className="w-full flex h-16 items-center px-[20px]">
         <Link to="/" className="flex items-center gap-2 mr-auto hover:underline transition-all duration-200" onClick={e => {
-        // TOUJOURS nettoyer la session quand on clique sur le logo
+        // Nettoyer la session de manière sécurisée quand on clique sur le logo
         e.preventDefault();
-        clearSession();
+        try {
+          clearSession();
+        } catch (error) {
+          console.warn('Erreur lors du nettoyage de la session:', error);
+        }
         navigate('/');
       }}>
           <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-8 w-8 rounded-none " />

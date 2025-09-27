@@ -24,6 +24,7 @@ interface DilemmaSetupProps {
   dilemma: string;
   setDilemma: (dilemma: string) => void;
   analysisStep: 'idle' | 'loading-criteria' | 'criteria-loaded' | 'loading-options' | 'done';
+  setAnalysisStep: (step: 'idle' | 'loading-criteria' | 'criteria-loaded' | 'loading-options' | 'done') => void;
   isLoading: boolean;
   isUpdating: boolean;
   applyTemplate: (template: any) => void;
@@ -36,6 +37,7 @@ interface DilemmaSetupProps {
   handleStartAnalysis: () => void;
   progress: number;
   progressMessage: string;
+  setProgressMessage: (message: string) => void;
   templates: {
     name: string;
     dilemma: string;
@@ -45,11 +47,14 @@ interface DilemmaSetupProps {
   onUpdateCategory: (decisionId: string, categoryId: string | undefined) => void;
   uploadedFiles: UploadedFile[];
   setUploadedFiles: (files: UploadedFile[]) => void;
+  addDecision: (decision: any) => void;
+  setCurrentDecisionId: (id: string) => void;
 }
 const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   dilemma,
   setDilemma,
   analysisStep,
+  setAnalysisStep,
   isLoading,
   isUpdating,
   applyTemplate,
@@ -62,12 +67,15 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   handleStartAnalysis,
   progress,
   progressMessage,
+  setProgressMessage,
   templates,
   selectedCategory,
   onCategoryChange,
   onUpdateCategory,
   uploadedFiles,
-  setUploadedFiles
+  setUploadedFiles,
+  addDecision,
+  setCurrentDecisionId
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -78,8 +86,16 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     t
   } = useI18nUI();
   const {
-    user
+    user,
+    profile
   } = useAuth();
+  
+  // Get user display name helper
+  const getUserDisplayName = () => {
+    if (profile?.full_name) return profile.full_name;
+    if (profile?.email) return profile.email;
+    return 'Utilisateur';
+  };
   const {
     context
   } = useContextualContent();
@@ -206,8 +222,12 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     // Clear previous analyses when starting a new question (not a follow-up)
     clearAnalyses();
     setIsAnalysisStarting(true);
+    console.log('🔍 [DEBUG] Toggle state:', realTimeSearchEnabled);
+    console.log('🔍 [DEBUG] localStorage value:', localStorage.getItem('realTimeSearchEnabled'));
+    
     if (realTimeSearchEnabled) {
       // Mode IA automatique
+      console.log('🤖 [DEBUG] AI mode activated');
       toast.success(t('dilemmaSetup.analysisStarted'));
       try {
         await handleStartAnalysis();
@@ -215,15 +235,38 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
         setIsAnalysisStarting(false);
       }
     } else {
-      // Mode manuel : on passe directement aux critères sans analyse automatique
-      toast.success("Mode manuel activé. Créez vos critères et options.");
-      try {
-        // On peut déclencher directement l'étape de création manuelle
-        // Pour l'instant, on utilise toujours handleStartAnalysis mais on pourrait ajouter une logique différente
-        await handleStartAnalysis();
-      } finally {
-        setIsAnalysisStarting(false);
-      }
+      // Mode manuel : créer une décision dès maintenant pour permettre les commentaires
+      console.log('📝 [DEBUG] Manual mode activated - creating decision immediately');
+      
+      // Créer une décision vide pour le mode manuel
+      const newId = crypto.randomUUID();
+      const newDecision = {
+        id: newId,
+        timestamp: Date.now(),
+        dilemma: dilemma,
+        emoji: '🤔',
+        criteria: [],
+        result: null, // Pas encore de résultat
+        category: undefined,
+        threadId: newId,
+        parentId: undefined,
+        createdById: user?.id,
+        createdByName: getUserDisplayName(),
+        language: 'fr'
+      };
+      
+      // Sauvegarder la décision immédiatement
+      addDecision(newDecision);
+      setCurrentDecisionId(newId);
+      
+      toast.success(t('dilemmaSetup.manualModeActivated'));
+      setIsAnalysisStarting(false);
+      
+      // En mode manuel, on passe directement à l'étape de création manuelle
+      setAnalysisStep('criteria-loaded');
+      setProgressMessage('Mode manuel - Créez vos critères et options');
+      
+      console.log('🆔 Created decision for manual mode:', newId);
     }
   };
   const handleAuthSuccess = () => {
@@ -241,14 +284,13 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             <div className="h-[72vh] flex items-center justify-center">
                 <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none shadow-none bg-transparent">
                     <CardHeader className="text-center pt-12 px-4 sm:px-6">
-        <h2 className="font-bold text-4xl sm:text-4xl md:text-5xl lg:text-6xl">
-                            <div className="font-semibold ">{t('dilemmaSetup.hero.titleLine1')} </div>
+                        <h2 className="font-bold text-4xl sm:text-4xl md:text-5xl lg:text-6xl">
+                            <div className="font-semibold">{t('dilemmaSetup.hero.titleLine1')}</div>
                             <div className="flex items-center justify-center gap-3">
                                 <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 xl:h-16 xl:w-16" />
-                                <span className="font-semibold ">{t('dilemmaSetup.hero.brand')}</span>
+                                <span className="font-semibold">{t('dilemmaSetup.hero.titleLine2')}</span>
                             </div>
                         </h2>
-                        <CardDescription className="text-muted-foreground text-sm:text-base">{t('dilemmaSetup.hero.subtitle')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6 px-4 sm:px-6">
                         <div className="space-y-2">
@@ -274,9 +316,14 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 
                                 {/* Toggle IA intégré dans l'input */}
                                 <div className="absolute bottom-3 left-3 flex items-center gap-1">
-                                    <Switch id="ai-analysis" checked={realTimeSearchEnabled} onCheckedChange={setRealTimeSearchEnabled} className="scale-75 hover:scale-75 active:scale-75 [&:hover]:translate-y-0 [&:active]:translate-y-0" />
+                                    <Switch 
+                                      id="ai-analysis" 
+                                      checked={realTimeSearchEnabled} 
+                                      onCheckedChange={setRealTimeSearchEnabled} 
+                                      className="scale-75 hover:scale-75 active:scale-75 [&:hover]:translate-y-0 [&:active]:translate-y-0" 
+                                    />
                                     <Label htmlFor="ai-analysis" className="text-xs font-medium cursor-pointer">
-                                        Analyse intelligente par IA
+                                        {t('dilemmaSetup.aiToggleLabel')}
                                     </Label>
                                 </div>
                                 
@@ -288,7 +335,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                     </button>
                                     
                                      {/* Bouton d'analyse avec feedback visuel */}
-                                     {analysisStep === 'idle' && <button type="button" onClick={handleAnalysisClick} disabled={isMainButtonDisabled} aria-label={realTimeSearchEnabled ? t('dilemmaSetup.launchAnalysis') : 'Créer manuellement'} title={realTimeSearchEnabled ? t('dilemmaSetup.launchAnalysis') : 'Créer vos options manuellement'} className="p-2 bg-black hover:bg-black/90 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full hover:scale-105 active:scale-95">
+                                     {analysisStep === 'idle' && <button type="button" onClick={handleAnalysisClick} disabled={isMainButtonDisabled} aria-label={realTimeSearchEnabled ? t('dilemmaSetup.launchAnalysis') : t('dilemmaSetup.createManually')} title={realTimeSearchEnabled ? t('dilemmaSetup.launchAnalysis') : t('dilemmaSetup.createManually')} className="p-2 bg-black hover:bg-black/90 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full hover:scale-105 active:scale-95">
                                              {isAnalysisStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
                                          </button>}
                                 </div>
@@ -411,6 +458,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                         </Button>)}
                                 </div>
                             </div>
+                            
                         </div>}
                 </CardContent>
             </Card>

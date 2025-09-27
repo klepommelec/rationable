@@ -1,30 +1,40 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { WorkspaceMembersManager } from "@/components/workspace/WorkspaceMembersManager";
+import { Users } from 'lucide-react';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
+import { WorkspaceMembersManager } from '@/components/workspace/WorkspaceMembersManager';
 import { useI18nUI } from '@/contexts/I18nUIContext';
-import { Building2 } from 'lucide-react';
 
 export const MembersSettings: React.FC = () => {
-  const { currentWorkspace, workspaces } = useWorkspaces();
   const { t } = useI18nUI();
+  const { currentWorkspace } = useWorkspaces();
 
   if (!currentWorkspace) {
-    return (  
-      <Card>
-        <CardContent className="p-8 text-center">
-          <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">
-            Aucun workspace sélectionné
-          </h3>
-          <p className="text-muted-foreground mb-4">
-            Veuillez sélectionner un workspace pour gérer ses membres
-          </p>
-          <div className="text-sm text-muted-foreground">
-            Allez dans l'onglet "Workspaces" pour créer ou sélectionner un workspace
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-medium">{t('settings.members.title')}</h3>
+            <p className="text-sm text-muted-foreground">
+              {t('settings.members.subtitle')}
+            </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center py-8">
+              <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">
+                {t('settings.members.noWorkspaceSelected')}
+              </h3>
+              <p className="text-muted-foreground">
+                {t('settings.members.selectWorkspaceMessage')}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -32,9 +42,9 @@ export const MembersSettings: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium">Gestion des membres</h3>
+          <h3 className="text-lg font-medium">{t('settings.members.title')}</h3>
           <p className="text-sm text-muted-foreground">
-            Invitez et gérez les membres du workspace "{currentWorkspace.name}"
+            {t('settings.members.subtitle')} "{currentWorkspace.name}"
           </p>
         </div>
       </div>
@@ -46,3 +56,5 @@ export const MembersSettings: React.FC = () => {
     </div>
   );
 };
+
+export default MembersSettings;

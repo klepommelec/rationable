@@ -37,7 +37,7 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
 
   const filteredAndSortedHistory = useMemo(() => {
     let filtered = history.filter(decision => {
-      const matchesSearch = decision.dilemma.toLowerCase().includes(searchQuery.toLowerCase()) || decision.result.recommendation.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = decision.dilemma.toLowerCase().includes(searchQuery.toLowerCase()) || (decision.result?.recommendation?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
       const matchesCategory = selectedCategory === 'all' || decision.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
@@ -149,7 +149,7 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
                 followUpCount={item.followUpCount}
                 followUpDecisions={item.followUps}
                 titleOverride={item.root.dilemma}
-                rootRecommendation={item.root.result.recommendation}
+                rootRecommendation={item.root.result?.recommendation || "Décision en cours"}
               />
             ))
           )}
