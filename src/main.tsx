@@ -5,13 +5,13 @@ import App from './App.tsx'
 import './index.css'
 import { I18nService } from '@/services/i18nService'
 import { loadAnalytics } from '@/lib/analytics'
-// Configuration Sentry
-import { initSentry, SentryErrorBoundary } from '@/lib/sentry'
+// Configuration Sentry - temporairement désactivé
+// import { initSentry, SentryErrorBoundary } from '@/lib/sentry'
 
 // Initialiser Sentry si la DSN est configurée
-if (import.meta.env.VITE_SENTRY_DSN) {
-  initSentry();
-}
+// if (import.meta.env.VITE_SENTRY_DSN) {
+//   initSentry();
+// }
 
 // axe-core temporairement désactivé
 // if (import.meta.env.DEV) {
