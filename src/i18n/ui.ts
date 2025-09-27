@@ -874,7 +874,6 @@ const fr: UITranslations = {
     pointsOfAttention: "Points d'attention",
     usefulLinks: "Liens utiles",
     popularVideos: "Vidéos populaires",
-    seeMore: "Voir plus",
     comparisonTable: "Tableau de comparaison",
   },
   settings: {
@@ -1546,10 +1545,9 @@ const en: UITranslations = {
     recommended: "Recommended",
     advantages: "Advantages",
     pointsOfAttention: "Points of attention",
-    usefulLinks: "Useful links",
-    popularVideos: "Popular videos",
-    seeMore: "See more",
-    comparisonTable: "Comparison table",
+      usefulLinks: "Useful links",
+      popularVideos: "Popular videos",
+      comparisonTable: "Comparison table",
   },
   settings: {
         sidebar: {

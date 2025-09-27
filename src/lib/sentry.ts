@@ -176,7 +176,7 @@ export const sentryUtils = {
    * Créer une transaction personnalisée
    */
   startTransaction: (name: string, op: string = 'custom') => {
-    return Sentry.startTransaction({ name, op });
+    return Sentry.startSpan({ name, op }, () => {});
   },
 
   /**
