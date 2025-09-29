@@ -8,7 +8,7 @@ import { DataAccuracyIndicator } from './DataAccuracyIndicator';
 import { WorkspaceDocumentIndicator } from './WorkspaceDocumentIndicator';
 import { AIProviderIndicator } from './AIProviderIndicator';
 import ValidatedLink from '@/components/ValidatedLink';
-import { ExternalLink, Lightbulb, CheckCircle, ShoppingBag, Loader2, Navigation, Search, Edit3 } from 'lucide-react';
+import { ExternalLink, Lightbulb, CheckCircle, XCircle, ShoppingBag, Loader2, Navigation, Search, Edit3 } from 'lucide-react';
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import { ExpandableText } from '@/components/ExpandableText';
 import { firstResultService, BestLinksResponse } from '@/services/firstResultService';
@@ -166,15 +166,11 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               <div className="grid md:grid-cols-2 gap-4 w-full py-[8px]">
                 {/* Avantages - affiché seulement s'il y a des avantages */}
                 {topOption.pros?.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4" />
-                      {t('decision.advantages')}
-                    </h4>
+                  <div>
                     <ul className="space-y-1">
                       {topOption.pros.map((pro, index) => (
                         <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <span className="text-green-500 mt-1">•</span>
+                          <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                           <span>{pro}</span>
                         </li>
                       ))}
@@ -184,15 +180,11 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 
                 {/* Points d'attention - affiché seulement s'il y a des inconvénients */}
                 {topOption.cons?.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-orange-700 dark:text-orange-300 flex items-center gap-2">
-                      <ExternalLink className="h-4 w-4" />
-                      {t('decision.pointsOfAttention')}
-                    </h4>
+                  <div>
                     <ul className="space-y-1">
                       {topOption.cons.map((con, index) => (
                         <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <span className="text-orange-500 mt-1">•</span>
+                          <XCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
                           <span>{con}</span>
                         </li>
                       ))}

@@ -45,10 +45,10 @@ const Layout = () => {
   const currentConfig = theme === 'dark' ? darkThemeConfig : lightThemeConfig;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground relative">
+    <div className="min-h-screen flex flex-col bg-background text-foreground relative overflow-x-hidden">
       {/* Background animé pour la page d'accueil uniquement */}
       {isHomePage && (
-        <div className="absolute inset-0 pointer-events-none z-0">
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
           {/* Background de base - adapté au thème */}
           <div
             className={`absolute inset-0 ${
@@ -62,10 +62,10 @@ const Layout = () => {
           <div
             className="absolute rounded-full"
             style={{
-              width: "500px",
-              height: "500px",
+              width: "min(500px, 50vw)",
+              height: "min(500px, 50vw)",
               top: "20%",
-              left: "10%",
+              left: "max(10%, -100px)",
               background: theme === 'dark'
                 ? 'radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.03) 50%, transparent 100%)'
                 : 'radial-gradient(circle, rgba(18, 113, 255, 0.2) 0%, rgba(18, 113, 255, 0.1) 50%, transparent 100%)',
@@ -78,10 +78,11 @@ const Layout = () => {
           <div
             className="absolute rounded-full blur-3xl"
             style={{
-              width: "450px",
-              height: "450px",
+              width: "min(450px, 45vw)",
+              height: "min(450px, 45vw)",
               top: "40%",
               left: "50%",
+              transform: "translateX(-50%)",
               background: theme === 'dark'
                 ? 'radial-gradient(circle, rgba(234, 179, 8, 0.12) 0%, rgba(234, 179, 8, 0.04) 50%, transparent 100%)'
                 : 'radial-gradient(circle, rgba(180, 180, 50, 0.35) 0%, rgba(180, 180, 50, 0.15) 50%, transparent 100%)',
@@ -93,10 +94,10 @@ const Layout = () => {
           <div
             className="absolute rounded-full"
             style={{
-              width: "600px",
-              height: "600px",
+              width: "min(600px, 60vw)",
+              height: "min(600px, 60vw)",
               top: "10%",
-              right: "20%",
+              right: "max(20%, -150px)",
               background: theme === 'dark'
                 ? 'radial-gradient(circle, rgba(34, 211, 238, 0.08) 0%, rgba(34, 211, 238, 0.03) 50%, transparent 100%)'
                 : 'radial-gradient(circle, rgba(100, 220, 255, 0.3) 0%, rgba(100, 220, 255, 0.15) 50%, transparent 100%)',
@@ -125,7 +126,7 @@ const Layout = () => {
         </div>
       )}
       
-      <div className="relative z-10 flex flex-col min-h-screen">
+      <div className="relative z-10 flex flex-col min-h-screen w-full max-w-full overflow-x-hidden">
         
         <Navbar />
         <main 
@@ -133,8 +134,8 @@ const Layout = () => {
           id="main-content" 
           className={`flex-grow ${
             isSettingsPage 
-              ? 'h-[calc(100vh-4rem)] overflow-hidden' 
-              : 'container mx-auto sm:px-6 lg:px-8 py-6 sm:py-6 lg:py-8 max-w-full overflow-x-hidden px-[3px] sm:px-6'
+              ? 'h-[calc(100vh-4rem)] overflow-hidden pt-16' 
+              : 'container mx-auto sm:px-6 lg:px-8 py-6 sm:py-6 lg:py-8 max-w-full overflow-x-hidden px-[3px] sm:px-6 pt-16'
           }`}
         >
           <Outlet />

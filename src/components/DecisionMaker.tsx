@@ -429,7 +429,7 @@ const DecisionMaker = () => {
         {displayStep !== 'idle' && <AnalysisNavigation analyses={analyses} currentAnalysisIndex={currentAnalysisIndex} onNavigate={handleAnalysisNavigation} />}
 
         {(displayStep === 'criteria-loaded' || displayStep === 'loading-options' || displayStep === 'done') && <>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 animate-fade-in">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 animate-fade-in pt-8 sm:pt-16">
               {/* Layout mobile : emoji au-dessus du titre, aligné à gauche */}
               <div className="sm:hidden space-y-2 w-full px-0">
                 <EmojiPicker emoji={displayEmoji} setEmoji={setEmoji} />

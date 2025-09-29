@@ -2,20 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { IBreakdownItem, IResult } from '@/types/decision';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, ExternalLink, ShoppingBag, Loader2, Navigation } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { CheckCircle, XCircle, Loader2, Navigation, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { generateOptionSearchLinks } from '@/services/expandOptionsService';
 import { firstResultService, BestLinksResponse } from '@/services/firstResultService';
 import { I18nService } from '@/services/i18nService';
 import { MerchantLogo } from '@/components/MerchantLogo';
 import { useI18nUI } from '@/contexts/I18nUIContext';
-import { handleExternalLinkClick } from '@/utils/navigation';
 
 interface ComparisonTableProps {
   breakdown: IBreakdownItem[];
   dilemma?: string;
-  result?: IResult; // Pour accéder au cache et le mettre à jour
-  onUpdateResult?: (updatedResult: IResult) => void; // Callback pour sauvegarder les liens en cache
+  result?: IResult;
+  onUpdateResult?: (updatedResult: IResult) => void;
 }
 
 export const ComparisonTable: React.FC<ComparisonTableProps> = ({
@@ -32,27 +31,30 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   const detectedLanguage = I18nService.getCurrentLanguage();
   const detectedVertical = dilemma ? I18nService.detectVertical(dilemma) : null;
 
-  // Lazy load action links only for recommended option
+  // Auto load action links for all options
   useEffect(() => {
     if (!breakdown?.length || !dilemma) return;
 
-    // Only load action links for the first (recommended) option
-    const recommendedOption = breakdown[0];
-    if (recommendedOption) {
-      const optionKey = recommendedOption.option;
+    // Load action links for all options automatically
+    breakdown.forEach((option, index) => {
+      const optionKey = option.option;
       
       // Vérifier si on a déjà tenté de charger cette option (succès ou échec)
       const hasCachedResult = result?.cachedActionLinks && result.cachedActionLinks.hasOwnProperty(optionKey);
       const hasLocalResult = actionLinks.hasOwnProperty(optionKey);
       
-      if (hasCachedResult || hasLocalResult) {
-        if (hasCachedResult && !hasLocalResult) {
-          console.log(`✅ Using cached action links for ${optionKey}`);
-          setActionLinks(prev => ({
-            ...prev,
-            [optionKey]: result.cachedActionLinks[optionKey]
-          }));
-        }
+      // Si on a un résultat en cache, l'utiliser immédiatement
+      if (hasCachedResult && !hasLocalResult) {
+        console.log(`✅ Using cached action links for ${optionKey}`);
+        setActionLinks(prev => ({
+          ...prev,
+          [optionKey]: result.cachedActionLinks[optionKey]
+        }));
+        return;
+      }
+      
+      // Si on a déjà un résultat local, ne pas recharger
+      if (hasLocalResult) {
         return;
       }
 
@@ -65,7 +67,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
         [optionKey]: true
       }));
       firstResultService.getBestLinks({
-        optionName: recommendedOption.option,
+        optionName: option.option,
         dilemma: dilemma,
         language: detectedLanguage,
         vertical: detectedVertical as any
@@ -123,94 +125,9 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
           [optionKey]: false
         }));
       });
-    }
-  }, [breakdown, dilemma, detectedLanguage, detectedVertical]);
+    });
+  }, [breakdown, dilemma, detectedLanguage, detectedVertical, result?.cachedActionLinks]);
 
-  // Lazy load action links for other options on demand
-  const loadActionLinksForOption = async (option: IBreakdownItem) => {
-    const optionKey = option.option;
-    
-    // Vérifier si on a déjà tenté de charger cette option (succès ou échec)
-    const hasCachedResult = result?.cachedActionLinks && result.cachedActionLinks.hasOwnProperty(optionKey);
-    const hasLocalResult = actionLinks.hasOwnProperty(optionKey);
-    
-    if (hasCachedResult || hasLocalResult || loadingStates[optionKey]) {
-      if (hasCachedResult && !hasLocalResult) {
-        console.log(`✅ Using cached action links for ${optionKey}`);
-        setActionLinks(prev => ({
-          ...prev,
-          [optionKey]: result.cachedActionLinks[optionKey]
-        }));
-      }
-      return;
-    }
-
-    console.log(`🔍 Loading action links for ${optionKey} (not cached)`);
-    setLoadingStates(prev => ({
-      ...prev,
-      [optionKey]: true
-    }));
-    try {
-      const linksResult = await firstResultService.getBestLinks({
-        optionName: option.option,
-        dilemma: dilemma || '',
-        language: detectedLanguage,
-        vertical: detectedVertical as any
-      });
-      setActionLinks(prev => ({
-        ...prev,
-        [optionKey]: linksResult
-      }));
-      
-      // Sauvegarder dans le cache
-      if (result && onUpdateResult) {
-        const updatedResult = {
-          ...result,
-          cachedActionLinks: {
-            ...result.cachedActionLinks,
-            [optionKey]: linksResult
-          }
-        };
-        console.log(`💾 Caching action links for ${optionKey}`);
-        onUpdateResult(updatedResult);
-      }
-    } catch (error) {
-      console.error(`Failed to get action links for ${optionKey}:`, error);
-      
-      // Créer une sentinelle pour indiquer l'échec
-      const failureSentinel: BestLinksResponse = {
-        official: undefined,
-        merchants: [],
-        maps: undefined,
-        actionType: 'buy',
-        provider: 'google_cse',
-        fromCache: true
-      };
-      
-      setActionLinks(prev => ({
-        ...prev,
-        [optionKey]: failureSentinel
-      }));
-      
-      // Sauvegarder l'échec dans le cache pour éviter de re-essayer
-      if (result && onUpdateResult) {
-        const updatedResult = {
-          ...result,
-          cachedActionLinks: {
-            ...result.cachedActionLinks,
-            [optionKey]: failureSentinel
-          }
-        };
-        console.log(`💾 Caching failure for ${optionKey}`);
-        onUpdateResult(updatedResult);
-      }
-    } finally {
-      setLoadingStates(prev => ({
-        ...prev,
-        [optionKey]: false
-      }));
-    }
-  };
 
   // Fonctions pour gérer l'expansion des avantages et inconvénients
   const toggleProsExpansion = (optionKey: string) => {
@@ -248,71 +165,233 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[280px] border-r">Option</TableHead>
-              <TableHead className="border-r">{t('decision.advantages')}</TableHead>
-              <TableHead className="border-r">{t('decision.disadvantages')}</TableHead>
-              <TableHead className="w-[180px]">{t('decision.learnMore')}</TableHead>
-            </TableRow>
-          </TableHeader>
+    <div className="space-y-4 w-full">
+      {/* Version mobile : Cards empilées */}
+      <div className="block md:hidden space-y-4">
+        {sortedOptions.map((option, index) => {
+          const optionKey = option.option;
+          const optionActionLinks = actionLinks?.[optionKey] || null;
+
+          return (
+            <Card key={index} className={`p-4 ${index === 0 ? 'border-green-200 bg-green-50 dark:bg-green-950/30' : ''}`}>
+              <div className="space-y-3">
+                {/* Header avec badge recommandé */}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    {index === 0 && (
+                      <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-white text-xs mb-2">
+                        {t('decision.recommended')}
+                      </Badge>
+                    )}
+                    <h3 className="font-medium text-sm leading-tight">
+                      {option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Boutons d'action - Search toujours en premier */}
+                <div className="flex flex-wrap gap-2">
+                  {/* Bouton Search - toujours présent */}
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-xs h-7"
+                    onClick={() => {
+                      const searchQuery = option.option.replace(/^Option\s+\d+:\s*/i, '').trim();
+                      window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, '_blank');
+                    }}
+                  >
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    {t('decision.search')}
+                  </Button>
+
+                  {/* Liens intelligents - seulement si disponibles */}
+                  {optionActionLinks && (optionActionLinks.official || optionActionLinks.merchants && optionActionLinks.merchants.length > 0 || optionActionLinks.maps) ? (
+                    <>
+                      {/* Primary button: Based on action type */}
+                      {optionActionLinks.actionType === 'directions' && optionActionLinks.maps ? (
+                        <a href={optionActionLinks.maps.url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm" className="text-xs h-7">
+                            <Navigation className="h-3 w-3 mr-1" />
+                            {I18nService.getDirectionsLabel(detectedLanguage)}
+                          </Button>
+                        </a>
+                      ) : optionActionLinks.official ? (
+                        <a href={optionActionLinks.official.url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm" className="text-xs h-7">
+                            <MerchantLogo url={optionActionLinks.official.url} size={14} className="mr-1" />
+                            {I18nService.getOfficialSiteLabel(detectedLanguage)}
+                          </Button>
+                        </a>
+                      ) : optionActionLinks.merchants?.[0] ? (
+                        <a href={optionActionLinks.merchants[0].url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm" className="text-xs h-7">
+                            <MerchantLogo url={optionActionLinks.merchants[0].url} size={14} className="mr-1" />
+                            {optionActionLinks.actionType === 'reserve' ? I18nService.getReserveLabel(detectedLanguage) : firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)}
+                          </Button>
+                        </a>
+                      ) : null}
+                      
+                      {/* Secondary buttons: Merchants */}
+                      {(optionActionLinks.actionType === 'directions' || optionActionLinks.official ? optionActionLinks.merchants || [] : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => (
+                        <a key={i} href={merchant.url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="secondary" size="sm" className="text-xs h-7">
+                            <MerchantLogo url={merchant.url} size={14} className="mr-1" />
+                            {firstResultService.getDomainLabel(merchant.domain)}
+                          </Button>
+                        </a>
+                      ))}
+                    </>
+                  ) : null}
+                </div>
+
+                {/* Avantages et Inconvénients en deux colonnes */}
+                {(option.pros?.length > 0 || option.cons?.length > 0) && (
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Avantages */}
+                    {option.pros && option.pros.length > 0 && (
+                      <div>
+                        <ul className="space-y-1">
+                          {(expandedPros[optionKey] ? option.pros : option.pros.slice(0, 3)).map((pro, proIndex) => (
+                            <li key={proIndex} className="text-xs text-muted-foreground flex items-start gap-2">
+                              <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+                              <span>{pro}</span>
+                            </li>
+                          ))}
+                          {option.pros.length > 3 && (
+                            <button
+                              onClick={() => toggleProsExpansion(optionKey)}
+                              className="text-xs text-muted-foreground italic hover:text-foreground transition-colors cursor-pointer"
+                            >
+                              {expandedPros[optionKey] 
+                                ? t('decision.seeLess') 
+                                : `+${option.pros.length - 3} ${t('decision.moreAdvantages')}`
+                              }
+                            </button>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Inconvénients */}
+                    {option.cons && option.cons.length > 0 && (
+                      <div>
+                        <ul className="space-y-1">
+                          {(expandedCons[optionKey] ? option.cons : option.cons.slice(0, 3)).map((con, conIndex) => (
+                            <li key={conIndex} className="text-xs text-muted-foreground flex items-start gap-2">
+                              <XCircle className="h-3 w-3 text-red-500 mt-0.5 flex-shrink-0" />
+                              <span>{con}</span>
+                            </li>
+                          ))}
+                          {option.cons.length > 3 && (
+                            <button
+                              onClick={() => toggleConsExpansion(optionKey)}
+                              className="text-xs text-muted-foreground italic hover:text-foreground transition-colors cursor-pointer"
+                            >
+                              {expandedCons[optionKey] 
+                                ? t('decision.seeLess') 
+                                : `+${option.cons.length - 3} ${t('decision.moreDisadvantages')}`
+                              }
+                            </button>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Version desktop : Tableau */}
+      <div className="hidden md:block">
+        <div className="rounded-md border w-full table-scroll-container">
+          <Table className="comparison-table" style={{ minWidth: '800px' }}>
+            <TableHeader>
+              <TableRow>
+                <TableHead 
+                  className="w-[300px] border-r" 
+                  style={{ paddingTop: '16px', paddingBottom: '16px', paddingLeft: '16px', paddingRight: '16px' }}
+                >
+                  Option
+                </TableHead>
+                <TableHead 
+                  className="w-[300px] border-r" 
+                  style={{ paddingTop: '16px', paddingBottom: '16px', paddingLeft: '16px', paddingRight: '16px' }}
+                >
+                  {t('decision.advantages')}
+                </TableHead>
+                <TableHead 
+                  className="w-[300px]" 
+                  style={{ paddingTop: '16px', paddingBottom: '16px', paddingLeft: '16px', paddingRight: '16px' }}
+                >
+                  {t('decision.disadvantages')}
+                </TableHead>
+              </TableRow>
+            </TableHeader>
           <TableBody>
             {sortedOptions.map((option, index) => {
-              const searchLinks = generateOptionSearchLinks(option.option, dilemma || '');
               const optionKey = option.option;
               const optionActionLinks = actionLinks?.[optionKey] || null;
-              const isLoading = loadingStates?.[optionKey] || false;
 
               return (
                 <TableRow 
                   key={index} 
-                  className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''} 
-                  onMouseEnter={() => index > 0 && loadActionLinksForOption(option)}
+                  className={index === 0 ? 'bg-green-50 dark:bg-green-950/30' : ''}
                 >
-                  <TableCell className="font-medium align-top border-r">
-                    <div className="flex flex-col gap-3">
+                  <TableCell className="font-medium align-top border-r" style={{ padding: '20px' }}>
+                    <div className="space-y-4">
                       {index === 0 && (
-                        <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-white whitespace-nowrap w-fit">
+                        <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-white text-xs">
                           {t('decision.recommended')}
                         </Badge>
                       )}
-                      <span className="text-sm font-medium">
+                      <div className="text-sm font-medium">
                         {option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
-                      </span>
+                      </div>
                       
-                      {/* Action buttons - only show for recommended option or when loaded */}
-                      {(index === 0 || actionLinks[optionKey]) && (
-                        <div className="mt-2">
-                          {isLoading ? (
-                            <Button variant="secondary" size="sm" disabled className="w-full text-xs h-7">
-                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                              {I18nService.getSearchingLabel(detectedLanguage)}
-                            </Button>
-                          ) : optionActionLinks && (optionActionLinks.official || optionActionLinks.merchants && optionActionLinks.merchants.length > 0 || optionActionLinks.maps) ? (
-                            <div className="flex flex-col gap-2">
+                      {/* Action buttons - Search toujours en premier */}
+                      <div className="mt-6 w-full">
+                        <div className="flex flex-col gap-1 w-full">
+                          {/* Bouton Search - toujours présent */}
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-xs w-full h-7"
+                            onClick={() => {
+                              const searchQuery = option.option.replace(/^Option\s+\d+:\s*/i, '').trim();
+                              window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, '_blank');
+                            }}
+                          >
+                            <ExternalLink className="h-3 w-3 mr-1 flex-shrink-0" />
+                            <span className="truncate">{t('decision.search')}</span>
+                          </Button>
+
+                          {/* Liens intelligents - seulement si disponibles */}
+                          {optionActionLinks && (optionActionLinks.official || optionActionLinks.merchants && optionActionLinks.merchants.length > 0 || optionActionLinks.maps) ? (
+                            <>
                               {/* Primary button: Based on action type */}
                               {optionActionLinks.actionType === 'directions' && optionActionLinks.maps ? (
                                 <a href={optionActionLinks.maps.url} target="_blank" rel="noopener noreferrer">
-                                  <Button variant="outline" size="sm" className="text-xs max-w-[120px] truncate h-7">
-                                    <Navigation className="h-3 w-3 mr-1" />
-                                    {I18nService.getDirectionsLabel(detectedLanguage)}
+                                  <Button variant="outline" size="sm" className="text-xs w-full h-7 truncate">
+                                    <Navigation className="h-3 w-3 mr-1 flex-shrink-0" />
+                                    <span className="truncate">{I18nService.getDirectionsLabel(detectedLanguage)}</span>
                                   </Button>
                                 </a>
                               ) : optionActionLinks.official ? (
                                 <a href={optionActionLinks.official.url} target="_blank" rel="noopener noreferrer">
-                                  <Button variant="outline" size="sm" className="text-xs max-w-[120px] truncate h-7">
-                                    <MerchantLogo url={optionActionLinks.official.url} size={14} className="mr-1" />
-                                    {I18nService.getOfficialSiteLabel(detectedLanguage)}
+                                  <Button variant="outline" size="sm" className="text-xs w-full h-7 truncate">
+                                    <MerchantLogo url={optionActionLinks.official.url} size={14} className="mr-1 flex-shrink-0" />
+                                    <span className="truncate">{I18nService.getOfficialSiteLabel(detectedLanguage)}</span>
                                   </Button>
                                 </a>
                               ) : optionActionLinks.merchants?.[0] ? (
                                 <a href={optionActionLinks.merchants[0].url} target="_blank" rel="noopener noreferrer">
-                                  <Button variant="outline" size="sm" className="text-xs max-w-[120px] truncate h-7">
-                                    <MerchantLogo url={optionActionLinks.merchants[0].url} size={14} className="mr-1" />
-                                    {optionActionLinks.actionType === 'reserve' ? I18nService.getReserveLabel(detectedLanguage) : firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)}
+                                  <Button variant="outline" size="sm" className="text-xs w-full h-7 truncate">
+                                    <MerchantLogo url={optionActionLinks.merchants[0].url} size={14} className="mr-1 flex-shrink-0" />
+                                    <span className="truncate">{optionActionLinks.actionType === 'reserve' ? I18nService.getReserveLabel(detectedLanguage) : firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)}</span>
                                   </Button>
                                 </a>
                               ) : null}
@@ -320,23 +399,24 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                               {/* Secondary buttons: Merchants */}
                               {(optionActionLinks.actionType === 'directions' || optionActionLinks.official ? optionActionLinks.merchants || [] : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => (
                                 <a key={i} href={merchant.url} target="_blank" rel="noopener noreferrer">
-                                  <Button variant="secondary" size="sm" className="text-xs max-w-[120px] truncate h-7">
-                                    <MerchantLogo url={merchant.url} size={14} className="mr-1" />
-                                    {firstResultService.getDomainLabel(merchant.domain)}
+                                  <Button variant="secondary" size="sm" className="text-xs w-full h-7 truncate">
+                                    <MerchantLogo url={merchant.url} size={14} className="mr-1 flex-shrink-0" />
+                                    <span className="truncate">{firstResultService.getDomainLabel(merchant.domain)}</span>
                                   </Button>
                                 </a>
                               ))}
-                            </div>
+                            </>
                           ) : null}
                         </div>
-                      )}
+                      </div>
                     </div>
                   </TableCell>
-                  <TableCell className="align-top vertical-align-top border-r">
-                    <div className="space-y-1">
+                  
+                  <TableCell className="align-top border-r" style={{ padding: '20px' }}>
+                    <div className="space-y-2">
                       {(expandedPros[optionKey] ? option.pros : option.pros?.slice(0, 3))?.map((pro, proIndex) => (
                         <div key={proIndex} className="flex items-start gap-2 text-sm">
-                          <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+                          <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                           <span className="text-muted-foreground">{pro}</span>
                         </div>
                       ))}
@@ -353,11 +433,12 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="align-top vertical-align-top border-r">
-                    <div className="space-y-1">
+                  
+                  <TableCell className="align-top" style={{ padding: '20px' }}>
+                    <div className="space-y-2">
                       {(expandedCons[optionKey] ? option.cons : option.cons?.slice(0, 3))?.map((con, conIndex) => (
                         <div key={conIndex} className="flex items-start gap-2 text-sm">
-                          <XCircle className="h-3 w-3 text-red-500 mt-0.5 flex-shrink-0" />
+                          <XCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
                           <span className="text-muted-foreground">{con}</span>
                         </div>
                       ))}
@@ -374,32 +455,17 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="align-top">
-                    <div className="space-y-1">
-                      {searchLinks.slice(0, 2).map((link, i) => (
-                        <Button 
-                          key={i} 
-                          variant="outline" 
-                          size="sm" 
-                          className="w-full text-xs" 
-                          onClick={e => handleExternalLinkClick(e, link.url)}
-                        >
-                          <ExternalLink className="h-3 w-3 mr-1" />
-                          {link.title.replace(`"${option.option}"`, '').trim() || t('decision.search')}
-                        </Button>
-                      ))}
-                    </div>
-                  </TableCell>
                 </TableRow>
               );
             })}
           </TableBody>
         </Table>
       </div>
-      
-      <div className="text-xs text-muted-foreground text-center sr-only">
-        {t('decision.comparisonTableCaption').replace('{count}', sortedOptions.length.toString())}
-      </div>
     </div>
+      
+    <div className="text-xs text-muted-foreground text-center sr-only">
+      {t('decision.comparisonTableCaption').replace('{count}', sortedOptions.length.toString())}
+    </div>
+  </div>
   );
 };

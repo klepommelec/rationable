@@ -23,8 +23,8 @@ export interface UITranslations {
       formatSupport: string;
     };
     info: {
-      title: string;
-      description: string;
+        title: string;
+        description: string;
       email: string;
       fullName: string;
       fullNamePlaceholder: string;
@@ -34,21 +34,21 @@ export interface UITranslations {
       savedSuccess: string;
     };
     language: {
-      title: string;
-      description: string;
+        title: string;
+        description: string;
       label: string;
       placeholder: string;
       helpText: string;
       toastTitle: string;
       toastDesc: string;
-    };
+      };
     googleAccount: {
       title: string;
       description: string;
       lastActivity: string;
       connected: string;
       disconnectAccount: string;
-      toasts: {
+    toasts: {
         connectError: string;
         connectSuccess: string;
         disconnectError: string;
@@ -85,8 +85,8 @@ export interface UITranslations {
       titleLine1: string;
       titleLine2: string;
       brand: string;
-      subtitle: string;
-    };
+    subtitle: string;
+  };
     templates: {
       description: string;
       viewAll: string;
@@ -99,7 +99,7 @@ export interface UITranslations {
         templateError: string;
         decisionDeleted: string;
         historyCleared: string;
-      };
+    };
     };
   };
   auth: {
@@ -126,6 +126,7 @@ export interface UITranslations {
     };
   };
   decision: {
+    search: string;
     disadvantages: string;
     learnMore: string;
     seeMoreOptions: string;
@@ -204,20 +205,20 @@ export interface UITranslations {
     comparisonTable: string;
   };
   settings: {
-        sidebar: {
-          profile: string;
+    sidebar: {
+      profile: string;
           accounts: string;
-          workspaces: string;
-          documents: string;
+      workspaces: string;
+      documents: string;
           members: string;
           realTimeSearch: string;
           monthlyTemplates: string;
           preferences: string;
-          admin: string;
+      admin: string;
           personal: string;
           organization: string;
           system: string;
-        };
+    };
     header: {
       subtitle: string;
     };
@@ -230,48 +231,48 @@ export interface UITranslations {
       light: string;
       dark: string;
       system: string;
-      avatar: {
-        title: string;
-        description: string;
-        change: string;
-        formatSupport: string;
-      };
-      info: {
-        title: string;
-        description: string;
-        email: string;
-        fullName: string;
-        fullNamePlaceholder: string;
-        save: string;
-        saving: string;
-        savedError: string;
+    avatar: {
+      title: string;
+      description: string;
+      change: string;
+      formatSupport: string;
+    };
+    info: {
+      title: string;
+      description: string;
+      email: string;
+      fullName: string;
+      fullNamePlaceholder: string;
+      save: string;
+      saving: string;
+      savedError: string;
         savedSuccess: string;
-      };
-      language: {
-        title: string;
-        description: string;
-        label: string;
+    };
+    language: {
+      title: string;
+      description: string;
+      label: string;
         placeholder: string;
-        helpText: string;
-        toastTitle: string;
-        toastDesc: string;
-      };
-      googleAccount: {
-        title: string;
-        description: string;
-        lastActivity: string;
+      helpText: string;
+      toastTitle: string;
+      toastDesc: string;
+    };
+    googleAccount: {
+      title: string;
+      description: string;
+      lastActivity: string;
         connected: string;
-        disconnectAccount: string;
-        toasts: {
-          connectError: string;
+      disconnectAccount: string;
+      toasts: {
+        connectError: string;
           connectSuccess: string;
-          disconnectError: string;
-        };
+        disconnectError: string;
       };
     };
+  };
     workspaces: {
-      title: string;
-      subtitle: string;
+    title: string;
+    subtitle: string;
       defaultWorkspace: string;
       name: string;
       namePlaceholder: string;
@@ -319,8 +320,8 @@ export interface UITranslations {
       noDocument: string;
     };
     members: {
-      title: string;
-      subtitle: string;
+    title: string;
+    subtitle: string;
       invite: string;
       inviteEmailPlaceholder: string;
       inviteRoleLabel: string;
@@ -513,8 +514,8 @@ export interface UITranslations {
   };
   templates: {
     page: {
-      title: string;
-      description: string;
+    title: string;
+    description: string;
     };
     filters: {
       searchPlaceholder: string;
@@ -585,7 +586,7 @@ export interface UITranslations {
         supportedFormats: string;
       };
       edit: {
-        title: string;
+    title: string;
         description: string;
         nameLabel: string;
         namePlaceholder: string;
@@ -798,6 +799,7 @@ const fr: UITranslations = {
     },
   },
   decision: {
+    search: "Rechercher",
     disadvantages: "Points d'attention",
     moreDisadvantages: "points d'attention supplémentaires",
     moreAdvantages: "avantages supplémentaires",
@@ -875,9 +877,9 @@ const fr: UITranslations = {
     usefulLinks: "Liens utiles",
     popularVideos: "Vidéos populaires",
     comparisonTable: "Tableau de comparaison",
-  },
-  settings: {
-        sidebar: {
+    },
+    settings: {
+      sidebar: {
           profile: "Profil",
           accounts: "Comptes",
           workspaces: "Espaces de travail",
@@ -890,11 +892,11 @@ const fr: UITranslations = {
           personal: "Personnel",
           organization: "Organisation",
           system: "Système",
-        },
-    header: {
+      },
+      header: {
       subtitle: "Gérez vos paramètres et préférences",
-    },
-    profile: {
+      },
+      profile: {
       title: "Paramètres du profil",
       subtitle: "Gérez les informations de votre profil.",
       name: "Nom",
@@ -1055,8 +1057,8 @@ const fr: UITranslations = {
     criterionPlaceholder: "Ex: Coût",
     updateAnalysis: "Mettre à jour l'analyse",
     edit: "Modifier",
-  },
-  criteria: {
+    },
+    criteria: {
     title: "Critères",
     addButton: "Ajouter un critère",
     tooltip: "Les critères vous aident à évaluer vos options de manière objective",
@@ -1143,7 +1145,7 @@ const fr: UITranslations = {
     sendInvitation: "Envoyer l'invitation",
   },
   history: {
-    searchBar: {
+      searchBar: {
       filter: "Filtrer",
       more: "Plus",
       categoryLabel: "Catégorie",
@@ -1152,7 +1154,7 @@ const fr: UITranslations = {
       uncategorized: "Non catégorisé",
       searchPlaceholder: "Rechercher dans l'historique...",
       sortBy: "Trier par",
-      sort: {
+        sort: {
         date: "Date",
         category: "Catégorie",
       },
@@ -1161,11 +1163,11 @@ const fr: UITranslations = {
       copyText: "Copier le texte",
       export: "Exporter",
       clearAll: "Tout effacer",
-      toasts: {
-        export: {
+        toasts: {
+          export: {
           success: "Export réussi",
-        },
-        json: {
+          },
+          json: {
           success: "Export JSON réussi",
         },
       },
@@ -1178,8 +1180,8 @@ const fr: UITranslations = {
     },
     list: {
       seeMore: "Voir plus",
-    },
-    item: {
+      },
+      item: {
       share: "Partager",
       delete: "Supprimer",
     },
@@ -1283,42 +1285,42 @@ const fr: UITranslations = {
         savedError: "Erreur lors de la mise à jour du workspace",
       },
     },
-  privacy: {
+    privacy: {
     title: "Politique de confidentialité",
     lastUpdated: "Dernière mise à jour",
-    sections: {
-      dataCollection: {
+      sections: {
+        dataCollection: {
         title: "Collecte de données",
         description: "Nous collectons les données suivantes",
         item1: "Informations de profil",
         item2: "Décisions et analyses",
         item3: "Données d'utilisation",
         item4: "Cookies et technologies similaires",
-      },
-      dataUsage: {
+        },
+        dataUsage: {
         title: "Utilisation des données",
         description: "Vos données sont utilisées pour",
         item1: "Fournir nos services",
         item2: "Améliorer l'expérience utilisateur",
         item3: "Analyser les tendances",
         item4: "Personnaliser le contenu",
-      },
-      dataSharing: {
+        },
+        dataSharing: {
         title: "Partage des données",
         description: "Nous ne partageons vos données qu'avec",
         item1: "Votre consentement explicite",
         item2: "Les services tiers nécessaires",
         item3: "Les autorités légales si requis",
-      },
-      security: {
+        },
+        security: {
         title: "Sécurité",
         description: "Nous protégeons vos données avec",
         item1: "Chiffrement des données sensibles",
         item2: "Accès sécurisé et authentifié",
         item3: "Surveillance continue des systèmes",
         item4: "Formation du personnel à la sécurité",
-      },
-      rights: {
+        },
+        rights: {
         title: "Vos droits",
         description: "Vous disposez des droits suivants",
         item1: "Accès à vos données personnelles",
@@ -1329,22 +1331,22 @@ const fr: UITranslations = {
       cookies: {
         title: "Cookies",
         description: "Nous utilisons des cookies pour améliorer votre expérience",
-      },
-      retention: {
+        },
+        retention: {
         title: "Conservation des données",
         description: "Vos données sont conservées selon nos politiques de rétention",
-      },
-      contact: {
+        },
+        contact: {
         title: "Contact",
         description: "Pour toute question concernant cette politique",
         email: "Email",
-      },
-      changes: {
+        },
+        changes: {
         title: "Modifications",
         description: "Cette politique peut être modifiée à tout moment",
+        },
       },
     },
-  },
 };
 
 // English translations
@@ -1471,6 +1473,7 @@ const en: UITranslations = {
     },
   },
   decision: {
+    search: "Search",
     disadvantages: "Points of attention",
     moreDisadvantages: "more points of attention",
     moreAdvantages: "more advantages",
@@ -1608,7 +1611,7 @@ const en: UITranslations = {
         lastActivity: "Last activity",
         connected: "Connected",
         disconnectAccount: "Disconnect account",
-        toasts: {
+      toasts: {
           connectError: "Error connecting account",
           connectSuccess: "Google account connected successfully",
           disconnectError: "Error disconnecting account",
@@ -1699,19 +1702,19 @@ const en: UITranslations = {
       pending: "Pending",
       admin: "Administrator",
       noMembers: "No members in this workspace",
-    },
-    appearance: {
+      },
+      appearance: {
       title: "Appearance",
       description: "Customize the application appearance",
       themeLabel: "Theme",
       light: "Light",
       dark: "Dark",
       system: "System",
-    },
-    data: {
+      },
+      data: {
       title: "Data",
       description: "Manage your data and history",
-      history: {
+        history: {
         title: "History",
         desc: "Clear your decision history",
       },
@@ -1803,7 +1806,7 @@ const en: UITranslations = {
       collaborate: "Collaborate",
       shareAsTemplate: "Share as template",
     },
-    toasts: {
+        toasts: {
       linkCopied: "Link copied to clipboard",
     },
   },
@@ -1814,9 +1817,9 @@ const en: UITranslations = {
     inviteDescription: "Send an invitation link by email to your collaborators.",
     emailPlaceholder: "Collaborator's email address",
     sendInvitation: "Send invitation",
-  },
-  history: {
-    searchBar: {
+    },
+    history: {
+      searchBar: {
       filter: "Filter",
       more: "More",
       categoryLabel: "Category",
@@ -1825,7 +1828,7 @@ const en: UITranslations = {
       uncategorized: "Uncategorized",
       searchPlaceholder: "Search history...",
       sortBy: "Sort by",
-      sort: {
+        sort: {
         date: "Date",
         category: "Category",
       },
@@ -1834,11 +1837,11 @@ const en: UITranslations = {
       copyText: "Copy text",
       export: "Export",
       clearAll: "Clear all",
-      toasts: {
-        export: {
+        toasts: {
+          export: {
           success: "Export successful",
-        },
-        json: {
+          },
+          json: {
           success: "JSON export successful",
         },
       },
@@ -1851,8 +1854,8 @@ const en: UITranslations = {
     },
     list: {
       seeMore: "See more",
-    },
-    item: {
+      },
+      item: {
       share: "Share",
       delete: "Delete",
     },
@@ -1956,42 +1959,42 @@ const en: UITranslations = {
         savedError: "Error updating workspace",
       },
     },
-  privacy: {
+    privacy: {
     title: "Privacy policy",
     lastUpdated: "Last updated",
-    sections: {
-      dataCollection: {
+      sections: {
+        dataCollection: {
         title: "Data collection",
         description: "We collect the following data",
         item1: "Profile information",
         item2: "Decisions and analyses",
         item3: "Usage data",
         item4: "Cookies and similar technologies",
-      },
-      dataUsage: {
+        },
+        dataUsage: {
         title: "Data usage",
         description: "Your data is used to",
         item1: "Provide our services",
         item2: "Improve user experience",
         item3: "Analyze trends",
         item4: "Personalize content",
-      },
-      dataSharing: {
+        },
+        dataSharing: {
         title: "Data sharing",
         description: "We only share your data with",
         item1: "Your explicit consent",
         item2: "Necessary third-party services",
         item3: "Legal authorities when required",
-      },
-      security: {
+        },
+        security: {
         title: "Security",
         description: "We protect your data with",
         item1: "Encryption of sensitive data",
         item2: "Secure and authenticated access",
         item3: "Continuous system monitoring",
         item4: "Security training for staff",
-      },
-      rights: {
+        },
+        rights: {
         title: "Your rights",
         description: "You have the following rights",
         item1: "Access to your personal data",
@@ -2002,17 +2005,17 @@ const en: UITranslations = {
       cookies: {
         title: "Cookies",
         description: "We use cookies to improve your experience",
-      },
-      retention: {
+        },
+        retention: {
         title: "Data retention",
         description: "Your data is retained according to our retention policies",
-      },
-      contact: {
+        },
+        contact: {
         title: "Contact",
         description: "For any questions about this policy",
         email: "Email",
-      },
-      changes: {
+        },
+        changes: {
         title: "Changes",
         description: "This policy may be modified at any time",
       },

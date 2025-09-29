@@ -64,7 +64,7 @@ const Navbar: React.FC = () => {
     const fullName = profile?.full_name || user?.email?.split('@')[0] || t('navbar.userFallback');
     return fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
-  return <header className={`sticky top-0 z-50 w-full transition-all duration-150 ${isScrolled ? 'bg-background/95 backdrop-blur border-b border-border supports-[backdrop-filter]:bg-background/90' : isSettingsPage ? 'bg-transparent border-b border-border' : 'bg-transparent'}`}>
+  return <header className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-150 ${isScrolled ? 'bg-background/95 backdrop-blur border-b border-border supports-[backdrop-filter]:bg-background/90' : isSettingsPage ? 'bg-transparent border-b border-border' : 'bg-transparent'}`}>
       <div className="w-full flex h-16 items-center px-[20px]">
         <Link to="/" className="flex items-center gap-2 mr-auto hover:underline transition-all duration-200" onClick={e => {
         // Nettoyer la session de manière sécurisée quand on clique sur le logo

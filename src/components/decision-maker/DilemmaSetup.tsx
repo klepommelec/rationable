@@ -279,15 +279,18 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
       }, 100);
     }
   };
-  return <div className="mx-auto space-y-6">
-            {/* Header principal occupant 72% de la hauteur de l'écran */}
-            <div className="h-[72vh] flex items-center justify-center">
+  return <div className="mx-auto space-y-6 w-full max-w-full overflow-x-hidden">
+            {/* Header principal occupant 90% de la hauteur de l'écran */}
+            <div className="h-[90vh] flex items-center justify-center">
                 <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none shadow-none bg-transparent">
-                    <CardHeader className="text-center pt-12 px-4 sm:px-6">
-                        <h2 className="font-bold" style={{ fontSize: '68px', lineHeight: '0.8' }}>
+                    <CardHeader className="text-center px-4 sm:px-6">
+                        <h2 className="font-bold" style={{ 
+                            fontSize: 'clamp(32px, 8vw, 68px)', 
+                            lineHeight: '0.8' 
+                        }}>
                             <div className="font-semibold">{t('dilemmaSetup.hero.titleLine1')}</div>
-                            <div className="flex items-center justify-center gap-3">
-                                <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 xl:h-16 xl:w-16" />
+                            <div className="flex items-center justify-center gap-2 sm:gap-3">
+                                <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 xl:h-16 xl:w-16" />
                                 <span className="font-semibold">{t('dilemmaSetup.hero.titleLine2')}</span>
                             </div>
                         </h2>
