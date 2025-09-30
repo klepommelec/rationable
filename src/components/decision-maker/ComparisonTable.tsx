@@ -6,6 +6,8 @@ import { Card } from '@/components/ui/card';
 import { CheckCircle, XCircle, Loader2, Navigation, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { firstResultService, BestLinksResponse } from '@/services/firstResultService';
+import { actionLinksCacheService } from '@/services/actionLinksCacheService';
+import { loadActionLinksFromCache, preloadAllActionLinks } from '@/utils/actionLinksLoader';
 import { I18nService } from '@/services/i18nService';
 import { MerchantLogo } from '@/components/MerchantLogo';
 import { useI18nUI } from '@/contexts/I18nUIContext';
@@ -43,18 +45,24 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
       const hasCachedResult = result?.cachedActionLinks && result.cachedActionLinks.hasOwnProperty(optionKey);
       const hasLocalResult = actionLinks.hasOwnProperty(optionKey);
       
-      // Si on a un résultat en cache, l'utiliser immédiatement
-      if (hasCachedResult && !hasLocalResult) {
-        console.log(`✅ Using cached action links for ${optionKey}`);
-        setActionLinks(prev => ({
-          ...prev,
-          [optionKey]: result.cachedActionLinks[optionKey]
-        }));
-        return;
-      }
-      
       // Si on a déjà un résultat local, ne pas recharger
       if (hasLocalResult) {
+        return;
+      }
+
+      // Essayer de charger depuis le cache (local ou persistant)
+      const cachedLinks = loadActionLinksFromCache({
+        optionName: optionKey,
+        dilemma: dilemma || '',
+        result,
+        onUpdateResult
+      });
+      
+      if (cachedLinks) {
+        setActionLinks(prev => ({
+          ...prev,
+          [optionKey]: cachedLinks
+        }));
         return;
       }
 
@@ -261,11 +269,11 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                           {option.pros.length > 3 && (
                             <button
                               onClick={() => toggleProsExpansion(optionKey)}
-                              className="text-xs text-muted-foreground italic hover:text-foreground transition-colors cursor-pointer"
+                              className="text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer"
                             >
                               {expandedPros[optionKey] 
                                 ? t('decision.seeLess') 
-                                : `+${option.pros.length - 3} ${t('decision.moreAdvantages')}`
+                                : `+${option.pros.length - 3} more`
                               }
                             </button>
                           )}
@@ -286,11 +294,11 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                           {option.cons.length > 3 && (
                             <button
                               onClick={() => toggleConsExpansion(optionKey)}
-                              className="text-xs text-muted-foreground italic hover:text-foreground transition-colors cursor-pointer"
+                              className="text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer"
                             >
                               {expandedCons[optionKey] 
                                 ? t('decision.seeLess') 
-                                : `+${option.cons.length - 3} ${t('decision.moreDisadvantages')}`
+                                : `+${option.cons.length - 3} more`
                               }
                             </button>
                           )}
@@ -423,11 +431,11 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                       {option.pros?.length > 3 && (
                         <button
                           onClick={() => toggleProsExpansion(optionKey)}
-                          className="text-xs text-muted-foreground italic hover:text-foreground transition-colors cursor-pointer"
+                          className="text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer"
                         >
                           {expandedPros[optionKey] 
                             ? t('decision.seeLess') 
-                            : `+${option.pros.length - 3} ${t('decision.moreAdvantages')}`
+                            : `+${option.pros.length - 3} more`
                           }
                         </button>
                       )}
@@ -445,11 +453,11 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                       {option.cons?.length > 3 && (
                         <button
                           onClick={() => toggleConsExpansion(optionKey)}
-                          className="text-xs text-muted-foreground italic hover:text-foreground transition-colors cursor-pointer"
+                          className="text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer"
                         >
                           {expandedCons[optionKey] 
                             ? t('decision.seeLess') 
-                            : `+${option.cons.length - 3} ${t('decision.moreDisadvantages')}`
+                            : `+${option.cons.length - 3} more`
                           }
                         </button>
                       )}

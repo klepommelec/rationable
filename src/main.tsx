@@ -5,6 +5,7 @@ import App from './App.tsx'
 import './index.css'
 import { I18nService } from '@/services/i18nService'
 import { loadAnalytics } from '@/lib/analytics'
+import { FirstResultService } from '@/services/firstResultService'
 // Configuration Sentry - temporairement désactivé
 // import { initSentry, SentryErrorBoundary } from '@/lib/sentry'
 
@@ -27,6 +28,9 @@ I18nService.initializeLanguage();
 
 // Load analytics safely
 loadAnalytics();
+
+// Migrer les anciens caches vers le nouveau système
+FirstResultService.migrateOldCaches();
 
 // Rendre l'application avec Sentry Error Boundary
 const root = createRoot(document.getElementById("root")!);

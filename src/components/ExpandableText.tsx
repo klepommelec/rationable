@@ -1,6 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useExpandableText } from '@/hooks/useExpandableText';
 import { useI18nUI } from '@/contexts/I18nUIContext';
 interface ExpandableTextProps {
@@ -33,14 +31,11 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
       <p ref={textRef} className={`text-muted-foreground leading-relaxed break-words ${!isExpanded && shouldTruncate ? 'line-clamp-3' : ''}`}>
         {text}
       </p>
-      {shouldTruncate && <Button variant="ghost" size="sm" onClick={toggleExpanded} className="mt-2 p-0 h-auto font-medium text-gray-600 text-sm">
-          {isExpanded ? <>
-              <ChevronUp className="h-4 w-4 mr-1" />
-              {t('decision.seeLess')}
-            </> : <>
-              <ChevronDown className="h-4 w-4 mr-1" />
-              {t('decision.seeMore')}
-            </>}
-        </Button>}
+      {shouldTruncate && <button
+          onClick={toggleExpanded}
+          className="mt-2 text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer"
+        >
+          {isExpanded ? t('decision.seeLess') : t('decision.seeMore')}
+        </button>}
     </div>;
 };

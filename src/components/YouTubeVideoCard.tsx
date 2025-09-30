@@ -14,7 +14,7 @@ const YouTubeVideoCard: React.FC<YouTubeVideoCardProps> = ({ video }) => {
       href={video.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all duration-200 hover:scale-[1.02] h-[320px] flex flex-col"
+      className="group block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all duration-200 hover:scale-[1.02] flex flex-col"
       onClick={(e) => handleExternalLinkClick(e, video.url)}
     >
       <div className="aspect-video relative overflow-hidden flex-shrink-0">
@@ -27,12 +27,12 @@ const YouTubeVideoCard: React.FC<YouTubeVideoCardProps> = ({ video }) => {
         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-200" />
       </div>
       
-      <div className="p-4 md:p-4 flex flex-col justify-between flex-1 min-h-0">
-        <h4 className="font-medium text-sm text-gray-900 dark:text-white line-clamp-2 mb-2 md:mb-3 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors leading-5 min-h-[2.5rem]">
+      <div className="p-4 md:p-4 flex flex-col">
+        <h4 className="font-medium text-sm text-gray-900 dark:text-white line-clamp-2 mb-1 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors leading-5">
           {video.title}
         </h4>
         
-        <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mt-auto pt-1 md:pt-2">
+        <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mt-1">
           <span className="truncate flex-1 mr-2">{video.channelTitle}</span>
           <div className="flex items-center gap-1 flex-shrink-0">
             <span>{video.viewCount}</span>

@@ -9,7 +9,43 @@ export interface CachedSearchResult {
 
 class SearchCacheService {
   private cache = new Map<string, CachedSearchResult>();
-  private readonly TTL = 5 * 60 * 1000; // 5 minutes en millisecondes
+  private readonly TTL = 24 * 60 * 60 * 1000; // 24 heures en millisecondes
+  private readonly STORAGE_KEY = 'rationable_search_cache';
+
+  constructor() {
+    this.loadFromStorage();
+  }
+
+  private loadFromStorage(): void {
+    try {
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      if (stored) {
+        const data = JSON.parse(stored);
+        const now = Date.now();
+        
+        // Ne charger que les entrées non expirées
+        for (const [key, value] of Object.entries(data)) {
+          const cachedResult = value as CachedSearchResult;
+          if (cachedResult.expiresAt > now) {
+            this.cache.set(key, cachedResult);
+          }
+        }
+        
+        console.log(`📦 Loaded ${this.cache.size} cached entries from localStorage`);
+      }
+    } catch (error) {
+      console.warn('⚠️ Failed to load cache from localStorage:', error);
+    }
+  }
+
+  private saveToStorage(): void {
+    try {
+      const data = Object.fromEntries(this.cache.entries());
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+    } catch (error) {
+      console.warn('⚠️ Failed to save cache to localStorage:', error);
+    }
+  }
 
   private generateCacheKey(query: string, context?: string): string {
     // Normaliser et hasher la requête pour la clé de cache
@@ -59,6 +95,9 @@ class SearchCacheService {
     this.cache.set(key, cachedResult);
     console.log(`💾 Cached search result from ${provider} for:`, query.substring(0, 50) + '...');
     
+    // Sauvegarder immédiatement dans localStorage
+    this.saveToStorage();
+    
     // Nettoyer les entrées expirées de manière périodique
     this.cleanupExpired();
   }
@@ -90,6 +129,11 @@ class SearchCacheService {
 
   clear(): void {
     this.cache.clear();
+    try {
+      localStorage.removeItem(this.STORAGE_KEY);
+    } catch (error) {
+      console.warn('⚠️ Failed to clear cache from localStorage:', error);
+    }
     console.log('🗑️ Search cache cleared');
   }
 

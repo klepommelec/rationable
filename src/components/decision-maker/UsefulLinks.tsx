@@ -145,11 +145,11 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
         {socialContent?.youtubeVideos && socialContent.youtubeVideos.length > 0 && (
           <div className="space-y-3">
             <div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
               role="list"
             >
               {(showAllVideos ? socialContent.youtubeVideos : socialContent.youtubeVideos.slice(0, 3)).map((video) => (
-                <div key={video.id} role="listitem" className="h-full">
+                <div key={video.id} role="listitem">
                   <YouTubeVideoCard video={video} />
                 </div>
               ))}

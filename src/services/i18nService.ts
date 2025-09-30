@@ -504,14 +504,14 @@ export class I18nService {
   static getVerticalKeywords(): Record<SupportedLanguage, Record<string, string[]>> {
     return {
       fr: {
-        automotive: ['voiture', 'auto', 'véhicule', 'automobile', 'concessionnaire', 'garage', 'occasion', 'neuf', 'hybride', 'électrique', 'diesel', 'essence'],
+        automotive: ['voiture', 'auto', 'véhicule', 'automobile', 'concessionnaire', 'garage', 'occasion', 'neuf', 'hybride', 'électrique', 'diesel', 'essence', 'vélo', 'bicyclette', 'vélos', 'bicycle', 'bike', 'bikes', 'cyclisme', 'cyclable', 'électrique', 'cargo', 'longtail'],
         accommodation: ['hôtel', 'hébergement', 'chambre', 'suite', 'resort', 'bed', 'breakfast', 'airbnb', 'gîte', 'camping'],
         travel: ['voyage', 'vacances', 'vol', 'avion', 'train', 'transport', 'billet', 'séjour', 'destination', 'tourisme'],
         dining: ['restaurant', 'réserver', 'réservation', 'table', 'dîner', 'déjeuner', 'cuisine', 'gastronomie', 'bistrot', 'brasserie', 'menu'],
         software: ['logiciel', 'application', 'app', 'programme', 'télécharger', 'installer', 'licence', 'abonnement']
       },
       en: {
-        automotive: ['car', 'auto', 'vehicle', 'automobile', 'dealer', 'garage', 'used', 'new', 'hybrid', 'electric', 'diesel', 'gasoline'],
+        automotive: ['car', 'auto', 'vehicle', 'automobile', 'dealer', 'garage', 'used', 'new', 'hybrid', 'electric', 'diesel', 'gasoline', 'bike', 'bicycle', 'bikes', 'cycling', 'electric', 'cargo', 'longtail', 'ebike'],
         accommodation: ['hotel', 'accommodation', 'room', 'suite', 'resort', 'bed', 'breakfast', 'airbnb', 'lodge', 'camping'],
         travel: ['travel', 'vacation', 'flight', 'plane', 'train', 'transport', 'ticket', 'stay', 'destination', 'tourism'],
         dining: ['restaurant', 'book', 'reservation', 'table', 'dinner', 'lunch', 'cuisine', 'gastronomy', 'bistro', 'brasserie', 'menu'],

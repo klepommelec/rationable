@@ -81,6 +81,14 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         dilemma={dilemma}
         currentDecision={currentDecision}
         onEditOptions={onEditOptions}
+        onUpdateResult={onUpdateDecision ? (updatedResult) => {
+          if (currentDecision) {
+            onUpdateDecision({
+              ...currentDecision,
+              result: updatedResult
+            });
+          }
+        } : undefined}
       />
       
       {hasMultipleOptions && (

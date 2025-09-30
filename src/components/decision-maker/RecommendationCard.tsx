@@ -12,6 +12,8 @@ import { ExternalLink, Lightbulb, CheckCircle, XCircle, ShoppingBag, Loader2, Na
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import { ExpandableText } from '@/components/ExpandableText';
 import { firstResultService, BestLinksResponse } from '@/services/firstResultService';
+import { actionLinksCacheService } from '@/services/actionLinksCacheService';
+import { loadActionLinksFromCache } from '@/utils/actionLinksLoader';
 import { I18nService } from '@/services/i18nService';
 import { MerchantLogo } from '@/components/MerchantLogo';
 import { UsefulLinks } from './UsefulLinks';
@@ -22,12 +24,14 @@ interface RecommendationCardProps {
   dilemma: string;
   currentDecision: any;
   onEditOptions?: () => void;
+  onUpdateResult?: (updatedResult: IResult) => void;
 }
 export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   result,
   dilemma,
   currentDecision,
-  onEditOptions
+  onEditOptions,
+  onUpdateResult
 }) => {
   const {
     t
@@ -45,26 +49,47 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
       
       const topOption = result.breakdown[0];
       
-      // Check if we already have cached action links for this option (including negative cache)
-      const cachedLinks = result?.cachedActionLinks?.[topOption.option];
+      // Essayer de charger depuis le cache (local ou persistant)
+      console.log(`🔍 RecommendationCard: Loading action links for "${topOption.option}"`);
+      console.log(`🔍 RecommendationCard: Has local cache:`, !!result?.cachedActionLinks?.[topOption.option]);
+      
+      const cachedLinks = loadActionLinksFromCache({
+        optionName: topOption.option,
+        dilemma,
+        result,
+        onUpdateResult
+      });
+      
       if (cachedLinks) {
-        console.log('✅ Using cached action links for recommendation:', topOption.option);
+        console.log(`✅ RecommendationCard: Using cached links for "${topOption.option}"`);
         setActionLinks(cachedLinks);
         setLoadingLinks(false);
         return;
       }
+      
+      console.log(`⚠️ RecommendationCard: No cached links found for "${topOption.option}", loading from API`);
       
       try {
         setLoadingLinks(true);
         const links = await firstResultService.getBestLinks({
           optionName: topOption.option,
           dilemma: dilemma,
-          language: 'fr' // TODO: detect language
+          language: detectedLanguage,
+          vertical: detectedVertical
         });
         setActionLinks(links);
         
-        // Cache the result (this would need to be passed up to parent for persistence)
-        // For now, just store in memory
+        // Sauvegarder dans le cache local pour la cohérence
+        if (onUpdateResult && result) {
+          const updatedResult = {
+            ...result,
+            cachedActionLinks: {
+              ...result.cachedActionLinks,
+              [topOption.option]: links
+            }
+          };
+          onUpdateResult(updatedResult);
+        }
       } catch (error) {
         console.error('Error loading action links:', error);
         
@@ -78,13 +103,25 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
           fromCache: true
         };
         setActionLinks(negativeCache);
+        
+        // Sauvegarder l'échec dans le cache local
+        if (onUpdateResult && result) {
+          const updatedResult = {
+            ...result,
+            cachedActionLinks: {
+              ...result.cachedActionLinks,
+              [topOption.option]: negativeCache
+            }
+          };
+          onUpdateResult(updatedResult);
+        }
       } finally {
         setLoadingLinks(false);
       }
     };
 
     loadActionLinks();
-  }, [result?.breakdown, result?.cachedActionLinks, dilemma]);
+  }, [result?.breakdown, result?.cachedActionLinks, dilemma, onUpdateResult]);
 
   // Configuration unifiée pour tous les types de résultats
   const config = {
@@ -196,66 +233,67 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
             {/* Action buttons for top option - moved to bottom */}
             {topOption?.option && <div className="w-full pt-4">{/* Added pt-4 for more spacing */}
-                {loadingLinks ? <Button variant="secondary" size="sm" disabled className="w-full sm:w-auto">
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    {I18nService.getSearchingLabel(detectedLanguage)}
-                  </Button> : actionLinks && (actionLinks.official || actionLinks.merchants && actionLinks.merchants.length > 0 || actionLinks.maps) ? <div className="flex flex-wrap gap-3">
-                    {/* Primary button: Based on action type */}
-                    {actionLinks.actionType === 'directions' && actionLinks.maps ? <a href={actionLinks.maps.url} target="_blank" rel="noopener noreferrer">
-                        <Button variant="default" size="sm">
-                          <Navigation className="h-4 w-4 mr-2" />
-                          {I18nService.getDirectionsLabel(detectedLanguage)}
-                        </Button>
-                      </a> : actionLinks.official ? <a href={actionLinks.official.url} target="_blank" rel="noopener noreferrer">
-                        <Button variant="default" size="sm">
-                          <MerchantLogo url={actionLinks.official.url} size={20} className="mr-2" />
-                          {I18nService.getOfficialSiteLabel(detectedLanguage)}
-                        </Button>
-                      </a> : actionLinks.merchants[0] ? <a href={actionLinks.merchants[0].url} target="_blank" rel="noopener noreferrer">
-                        <Button variant="default" size="sm">
-                          <MerchantLogo url={actionLinks.merchants[0].url} size={20} className="mr-2" />
-                          {actionLinks.actionType === 'reserve' ? I18nService.getReserveLabel(detectedLanguage) : firstResultService.getActionVerb(detectedVertical, detectedLanguage)} sur {firstResultService.getDomainLabel(actionLinks.merchants[0].domain)}
-                        </Button>
-                      </a> : null}
-                    
-                     {/* Secondary buttons: Merchants (excluding already shown ones) */}
-                     {actionLinks.merchants.filter((merchant, index) => {
-                // If we have directions as primary, show all merchants
-                if (actionLinks.actionType === 'directions') return true;
-                // If we have an official site, show all merchants
-                if (actionLinks.official) return true;
-                // If no official site, skip the first merchant (already shown as primary)
-                return index > 0;
-              }).filter((merchant, index, filteredArray) => {
-                // Remove duplicates based on domain
-                return filteredArray.findIndex(m => m.domain === merchant.domain) === index;
-              }).slice(0, 2).map((merchant, i) => <a key={`merchant-${merchant.domain}-${i}`} href={merchant.url} target="_blank" rel="noopener noreferrer">
+                <div className="flex flex-wrap gap-3">
+                  {/* Search button - always visible immediately */}
+                  <Button variant="outline" size="sm" onClick={e => {
+                    const searchLinks = generateOptionSearchLinks(topOption.option, dilemma);
+                    if (searchLinks.length > 0) {
+                      handleExternalLinkClick(e, searchLinks[0].url);
+                    }
+                  }}>
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    {t('common.search')}
+                  </Button>
+
+                  {/* Intelligent action links - only show when loaded */}
+                  {actionLinks && (actionLinks.official || actionLinks.merchants && actionLinks.merchants.length > 0 || actionLinks.maps) ? (
+                    <>
+                      {/* Primary button: Based on action type */}
+                      {actionLinks.actionType === 'directions' && actionLinks.maps ? (
+                        <a href={actionLinks.maps.url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm">
+                            <Navigation className="h-4 w-4 mr-2" />
+                            {I18nService.getDirectionsLabel(detectedLanguage)}
+                          </Button>
+                        </a>
+                      ) : actionLinks.official ? (
+                        <a href={actionLinks.official.url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm">
+                            <MerchantLogo url={actionLinks.official.url} size={20} className="mr-2" />
+                            {I18nService.getOfficialSiteLabel(detectedLanguage)}
+                          </Button>
+                        </a>
+                      ) : actionLinks.merchants[0] ? (
+                        <a href={actionLinks.merchants[0].url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm">
+                            <MerchantLogo url={actionLinks.merchants[0].url} size={20} className="mr-2" />
+                            {actionLinks.actionType === 'reserve' ? I18nService.getReserveLabel(detectedLanguage) : firstResultService.getActionVerb(detectedVertical, detectedLanguage)} sur {firstResultService.getDomainLabel(actionLinks.merchants[0].domain)}
+                          </Button>
+                        </a>
+                      ) : null}
+                      
+                      {/* Secondary buttons: Merchants (excluding already shown ones) */}
+                      {actionLinks.merchants.filter((merchant, index) => {
+                        // If we have directions as primary, show all merchants
+                        if (actionLinks.actionType === 'directions') return true;
+                        // If we have an official site, show all merchants
+                        if (actionLinks.official) return true;
+                        // If no official site, skip the first merchant (already shown as primary)
+                        return index > 0;
+                      }).filter((merchant, index, filteredArray) => {
+                        // Remove duplicates based on domain
+                        return filteredArray.findIndex(m => m.domain === merchant.domain) === index;
+                      }).slice(0, 2).map((merchant, i) => (
+                        <a key={`merchant-${merchant.domain}-${i}`} href={merchant.url} target="_blank" rel="noopener noreferrer">
                           <Button variant="outline" size="sm" className="min-w-[120px]">
                             <MerchantLogo url={merchant.url} size={20} className="mr-2" />
                             {firstResultService.getDomainLabel(merchant.domain)}
                           </Button>
-                        </a>)}
-
-                     {/* Always show search button */}
-                     <Button variant="outline" size="sm" onClick={e => {
-                const searchLinks = generateOptionSearchLinks(topOption.option, dilemma);
-                if (searchLinks.length > 0) {
-                  handleExternalLinkClick(e, searchLinks[0].url);
-                }
-              }}>
-                       <ExternalLink className="h-3 w-3 mr-1" />
-                       {t('common.search')}
-                     </Button>
-                   </div> : (/* Show search button even when no action links */
-            <Button variant="outline" size="sm" onClick={e => {
-              const searchLinks = generateOptionSearchLinks(topOption.option, dilemma);
-              if (searchLinks.length > 0) {
-                handleExternalLinkClick(e, searchLinks[0].url);
-              }
-            }}>
-                    <ExternalLink className="h-3 w-3 mr-1" />
-                    {t('common.search')}
-                  </Button>)}
+                        </a>
+                      ))}
+                    </>
+                  ) : null}
+                </div>
               </div>}
 
             {/* Useful Links moved inside recommendation card */}

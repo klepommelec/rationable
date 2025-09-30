@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { I18nService, SupportedLanguage } from './i18nService';
 import { searchCacheService } from './searchCacheService';
+import { actionLinksCacheService } from './actionLinksCacheService';
 import { LinkVerifierService } from './linkVerifierService';
 
 export interface FirstResultResponse {
@@ -26,7 +27,7 @@ export interface FirstResultOptions {
   vertical?: 'dining' | 'accommodation' | 'travel' | 'automotive' | 'software' | null;
 }
 
-class FirstResultService {
+export class FirstResultService {
   async getBestLinks({ optionName, dilemma, language, vertical }: FirstResultOptions): Promise<BestLinksResponse> {
     // Check if real-time search is enabled
     const realTimeSearchEnabled = localStorage.getItem('realTimeSearchEnabled');
@@ -73,7 +74,21 @@ class FirstResultService {
     
     try {
     
-    // 6. Check cache for both official and merchants
+    // 6. Check action links cache first (plus spécifique et persistant)
+    const cachedActionLinks = actionLinksCacheService.get(optionName, detectedLanguage, detectedVertical);
+    if (cachedActionLinks) {
+      console.log(`✅ Using cached action links for: ${optionName}`);
+      return {
+        official: cachedActionLinks.official,
+        merchants: cachedActionLinks.merchants || [],
+        maps: cachedActionLinks.maps,
+        actionType: cachedActionLinks.actionType,
+        provider: cachedActionLinks.provider as any,
+        fromCache: true
+      };
+    }
+
+    // 7. Fallback to search cache for backward compatibility
     const officialCacheKey = `${query}_${detectedLanguage}_${detectedVertical || 'general'}_official`;
     const merchantsCacheKey = `${query}_${detectedLanguage}_${detectedVertical || 'general'}_merchants`;
     
@@ -81,7 +96,7 @@ class FirstResultService {
     const cachedMerchants = searchCacheService.get(merchantsCacheKey);
     
     if (cachedOfficial && cachedMerchants) {
-      console.log(`✅ Using cached results for: ${optionName}`);
+      console.log(`✅ Using cached search results for: ${optionName}`);
       return {
         official: cachedOfficial.content.official,
         merchants: cachedMerchants.content.merchants || [],
@@ -103,7 +118,8 @@ class FirstResultService {
         // 7. Search for official site first if we have a brand (with timeout)
         let officialResult = null;
         if (brand && (Date.now() - startTime) < 2000) {
-          const officialQuery = `${brand} ${optionName} site officiel`;
+          // Improved query to target product pages specifically
+          const officialQuery = this.buildOfficialSiteQuery(brand, optionName, detectedLanguage, detectedVertical);
           const siteBias = this.getBrandDomains(brand);
           
           try {
@@ -126,14 +142,38 @@ class FirstResultService {
               );
               
               if (officialResults.length > 0) {
-                // Skip verification for speed - trust official domains
-                const bestOfficial = officialResults[0];
-                officialResult = {
-                  url: bestOfficial.url,
-                  title: bestOfficial.title,
-                  domain: this.extractDomain(bestOfficial.url)
-                };
-                console.log(`✅ Official found: ${bestOfficial.url}`);
+                // Prefer product-specific pages over homepage
+                const productPage = officialResults.find((r: any) => 
+                  this.isProductPage(r.url, optionName, brand)
+                );
+                
+                if (productPage) {
+                  officialResult = {
+                    url: productPage.url,
+                    title: productPage.title,
+                    domain: this.extractDomain(productPage.url)
+                  };
+                  console.log(`✅ Product page found: ${productPage.url}`);
+                } else {
+                  // Try to construct a product page URL if we have the homepage
+                  const homepage = officialResults[0];
+                  const productUrl = this.constructProductPageUrl(homepage.url, optionName, brand, detectedVertical);
+                  if (productUrl) {
+                    officialResult = {
+                      url: productUrl,
+                      title: `${homepage.title} - ${optionName}`,
+                      domain: this.extractDomain(productUrl)
+                    };
+                    console.log(`✅ Constructed product page: ${productUrl}`);
+                  } else {
+                    officialResult = {
+                      url: homepage.url,
+                      title: homepage.title,
+                      domain: this.extractDomain(homepage.url)
+                    };
+                    console.log(`✅ Official site found: ${homepage.url}`);
+                  }
+                }
               }
             }
           } catch (error) {
@@ -201,7 +241,17 @@ class FirstResultService {
         fromCache: false
       };
 
-      // 10. Cache results
+      // 10. Cache results in both caches
+      // Cache principal (action links cache - persistant)
+      actionLinksCacheService.set(optionName, detectedLanguage, detectedVertical, {
+        official: officialResult,
+        merchants: finalMerchants,
+        maps: mapsResult,
+        actionType,
+        provider: data.provider
+      });
+
+      // Cache de fallback (search cache - pour compatibilité)
       if (officialResult) {
         searchCacheService.set(officialCacheKey, detectedVertical || 'general', { official: officialResult }, data.provider);
       }
@@ -588,7 +638,7 @@ class FirstResultService {
       return restaurantName;
     }
     
-    // Enhanced multilingual brand mapping
+    // Enhanced multilingual brand mapping with more comprehensive coverage
     const brandMap = {
       // Automotive - with multilingual variants
       'toyota': 'toyota',
@@ -658,14 +708,138 @@ class FirstResultService {
       'mercure': 'mercure',
       'sofitel': 'sofitel',
       
-      // Other
+      // Technology & Electronics
+      'apple': 'apple',
+      'samsung': 'samsung',
+      'google': 'google',
+      'microsoft': 'microsoft',
+      'sony': 'sony',
+      'lg': 'lg',
+      'huawei': 'huawei',
+      'xiaomi': 'xiaomi',
+      'oneplus': 'oneplus',
+      'oppo': 'oppo',
+      'vivo': 'vivo',
+      'realme': 'realme',
+      
+      // Bikes & Cycling
+      'tern': 'tern',
+      'yuba': 'yuba',
+      'riese': 'riese-muller',
+      'riese & müller': 'riese-muller',
+      'riese müller': 'riese-muller',
+      'riese-muller': 'riese-muller',
+      'riese-müller': 'riese-muller',
+      'decathlon': 'decathlon',
+      'canyon': 'canyon',
+      'trek': 'trek',
+      'specialized': 'specialized',
+      'giant': 'giant',
+      'cannondale': 'cannondale',
+      'cube': 'cube',
+      'scott': 'scott',
+      'bianchi': 'bianchi',
+      'pinarello': 'pinarello',
+      'cervelo': 'cervelo',
+      'look': 'look',
+      'time': 'time',
+      'lapierre': 'lapierre',
+      'btwin': 'btwin',
+      'rockrider': 'rockrider',
+      'elops': 'elops',
+      
+      // Fashion & Lifestyle
       'nike': 'nike',
       'adidas': 'adidas',
+      'puma': 'puma',
+      'reebok': 'reebok',
+      'converse': 'converse',
+      'vans': 'vans',
+      'new balance': 'new-balance',
+      'under armour': 'under-armour',
+      'lululemon': 'lululemon',
+      'patagonia': 'patagonia',
+      'north face': 'north-face',
+      'columbia': 'columbia',
+      'timberland': 'timberland',
+      'dr martens': 'dr-martens',
+      'clarks': 'clarks',
+      'ecco': 'ecco',
+      'birkenstock': 'birkenstock',
+      'ugg': 'ugg',
+      'crocs': 'crocs',
+      
+      // Home & Furniture
       'ikea': 'ikea',
       'lego': 'lego',
       'zara': 'zara',
       'h&m': 'hm',
-      'uniqlo': 'uniqlo'
+      'uniqlo': 'uniqlo',
+      'mango': 'mango',
+      'massimo dutti': 'massimo-dutti',
+      'bershka': 'bershka',
+      'pull & bear': 'pull-bear',
+      'stradivarius': 'stradivarius',
+      'oysho': 'oysho',
+      'zara home': 'zara-home',
+      'home': 'zara-home',
+      'west elm': 'west-elm',
+      'crate & barrel': 'crate-barrel',
+      'pottery barn': 'pottery-barn',
+      'williams sonoma': 'williams-sonoma',
+      'restoration hardware': 'restoration-hardware',
+      'cb2': 'cb2',
+      'anthropologie': 'anthropologie',
+      'urban outfitters': 'urban-outfitters',
+      
+      // Beauty & Cosmetics
+      'l\'oréal': 'loreal',
+      'loreal': 'loreal',
+      'maybelline': 'maybelline',
+      'revlon': 'revlon',
+      'covergirl': 'covergirl',
+      'clinique': 'clinique',
+      'estée lauder': 'estee-lauder',
+      'estee lauder': 'estee-lauder',
+      'lancôme': 'lancome',
+      'lancome': 'lancome',
+      'ysl': 'ysl',
+      'dior': 'dior',
+      'chanel': 'chanel',
+      'mac': 'mac',
+      'nars': 'nars',
+      'urban decay': 'urban-decay',
+      'too faced': 'too-faced',
+      'fenty': 'fenty',
+      'rare beauty': 'rare-beauty',
+      'glossier': 'glossier',
+      'drunk elephant': 'drunk-elephant',
+      'the ordinary': 'the-ordinary',
+      'paula\'s choice': 'paulas-choice',
+      'paulas choice': 'paulas-choice',
+      'cerave': 'cerave',
+      'neutrogena': 'neutrogena',
+      'olay': 'olay',
+      'aveeno': 'aveeno',
+      'cetaphil': 'cetaphil',
+      'la roche-posay': 'la-roche-posay',
+      'laroche posay': 'la-roche-posay',
+      'vichy': 'vichy',
+      'avène': 'avene',
+      'avene': 'avene',
+      'eucerin': 'eucerin',
+      'bioderma': 'bioderma',
+      'philips': 'philips',
+      'braun': 'braun',
+      'remington': 'remington',
+      'conair': 'conair',
+      'dyson': 'dyson',
+      't3': 't3',
+      'ghd': 'ghd',
+      'babyliss': 'babyliss',
+      'wahl': 'wahl',
+      'andis': 'andis',
+      'oster': 'oster'
     };
     
     for (const [keyword, brand] of Object.entries(brandMap)) {
@@ -715,15 +889,28 @@ class FirstResultService {
 
   private getBrandDomains(brand: string): string[] {
     const domainMap: Record<string, string[]> = {
+      // Technology & Electronics
       'samsung': ['samsung.com', 'samsung.fr', 'samsung.es', 'samsung.it', 'samsung.de'],
       'apple': ['apple.com', 'apple.fr', 'apple.es', 'apple.it', 'apple.de'],
       'google': ['store.google.com', 'google.com'],
+      'microsoft': ['microsoft.com', 'microsoft.fr', 'microsoft.es', 'microsoft.it', 'microsoft.de'],
+      'sony': ['sony.com', 'sony.fr', 'sony.es', 'sony.it', 'sony.de'],
+      'lg': ['lg.com', 'lg.fr', 'lg.es', 'lg.it', 'lg.de'],
+      'huawei': ['huawei.com', 'huawei.fr', 'huawei.es', 'huawei.it', 'huawei.de'],
+      'xiaomi': ['mi.com', 'xiaomi.com', 'xiaomi.fr', 'xiaomi.es', 'xiaomi.it', 'xiaomi.de'],
+      'oneplus': ['oneplus.com', 'oneplus.fr', 'oneplus.es', 'oneplus.it', 'oneplus.de'],
+      'oppo': ['oppo.com', 'oppo.fr', 'oppo.es', 'oppo.it', 'oppo.de'],
+      'vivo': ['vivo.com', 'vivo.fr', 'vivo.es', 'vivo.it', 'vivo.de'],
+      'realme': ['realme.com', 'realme.fr', 'realme.es', 'realme.it', 'realme.de'],
+      
+      // Automotive
       'toyota': ['toyota.fr', 'toyota.com', 'toyota.es', 'toyota.it', 'toyota.de'],
       'honda': ['honda.fr', 'honda.com', 'honda.es', 'honda.it', 'honda.de'],
       'ford': ['ford.fr', 'ford.com', 'ford.es', 'ford.it', 'ford.de'],
       'bmw': ['bmw.fr', 'bmw.com', 'bmw.es', 'bmw.it', 'bmw.de'],
       'mercedes': ['mercedes-benz.fr', 'mercedes-benz.com', 'mercedes-benz.es', 'mercedes-benz.it', 'mercedes-benz.de'],
       'audi': ['audi.fr', 'audi.com', 'audi.es', 'audi.it', 'audi.de'],
+      'volkswagen': ['volkswagen.fr', 'volkswagen.com', 'volkswagen.es', 'volkswagen.it', 'volkswagen.de'],
       'peugeot': ['peugeot.fr', 'peugeot.com', 'peugeot.es'],
       'renault': ['renault.fr', 'renault.com', 'renault.es'],
       'dacia': ['dacia.fr', 'dacia.com', 'dacia.es'],
@@ -734,11 +921,114 @@ class FirstResultService {
       'subaru': ['subaru.fr', 'subaru.com', 'subaru.es', 'subaru.it', 'subaru.de'],
       'opel': ['opel.fr', 'opel.com', 'opel.es', 'opel.it', 'opel.de'],
       'fiat': ['fiat.fr', 'fiat.com', 'fiat.es', 'fiat.it', 'fiat.de'],
+      
+      // Bikes & Cycling
+      'tern': ['ternbicycles.com', 'ternbicycles.fr', 'ternbicycles.es', 'ternbicycles.it', 'ternbicycles.de'],
+      'yuba': ['yubabikes.com', 'yubabikes.fr', 'yubabikes.es', 'yubabikes.it', 'yubabikes.de'],
+      'riese-muller': ['riese-mueller.com', 'riese-mueller.fr', 'riese-mueller.es', 'riese-mueller.it', 'riese-mueller.de'],
+      'decathlon': ['decathlon.fr', 'decathlon.com', 'decathlon.es', 'decathlon.it', 'decathlon.de'],
+      'canyon': ['canyon.com', 'canyon.fr', 'canyon.es', 'canyon.it', 'canyon.de'],
+      'trek': ['trekbikes.com', 'trekbikes.fr', 'trekbikes.es', 'trekbikes.it', 'trekbikes.de'],
+      'specialized': ['specialized.com', 'specialized.fr', 'specialized.es', 'specialized.it', 'specialized.de'],
+      'giant': ['giant-bicycles.com', 'giant-bicycles.fr', 'giant-bicycles.es', 'giant-bicycles.it', 'giant-bicycles.de'],
+      'cannondale': ['cannondale.com', 'cannondale.fr', 'cannondale.es', 'cannondale.it', 'cannondale.de'],
+      'cube': ['cube.eu', 'cube.fr', 'cube.es', 'cube.it', 'cube.de'],
+      'scott': ['scott-sports.com', 'scott-sports.fr', 'scott-sports.es', 'scott-sports.it', 'scott-sports.de'],
+      'bianchi': ['bianchi.com', 'bianchi.fr', 'bianchi.es', 'bianchi.it', 'bianchi.de'],
+      'pinarello': ['pinarello.com', 'pinarello.fr', 'pinarello.es', 'pinarello.it', 'pinarello.de'],
+      'cervelo': ['cervelo.com', 'cervelo.fr', 'cervelo.es', 'cervelo.it', 'cervelo.de'],
+      'look': ['lookcycle.com', 'lookcycle.fr', 'lookcycle.es', 'lookcycle.it', 'lookcycle.de'],
+      'time': ['time-sport.com', 'time-sport.fr', 'time-sport.es', 'time-sport.it', 'time-sport.de'],
+      'lapierre': ['lapierre-bikes.com', 'lapierre-bikes.fr', 'lapierre-bikes.es', 'lapierre-bikes.it', 'lapierre-bikes.de'],
+      'btwin': ['btwin.com', 'btwin.fr', 'btwin.es', 'btwin.it', 'btwin.de'],
+      'rockrider': ['rockrider.com', 'rockrider.fr', 'rockrider.es', 'rockrider.it', 'rockrider.de'],
+      'elops': ['elops.com', 'elops.fr', 'elops.es', 'elops.it', 'elops.de'],
+      
+      // Fashion & Lifestyle
       'nike': ['nike.com', 'nike.fr', 'nike.es', 'nike.it', 'nike.de'],
       'adidas': ['adidas.com', 'adidas.fr', 'adidas.es', 'adidas.it', 'adidas.de'],
-      'asus': ['asus.com', 'asus.fr', 'asus.es', 'asus.it', 'asus.de'],
-      'acer': ['acer.com', 'acer.fr', 'acer.es', 'acer.it', 'acer.de'],
-      'msi': ['msi.com', 'msi.fr', 'msi.es', 'msi.it', 'msi.de'],
+      'puma': ['puma.com', 'puma.fr', 'puma.es', 'puma.it', 'puma.de'],
+      'reebok': ['reebok.com', 'reebok.fr', 'reebok.es', 'reebok.it', 'reebok.de'],
+      'converse': ['converse.com', 'converse.fr', 'converse.es', 'converse.it', 'converse.de'],
+      'vans': ['vans.com', 'vans.fr', 'vans.es', 'vans.it', 'vans.de'],
+      'new-balance': ['newbalance.com', 'newbalance.fr', 'newbalance.es', 'newbalance.it', 'newbalance.de'],
+      'under-armour': ['underarmour.com', 'underarmour.fr', 'underarmour.es', 'underarmour.it', 'underarmour.de'],
+      'lululemon': ['lululemon.com', 'lululemon.fr', 'lululemon.es', 'lululemon.it', 'lululemon.de'],
+      'patagonia': ['patagonia.com', 'patagonia.fr', 'patagonia.es', 'patagonia.it', 'patagonia.de'],
+      'north-face': ['thenorthface.com', 'thenorthface.fr', 'thenorthface.es', 'thenorthface.it', 'thenorthface.de'],
+      'columbia': ['columbia.com', 'columbia.fr', 'columbia.es', 'columbia.it', 'columbia.de'],
+      'timberland': ['timberland.com', 'timberland.fr', 'timberland.es', 'timberland.it', 'timberland.de'],
+      'dr-martens': ['drmartens.com', 'drmartens.fr', 'drmartens.es', 'drmartens.it', 'drmartens.de'],
+      'clarks': ['clarks.com', 'clarks.fr', 'clarks.es', 'clarks.it', 'clarks.de'],
+      'ecco': ['ecco.com', 'ecco.fr', 'ecco.es', 'ecco.it', 'ecco.de'],
+      'birkenstock': ['birkenstock.com', 'birkenstock.fr', 'birkenstock.es', 'birkenstock.it', 'birkenstock.de'],
+      'ugg': ['ugg.com', 'ugg.fr', 'ugg.es', 'ugg.it', 'ugg.de'],
+      'crocs': ['crocs.com', 'crocs.fr', 'crocs.es', 'crocs.it', 'crocs.de'],
+      
+      // Home & Furniture
+      'ikea': ['ikea.com', 'ikea.fr', 'ikea.es', 'ikea.it', 'ikea.de'],
+      'lego': ['lego.com', 'lego.fr', 'lego.es', 'lego.it', 'lego.de'],
+      'zara': ['zara.com', 'zara.fr', 'zara.es', 'zara.it', 'zara.de'],
+      'hm': ['hm.com', 'hm.fr', 'hm.es', 'hm.it', 'hm.de'],
+      'uniqlo': ['uniqlo.com', 'uniqlo.fr', 'uniqlo.es', 'uniqlo.it', 'uniqlo.de'],
+      'mango': ['mango.com', 'mango.fr', 'mango.es', 'mango.it', 'mango.de'],
+      'massimo-dutti': ['massimodutti.com', 'massimodutti.fr', 'massimodutti.es', 'massimodutti.it', 'massimodutti.de'],
+      'bershka': ['bershka.com', 'bershka.fr', 'bershka.es', 'bershka.it', 'bershka.de'],
+      'pull-bear': ['pullandbear.com', 'pullandbear.fr', 'pullandbear.es', 'pullandbear.it', 'pullandbear.de'],
+      'stradivarius': ['stradivarius.com', 'stradivarius.fr', 'stradivarius.es', 'stradivarius.it', 'stradivarius.de'],
+      'oysho': ['oysho.com', 'oysho.fr', 'oysho.es', 'oysho.it', 'oysho.de'],
+      'zara-home': ['zarahome.com', 'zarahome.fr', 'zarahome.es', 'zarahome.it', 'zarahome.de'],
+      'west-elm': ['westelm.com', 'westelm.fr', 'westelm.es', 'westelm.it', 'westelm.de'],
+      'crate-barrel': ['crateandbarrel.com', 'crateandbarrel.fr', 'crateandbarrel.es', 'crateandbarrel.it', 'crateandbarrel.de'],
+      'pottery-barn': ['potterybarn.com', 'potterybarn.fr', 'potterybarn.es', 'potterybarn.it', 'potterybarn.de'],
+      'williams-sonoma': ['williams-sonoma.com', 'williams-sonoma.fr', 'williams-sonoma.es', 'williams-sonoma.it', 'williams-sonoma.de'],
+      'restoration-hardware': ['rh.com', 'rh.fr', 'rh.es', 'rh.it', 'rh.de'],
+      'cb2': ['cb2.com', 'cb2.fr', 'cb2.es', 'cb2.it', 'cb2.de'],
+      'anthropologie': ['anthropologie.com', 'anthropologie.fr', 'anthropologie.es', 'anthropologie.it', 'anthropologie.de'],
+      'urban-outfitters': ['urbanoutfitters.com', 'urbanoutfitters.fr', 'urbanoutfitters.es', 'urbanoutfitters.it', 'urbanoutfitters.de'],
+      
+      // Beauty & Cosmetics
+      'loreal': ['loreal.com', 'loreal.fr', 'loreal.es', 'loreal.it', 'loreal.de'],
+      'maybelline': ['maybelline.com', 'maybelline.fr', 'maybelline.es', 'maybelline.it', 'maybelline.de'],
+      'revlon': ['revlon.com', 'revlon.fr', 'revlon.es', 'revlon.it', 'revlon.de'],
+      'covergirl': ['covergirl.com', 'covergirl.fr', 'covergirl.es', 'covergirl.it', 'covergirl.de'],
+      'clinique': ['clinique.com', 'clinique.fr', 'clinique.es', 'clinique.it', 'clinique.de'],
+      'estee-lauder': ['esteelauder.com', 'esteelauder.fr', 'esteelauder.es', 'esteelauder.it', 'esteelauder.de'],
+      'lancome': ['lancome.com', 'lancome.fr', 'lancome.es', 'lancome.it', 'lancome.de'],
+      'ysl': ['ysl.com', 'ysl.fr', 'ysl.es', 'ysl.it', 'ysl.de'],
+      'dior': ['dior.com', 'dior.fr', 'dior.es', 'dior.it', 'dior.de'],
+      'chanel': ['chanel.com', 'chanel.fr', 'chanel.es', 'chanel.it', 'chanel.de'],
+      'mac': ['maccosmetics.com', 'maccosmetics.fr', 'maccosmetics.es', 'maccosmetics.it', 'maccosmetics.de'],
+      'nars': ['nars.com', 'nars.fr', 'nars.es', 'nars.it', 'nars.de'],
+      'urban-decay': ['urbandecay.com', 'urbandecay.fr', 'urbandecay.es', 'urbandecay.it', 'urbandecay.de'],
+      'too-faced': ['toofaced.com', 'toofaced.fr', 'toofaced.es', 'toofaced.it', 'toofaced.de'],
+      'fenty': ['fenty.com', 'fenty.fr', 'fenty.es', 'fenty.it', 'fenty.de'],
+      'rare-beauty': ['rarebeauty.com', 'rarebeauty.fr', 'rarebeauty.es', 'rarebeauty.it', 'rarebeauty.de'],
+      'glossier': ['glossier.com', 'glossier.fr', 'glossier.es', 'glossier.it', 'glossier.de'],
+      'drunk-elephant': ['drunkelephant.com', 'drunkelephant.fr', 'drunkelephant.es', 'drunkelephant.it', 'drunkelephant.de'],
+      'the-ordinary': ['theordinary.com', 'theordinary.fr', 'theordinary.es', 'theordinary.it', 'theordinary.de'],
+      'paulas-choice': ['paulaschoice.com', 'paulaschoice.fr', 'paulaschoice.es', 'paulaschoice.it', 'paulaschoice.de'],
+      'cerave': ['cerave.com', 'cerave.fr', 'cerave.es', 'cerave.it', 'cerave.de'],
+      'neutrogena': ['neutrogena.com', 'neutrogena.fr', 'neutrogena.es', 'neutrogena.it', 'neutrogena.de'],
+      'olay': ['olay.com', 'olay.fr', 'olay.es', 'olay.it', 'olay.de'],
+      'aveeno': ['aveeno.com', 'aveeno.fr', 'aveeno.es', 'aveeno.it', 'aveeno.de'],
+      'cetaphil': ['cetaphil.com', 'cetaphil.fr', 'cetaphil.es', 'cetaphil.it', 'cetaphil.de'],
+      'la-roche-posay': ['laroche-posay.com', 'laroche-posay.fr', 'laroche-posay.es', 'laroche-posay.it', 'laroche-posay.de'],
+      'vichy': ['vichy.com', 'vichy.fr', 'vichy.es', 'vichy.it', 'vichy.de'],
+      'avene': ['avene.com', 'avene.fr', 'avene.es', 'avene.it', 'avene.de'],
+      'eucerin': ['eucerin.com', 'eucerin.fr', 'eucerin.es', 'eucerin.it', 'eucerin.de'],
+      'bioderma': ['bioderma.com', 'bioderma.fr', 'bioderma.es', 'bioderma.it', 'bioderma.de'],
+      'philips': ['philips.com', 'philips.fr', 'philips.es', 'philips.it', 'philips.de'],
+      'braun': ['braun.com', 'braun.fr', 'braun.es', 'braun.it', 'braun.de'],
+      'remington': ['remington.com', 'remington.fr', 'remington.es', 'remington.it', 'remington.de'],
+      'conair': ['conair.com', 'conair.fr', 'conair.es', 'conair.it', 'conair.de'],
+      'dyson': ['dyson.com', 'dyson.fr', 'dyson.es', 'dyson.it', 'dyson.de'],
+      't3': ['t3micro.com', 't3micro.fr', 't3micro.es', 't3micro.it', 't3micro.de'],
+      'ghd': ['ghd.com', 'ghd.fr', 'ghd.es', 'ghd.it', 'ghd.de'],
+      'babyliss': ['babyliss.com', 'babyliss.fr', 'babyliss.es', 'babyliss.it', 'babyliss.de'],
+      'wahl': ['wahl.com', 'wahl.fr', 'wahl.es', 'wahl.it', 'wahl.de'],
+      'andis': ['andis.com', 'andis.fr', 'andis.es', 'andis.it', 'andis.de'],
+      'oster': ['oster.com', 'oster.fr', 'oster.es', 'oster.it', 'oster.de'],
       
       // Dining brands
       'mcdonalds': ['mcdonalds.com', 'mcdonalds.fr', 'mcdonalds.es', 'mcdonalds.it', 'mcdonalds.de'],
@@ -806,6 +1096,60 @@ class FirstResultService {
     return false;
   }
 
+  private buildOfficialSiteQuery(brand: string, optionName: string, language: SupportedLanguage, vertical: string | null): string {
+    // Clean option name to remove generic prefixes
+    const cleanOptionName = optionName.replace(/^(option\s+\d+:\s*)/i, '').trim();
+    
+    // Language-specific official site queries
+    const officialQueries = {
+      fr: {
+        automotive: `${brand} ${cleanOptionName} site officiel`,
+        dining: `${brand} restaurant officiel`,
+        accommodation: `${brand} hôtel officiel`,
+        travel: `${brand} voyage officiel`,
+        software: `${brand} ${cleanOptionName} téléchargement officiel`,
+        general: `${brand} ${cleanOptionName} site officiel`
+      },
+      en: {
+        automotive: `${brand} ${cleanOptionName} official site`,
+        dining: `${brand} restaurant official`,
+        accommodation: `${brand} hotel official`,
+        travel: `${brand} travel official`,
+        software: `${brand} ${cleanOptionName} official download`,
+        general: `${brand} ${cleanOptionName} official site`
+      },
+      es: {
+        automotive: `${brand} ${cleanOptionName} sitio oficial`,
+        dining: `${brand} restaurante oficial`,
+        accommodation: `${brand} hotel oficial`,
+        travel: `${brand} viaje oficial`,
+        software: `${brand} ${cleanOptionName} descarga oficial`,
+        general: `${brand} ${cleanOptionName} sitio oficial`
+      },
+      it: {
+        automotive: `${brand} ${cleanOptionName} sito ufficiale`,
+        dining: `${brand} ristorante ufficiale`,
+        accommodation: `${brand} hotel ufficiale`,
+        travel: `${brand} viaggio ufficiale`,
+        software: `${brand} ${cleanOptionName} download ufficiale`,
+        general: `${brand} ${cleanOptionName} sito ufficiale`
+      },
+      de: {
+        automotive: `${brand} ${cleanOptionName} offizielle website`,
+        dining: `${brand} restaurant offizielle`,
+        accommodation: `${brand} hotel offizielle`,
+        travel: `${brand} reise offizielle`,
+        software: `${brand} ${cleanOptionName} offizielle download`,
+        general: `${brand} ${cleanOptionName} offizielle website`
+      }
+    };
+    
+    const langQueries = officialQueries[language] || officialQueries.en;
+    const verticalKey = vertical && langQueries[vertical as keyof typeof langQueries] ? vertical : 'general';
+    
+    return langQueries[verticalKey as keyof typeof langQueries];
+  }
+
   private getBrandVariants(brand: string): string[] {
     // Generate brand variants for better multilingual detection
     const variants = [brand];
@@ -825,11 +1169,136 @@ class FirstResultService {
     return variants;
   }
 
+  private isProductPage(url: string, optionName: string, brand: string): boolean {
+    const lowerUrl = url.toLowerCase();
+    const lowerOption = optionName.toLowerCase();
+    const lowerBrand = brand.toLowerCase();
+    
+    // Check for product-specific URL patterns
+    const productPatterns = [
+      // Common product page indicators
+      /\/product[s]?\/[^\/]+/,
+      /\/item[s]?\/[^\/]+/,
+      /\/detail[s]?\/[^\/]+/,
+      /\/model[s]?\/[^\/]+/,
+      /\/bike[s]?\/[^\/]+/,
+      /\/car[s]?\/[^\/]+/,
+      /\/phone[s]?\/[^\/]+/,
+      /\/laptop[s]?\/[^\/]+/,
+      /\/shoe[s]?\/[^\/]+/,
+      /\/clothing\/[^\/]+/,
+      /\/furniture\/[^\/]+/,
+      /\/cosmetics\/[^\/]+/,
+      /\/makeup\/[^\/]+/,
+      /\/skincare\/[^\/]+/,
+      // Brand-specific patterns
+      new RegExp(`\\/${lowerBrand}\\/[^\\/]+`),
+      // Product name in URL
+      new RegExp(lowerOption.replace(/[^a-z0-9]/g, '[^a-z0-9]*'))
+    ];
+    
+    // Check if URL contains product indicators
+    const hasProductPattern = productPatterns.some(pattern => pattern.test(lowerUrl));
+    
+    // Check if URL contains the product name (with some flexibility)
+    const cleanOptionName = lowerOption.replace(/[^a-z0-9]/g, '');
+    const hasProductName = cleanOptionName.length > 3 && lowerUrl.includes(cleanOptionName);
+    
+    // Check if URL contains brand name
+    const hasBrandName = lowerUrl.includes(lowerBrand);
+    
+    // Exclude homepage and category pages
+    const isHomepage = /\/$/.test(url) || /\/home\/?$/.test(lowerUrl) || /\/index\.html?$/.test(lowerUrl);
+    const isCategoryPage = /\/category\/[^\/]+$/.test(lowerUrl) || /\/collection\/[^\/]+$/.test(lowerUrl);
+    
+    return (hasProductPattern || hasProductName) && hasBrandName && !isHomepage && !isCategoryPage;
+  }
+
+  private constructProductPageUrl(homepageUrl: string, optionName: string, brand: string, vertical: string | null): string | null {
+    try {
+      const url = new URL(homepageUrl);
+      const cleanOptionName = optionName.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+      const slug = cleanOptionName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      
+      // Brand-specific URL construction patterns
+      const brandPatterns: Record<string, string[]> = {
+        'nike': [`/products/${slug}`, `/shoes/${slug}`, `/clothing/${slug}`],
+        'adidas': [`/products/${slug}`, `/shoes/${slug}`, `/clothing/${slug}`],
+        'apple': [`/products/${slug}`, `/iphone/${slug}`, `/mac/${slug}`, `/ipad/${slug}`],
+        'samsung': [`/products/${slug}`, `/galaxy/${slug}`, `/smartphones/${slug}`],
+        'trek': [`/bikes/${slug}`, `/products/${slug}`],
+        'specialized': [`/bikes/${slug}`, `/products/${slug}`],
+        'canyon': [`/bikes/${slug}`, `/products/${slug}`],
+        'tern': [`/bikes/${slug}`, `/products/${slug}`],
+        'yuba': [`/bikes/${slug}`, `/products/${slug}`],
+        'riese-muller': [`/bikes/${slug}`, `/products/${slug}`],
+        'decathlon': [`/products/${slug}`, `/bikes/${slug}`, `/sports/${slug}`],
+        'ikea': [`/products/${slug}`, `/furniture/${slug}`],
+        'zara': [`/products/${slug}`, `/clothing/${slug}`],
+        'hm': [`/products/${slug}`, `/clothing/${slug}`],
+        'uniqlo': [`/products/${slug}`, `/clothing/${slug}`],
+        'loreal': [`/products/${slug}`, `/makeup/${slug}`, `/skincare/${slug}`],
+        'maybelline': [`/products/${slug}`, `/makeup/${slug}`],
+        'dior': [`/products/${slug}`, `/makeup/${slug}`, `/perfume/${slug}`],
+        'chanel': [`/products/${slug}`, `/makeup/${slug}`, `/perfume/${slug}`]
+      };
+      
+      // Vertical-specific patterns
+      const verticalPatterns: Record<string, string[]> = {
+        'automotive': [`/vehicles/${slug}`, `/cars/${slug}`, `/bikes/${slug}`, `/products/${slug}`],
+        'fashion': [`/clothing/${slug}`, `/shoes/${slug}`, `/accessories/${slug}`, `/products/${slug}`],
+        'beauty': [`/makeup/${slug}`, `/skincare/${slug}`, `/perfume/${slug}`, `/products/${slug}`],
+        'home': [`/furniture/${slug}`, `/decor/${slug}`, `/products/${slug}`],
+        'tech': [`/products/${slug}`, `/smartphones/${slug}`, `/laptops/${slug}`, `/electronics/${slug}`]
+      };
+      
+      // Try brand-specific patterns first
+      const brandPattern = brandPatterns[brand];
+      if (brandPattern) {
+        for (const pattern of brandPattern) {
+          const testUrl = `${url.origin}${pattern}`;
+          return testUrl;
+        }
+      }
+      
+      // Try vertical-specific patterns
+      if (vertical && verticalPatterns[vertical]) {
+        for (const pattern of verticalPatterns[vertical]) {
+          const testUrl = `${url.origin}${pattern}`;
+          return testUrl;
+        }
+      }
+      
+      // Generic product page pattern
+      return `${url.origin}/products/${slug}`;
+      
+    } catch (error) {
+      console.log(`⚠️ Failed to construct product URL: ${error.message}`);
+      return null;
+    }
+  }
+
   private extractDomain(url: string): string {
     try {
       return new URL(url).hostname.replace(/^www\./, '');
     } catch {
       return url;
+    }
+  }
+
+  // Méthode publique pour migrer les anciens caches
+  static migrateOldCaches(): void {
+    try {
+      // Migrer depuis result.cachedActionLinks si disponible
+      const oldCache = localStorage.getItem('rationable_decision_cache');
+      if (oldCache) {
+        const data = JSON.parse(oldCache);
+        if (data.cachedActionLinks) {
+          actionLinksCacheService.migrateFromOldCache(data.cachedActionLinks);
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️ Failed to migrate old caches:', error);
     }
   }
 
@@ -1058,6 +1527,28 @@ class FirstResultService {
     
     // Check if there's a city context in the dilemma
     const hasCityContext = this.extractCityFromDilemma(dilemma || '') !== null;
+    
+    // Product keywords that should always be 'buy' (never directions)
+    const productKeywords = [
+      // Bikes and cycling
+      'vélo', 'bicyclette', 'bicycle', 'bike', 'ebike', 'cargo', 'longtail', 'cyclisme',
+      // Cars and vehicles
+      'voiture', 'auto', 'car', 'véhicule', 'vehicle', 'automobile', 'moto', 'motorcycle',
+      // Electronics
+      'iphone', 'smartphone', 'laptop', 'ordinateur', 'computer', 'tablette', 'tablet',
+      // Other products
+      'livre', 'book', 'vêtement', 'clothing', 'chaussure', 'shoe', 'montre', 'watch'
+    ];
+    
+    // If it's clearly a product, always return 'buy'
+    if (productKeywords.some(keyword => lowerOption.includes(keyword))) {
+      return 'buy';
+    }
+    
+    // If it's automotive vertical (includes bikes), always return 'buy'
+    if (vertical === 'automotive') {
+      return 'buy';
+    }
     
     // Local business keywords that indicate physical locations
     const localBusinessKeywords = [
