@@ -25,6 +25,14 @@ export const I18nUIProvider = ({ children }: I18nUIProviderProps) => {
   });
 
   useEffect(() => {
+    // Initialize language with geo-location detection
+    const initializeLanguage = async () => {
+      await I18nService.initializeLanguageWithGeoLocation();
+      setCurrentLanguage(I18nService.getCurrentLanguage());
+    };
+
+    initializeLanguage();
+
     // Listen for language changes
     const handleLanguageChange = () => {
       setCurrentLanguage(I18nService.getCurrentLanguage());
@@ -40,14 +48,14 @@ export const I18nUIProvider = ({ children }: I18nUIProviderProps) => {
 
   const t = (key: string): string => {
     const keys = key.split('.');
-    let current: any = translations[currentLanguage] || translations.fr;
+    let current: any = translations[currentLanguage] || translations.en;
     
     for (const k of keys) {
       if (current && typeof current === 'object' && k in current) {
         current = current[k];
       } else {
-        // Fallback to French if key not found in current language
-        let fallback: any = translations.fr;
+        // Fallback to English if key not found in current language
+        let fallback: any = translations.en;
         for (const fallbackKey of keys) {
           if (fallback && typeof fallback === 'object' && fallbackKey in fallback) {
             fallback = fallback[fallbackKey];

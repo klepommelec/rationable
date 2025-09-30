@@ -23,7 +23,7 @@ import { FirstResultService } from '@/services/firstResultService'
 //   });
 // }
 
-// Initialize language from localStorage on app start
+// Initialize language from localStorage on app start (fallback)
 I18nService.initializeLanguage();
 
 // Load analytics safely

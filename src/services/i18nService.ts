@@ -293,8 +293,8 @@ const LOCALE_CONFIGS: Record<SupportedLanguage, LocaleConfig> = {
 };
 
 export class I18nService {
-  private static defaultLanguage: SupportedLanguage = 'fr';
-  private static currentLanguage: SupportedLanguage = 'fr';
+  private static defaultLanguage: SupportedLanguage = 'en';
+  private static currentLanguage: SupportedLanguage = 'en';
   private static readonly STORAGE_KEY = 'rationable_language';
 
   static detectLanguage(text: string): SupportedLanguage {
@@ -346,6 +346,39 @@ export class I18nService {
     const stored = localStorage.getItem(this.STORAGE_KEY);
     if (stored && this.isValidLanguage(stored)) {
       this.currentLanguage = stored as SupportedLanguage;
+    }
+  }
+
+  /**
+   * Initialise la langue basée sur la géolocalisation
+   * Anglais par défaut, français pour la France
+   */
+  static async initializeLanguageWithGeoLocation(): Promise<void> {
+    // Vérifier d'abord si l'utilisateur a déjà choisi une langue
+    const stored = localStorage.getItem(this.STORAGE_KEY);
+    if (stored && this.isValidLanguage(stored)) {
+      this.currentLanguage = stored as SupportedLanguage;
+      console.log('🌐 Using stored language preference:', this.currentLanguage);
+      return;
+    }
+
+    try {
+      // Importer le service de géolocalisation dynamiquement pour éviter les erreurs SSR
+      const { default: GeoLocationService } = await import('./geoLocationService');
+      
+      const isInFrance = await GeoLocationService.isInFrance();
+      const detectedLanguage = isInFrance ? 'fr' : 'en';
+      
+      this.currentLanguage = detectedLanguage;
+      console.log('🌍 Geo-location based language detection:', {
+        isInFrance,
+        detectedLanguage,
+        country: isInFrance ? 'France' : 'Other'
+      });
+      
+    } catch (error) {
+      console.warn('⚠️ Failed to detect location, using default language (English):', error);
+      this.currentLanguage = 'en';
     }
   }
 

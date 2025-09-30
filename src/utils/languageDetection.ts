@@ -1,7 +1,7 @@
 type SupportedLanguage = 'fr' | 'en' | 'es' | 'it' | 'de';
 
 export const detectLanguage = (text: string): SupportedLanguage => {
-  if (!text || text.length < 5) return 'fr'; // Default to French
+  if (!text || text.length < 5) return 'en'; // Default to English
 
   const lowerText = text.toLowerCase();
 
@@ -33,7 +33,7 @@ export const detectLanguage = (text: string): SupportedLanguage => {
   const detectedLanguage = Object.entries(languageScores)
     .reduce((max, [lang, score]) => 
       score > max.score ? { lang: lang as SupportedLanguage, score } : max,
-      { lang: 'fr' as SupportedLanguage, score: 0 }
+      { lang: 'en' as SupportedLanguage, score: 0 }
     ).lang;
 
   console.log('🌐 Language detection:', {
