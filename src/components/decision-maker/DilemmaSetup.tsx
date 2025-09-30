@@ -281,7 +281,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   };
   return <div className="mx-auto space-y-6 w-full max-w-full overflow-x-hidden">
             {/* Header principal occupant 90% de la hauteur de l'écran */}
-            <div className="h-[90vh] flex items-center justify-center">
+            <div className="h-[94vh] flex items-center justify-center">
                 <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none shadow-none bg-transparent">
                     <CardHeader className="text-center px-4 sm:px-6">
                         <h2 className="font-bold" style={{ 
