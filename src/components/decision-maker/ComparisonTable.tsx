@@ -250,73 +250,18 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                   </div>
                 </div>
 
-                {/* Boutons d'action - Search toujours en premier */}
-                <div className="flex flex-wrap gap-2">
-                  {/* Bouton Search - toujours présent */}
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                {/* Bouton de vote - en premier */}
+                {showVoting && decisionId && user && (
+                  <VoteButton
+                    decisionId={decisionId}
+                    optionName={option.option}
+                    initialVoteCount={voteCounts[option.option] || 0}
+                    initialHasVoted={userVotes[option.option] || false}
+                    onVoteChange={handleVoteChange}
                     className="text-xs h-7"
-                    onClick={() => {
-                      const searchQuery = option.option.replace(/^Option\s+\d+:\s*/i, '').trim();
-                      window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, '_blank');
-                    }}
-                  >
-                    <ExternalLink className="h-3 w-3 mr-1" />
-                    {t('decision.search')}
-                  </Button>
+                  />
+                )}
 
-                  {/* Liens intelligents - seulement si disponibles */}
-                  {optionActionLinks && (optionActionLinks.official || optionActionLinks.merchants && optionActionLinks.merchants.length > 0 || optionActionLinks.maps) ? (
-                    <>
-                      {/* Primary button: Based on action type */}
-                      {optionActionLinks.actionType === 'directions' && optionActionLinks.maps ? (
-                        <a href={optionActionLinks.maps.url} target="_blank" rel="noopener noreferrer">
-                          <Button variant="outline" size="sm" className="text-xs h-7">
-                            <Navigation className="h-3 w-3 mr-1" />
-                            {I18nService.getDirectionsLabel(detectedLanguage)}
-                          </Button>
-                        </a>
-                      ) : optionActionLinks.official ? (
-                        <a href={optionActionLinks.official.url} target="_blank" rel="noopener noreferrer">
-                          <Button variant="outline" size="sm" className="text-xs h-7">
-                            <MerchantLogo url={optionActionLinks.official.url} size={14} className="mr-1" />
-                            {I18nService.getOfficialSiteLabel(detectedLanguage)}
-                          </Button>
-                        </a>
-                      ) : optionActionLinks.merchants?.[0] ? (
-                        <a href={optionActionLinks.merchants[0].url} target="_blank" rel="noopener noreferrer">
-                          <Button variant="outline" size="sm" className="text-xs h-7">
-                            <MerchantLogo url={optionActionLinks.merchants[0].url} size={14} className="mr-1" />
-                            {optionActionLinks.actionType === 'reserve' ? I18nService.getReserveLabel(detectedLanguage) : firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)}
-                          </Button>
-                        </a>
-                      ) : null}
-                      
-                      {/* Secondary buttons: Merchants */}
-                      {(optionActionLinks.actionType === 'directions' || optionActionLinks.official ? optionActionLinks.merchants || [] : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => (
-                        <a key={i} href={merchant.url} target="_blank" rel="noopener noreferrer">
-                          <Button variant="secondary" size="sm" className="text-xs h-7">
-                            <MerchantLogo url={merchant.url} size={14} className="mr-1" />
-                            {firstResultService.getDomainLabel(merchant.domain)}
-                          </Button>
-                        </a>
-                      ))}
-                    </>
-                  ) : null}
-
-                  {/* Bouton de vote - après les boutons intelligents */}
-                  {showVoting && decisionId && user && (
-                    <VoteButton
-                      decisionId={decisionId}
-                      optionName={option.option}
-                      initialVoteCount={voteCounts[option.option] || 0}
-                      initialHasVoted={userVotes[option.option] || false}
-                      onVoteChange={handleVoteChange}
-                      className="text-xs h-7"
-                    />
-                  )}
-                </div>
 
                 {/* Avantages et Inconvénients en deux colonnes */}
                 {(option.pros?.length > 0 || option.cons?.length > 0) && (
@@ -372,6 +317,62 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                     )}
                   </div>
                 )}
+
+                {/* Boutons d'action - Search et liens intelligents (en bas sur mobile) */}
+                <div className="flex flex-wrap gap-2">
+                  {/* Bouton Search - toujours présent */}
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-xs h-7 hover:underline"
+                    onClick={() => {
+                      const searchQuery = option.option.replace(/^Option\s+\d+:\s*/i, '').trim();
+                      window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, '_blank');
+                    }}
+                  >
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    {t('decision.search')}
+                  </Button>
+
+                  {/* Liens intelligents - seulement si disponibles */}
+                  {optionActionLinks && (optionActionLinks.official || optionActionLinks.merchants && optionActionLinks.merchants.length > 0 || optionActionLinks.maps) ? (
+                    <>
+                      {/* Primary button: Based on action type */}
+                      {optionActionLinks.actionType === 'directions' && optionActionLinks.maps ? (
+                        <a href={optionActionLinks.maps.url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm" className="text-xs h-7">
+                            <Navigation className="h-3 w-3 mr-1" />
+                            {I18nService.getDirectionsLabel(detectedLanguage)}
+                          </Button>
+                        </a>
+                      ) : optionActionLinks.official ? (
+                        <a href={optionActionLinks.official.url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm" className="text-xs h-7">
+                            <MerchantLogo url={optionActionLinks.official.url} size={14} className="mr-1" />
+                            {I18nService.getOfficialSiteLabel(detectedLanguage)}
+                          </Button>
+                        </a>
+                      ) : optionActionLinks.merchants?.[0] ? (
+                        <a href={optionActionLinks.merchants[0].url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm" className="text-xs h-7">
+                            <MerchantLogo url={optionActionLinks.merchants[0].url} size={14} className="mr-1" />
+                            {optionActionLinks.actionType === 'reserve' ? I18nService.getReserveLabel(detectedLanguage) : firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)}
+                          </Button>
+                        </a>
+                      ) : null}
+                      
+                      {/* Secondary buttons: Merchants */}
+                      {(optionActionLinks.actionType === 'directions' || optionActionLinks.official ? optionActionLinks.merchants || [] : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => (
+                        <a key={i} href={merchant.url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="secondary" size="sm" className="text-xs h-7">
+                            <MerchantLogo url={merchant.url} size={14} className="mr-1" />
+                            {firstResultService.getDomainLabel(merchant.domain)}
+                          </Button>
+                        </a>
+                      ))}
+                    </>
+                  ) : null}
+                </div>
               </div>
             </Card>
           );
@@ -425,21 +426,38 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                         {option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
                       </div>
                       
-                      {/* Action buttons - Search toujours en premier */}
-                      <div className="mt-6 w-full">
+                      {/* Bouton de vote - en premier */}
+                      {showVoting && decisionId && user && (
+                        <div className="mt-6 w-full">
+                          <VoteButton
+                            decisionId={decisionId}
+                            optionName={option.option}
+                            initialVoteCount={voteCounts[option.option] || 0}
+                            initialHasVoted={userVotes[option.option] || false}
+                            onVoteChange={handleVoteChange}
+                            className="text-xs w-full h-7"
+                          />
+                        </div>
+                      )}
+
+                      {/* Divider */}
+                      <div className="border-t border-gray-200 dark:border-gray-700 my-4"></div>
+
+                      {/* Action buttons - Search et liens intelligents */}
+                      <div className="w-full">
                         <div className="flex flex-col gap-1 w-full">
                           {/* Bouton Search - toujours présent */}
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="text-xs w-full h-7"
+                            className="text-xs w-full h-7 relative flex items-center justify-center hover:underline"
                             onClick={() => {
                               const searchQuery = option.option.replace(/^Option\s+\d+:\s*/i, '').trim();
                               window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, '_blank');
                             }}
                           >
-                            <ExternalLink className="h-3 w-3 mr-1 flex-shrink-0" />
-                            <span className="truncate">{t('decision.search')}</span>
+                            <ExternalLink className="h-3 w-3 absolute left-2" />
+                            <span className="text-center">{t('decision.search')}</span>
                           </Button>
 
                           {/* Liens intelligents - seulement si disponibles */}
@@ -448,23 +466,23 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                               {/* Primary button: Based on action type */}
                               {optionActionLinks.actionType === 'directions' && optionActionLinks.maps ? (
                                 <a href={optionActionLinks.maps.url} target="_blank" rel="noopener noreferrer">
-                                  <Button variant="outline" size="sm" className="text-xs w-full h-7 truncate">
-                                    <Navigation className="h-3 w-3 mr-1 flex-shrink-0" />
-                                    <span className="truncate">{I18nService.getDirectionsLabel(detectedLanguage)}</span>
+                                  <Button variant="outline" size="sm" className="text-xs w-full h-7 relative flex items-center justify-center hover:underline">
+                                    <Navigation className="h-3 w-3 absolute left-2" />
+                                    <span className="text-center">{I18nService.getDirectionsLabel(detectedLanguage)}</span>
                                   </Button>
                                 </a>
                               ) : optionActionLinks.official ? (
                                 <a href={optionActionLinks.official.url} target="_blank" rel="noopener noreferrer">
-                                  <Button variant="outline" size="sm" className="text-xs w-full h-7 truncate">
-                                    <MerchantLogo url={optionActionLinks.official.url} size={14} className="mr-1 flex-shrink-0" />
-                                    <span className="truncate">{I18nService.getOfficialSiteLabel(detectedLanguage)}</span>
+                                  <Button variant="outline" size="sm" className="text-xs w-full h-7 relative flex items-center justify-center hover:underline">
+                                    <MerchantLogo url={optionActionLinks.official.url} size={14} className="absolute left-2" />
+                                    <span className="text-center">{I18nService.getOfficialSiteLabel(detectedLanguage)}</span>
                                   </Button>
                                 </a>
                               ) : optionActionLinks.merchants?.[0] ? (
                                 <a href={optionActionLinks.merchants[0].url} target="_blank" rel="noopener noreferrer">
-                                  <Button variant="outline" size="sm" className="text-xs w-full h-7 truncate">
-                                    <MerchantLogo url={optionActionLinks.merchants[0].url} size={14} className="mr-1 flex-shrink-0" />
-                                    <span className="truncate">{optionActionLinks.actionType === 'reserve' ? I18nService.getReserveLabel(detectedLanguage) : firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)}</span>
+                                  <Button variant="outline" size="sm" className="text-xs w-full h-7 relative flex items-center justify-center hover:underline">
+                                    <MerchantLogo url={optionActionLinks.merchants[0].url} size={14} className="absolute left-2" />
+                                    <span className="text-center">{optionActionLinks.actionType === 'reserve' ? I18nService.getReserveLabel(detectedLanguage) : firstResultService.getActionVerb(detectedVertical as any, detectedLanguage)}</span>
                                   </Button>
                                 </a>
                               ) : null}
@@ -472,26 +490,14 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                               {/* Secondary buttons: Merchants */}
                               {(optionActionLinks.actionType === 'directions' || optionActionLinks.official ? optionActionLinks.merchants || [] : (optionActionLinks.merchants || []).slice(1)).slice(0, 2).map((merchant, i) => (
                                 <a key={i} href={merchant.url} target="_blank" rel="noopener noreferrer">
-                                  <Button variant="secondary" size="sm" className="text-xs w-full h-7 truncate">
-                                    <MerchantLogo url={merchant.url} size={14} className="mr-1 flex-shrink-0" />
-                                    <span className="truncate">{firstResultService.getDomainLabel(merchant.domain)}</span>
+                                  <Button variant="secondary" size="sm" className="text-xs w-full h-7 relative flex items-center justify-center hover:underline">
+                                    <MerchantLogo url={merchant.url} size={14} className="absolute left-2" />
+                                    <span className="text-center">{firstResultService.getDomainLabel(merchant.domain)}</span>
                                   </Button>
                                 </a>
                               ))}
                             </>
                           ) : null}
-
-                          {/* Bouton de vote - après les boutons intelligents */}
-                          {showVoting && decisionId && user && (
-                            <VoteButton
-                              decisionId={decisionId}
-                              optionName={option.option}
-                              initialVoteCount={voteCounts[option.option] || 0}
-                              initialHasVoted={userVotes[option.option] || false}
-                              onVoteChange={handleVoteChange}
-                              className="text-xs w-full h-7"
-                            />
-                          )}
                         </div>
                       </div>
                     </div>
