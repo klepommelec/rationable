@@ -11,27 +11,80 @@ import { loadActionLinksFromCache, preloadAllActionLinks } from '@/utils/actionL
 import { I18nService } from '@/services/i18nService';
 import { MerchantLogo } from '@/components/MerchantLogo';
 import { useI18nUI } from '@/contexts/I18nUIContext';
+import { VoteButton } from './VoteButton';
+import { votingService, VotingPermissions, VoteCount } from '@/services/votingService';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ComparisonTableProps {
   breakdown: IBreakdownItem[];
   dilemma?: string;
   result?: IResult;
   onUpdateResult?: (updatedResult: IResult) => void;
+  decisionId?: string;
+  showVoting?: boolean;
 }
 
 export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   breakdown,
   dilemma,
   result,
-  onUpdateResult
+  onUpdateResult,
+  decisionId,
+  showVoting = false
 }) => {
   const { t } = useI18nUI();
+  const { user } = useAuth();
   const [actionLinks, setActionLinks] = useState<Record<string, BestLinksResponse | null>>({});
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
   const [expandedPros, setExpandedPros] = useState<Record<string, boolean>>({});
   const [expandedCons, setExpandedCons] = useState<Record<string, boolean>>({});
+  const [voteCounts, setVoteCounts] = useState<Record<string, number>>({});
+  const [userVotes, setUserVotes] = useState<Record<string, boolean>>({});
   const detectedLanguage = I18nService.getCurrentLanguage();
   const detectedVertical = dilemma ? I18nService.detectVertical(dilemma) : null;
+
+  // Load voting data
+  useEffect(() => {
+    console.log('🔍 Voting debug:', { showVoting, decisionId, user: !!user });
+    
+    if (!showVoting || !decisionId || !user) {
+      console.log('❌ Voting conditions not met:', { showVoting, decisionId, hasUser: !!user });
+      return;
+    }
+
+    const loadVotingData = async () => {
+      try {
+        console.log('🔄 Loading voting data for decision:', decisionId);
+        
+        // Load vote counts
+        const counts = await votingService.getVoteCounts(decisionId);
+        console.log('📊 Vote counts:', counts);
+        const countsMap: Record<string, number> = {};
+        counts.forEach(count => {
+          countsMap[count.option_name] = count.vote_count;
+        });
+        setVoteCounts(countsMap);
+
+        // Load user votes
+        const votesMap: Record<string, boolean> = {};
+        for (const option of breakdown) {
+          const hasVoted = await votingService.hasUserVoted(decisionId, option.option, user.id);
+          votesMap[option.option] = hasVoted;
+        }
+        console.log('🗳️ User votes:', votesMap);
+        setUserVotes(votesMap);
+      } catch (error) {
+        console.error('Error loading voting data:', error);
+      }
+    };
+
+    loadVotingData();
+  }, [showVoting, decisionId, user, breakdown]);
+
+  const handleVoteChange = (optionName: string, newCount: number, hasVoted: boolean) => {
+    setVoteCounts(prev => ({ ...prev, [optionName]: newCount }));
+    setUserVotes(prev => ({ ...prev, [optionName]: hasVoted }));
+  };
 
   // Auto load action links for all options
   useEffect(() => {
@@ -251,6 +304,18 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                       ))}
                     </>
                   ) : null}
+
+                  {/* Bouton de vote - après les boutons intelligents */}
+                  {showVoting && decisionId && user && (
+                    <VoteButton
+                      decisionId={decisionId}
+                      optionName={option.option}
+                      initialVoteCount={voteCounts[option.option] || 0}
+                      initialHasVoted={userVotes[option.option] || false}
+                      onVoteChange={handleVoteChange}
+                      className="text-xs h-7"
+                    />
+                  )}
                 </div>
 
                 {/* Avantages et Inconvénients en deux colonnes */}
@@ -415,6 +480,18 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                               ))}
                             </>
                           ) : null}
+
+                          {/* Bouton de vote - après les boutons intelligents */}
+                          {showVoting && decisionId && user && (
+                            <VoteButton
+                              decisionId={decisionId}
+                              optionName={option.option}
+                              initialVoteCount={voteCounts[option.option] || 0}
+                              initialHasVoted={userVotes[option.option] || false}
+                              onVoteChange={handleVoteChange}
+                              className="text-xs w-full h-7"
+                            />
+                          )}
                         </div>
                       </div>
                     </div>

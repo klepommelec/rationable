@@ -108,6 +108,8 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               breakdown={displayedOptions} 
               dilemma={dilemma}
               result={result}
+              decisionId={currentDecision?.id}
+              showVoting={true}
               onUpdateResult={(updatedResult) => {
                 // Sauvegarder les liens en cache dans la décision courante
                 if (onUpdateDecision && currentDecision) {
@@ -143,6 +145,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </CardContent>
         </Card>
       )}
+
       
       {/* Section Commentaires */}
       {currentDecision?.id && (
