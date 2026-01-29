@@ -484,6 +484,7 @@ Retournez un objet JSON avec:
 7. "shoppingLinks": Tableau de 2-3 liens d'achat avec "title" et "url" (obligatoire)
 8. "breakdown": Tableau de 6-8 objets avec:
    - "option": Nom de l'option (différent pour chaque option)
+   - "description": Description courte de 2-3 lignes expliquant cette option (obligatoire, 100-200 caractères)
    - "pros": Tableau des avantages spécifiques
    - "cons": Tableau des inconvénients spécifiques
    - "score": Note sur 100 (VARIEZ les scores: 85-95 pour la meilleure, 70-84 pour les bonnes, 50-69 pour les moyennes)
@@ -504,6 +505,7 @@ Return a JSON object with:
 7. "shoppingLinks": Array of 2-3 purchase links with "title" and "url" (mandatory)
 8. "breakdown": Array of 6-8 objects with:
    - "option": Option name (different for each option)
+   - "description": Short 2-3 line description explaining this option (mandatory, 100-200 characters)
    - "pros": Array of specific advantages
    - "cons": Array of specific disadvantages
    - "score": Score out of 100 (VARY scores: 85-95 for best, 70-84 for good, 50-69 for average)
@@ -524,6 +526,7 @@ Devuelve un objeto JSON con:
 7. "shoppingLinks": Array de 2-3 enlaces de compra con "title" y "url" (obligatorio)
 8. "breakdown": Array de 6-8 objetos con:
    - "option": Nombre de la opción (diferente para cada opción)
+   - "description": Descripción corta de 2-3 líneas explicando esta opción (obligatorio, 100-200 caracteres)
    - "pros": Array de ventajas específicas
    - "cons": Array de desventajas específicas
    - "score": Puntuación sobre 100 (VARIA las puntuaciones: 85-95 para la mejor, 70-84 para las buenas, 50-69 para las promedio)
@@ -544,6 +547,7 @@ Restituisci un oggetto JSON con:
 7. "shoppingLinks": Array di 2-3 link di acquisto con "title" e "url" (obbligatorio)
 8. "breakdown": Array di 6-8 oggetti con:
    - "option": Nome dell'opzione (diverso per ogni opzione)
+   - "description": Descrizione breve di 2-3 righe che spiega questa opzione (obbligatorio, 100-200 caratteri)
    - "pros": Array di vantaggi specifici
    - "cons": Array di svantaggi specifici
    - "score": Punteggio su 100 (VARIA i punteggi: 85-95 per il migliore, 70-84 per i buoni, 50-69 per la media)
@@ -563,6 +567,7 @@ Geben Sie ein JSON-Objekt zurück mit:
 7. "shoppingLinks": Array von 2-3 Einkaufslinks mit "title" und "url" (obligatorisch)
 8. "breakdown": Array von 6-8 Objekten mit:
    - "option": Optionsname (unterschiedlich für jede Option)
+   - "description": Kurze 2-3 Zeilen Beschreibung, die diese Option erklärt (obligatorisch, 100-200 Zeichen)
    - "pros": Array spezifischer Vorteile
    - "cons": Array spezifischer Nachteile
    - "score": Bewertung von 100 (VARIIEREN Sie die Bewertungen: 85-95 für die beste, 70-84 für gute, 50-69 für durchschnittliche)
@@ -618,6 +623,7 @@ ${responseInstructions}`;
       result.breakdown = result.breakdown.map(item => ({
         ...item,
         option: item.option || '',
+        description: item.description || undefined,
         pros: item.pros || [],
         cons: item.cons || []
       }));

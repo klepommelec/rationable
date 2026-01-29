@@ -43,24 +43,48 @@ class VotingService {
     userId: string, 
     role: ParticipantRole = 'observer',
     invitedBy?: string
-  ): Promise<DecisionParticipant> {
-    const { data, error } = await supabase
-      .from('decision_participants')
-      .insert({
-        decision_id: decisionId,
-        user_id: userId,
-        role,
-        invited_by: invitedBy
-      })
-      .select()
-      .single();
+  ): Promise<DecisionParticipant | null> {
+    try {
+      const { data, error } = await supabase
+        .from('decision_participants')
+        .insert({
+          decision_id: decisionId,
+          user_id: userId,
+          role,
+          invited_by: invitedBy
+        })
+        .select()
+        .single();
 
-    if (error) {
-      console.error('Error adding participant:', error);
-      throw error;
+      if (error) {
+        // Si le participant existe déjà (code 23505 = unique violation), le récupérer
+        if (error.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('unique')) {
+          console.log('Participant already exists, fetching existing:', { decisionId, userId });
+          const { data: existingData, error: fetchError } = await supabase
+            .from('decision_participants')
+            .select('*')
+            .eq('decision_id', decisionId)
+            .eq('user_id', userId)
+            .single();
+          
+          if (fetchError) {
+            console.error('Error fetching existing participant:', fetchError);
+            return null;
+          }
+          
+          return existingData;
+        }
+        
+        console.error('Error adding participant:', error);
+        // Ne pas throw pour ne pas bloquer l'UI, retourner null
+        return null;
+      }
+
+      return data;
+    } catch (err) {
+      console.error('Exception in addParticipant:', err);
+      return null; // Retourner null au lieu de throw pour ne pas bloquer
     }
-
-    return data;
   }
 
   /**
@@ -152,22 +176,34 @@ class VotingService {
     optionName: string, 
     userId: string
   ): Promise<DecisionVote> {
-    const { data, error } = await supabase
-      .from('decision_votes')
-      .insert({
-        decision_id: decisionId,
-        option_name: optionName,
-        user_id: userId
-      })
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('decision_votes')
+        .insert({
+          decision_id: decisionId,
+          option_name: optionName,
+          user_id: userId
+        })
+        .select()
+        .single();
 
-    if (error) {
-      console.error('Error voting for option:', error);
-      throw error;
+      if (error) {
+        // Handle 406 errors with a more user-friendly message
+        if (error.status === 406 || error.message?.includes('406')) {
+          const customError = new Error('Vous n\'avez pas la permission de voter sur cette décision');
+          (customError as any).status = 406;
+          console.error('Vote blocked (406):', { decisionId, optionName, userId });
+          throw customError;
+        }
+        console.error('Error voting for option:', error);
+        throw error;
+      }
+
+      return data;
+    } catch (err) {
+      // Re-throw to let the UI handle it
+      throw err;
     }
-
-    return data;
   }
 
   /**
@@ -178,16 +214,28 @@ class VotingService {
     optionName: string, 
     userId: string
   ): Promise<void> {
-    const { error } = await supabase
-      .from('decision_votes')
-      .delete()
-      .eq('decision_id', decisionId)
-      .eq('option_name', optionName)
-      .eq('user_id', userId);
+    try {
+      const { error } = await supabase
+        .from('decision_votes')
+        .delete()
+        .eq('decision_id', decisionId)
+        .eq('option_name', optionName)
+        .eq('user_id', userId);
 
-    if (error) {
-      console.error('Error removing vote:', error);
-      throw error;
+      if (error) {
+        // Handle 406 errors with a more user-friendly message
+        if (error.status === 406 || error.message?.includes('406')) {
+          const customError = new Error('Vous n\'avez pas la permission de retirer votre vote');
+          (customError as any).status = 406;
+          console.error('Vote removal blocked (406):', { decisionId, optionName, userId });
+          throw customError;
+        }
+        console.error('Error removing vote:', error);
+        throw error;
+      }
+    } catch (err) {
+      // Re-throw to let the UI handle it
+      throw err;
     }
   }
 
@@ -199,57 +247,90 @@ class VotingService {
     optionName: string, 
     userId: string
   ): Promise<boolean> {
-    const { data, error } = await supabase
-      .from('decision_votes')
-      .select('id')
-      .eq('decision_id', decisionId)
-      .eq('option_name', optionName)
-      .eq('user_id', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('decision_votes')
+        .select('id')
+        .eq('decision_id', decisionId)
+        .eq('option_name', optionName)
+        .eq('user_id', userId)
+        .single();
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        // No rows returned - user hasn't voted
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No rows returned - user hasn't voted
+          return false;
+        }
+        // Handle 406 errors gracefully (RLS or permission issues)
+        if (error.status === 406 || error.message?.includes('406')) {
+          console.warn('Vote check blocked (406):', { decisionId, optionName, userId });
+          return false; // Default to not voted if access is blocked
+        }
+        console.error('Error checking vote:', error);
+        // Don't throw, return false as safe default
         return false;
       }
-      console.error('Error checking vote:', error);
-      throw error;
-    }
 
-    return !!data;
+      return !!data;
+    } catch (err) {
+      console.error('Exception in hasUserVoted:', err);
+      return false; // Safe default
+    }
   }
 
   /**
    * Get vote counts for all options in a decision
    */
   async getVoteCounts(decisionId: string): Promise<VoteCount[]> {
-    const { data, error } = await supabase
-      .rpc('get_decision_vote_counts', { decision_id_param: decisionId });
+    try {
+      const { data, error } = await supabase
+        .rpc('get_decision_vote_counts', { decision_id_param: decisionId });
 
-    if (error) {
-      console.error('Error fetching vote counts:', error);
-      throw error;
+      if (error) {
+        // Handle 406 errors gracefully (RLS or permission issues)
+        if (error.status === 406 || error.message?.includes('406')) {
+          console.warn('Vote counts blocked (406):', { decisionId });
+          return []; // Return empty array if access is blocked
+        }
+        console.error('Error fetching vote counts:', error);
+        // Don't throw, return empty array as safe default
+        return [];
+      }
+
+      return data || [];
+    } catch (err) {
+      console.error('Exception in getVoteCounts:', err);
+      return []; // Safe default
     }
-
-    return data || [];
   }
 
   /**
    * Get all votes for a decision (with user info)
    */
   async getDecisionVotes(decisionId: string): Promise<DecisionVote[]> {
-    const { data, error } = await supabase
-      .from('decision_votes')
-      .select('*')
-      .eq('decision_id', decisionId)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('decision_votes')
+        .select('*')
+        .eq('decision_id', decisionId)
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching votes:', error);
-      throw error;
+      if (error) {
+        // Handle 406 errors gracefully (RLS or permission issues)
+        if (error.status === 406 || error.message?.includes('406')) {
+          console.warn('Decision votes blocked (406):', { decisionId });
+          return []; // Return empty array if access is blocked
+        }
+        console.error('Error fetching votes:', error);
+        // Don't throw, return empty array as safe default
+        return [];
+      }
+
+      return data || [];
+    } catch (err) {
+      console.error('Exception in getDecisionVotes:', err);
+      return []; // Safe default
     }
-
-    return data || [];
   }
 
   /**

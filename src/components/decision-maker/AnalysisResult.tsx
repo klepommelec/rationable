@@ -11,7 +11,6 @@ import { ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import FollowUpQuestions from './FollowUpQuestions';
 import { DataAccuracyIndicator } from './DataAccuracyIndicator';
 import { useI18nUI } from '@/contexts/I18nUIContext';
-import { CommentSection } from '../comments/CommentSection';
 import { OptionsLoadingSkeleton } from '../OptionsLoadingSkeleton';
 
 interface AnalysisResultProps {
@@ -37,13 +36,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
 }) => {
   const { t } = useI18nUI();
   const [showAllOptions, setShowAllOptions] = useState(false);
-  const [hasComments, setHasComments] = useState(false);
-  const [isAddingComment, setIsAddingComment] = useState(false);
-  const [commentsCount, setCommentsCount] = useState(0);
-  
-  const handleAddCommentClick = () => {
-    setIsAddingComment(true);
-  };
   
   // Nombre d'options à afficher initialement (5)
   const initialOptionsCount = 5;
@@ -72,7 +64,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
 
   // Affichage unifié pour tous les types de questions
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in pt-6">
       {/* Indicateur de sources et mise à jour */}
       <DataAccuracyIndicator result={result} currentDecision={currentDecision} />
       
@@ -92,24 +84,24 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
       />
       
       {hasMultipleOptions && (
-        <Card>
-          <CardHeader>
+        <Card className="mt-0 bg-transparent border-0 shadow-none" style={{ overflow: 'visible' }}>
+          <CardHeader className="px-0">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <CardTitle className="text-lg">
                 {t('decision.comparisonTable')}
               </CardTitle>
-              <Badge variant="outline" className="self-start sm:self-center">
+              <Badge variant="outline" className="self-start sm:self-center bg-white">
                 {result.breakdown?.length || 0} options
               </Badge>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-0" style={{ overflow: 'visible' }}>
             <ComparisonTable 
               breakdown={displayedOptions} 
               dilemma={dilemma}
               result={result}
-              decisionId={currentDecision?.id}
-              showVoting={true}
+              decisionId={currentDecision?.id || undefined}
+              showVoting={!!currentDecision?.id}
               onUpdateResult={(updatedResult) => {
                 // Sauvegarder les liens en cache dans la décision courante
                 if (onUpdateDecision && currentDecision) {
@@ -147,47 +139,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
       )}
 
       
-      {/* Section Commentaires */}
-      {currentDecision?.id && (
-        <Card className="mt-6">
-          {hasComments && (
-            <CardHeader className="h-16 pt-6">
-              <div className="flex items-center justify-between h-full">
-                <CardTitle className="text-lg">
-                  {t('decision.manualOptions.comments')} ({commentsCount})
-                </CardTitle>
-                {!isAddingComment && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleAddCommentClick}
-                    className="text-black border-gray-300 hover:text-black hover:border-gray-400"
-                  >
-                    <Plus className="h-4 w-4 mr-2 text-black" />
-                    {t('comments.section.addButton')}
-                  </Button>
-                )}
-              </div>
-            </CardHeader>
-          )}
-          <CardContent>
-            <CommentSection
-              decisionId={currentDecision.id}
-              commentType="general"
-              title={t('decision.manualOptions.comments')}
-              placeholder={t('decision.manualOptions.commentsPlaceholder')}
-              onCommentsChange={(hasComments, isAddingComment, count) => {
-                setHasComments(hasComments);
-                setIsAddingComment(isAddingComment);
-                setCommentsCount(count);
-              }}
-              externalIsAddingComment={isAddingComment}
-              onSetIsAddingComment={setIsAddingComment}
-            />
-          </CardContent>
-        </Card>
-      )}
-
       {/* Questions de suivi automatiques pour les décisions intelligentes */}
       {onFollowUpQuestion && !result.recommendation?.includes("Options créées manuellement") && (
         <FollowUpQuestions

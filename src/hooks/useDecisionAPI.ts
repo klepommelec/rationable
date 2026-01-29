@@ -12,6 +12,7 @@ import { detectQuestionType } from '@/services/questionClassificationService';
 import { useAuth } from '@/hooks/useAuth';
 import { detectLanguage } from '@/utils/languageDetection';
 import { I18nService } from '@/services/i18nService';
+import { votingService } from '@/services/votingService';
 
 interface UseDecisionAPIProps {
     dilemma: string;
@@ -308,9 +309,34 @@ export const useDecisionAPI = ({
                 createdByName: getUserDisplayName(),
                 language: contentLanguage
             };
-            addDecision(newDecision);
+            
+            // Définir l'ID AVANT d'ajouter la décision pour éviter les race conditions
             setCurrentDecisionId(newDecision.id);
+            // Ajouter la décision (asynchrone mais mise à jour locale immédiate)
+            // IMPORTANT: addDecision attend maintenant que la sauvegarde Supabase soit terminée
+            await addDecision(newDecision);
+            // Forcer un délai pour garantir que React a mis à jour l'état history
+            // ET que la transaction Supabase est commitée avant que les composants ne se rendent
+            // Cela permet aux appels API (votes, commentaires) de fonctionner correctement
+            await new Promise(resolve => setTimeout(resolve, 150));
+            
             initialCriteriaRef.current = newCriteria;
+            
+            // Ajouter automatiquement l'utilisateur comme participant pour permettre les votes
+            // IMPORTANT: Attendre que l'ajout soit terminé pour que les votes fonctionnent immédiatement
+            if (user?.id) {
+                try {
+                    const participant = await votingService.addParticipant(newDecision.id, user.id, 'contributor');
+                    if (participant) {
+                        console.log('✅ User added as participant:', participant);
+                    } else {
+                        console.warn('⚠️ Failed to add user as participant (may already exist)');
+                    }
+                } catch (err) {
+                    console.error('Error adding user as participant:', err);
+                    // Ne pas bloquer l'UI en cas d'erreur, mais loguer pour debug
+                }
+            }
             
             const successMessage = optionsResult.workspaceData?.documentsUsed 
                 ? `Analyse générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`

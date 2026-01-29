@@ -104,8 +104,8 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
   }
 
   return (
-    <Card className="animate-fade-in">
-      <CardHeader>
+    <Card className="animate-fade-in border-0 bg-transparent shadow-none flex flex-col gap-6 py-8">
+      <CardHeader className="p-0">
         <CardTitle className="text-lg">
           {t('analysis.followUpSection.title')}
         </CardTitle>
@@ -113,12 +113,12 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
           {t('analysis.followUpSection.subtitle')}
         </p>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="p-0 flex flex-col">
         {questions.map((question) => (
           <Button
             key={question.id}
             variant="outline"
-            className="w-full justify-start text-left p-4 hover:bg-muted/50 transition-colors"
+            className="w-full justify-start text-left py-7 px-4 hover:bg-muted/50 transition-colors rounded-none gap-0 border-0 border-t border-input"
             onClick={() => handleQuestionClick(question.id)}
             disabled={isLoading || loadingQuestions}
             aria-disabled={isLoading || loadingQuestions}

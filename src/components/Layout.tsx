@@ -45,7 +45,7 @@ const Layout = () => {
   const currentConfig = theme === 'dark' ? darkThemeConfig : lightThemeConfig;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground relative overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-background text-foreground relative" style={{ overflowX: 'visible' }}>
       {/* Background animé pour la page d'accueil uniquement */}
       {isHomePage && (
         <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
@@ -126,7 +126,7 @@ const Layout = () => {
         </div>
       )}
       
-      <div className="relative z-10 flex flex-col min-h-screen w-full max-w-full overflow-x-hidden">
+      <div className="relative z-10 flex flex-col min-h-screen w-full max-w-full" style={{ overflowX: 'hidden' }}>
         
         <Navbar />
         <main 
@@ -135,8 +135,9 @@ const Layout = () => {
           className={`flex-grow ${
             isSettingsPage 
               ? 'h-[calc(100vh-4rem)] overflow-hidden pt-16' 
-              : 'container mx-auto sm:px-6 lg:px-8 py-6 sm:py-6 lg:py-8 max-w-full overflow-x-hidden px-[3px] sm:px-6 pt-16'
+              : 'container mx-auto sm:px-6 lg:px-8 py-6 sm:py-6 lg:py-8 max-w-full px-[3px] sm:px-6 pt-16'
           }`}
+          style={!isSettingsPage ? { overflowX: 'visible' } : {}}
         >
           <Outlet />
         </main>

@@ -20,6 +20,53 @@ export const shareDecision = async (decision: IDecision): Promise<string> => {
     throw new Error('Vous devez être connecté pour partager une décision');
   }
 
+  // Vérifier que la décision existe en cloud avant de la partager
+  // Si elle n'existe pas, essayer de la sauvegarder d'abord
+  try {
+    const { data: existingDecision, error: checkError } = await supabase
+      .from('decisions')
+      .select('id')
+      .eq('id', decision.id)
+      .eq('user_id', user.id)
+      .single();
+
+    if (checkError && checkError.code !== 'PGRST116') {
+      // PGRST116 = no rows returned, which is expected if decision doesn't exist
+      console.warn('Error checking decision existence:', checkError);
+    }
+
+    // Si la décision n'existe pas en cloud, la sauvegarder
+    if (!existingDecision) {
+      console.log('⚠️ Decision not found in cloud, saving it first...', decision.id);
+      
+      const { error: saveError } = await supabase
+        .from('decisions')
+        .insert({
+          id: decision.id,
+          user_id: user.id,
+          workspace_id: null, // Will be set by the hook if workspace context is available
+          dilemma: decision.dilemma,
+          emoji: decision.emoji,
+          category: decision.category,
+          tags: decision.tags || [],
+          thread_id: decision.threadId,
+          decision_data: decision as any,
+          timestamp: decision.timestamp ? new Date(decision.timestamp).toISOString() : null
+        });
+
+      if (saveError) {
+        console.error('Failed to save decision before sharing:', saveError);
+        // Continue anyway - the decision might be in a different workspace or there might be a race condition
+        // The share will still work as shared_decisions stores the full decision_data
+      } else {
+        console.log('✅ Decision saved to cloud before sharing');
+      }
+    }
+  } catch (err) {
+    console.warn('Error checking/saving decision before sharing:', err);
+    // Continue anyway - sharing should still work
+  }
+
   // Check rate limit with user-specific identifier for better security
   const { data: rateLimitOk, error: rateLimitError } = await supabase
     .rpc('check_rate_limit', {

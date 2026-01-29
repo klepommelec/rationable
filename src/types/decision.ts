@@ -8,6 +8,7 @@ export interface ICriterion {
 
 export interface IBreakdownItem {
   option: string;
+  description?: string;
   pros: string[];
   cons: string[];
   score: number;

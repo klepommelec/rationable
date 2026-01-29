@@ -161,10 +161,11 @@ const parseMultipleItemsFromPerplexity = (content: string, dilemma: string): { r
   // Créer des IBreakdownItem avec données validées
   const breakdown: IBreakdownItem[] = validatedItems.map((item, index) => ({
     option: item.title,
+    description: item.description || item.details || undefined,
     pros: [
       item.description || 'Information disponible',
       item.details || 'Détails sur site officiel'
-    ].filter(Boolean),
+    ].filter(Boolean).slice(1), // Exclure la description du premier pros si elle est utilisée comme description
     cons: [], 
     score: 95 - (index * 3) // Scores plus proches pour refléter la qualité réelle
   }));

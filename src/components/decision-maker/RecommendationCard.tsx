@@ -128,8 +128,8 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     icon: <Lightbulb className="h-5 w-5 text-primary" />,
     title: t('decision.title'),
     badge: t('decision.recommended'),
-    borderColor: 'border-primary/20',
-    bgGradient: 'bg-gradient-to-r from-primary/5 to-secondary/5',
+    borderColor: 'border-primary',
+    bgGradient: '',
     badgeColor: 'bg-primary/10 text-primary',
     titleColor: 'text-primary'
   };
@@ -139,10 +139,10 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     topOption.description.trim() === '' ||
     (!topOption.pros?.length && !topOption.cons?.length);
   
-  return <Card className={`border-2 ${config.borderColor} ${config.bgGradient} w-full`}>
-      <CardContent className={`space-y-6 pt-4 sm:pt-2 ${isCardEmpty ? 'pb-2' : ''}`}>
+  return <Card className={`${config.bgGradient} w-full shadow-none bg-transparent border-0`}>
+      <CardContent className="px-0 py-0 space-y-6">
         <div className="flex flex-col gap-6">
-          <div className="w-full space-y-4">
+          <div className="w-full space-y-4 bg-transparent px-0" style={{ boxSizing: 'border-box' }}>
             {/* Layout mobile : badge centré */}
             <div className="sm:hidden">
               <div className="flex items-center justify-between">
@@ -193,9 +193,10 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               <ConfidenceIndicator breakdown={result.breakdown} topOption={topOption} result={result} />
             </div>
             
-            {result?.description && result.description.trim() !== '' && (
+            {/* Afficher la description de l'option recommandée si disponible, sinon la description globale */}
+            {(topOption?.description || result?.description) && (topOption?.description || result?.description)?.trim() !== '' && (
               <div className="w-full">
-                <ExpandableText text={result.description} />
+                <ExpandableText text={topOption?.description || result?.description || ''} />
               </div>
             )}
 
@@ -235,14 +236,20 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             {topOption?.option && <div className="w-full pt-4">{/* Added pt-4 for more spacing */}
                 <div className="flex flex-wrap gap-3">
                   {/* Search button - always visible immediately */}
-                  <Button variant="outline" size="sm" onClick={e => {
-                    const searchLinks = generateOptionSearchLinks(topOption.option, dilemma);
-                    if (searchLinks.length > 0) {
-                      handleExternalLinkClick(e, searchLinks[0].url);
-                    }
-                  }}>
-                    <ExternalLink className="h-3 w-3 mr-1" />
-                    {t('common.search')}
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center justify-center gap-1.5 min-w-[100px]"
+                    onClick={e => {
+                      const searchLinks = generateOptionSearchLinks(topOption.option, dilemma);
+                      if (searchLinks.length > 0) {
+                        handleExternalLinkClick(e, searchLinks[0].url);
+                      }
+                    }}
+                    aria-label={`${t('common.search')} ${topOption.option.replace(/^Option\s+\d+:\s*/i, '').trim()}`}
+                  >
+                    <ExternalLink className="h-3 w-3 flex-shrink-0" aria-hidden="true" />
+                    <span>{t('common.search')}</span>
                   </Button>
 
                   {/* Intelligent action links - only show when loaded */}

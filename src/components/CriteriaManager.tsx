@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ChevronDown, Info, RefreshCw } from 'lucide-react';
+import { PlusCircle, Info, RefreshCw } from 'lucide-react';
 import { ICriterion } from '@/types/decision';
 import { CriterionRow } from './CriterionRow';
 import { toast } from 'sonner';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useI18nUI } from '@/contexts/I18nUIContext';
 interface CriteriaManagerProps {
@@ -31,6 +31,7 @@ export const CriteriaManager = ({
 }: CriteriaManagerProps) => {
   const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
   const [lastCriteriaCount, setLastCriteriaCount] = useState(0);
+  const [isOpen, setIsOpen] = useState(isNewDecision);
   const { t } = useI18nUI();
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, {
     coordinateGetter: sortableKeyboardCoordinates
@@ -108,12 +109,13 @@ export const CriteriaManager = ({
     setCriteria(items => [...items, newCriterion]);
     toast.success(t('criteria.addSuccess'));
   };
-  return <Collapsible defaultOpen={isNewDecision} className="p-4 animate-fade-in shadow-neutral-500 rounded-xl border shadow-200 bg-background ">
-      <CollapsibleTrigger className="flex justify-between items-center w-full group">
-        <div className="flex items-center gap-2">
-          <h3 className="font-semibold text-lg text-left">
+  return (
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild>
+        <Button variant="outline" className="flex items-center gap-2 h-9 px-3 py-1">
+          <span className="font-medium">
             {t('criteria.title')}
-          </h3>
+          </span>
           <span className="text-sm font-medium text-muted-foreground">
             ({criteria.length}/8)
           </span>
@@ -127,32 +129,51 @@ export const CriteriaManager = ({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-        </div>
-        <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-160 group-data-[state=open]:rotate-180" />
-      </CollapsibleTrigger>
-
-      <CollapsibleContent className="space-y-4 pt-4">
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={criteria} strategy={verticalListSortingStrategy}>
-            <div className="space-y-2">
-              {criteria.map(criterion => <div key={criterion.id} className={`transition-all duration-300 ease-out ${visibleCriteria.includes(criterion.id) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'}`}>
-                  <CriterionRow criterion={criterion} onNameChange={handleNameChange} onRemove={handleRemove} isRemoveDisabled={!isManualDecision && criteria.length <= 2} isDragDisabled={isInteractionDisabled} />
-                </div>)}
-            </div>
-          </SortableContext>
-        </DndContext>
-        
-        <div className="flex justify-between items-center gap-2">
-          <Button onClick={handleAdd} disabled={isInteractionDisabled || criteria.length >= 8} variant="outline" size="sm">
-            <PlusCircle className="h-4 w-4 mr-2" />
-            {t('criteria.addButton')}
-          </Button>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-full sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-2">
+            {t('criteria.title')}
+            <span className="text-sm font-medium text-muted-foreground">
+              ({criteria.length}/8)
+            </span>
+          </SheetTitle>
+        </SheetHeader>
+        <div className="space-y-4 pt-4">
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={criteria} strategy={verticalListSortingStrategy}>
+              <div className="space-y-2">
+                {criteria.map(criterion => (
+                  <div key={criterion.id} className={`transition-all duration-300 ease-out ${visibleCriteria.includes(criterion.id) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'}`}>
+                    <CriterionRow 
+                      criterion={criterion} 
+                      onNameChange={handleNameChange} 
+                      onRemove={handleRemove} 
+                      isRemoveDisabled={!isManualDecision && criteria.length <= 2} 
+                      isDragDisabled={isInteractionDisabled} 
+                    />
+                  </div>
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
           
-          {hasChanges && onUpdateAnalysis && !isManualDecision && <Button onClick={onUpdateAnalysis} disabled={isInteractionDisabled} variant="default" size="sm" className="bg-black hover:bg-black/90 text-white">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              {t('criteria.updateAnalysis')}
-            </Button>}
+          <div className="flex justify-between items-center gap-2">
+            <Button onClick={handleAdd} disabled={isInteractionDisabled || criteria.length >= 8} variant="outline" size="sm">
+              <PlusCircle className="h-4 w-4 mr-2" />
+              {t('criteria.addButton')}
+            </Button>
+            
+            {hasChanges && onUpdateAnalysis && !isManualDecision && (
+              <Button onClick={onUpdateAnalysis} disabled={isInteractionDisabled} variant="default" size="sm" className="bg-black hover:bg-black/90 text-white">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                {t('criteria.updateAnalysis')}
+              </Button>
+            )}
+          </div>
         </div>
-      </CollapsibleContent>
-    </Collapsible>;
+      </SheetContent>
+    </Sheet>
+  );
 };

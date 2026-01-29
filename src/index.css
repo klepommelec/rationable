@@ -210,6 +210,10 @@
     box-sizing: border-box;
   }
 
+  #root {
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-weight: 500;
@@ -219,15 +223,33 @@
   }
 
   /* Assure que les conteneurs principaux ne débordent pas */
-  .container, .mx-auto {
+  /* Exception pour permettre le débordement visible des cards */
+  .container:not(:has(.cards-container-wrapper)):not(.has-cards-overflow),
+  .mx-auto:not(:has(.cards-container-wrapper)):not(.has-cards-overflow) {
     max-width: 100vw;
     overflow-x: hidden;
   }
+  
+  /* Permettre le débordement visible quand les cards sont présentes */
+  .container:has(.cards-container-wrapper),
+  .mx-auto:has(.cards-container-wrapper),
+  .container.has-cards-overflow,
+  .mx-auto.has-cards-overflow {
+    overflow-x: visible !important;
+  }
 
   /* Empêche le scroll horizontal sur tous les éléments racine */
-  html, body {
+  /* Exception pour permettre le débordement visible des cards */
+  html:not(.has-cards-overflow),
+  body:not(.has-cards-overflow) {
     overflow-x: hidden;
     max-width: 100vw;
+  }
+  
+  /* Permettre le débordement visible quand les cards sont affichées */
+  html.has-cards-overflow,
+  body.has-cards-overflow {
+    overflow-x: visible !important;
   }
 
   /* Assure que tous les éléments flex ne débordent pas */
@@ -277,6 +299,53 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch; /* Smooth scrolling sur iOS */
     scrollbar-width: thin; /* Firefox */
+  }
+
+  /* Exception pour permettre le débordement visible des cards */
+  /* Le wrapper permet le débordement visible */
+  .cards-container-wrapper {
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    position: relative !important;
+    /* Permettre au conteneur lui-même de déborder */
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+  }
+  
+  /* Le conteneur de scroll interne utilise overflow-x: auto pour le scroll natif */
+  /* mais peut déborder visuellement grâce au wrapper parent */
+  .cards-container-wrapper > div {
+    overflow-y: visible !important;
+    /* overflow-x: auto est géré en inline pour permettre le scroll */
+  }
+  
+  /* Les parents doivent permettre le débordement visible */
+  /* Utiliser :has() si supporté */
+  body:has(.cards-container-wrapper),
+  html:has(.cards-container-wrapper),
+  body:has(.cards-container-wrapper) > div:first-child,
+  #main-content:has(.cards-container-wrapper),
+  #main-content:has(.cards-container-wrapper).container {
+    overflow-x: visible !important;
+  }
+  
+  /* Fallback si :has() n'est pas supporté - utiliser une classe sur body */
+  body.has-cards-overflow,
+  html.has-cards-overflow,
+  body.has-cards-overflow > div:first-child,
+  #main-content.has-cards-overflow,
+  #main-content.has-cards-overflow.container {
+    overflow-x: visible !important;
+  }
+  
+  /* Forcer aussi sur le conteneur racine */
+  body.has-cards-overflow > div.min-h-screen {
+    overflow-x: visible !important;
+  }
+  
+  /* Les cards individuelles peuvent déborder */
+  .cards-container-wrapper .flex > * {
+    position: relative;
   }
 
   .table-scroll-container::-webkit-scrollbar {

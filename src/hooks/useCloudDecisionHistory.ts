@@ -143,11 +143,17 @@ export const useCloudDecisionHistory = (): CloudDecisionHistory => {
   };
 
   // Cloud operations with offline queue
-  const addDecision = async (decision: IDecision) => {
+  const addDecision = async (decision: IDecision, retryCount = 0): Promise<boolean> => {
     // Immediate local update
     setHistory(prev => [decision, ...prev]);
     
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.warn('⚠️ Cannot save decision to cloud: user not authenticated');
+      return false;
+    }
+    
+    const maxRetries = 3;
+    const retryDelay = 1000; // 1 second
     
     try {
       const { error } = await supabase
@@ -165,27 +171,57 @@ export const useCloudDecisionHistory = (): CloudDecisionHistory => {
           timestamp: decision.timestamp ? new Date(decision.timestamp).toISOString() : null
         });
       
-      if (error) throw error;
+      if (error) {
+        // Retry on network errors or temporary failures
+        if (retryCount < maxRetries && (
+          error.message?.includes('network') || 
+          error.message?.includes('timeout') ||
+          error.code === 'PGRST301' || // Connection error
+          error.code === 'PGRST302'    // Timeout
+        )) {
+          console.warn(`⚠️ Retry ${retryCount + 1}/${maxRetries} for decision ${decision.id}:`, error.message);
+          await new Promise(resolve => setTimeout(resolve, retryDelay * (retryCount + 1)));
+          return addDecision(decision, retryCount + 1);
+        }
+        throw error;
+      }
+      
+      console.log('✅ Decision saved to cloud:', decision.id);
+      return true;
       
     } catch (error) {
-      console.error('Failed to add decision to cloud:', error);
-      // Add to offline queue
-      setOfflineQueue(prev => [...prev, {
-        type: 'add',
-        decision,
-        timestamp: Date.now()
-      }]);
+      console.error(`❌ Failed to add decision to cloud (attempt ${retryCount + 1}):`, error);
+      
+      // Add to offline queue for later retry
+      setOfflineQueue(prev => {
+        // Avoid duplicates
+        const exists = prev.some(item => item.type === 'add' && item.decision.id === decision.id);
+        if (exists) return prev;
+        
+        return [...prev, {
+          type: 'add',
+          decision,
+          timestamp: Date.now()
+        }];
+      });
       setIsOffline(true);
+      return false;
     }
   };
 
-  const updateDecision = async (updatedDecision: IDecision) => {
+  const updateDecision = async (updatedDecision: IDecision, retryCount = 0): Promise<boolean> => {
     // Immediate local update
     setHistory(prev => prev.map(d => 
       d.id === updatedDecision.id ? updatedDecision : d
     ));
     
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.warn('⚠️ Cannot update decision in cloud: user not authenticated');
+      return false;
+    }
+    
+    const maxRetries = 3;
+    const retryDelay = 1000;
     
     try {
       const { error } = await supabase
@@ -202,16 +238,41 @@ export const useCloudDecisionHistory = (): CloudDecisionHistory => {
         .eq('id', updatedDecision.id)
         .eq('user_id', user.id);
       
-      if (error) throw error;
+      if (error) {
+        // Retry on network errors or temporary failures
+        if (retryCount < maxRetries && (
+          error.message?.includes('network') || 
+          error.message?.includes('timeout') ||
+          error.code === 'PGRST301' || // Connection error
+          error.code === 'PGRST302'    // Timeout
+        )) {
+          console.warn(`⚠️ Retry ${retryCount + 1}/${maxRetries} for update decision ${updatedDecision.id}:`, error.message);
+          await new Promise(resolve => setTimeout(resolve, retryDelay * (retryCount + 1)));
+          return updateDecision(updatedDecision, retryCount + 1);
+        }
+        throw error;
+      }
+      
+      console.log('✅ Decision updated in cloud:', updatedDecision.id);
+      return true;
       
     } catch (error) {
-      console.error('Failed to update decision in cloud:', error);
-      setOfflineQueue(prev => [...prev, {
-        type: 'update',
-        decision: updatedDecision,
-        timestamp: Date.now()
-      }]);
+      console.error(`❌ Failed to update decision in cloud (attempt ${retryCount + 1}):`, error);
+      
+      // Add to offline queue for later retry
+      setOfflineQueue(prev => {
+        // Avoid duplicates
+        const exists = prev.some(item => item.type === 'update' && item.decision.id === updatedDecision.id);
+        if (exists) return prev;
+        
+        return [...prev, {
+          type: 'update',
+          decision: updatedDecision,
+          timestamp: Date.now()
+        }];
+      });
       setIsOffline(true);
+      return false;
     }
   };
 

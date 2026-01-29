@@ -397,7 +397,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} onSuccess={handleAuthSuccess} />
 
             {/* Section Templates */}
-            <Card className="backdrop-blur-sm">
+            <Card className="bg-transparent border-0 shadow-none ml-[240px] mr-[240px]">
                 <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
                         <div>
@@ -467,7 +467,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             </Card>
 
             {/* Historique intégré directement dans la page - seulement pour les utilisateurs connectés */}
-            {user && <Card className="backdrop-blur-sm">
+            {user && <Card className="bg-transparent border-0 shadow-none ml-[240px] mr-[240px]">
                   <CardHeader className="pb-4">
                       <CardTitle className="font-semibold text-2xl">{t('dilemmaSetup.history.title')}</CardTitle>
                       <CardDescription className="text-muted-foreground">

@@ -1,0 +1,2528 @@
+{
+  "generatedAt": "2026-01-27T10:36:40.759Z",
+  "summary": {
+    "total": 157,
+    "withStories": 5,
+    "withoutStories": 152,
+    "used": 110,
+    "unused": 47
+  },
+  "components": [
+    {
+      "name": "AccessibilityAudit",
+      "path": "src/components/AccessibilityAudit.tsx",
+      "category": "Core",
+      "exports": [
+        "AccessibilityAudit"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "AdvancedFeaturesDashboard",
+      "path": "src/components/AdvancedFeaturesDashboard.tsx",
+      "category": "Core",
+      "exports": [
+        "AdvancedFeaturesDashboard"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "AnimatedBackground",
+      "path": "src/components/AnimatedBackground.tsx",
+      "category": "Core",
+      "exports": [
+        "AnimatedBackground"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "AnimatedPlaceholder",
+      "path": "src/components/AnimatedPlaceholder.tsx",
+      "category": "Core",
+      "exports": [
+        "AnimatedPlaceholder"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "AuthForm",
+      "path": "src/components/AuthForm.tsx",
+      "category": "Core",
+      "exports": [
+        "AuthForm"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/components/AuthModal.tsx",
+        "src/pages/Auth.tsx",
+        "src/components/AuthModal.tsx",
+        "src/pages/Auth.tsx"
+      ]
+    },
+    {
+      "name": "AuthModal",
+      "path": "src/components/AuthModal.tsx",
+      "category": "Core",
+      "exports": [
+        "AuthModal"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/DilemmaSetup.tsx",
+        "src/pages/CommunityTemplates.tsx",
+        "src/components/decision-maker/DilemmaSetup.tsx",
+        "src/pages/CommunityTemplates.tsx"
+      ]
+    },
+    {
+      "name": "AvatarUpload",
+      "path": "src/components/AvatarUpload.tsx",
+      "category": "Core",
+      "exports": [
+        "AvatarUpload"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/settings/ProfileSettings.tsx",
+        "src/components/settings/ProfileSettings.tsx"
+      ]
+    },
+    {
+      "name": "BackgroundGradientAnimation",
+      "path": "src/components/BackgroundGradientAnimation.tsx",
+      "category": "Core",
+      "exports": [
+        "BackgroundGradientAnimation"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/Layout.tsx",
+        "src/components/Layout.tsx"
+      ]
+    },
+    {
+      "name": "CategorySelector",
+      "path": "src/components/CategorySelector.tsx",
+      "category": "Core",
+      "exports": [
+        "CategorySelector",
+        "CategoryBadge"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/SharedDecisionView.tsx",
+        "src/components/SharedDecisionView.tsx"
+      ]
+    },
+    {
+      "name": "CollaborationDialog",
+      "path": "src/components/CollaborationDialog.tsx",
+      "category": "Core",
+      "exports": [
+        "CollaborationDialog"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/ShareButton.tsx",
+        "src/components/ShareButton.tsx"
+      ]
+    },
+    {
+      "name": "CriteriaManager",
+      "path": "src/components/CriteriaManager.tsx",
+      "category": "Core",
+      "exports": [
+        "CriteriaManager"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/DecisionMaker.tsx",
+        "src/components/DecisionMaker.tsx"
+      ]
+    },
+    {
+      "name": "CriteriaSkeleton",
+      "path": "src/components/CriteriaSkeleton.tsx",
+      "category": "Core",
+      "exports": [
+        "CriteriaSkeleton"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "CriterionRow",
+      "path": "src/components/CriterionRow.tsx",
+      "category": "Core",
+      "exports": [
+        "CriterionRow"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/CriteriaManager.tsx",
+        "src/components/CriteriaManager.tsx"
+      ]
+    },
+    {
+      "name": "DecisionHistory",
+      "path": "src/components/DecisionHistory.tsx",
+      "category": "Core",
+      "exports": [
+        "DecisionHistory"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "DecisionMaker",
+      "path": "src/components/DecisionMaker.tsx",
+      "category": "Core",
+      "exports": [
+        "DecisionMaker"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/pages/Index.tsx",
+        "src/pages/Index.tsx"
+      ]
+    },
+    {
+      "name": "EditableTitle",
+      "path": "src/components/EditableTitle.tsx",
+      "category": "Core",
+      "exports": [
+        "EditableTitle"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/DecisionMaker.tsx",
+        "src/components/DecisionMaker.tsx"
+      ]
+    },
+    {
+      "name": "EmojiPicker",
+      "path": "src/components/EmojiPicker.tsx",
+      "category": "Core",
+      "exports": [],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/DecisionMaker.tsx",
+        "src/components/DecisionMaker.tsx"
+      ]
+    },
+    {
+      "name": "EnhancedDecisionHistory",
+      "path": "src/components/EnhancedDecisionHistory.tsx",
+      "category": "Core",
+      "exports": [
+        "EnhancedDecisionHistory"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/DecisionHistory.tsx",
+        "src/components/DecisionHistory.tsx"
+      ]
+    },
+    {
+      "name": "ExpandableText",
+      "path": "src/components/ExpandableText.tsx",
+      "category": "Core",
+      "exports": [
+        "ExpandableText"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/RecommendationCard.tsx",
+        "src/components/decision-maker/RecommendationCard.tsx"
+      ]
+    },
+    {
+      "name": "ExportMenu",
+      "path": "src/components/ExportMenu.tsx",
+      "category": "Core",
+      "exports": [
+        "ExportMenu"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "FileUpload",
+      "path": "src/components/FileUpload.tsx",
+      "category": "Core",
+      "exports": [
+        "FileUpload"
+      ],
+      "usageCount": 3,
+      "hasStory": false,
+      "usages": [
+        "src/hooks/useDecisionAPI.ts",
+        "src/hooks/useDecisionMaker.tsx",
+        "src/services/fileUploadService.ts",
+        "src/hooks/useDecisionAPI.ts",
+        "src/hooks/useDecisionMaker.tsx",
+        "src/services/fileUploadService.ts"
+      ]
+    },
+    {
+      "name": "Footer",
+      "path": "src/components/Footer.tsx",
+      "category": "Core",
+      "exports": [
+        "Footer"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/Layout.tsx",
+        "src/components/Layout.tsx"
+      ]
+    },
+    {
+      "name": "LanguageSelector",
+      "path": "src/components/LanguageSelector.tsx",
+      "category": "Core",
+      "exports": [
+        "LanguageSelector"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "Layout",
+      "path": "src/components/Layout.tsx",
+      "category": "Core",
+      "exports": [
+        "Layout"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/App.tsx",
+        "src/App.tsx",
+        "src/App.tsx"
+      ]
+    },
+    {
+      "name": "LazyComponent",
+      "path": "src/components/LazyComponent.tsx",
+      "category": "Core",
+      "exports": [
+        "createLazyComponent",
+        "SkeletonFallback",
+        "IntersectionLazyComponent",
+        "lazyUtils"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/App.tsx",
+        "src/components/LazyLoadingDemo.tsx",
+        "src/App.tsx",
+        "src/App.tsx",
+        "src/components/LazyLoadingDemo.tsx"
+      ]
+    },
+    {
+      "name": "LazyLoadingDemo",
+      "path": "src/components/LazyLoadingDemo.tsx",
+      "category": "Core",
+      "exports": [
+        "LazyLoadingDemo"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "ManualOptionsCreator",
+      "path": "src/components/ManualOptionsCreator.tsx",
+      "category": "Core",
+      "exports": [
+        "ManualOptionsCreator"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/DecisionMaker.tsx",
+        "src/components/DecisionMaker.tsx"
+      ]
+    },
+    {
+      "name": "ManualOptionsGenerator",
+      "path": "src/components/ManualOptionsGenerator.tsx",
+      "category": "Core",
+      "exports": [
+        "ManualOptionsGenerator"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/DecisionMaker.tsx",
+        "src/components/DecisionMaker.tsx"
+      ]
+    },
+    {
+      "name": "MerchantLogo",
+      "path": "src/components/MerchantLogo.tsx",
+      "category": "Core",
+      "exports": [
+        "MerchantLogo"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/ComparisonTable.tsx",
+        "src/components/decision-maker/RecommendationCard.tsx",
+        "src/components/decision-maker/ComparisonTable.tsx",
+        "src/components/decision-maker/RecommendationCard.tsx"
+      ]
+    },
+    {
+      "name": "MonthlyTrendingTemplates",
+      "path": "src/components/MonthlyTrendingTemplates.tsx",
+      "category": "Core",
+      "exports": [
+        "MonthlyTrendingTemplates"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/DilemmaSetup.tsx",
+        "src/components/decision-maker/DilemmaSetup.tsx"
+      ]
+    },
+    {
+      "name": "Navbar",
+      "path": "src/components/Navbar.tsx",
+      "category": "Core",
+      "exports": [
+        "Navbar"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/components/Layout.tsx",
+        "src/pages/TemplatePreview.tsx",
+        "src/components/Layout.tsx",
+        "src/pages/TemplatePreview.tsx"
+      ]
+    },
+    {
+      "name": "Onboarding",
+      "path": "src/components/Onboarding.tsx",
+      "category": "Core",
+      "exports": [
+        "Onboarding"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/ProtectedRoute.tsx",
+        "src/components/ProtectedRoute.tsx"
+      ]
+    },
+    {
+      "name": "OptimizedImage",
+      "path": "src/components/OptimizedImage.tsx",
+      "category": "Core",
+      "exports": [
+        "OptimizedImage",
+        "ResponsiveImage",
+        "AspectRatioImage"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/LazyLoadingDemo.tsx",
+        "src/components/LazyLoadingDemo.tsx"
+      ]
+    },
+    {
+      "name": "OptionsLoadingSkeleton",
+      "path": "src/components/OptionsLoadingSkeleton.tsx",
+      "category": "Core",
+      "exports": [
+        "OptionsLoadingSkeleton"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/DecisionMaker.tsx",
+        "src/components/DecisionMaker.tsx"
+      ]
+    },
+    {
+      "name": "PerformanceDashboard",
+      "path": "src/components/PerformanceDashboard.tsx",
+      "category": "Core",
+      "exports": [
+        "PerformanceDashboard"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "PerformanceMonitor",
+      "path": "src/components/PerformanceMonitor.tsx",
+      "category": "Core",
+      "exports": [
+        "PerformanceMonitor",
+        "usePerformanceMetrics",
+        "performanceUtils"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/App.tsx",
+        "src/components/PerformanceDashboard.tsx",
+        "src/App.tsx",
+        "src/App.tsx",
+        "src/components/PerformanceDashboard.tsx"
+      ]
+    },
+    {
+      "name": "ProtectedRoute",
+      "path": "src/components/ProtectedRoute.tsx",
+      "category": "Core",
+      "exports": [
+        "ProtectedRoute"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/App.tsx",
+        "src/App.tsx",
+        "src/App.tsx"
+      ]
+    },
+    {
+      "name": "RealTimeSearchToggle",
+      "path": "src/components/RealTimeSearchToggle.tsx",
+      "category": "Core",
+      "exports": [
+        "RealTimeSearchToggle"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/Layout.tsx",
+        "src/components/Layout.tsx"
+      ]
+    },
+    {
+      "name": "SecurityNotice",
+      "path": "src/components/SecurityNotice.tsx",
+      "category": "Core",
+      "exports": [
+        "SecurityNotice"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/settings/AdminSettings.tsx",
+        "src/components/settings/AdminSettings.tsx"
+      ]
+    },
+    {
+      "name": "SentryDashboard",
+      "path": "src/components/SentryDashboard.tsx",
+      "category": "Core",
+      "exports": [
+        "SentryDashboard"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "ShareAsTemplateDialog",
+      "path": "src/components/ShareAsTemplateDialog.tsx",
+      "category": "Core",
+      "exports": [
+        "ShareAsTemplateDialog"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/ShareButton.tsx",
+        "src/components/ShareButton.tsx"
+      ]
+    },
+    {
+      "name": "ShareButton",
+      "path": "src/components/ShareButton.tsx",
+      "category": "Core",
+      "exports": [
+        "ShareButton"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/components/ExportMenu.tsx",
+        "src/components/Navbar.tsx",
+        "src/components/ExportMenu.tsx",
+        "src/components/Navbar.tsx"
+      ]
+    },
+    {
+      "name": "SharedDecisionView",
+      "path": "src/components/SharedDecisionView.tsx",
+      "category": "Core",
+      "exports": [
+        "SharedDecisionView"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/pages/SharedDecision.tsx",
+        "src/pages/SharedDecision.tsx"
+      ]
+    },
+    {
+      "name": "SimpleDashboard",
+      "path": "src/components/SimpleDashboard.tsx",
+      "category": "Core",
+      "exports": [
+        "SimpleDashboard"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/App.tsx",
+        "src/App.tsx",
+        "src/App.tsx"
+      ]
+    },
+    {
+      "name": "ThemeToggle",
+      "path": "src/components/ThemeToggle.tsx",
+      "category": "Core",
+      "exports": [
+        "ThemeToggle"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "ValidatedLink",
+      "path": "src/components/ValidatedLink.tsx",
+      "category": "Core",
+      "exports": [
+        "ValidatedLink"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/components/SharedDecisionView.tsx",
+        "src/components/decision-maker/RecommendationCard.tsx",
+        "src/components/SharedDecisionView.tsx",
+        "src/components/decision-maker/RecommendationCard.tsx"
+      ]
+    },
+    {
+      "name": "WorkspaceImageUpload",
+      "path": "src/components/WorkspaceImageUpload.tsx",
+      "category": "Core",
+      "exports": [
+        "WorkspaceImageUpload"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/workspace/CreateWorkspaceDialog.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/workspace/CreateWorkspaceDialog.tsx"
+      ]
+    },
+    {
+      "name": "YouTubeVideoCard",
+      "path": "src/components/YouTubeVideoCard.tsx",
+      "category": "Core",
+      "exports": [
+        "YouTubeVideoCard"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "PageTransition",
+      "path": "src/components/animations/PageTransition.tsx",
+      "category": "Core",
+      "exports": [
+        "PageTransition",
+        "FadeTransition",
+        "ScaleTransition",
+        "StaggerTransition",
+        "StaggerItem"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/App.tsx",
+        "src/components/LazyLoadingDemo.tsx",
+        "src/App.tsx",
+        "src/App.tsx",
+        "src/components/LazyLoadingDemo.tsx"
+      ]
+    },
+    {
+      "name": "CommentItem",
+      "path": "src/components/comments/CommentItem.tsx",
+      "category": "Comments",
+      "exports": [
+        "CommentItem"
+      ],
+      "usageCount": 3,
+      "hasStory": false,
+      "usages": [
+        "src/components/comments/CommentReplies.tsx",
+        "src/components/comments/CommentSection.tsx",
+        "src/components/comments/CommentsPanel.tsx"
+      ]
+    },
+    {
+      "name": "CommentReactions",
+      "path": "src/components/comments/CommentReactions.tsx",
+      "category": "Comments",
+      "exports": [
+        "CommentReactions"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/comments/CommentItem.tsx"
+      ]
+    },
+    {
+      "name": "CommentReplies",
+      "path": "src/components/comments/CommentReplies.tsx",
+      "category": "Comments",
+      "exports": [
+        "CommentReplies"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/comments/CommentItem.tsx"
+      ]
+    },
+    {
+      "name": "CommentSection",
+      "path": "src/components/comments/CommentSection.tsx",
+      "category": "Comments",
+      "exports": [
+        "CommentSection"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/components/SharedDecisionView.tsx",
+        "src/components/comments/CommentableSection.tsx",
+        "src/components/SharedDecisionView.tsx"
+      ]
+    },
+    {
+      "name": "CommentableSection",
+      "path": "src/components/comments/CommentableSection.tsx",
+      "category": "Comments",
+      "exports": [
+        "CommentableSection"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "CommentsPanel",
+      "path": "src/components/comments/CommentsPanel.tsx",
+      "category": "Comments",
+      "exports": [
+        "CommentsPanel"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/DecisionMaker.tsx",
+        "src/components/DecisionMaker.tsx"
+      ]
+    },
+    {
+      "name": "MentionRenderer",
+      "path": "src/components/comments/MentionRenderer.tsx",
+      "category": "Comments",
+      "exports": [
+        "MentionRenderer"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/comments/CommentItem.tsx"
+      ]
+    },
+    {
+      "name": "MentionsInput",
+      "path": "src/components/comments/MentionsInput.tsx",
+      "category": "Comments",
+      "exports": [
+        "MentionsInput"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/components/comments/CommentSection.tsx",
+        "src/components/comments/CommentsPanel.tsx"
+      ]
+    },
+    {
+      "name": "AppErrorBoundary",
+      "path": "src/components/core/AppErrorBoundary.tsx",
+      "category": "Core",
+      "exports": [
+        "AppErrorBoundary"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/App.tsx",
+        "src/App.tsx",
+        "src/App.tsx"
+      ]
+    },
+    {
+      "name": "AIProviderDashboard",
+      "path": "src/components/decision-maker/AIProviderDashboard.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "AIProviderDashboard"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/settings/AdminSettings.tsx",
+        "src/components/settings/AdminSettings.tsx"
+      ]
+    },
+    {
+      "name": "AIProviderIndicator",
+      "path": "src/components/decision-maker/AIProviderIndicator.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "AIProviderIndicator"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/RecommendationCard.tsx"
+      ]
+    },
+    {
+      "name": "AIProviderMonitor",
+      "path": "src/components/decision-maker/AIProviderMonitor.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "AIProviderMonitor"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/settings/AdminSettings.tsx",
+        "src/components/settings/AdminSettings.tsx"
+      ]
+    },
+    {
+      "name": "AnalysisCharts",
+      "path": "src/components/decision-maker/AnalysisCharts.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "AnalysisCharts"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "AnalysisInsights",
+      "path": "src/components/decision-maker/AnalysisInsights.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "AnalysisInsights"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "AnalysisNavigation",
+      "path": "src/components/decision-maker/AnalysisNavigation.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "AnalysisNavigation"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/DecisionMaker.tsx",
+        "src/components/DecisionMaker.tsx"
+      ]
+    },
+    {
+      "name": "AnalysisResult",
+      "path": "src/components/decision-maker/AnalysisResult.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "AnalysisResult"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/components/DecisionMaker.tsx",
+        "src/pages/TemplatePreview.tsx",
+        "src/components/DecisionMaker.tsx",
+        "src/pages/TemplatePreview.tsx"
+      ]
+    },
+    {
+      "name": "ComparisonTable",
+      "path": "src/components/decision-maker/ComparisonTable.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "ComparisonTable"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/AnalysisResult.tsx",
+        "src/components/decision-maker/MetricsVisual.tsx"
+      ]
+    },
+    {
+      "name": "ConfidenceIndicator",
+      "path": "src/components/decision-maker/ConfidenceIndicator.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "ConfidenceIndicator"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/RecommendationCard.tsx"
+      ]
+    },
+    {
+      "name": "DataAccuracyIndicator",
+      "path": "src/components/decision-maker/DataAccuracyIndicator.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "DataAccuracyIndicator"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/AnalysisResult.tsx",
+        "src/components/decision-maker/RecommendationCard.tsx"
+      ]
+    },
+    {
+      "name": "DecisionImage",
+      "path": "src/components/decision-maker/DecisionImage.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "DecisionImage"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "DilemmaSetup",
+      "path": "src/components/decision-maker/DilemmaSetup.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "DilemmaSetup"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/DecisionMaker.tsx",
+        "src/components/DecisionMaker.tsx"
+      ]
+    },
+    {
+      "name": "EnhancedRadarChart",
+      "path": "src/components/decision-maker/EnhancedRadarChart.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "EnhancedRadarChart"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "ExpandOptionsButton",
+      "path": "src/components/decision-maker/ExpandOptionsButton.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "ExpandOptionsButton"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "FollowUpQuestions",
+      "path": "src/components/decision-maker/FollowUpQuestions.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "FollowUpQuestions"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/AnalysisResult.tsx"
+      ]
+    },
+    {
+      "name": "MainActionButton",
+      "path": "src/components/decision-maker/MainActionButton.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "MainActionButton"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/DilemmaSetup.tsx"
+      ]
+    },
+    {
+      "name": "MetricsVisual",
+      "path": "src/components/decision-maker/MetricsVisual.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "MetricsVisual"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/AnalysisCharts.tsx"
+      ]
+    },
+    {
+      "name": "ParticipantManager",
+      "path": "src/components/decision-maker/ParticipantManager.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "ParticipantManager"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "PerplexityCounter",
+      "path": "src/components/decision-maker/PerplexityCounter.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "PerplexityCounter"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "PieChart",
+      "path": "src/components/decision-maker/PieChart.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "ScorePieChart"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "RecommendationCard",
+      "path": "src/components/decision-maker/RecommendationCard.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "RecommendationCard"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/AnalysisResult.tsx"
+      ]
+    },
+    {
+      "name": "ScoreChart",
+      "path": "src/components/decision-maker/ScoreChart.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "ScoreChart"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "SourcesList",
+      "path": "src/components/decision-maker/SourcesList.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "SourcesList"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "UsefulLinks",
+      "path": "src/components/decision-maker/UsefulLinks.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "UsefulLinks"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/RecommendationCard.tsx"
+      ]
+    },
+    {
+      "name": "VisualIndicators",
+      "path": "src/components/decision-maker/VisualIndicators.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "VisualIndicators"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/AnalysisCharts.tsx"
+      ]
+    },
+    {
+      "name": "VoteButton",
+      "path": "src/components/decision-maker/VoteButton.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "VoteButton"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/ComparisonTable.tsx"
+      ]
+    },
+    {
+      "name": "WorkspaceDocumentIndicator",
+      "path": "src/components/decision-maker/WorkspaceDocumentIndicator.tsx",
+      "category": "DecisionMaker",
+      "exports": [
+        "WorkspaceDocumentIndicator"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/RecommendationCard.tsx"
+      ]
+    },
+    {
+      "name": "EmptyHistoryState",
+      "path": "src/components/history/EmptyHistoryState.tsx",
+      "category": "History",
+      "exports": [
+        "EmptyHistoryState"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/EnhancedDecisionHistory.tsx",
+        "src/components/EnhancedDecisionHistory.tsx"
+      ]
+    },
+    {
+      "name": "HistoryActions",
+      "path": "src/components/history/HistoryActions.tsx",
+      "category": "History",
+      "exports": [
+        "HistoryActions"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/EnhancedDecisionHistory.tsx",
+        "src/components/EnhancedDecisionHistory.tsx"
+      ]
+    },
+    {
+      "name": "HistoryItem",
+      "path": "src/components/history/HistoryItem.tsx",
+      "category": "History",
+      "exports": [
+        "HistoryItem"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/EnhancedDecisionHistory.tsx",
+        "src/components/EnhancedDecisionHistory.tsx"
+      ]
+    },
+    {
+      "name": "HistorySearchBar",
+      "path": "src/components/history/HistorySearchBar.tsx",
+      "category": "History",
+      "exports": [
+        "HistorySearchBar"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/EnhancedDecisionHistory.tsx",
+        "src/components/EnhancedDecisionHistory.tsx"
+      ]
+    },
+    {
+      "name": "AccountsSettings",
+      "path": "src/components/settings/AccountsSettings.tsx",
+      "category": "Settings",
+      "exports": [
+        "AccountsSettings"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/pages/Settings.tsx",
+        "src/pages/Settings.tsx"
+      ]
+    },
+    {
+      "name": "AdminSettings",
+      "path": "src/components/settings/AdminSettings.tsx",
+      "category": "Settings",
+      "exports": [
+        "AdminSettings"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/pages/Settings.tsx",
+        "src/pages/Settings.tsx"
+      ]
+    },
+    {
+      "name": "AppearanceSettings",
+      "path": "src/components/settings/AppearanceSettings.tsx",
+      "category": "Settings",
+      "exports": [
+        "AppearanceSettings"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/pages/Settings.tsx",
+        "src/pages/Settings.tsx"
+      ]
+    },
+    {
+      "name": "DocumentsSettings",
+      "path": "src/components/settings/DocumentsSettings.tsx",
+      "category": "Settings",
+      "exports": [
+        "DocumentsSettings"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/pages/Settings.tsx",
+        "src/pages/Settings.tsx"
+      ]
+    },
+    {
+      "name": "GoogleAccountSettings",
+      "path": "src/components/settings/GoogleAccountSettings.tsx",
+      "category": "Settings",
+      "exports": [
+        "GoogleAccountSettings"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/settings/AccountsSettings.tsx"
+      ]
+    },
+    {
+      "name": "MembersSettings",
+      "path": "src/components/settings/MembersSettings.tsx",
+      "category": "Settings",
+      "exports": [
+        "MembersSettings",
+        "MembersSettings"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/pages/Settings.tsx",
+        "src/pages/Settings.tsx"
+      ]
+    },
+    {
+      "name": "MonthlyTemplatesSettings",
+      "path": "src/components/settings/MonthlyTemplatesSettings.tsx",
+      "category": "Settings",
+      "exports": [
+        "MonthlyTemplatesSettings"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "ProfileSettings",
+      "path": "src/components/settings/ProfileSettings.tsx",
+      "category": "Settings",
+      "exports": [
+        "ProfileSettings"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/pages/Settings.tsx",
+        "src/pages/Settings.tsx"
+      ]
+    },
+    {
+      "name": "RealTimeSearchSettings",
+      "path": "src/components/settings/RealTimeSearchSettings.tsx",
+      "category": "Settings",
+      "exports": [
+        "RealTimeSearchSettings"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "SettingsSidebar",
+      "path": "src/components/settings/SettingsSidebar.tsx",
+      "category": "Settings",
+      "exports": [
+        "SettingsSidebar"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/pages/Settings.tsx",
+        "src/pages/Settings.tsx"
+      ]
+    },
+    {
+      "name": "WorkspacesSettings",
+      "path": "src/components/settings/WorkspacesSettings.tsx",
+      "category": "Settings",
+      "exports": [
+        "WorkspacesSettings",
+        "WorkspacesSettings"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/pages/Settings.tsx",
+        "src/pages/Settings.tsx"
+      ]
+    },
+    {
+      "name": "CustomTemplateManager",
+      "path": "src/components/templates/CustomTemplateManager.tsx",
+      "category": "Templates",
+      "exports": [
+        "CustomTemplateManager"
+      ],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "TemplateCard",
+      "path": "src/components/templates/TemplateCard.tsx",
+      "category": "Templates",
+      "exports": [
+        "TemplateCard"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/templates/TemplateGrid.tsx"
+      ]
+    },
+    {
+      "name": "TemplateFilters",
+      "path": "src/components/templates/TemplateFilters.tsx",
+      "category": "Templates",
+      "exports": [
+        "TemplateFilters"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/pages/CommunityTemplates.tsx",
+        "src/pages/CommunityTemplates.tsx"
+      ]
+    },
+    {
+      "name": "TemplateGrid",
+      "path": "src/components/templates/TemplateGrid.tsx",
+      "category": "Templates",
+      "exports": [
+        "TemplateGrid"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/pages/CommunityTemplates.tsx",
+        "src/pages/CommunityTemplates.tsx"
+      ]
+    },
+    {
+      "name": "theme-provider",
+      "path": "src/components/theme-provider.tsx",
+      "category": "Core",
+      "exports": [
+        "ThemeProvider"
+      ],
+      "usageCount": 4,
+      "hasStory": false,
+      "usages": [
+        "src/App.tsx",
+        "src/pages/SharedDecision.tsx",
+        "src/pages/TemplatePreview.tsx",
+        "src/test/test-utils.tsx",
+        "src/App.tsx",
+        "src/App.tsx",
+        "src/pages/SharedDecision.tsx",
+        "src/pages/TemplatePreview.tsx",
+        "src/test/test-utils.tsx"
+      ]
+    },
+    {
+      "name": "accordion",
+      "path": "src/components/ui/accordion.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "alert-dialog",
+      "path": "src/components/ui/alert-dialog.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 4,
+      "hasStory": false,
+      "usages": [
+        "src/components/history/HistorySearchBar.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/workspace/DocumentsSettings.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx",
+        "src/components/history/HistorySearchBar.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/workspace/DocumentsSettings.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx"
+      ]
+    },
+    {
+      "name": "alert",
+      "path": "src/components/ui/alert.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 12,
+      "hasStory": false,
+      "usages": [
+        "src/components/AccessibilityAudit.tsx",
+        "src/components/AuthForm.tsx",
+        "src/components/RealTimeSearchToggle.tsx",
+        "src/components/SecurityNotice.tsx",
+        "src/components/SentryDashboard.tsx",
+        "src/components/decision-maker/AIProviderMonitor.tsx",
+        "src/components/settings/GoogleAccountSettings.tsx",
+        "src/components/settings/RealTimeSearchSettings.tsx",
+        "src/components/history/HistorySearchBar.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/workspace/DocumentsSettings.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx",
+        "src/components/AccessibilityAudit.tsx",
+        "src/components/AuthForm.tsx",
+        "src/components/RealTimeSearchToggle.tsx",
+        "src/components/SecurityNotice.tsx",
+        "src/components/SentryDashboard.tsx",
+        "src/components/decision-maker/AIProviderMonitor.tsx",
+        "src/components/settings/GoogleAccountSettings.tsx",
+        "src/components/settings/RealTimeSearchSettings.tsx"
+      ]
+    },
+    {
+      "name": "aspect-ratio",
+      "path": "src/components/ui/aspect-ratio.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "avatar",
+      "path": "src/components/ui/avatar.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 8,
+      "hasStory": false,
+      "usages": [
+        "src/components/AvatarUpload.tsx",
+        "src/components/Navbar.tsx",
+        "src/components/WorkspaceImageUpload.tsx",
+        "src/components/comments/CommentItem.tsx",
+        "src/components/comments/MentionsInput.tsx",
+        "src/components/decision-maker/VoteButton.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx",
+        "src/components/workspace/WorkspaceSelector.tsx",
+        "src/components/AvatarUpload.tsx",
+        "src/components/Navbar.tsx",
+        "src/components/WorkspaceImageUpload.tsx",
+        "src/components/comments/CommentItem.tsx",
+        "src/components/comments/MentionsInput.tsx",
+        "src/components/decision-maker/VoteButton.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx",
+        "src/components/workspace/WorkspaceSelector.tsx"
+      ]
+    },
+    {
+      "name": "badge",
+      "path": "src/components/ui/badge.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 32,
+      "hasStory": true,
+      "usages": [
+        "src/components/AccessibilityAudit.tsx",
+        "src/components/CategorySelector.tsx",
+        "src/components/LazyLoadingDemo.tsx",
+        "src/components/PerformanceDashboard.tsx",
+        "src/components/SentryDashboard.tsx",
+        "src/components/ShareAsTemplateDialog.tsx",
+        "src/components/SharedDecisionView.tsx",
+        "src/components/comments/CommentableSection.tsx",
+        "src/components/decision-maker/AIProviderDashboard.tsx",
+        "src/components/decision-maker/AIProviderIndicator.tsx",
+        "src/components/decision-maker/AIProviderMonitor.tsx",
+        "src/components/decision-maker/AnalysisNavigation.tsx",
+        "src/components/decision-maker/AnalysisResult.tsx",
+        "src/components/decision-maker/ConfidenceIndicator.tsx",
+        "src/components/decision-maker/DataAccuracyIndicator.tsx",
+        "src/components/decision-maker/MetricsVisual.tsx",
+        "src/components/decision-maker/ParticipantManager.tsx",
+        "src/components/decision-maker/PerplexityCounter.tsx",
+        "src/components/decision-maker/RecommendationCard.tsx",
+        "src/components/decision-maker/SourcesList.tsx",
+        "src/components/decision-maker/VisualIndicators.tsx",
+        "src/components/decision-maker/WorkspaceDocumentIndicator.tsx",
+        "src/components/history/HistorySearchBar.tsx",
+        "src/components/settings/AdminSettings.tsx",
+        "src/components/settings/DocumentsSettings.tsx",
+        "src/components/settings/GoogleAccountSettings.tsx",
+        "src/components/settings/MonthlyTemplatesSettings.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/templates/TemplateCard.tsx",
+        "src/components/workspace/DocumentsSettings.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx",
+        "src/components/AccessibilityAudit.tsx",
+        "src/components/CategorySelector.tsx",
+        "src/components/LazyLoadingDemo.tsx",
+        "src/components/PerformanceDashboard.tsx",
+        "src/components/SentryDashboard.tsx",
+        "src/components/ShareAsTemplateDialog.tsx",
+        "src/components/SharedDecisionView.tsx",
+        "src/components/comments/CommentableSection.tsx",
+        "src/components/decision-maker/AIProviderDashboard.tsx",
+        "src/components/decision-maker/AIProviderIndicator.tsx",
+        "src/components/decision-maker/AIProviderMonitor.tsx",
+        "src/components/decision-maker/AnalysisNavigation.tsx",
+        "src/components/decision-maker/AnalysisResult.tsx",
+        "src/components/decision-maker/ConfidenceIndicator.tsx",
+        "src/components/decision-maker/DataAccuracyIndicator.tsx",
+        "src/components/decision-maker/MetricsVisual.tsx",
+        "src/components/decision-maker/ParticipantManager.tsx",
+        "src/components/decision-maker/PerplexityCounter.tsx",
+        "src/components/decision-maker/RecommendationCard.tsx",
+        "src/components/decision-maker/SourcesList.tsx",
+        "src/components/decision-maker/VisualIndicators.tsx",
+        "src/components/decision-maker/WorkspaceDocumentIndicator.tsx",
+        "src/components/history/HistorySearchBar.tsx",
+        "src/components/settings/AdminSettings.tsx",
+        "src/components/settings/DocumentsSettings.tsx",
+        "src/components/settings/GoogleAccountSettings.tsx",
+        "src/components/settings/MonthlyTemplatesSettings.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/templates/TemplateCard.tsx",
+        "src/components/workspace/DocumentsSettings.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx"
+      ]
+    },
+    {
+      "name": "breadcrumb",
+      "path": "src/components/ui/breadcrumb.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "button",
+      "path": "src/components/ui/button.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 71,
+      "hasStory": true,
+      "usages": [
+        "src/components/AccessibilityAudit.tsx",
+        "src/components/AuthForm.tsx",
+        "src/components/AvatarUpload.tsx",
+        "src/components/CategorySelector.tsx",
+        "src/components/CollaborationDialog.tsx",
+        "src/components/CriteriaManager.tsx",
+        "src/components/CriterionRow.tsx",
+        "src/components/EditableTitle.tsx",
+        "src/components/EmojiPicker.tsx",
+        "src/components/EnhancedDecisionHistory.tsx",
+        "src/components/ExportMenu.tsx",
+        "src/components/FileUpload.tsx",
+        "src/components/LanguageSelector.tsx",
+        "src/components/LazyLoadingDemo.tsx",
+        "src/components/ManualOptionsCreator.tsx",
+        "src/components/ManualOptionsGenerator.tsx",
+        "src/components/MonthlyTrendingTemplates.tsx",
+        "src/components/Navbar.tsx",
+        "src/components/Onboarding.tsx",
+        "src/components/PerformanceDashboard.tsx",
+        "src/components/SecurityNotice.tsx",
+        "src/components/SentryDashboard.tsx",
+        "src/components/ShareAsTemplateDialog.tsx",
+        "src/components/ShareButton.tsx",
+        "src/components/SharedDecisionView.tsx",
+        "src/components/ThemeToggle.tsx",
+        "src/components/WorkspaceImageUpload.tsx",
+        "src/components/comments/CommentItem.tsx",
+        "src/components/comments/CommentReactions.tsx",
+        "src/components/comments/CommentReplies.tsx",
+        "src/components/comments/CommentSection.tsx",
+        "src/components/comments/CommentableSection.tsx",
+        "src/components/comments/CommentsPanel.tsx",
+        "src/components/core/AppErrorBoundary.tsx",
+        "src/components/decision-maker/AIProviderDashboard.tsx",
+        "src/components/decision-maker/AIProviderMonitor.tsx",
+        "src/components/decision-maker/AnalysisNavigation.tsx",
+        "src/components/decision-maker/AnalysisResult.tsx",
+        "src/components/decision-maker/ComparisonTable.tsx",
+        "src/components/decision-maker/DilemmaSetup.tsx",
+        "src/components/decision-maker/ExpandOptionsButton.tsx",
+        "src/components/decision-maker/FollowUpQuestions.tsx",
+        "src/components/decision-maker/MainActionButton.tsx",
+        "src/components/decision-maker/ParticipantManager.tsx",
+        "src/components/decision-maker/RecommendationCard.tsx",
+        "src/components/decision-maker/ScoreChart.tsx",
+        "src/components/decision-maker/UsefulLinks.tsx",
+        "src/components/decision-maker/VoteButton.tsx",
+        "src/components/history/HistoryItem.tsx",
+        "src/components/history/HistorySearchBar.tsx",
+        "src/components/settings/AppearanceSettings.tsx",
+        "src/components/settings/DocumentsSettings.tsx",
+        "src/components/settings/GoogleAccountSettings.tsx",
+        "src/components/settings/MonthlyTemplatesSettings.tsx",
+        "src/components/settings/ProfileSettings.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/templates/TemplateCard.tsx",
+        "src/components/templates/TemplateGrid.tsx",
+        "src/components/ui/alert-dialog.tsx",
+        "src/components/ui/calendar.tsx",
+        "src/components/ui/carousel.tsx",
+        "src/components/ui/pagination.tsx",
+        "src/components/ui/sidebar.tsx",
+        "src/components/workspace/CreateWorkspaceDialog.tsx",
+        "src/components/workspace/DocumentsSettings.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx",
+        "src/components/workspace/WorkspaceSelector.tsx",
+        "src/pages/Settings.tsx",
+        "src/pages/SharedDecision.tsx",
+        "src/pages/TemplatePreview.tsx",
+        "src/components/AccessibilityAudit.tsx",
+        "src/components/AuthForm.tsx",
+        "src/components/AvatarUpload.tsx",
+        "src/components/CategorySelector.tsx",
+        "src/components/CollaborationDialog.tsx",
+        "src/components/CriteriaManager.tsx",
+        "src/components/CriterionRow.tsx",
+        "src/components/EditableTitle.tsx",
+        "src/components/EmojiPicker.tsx",
+        "src/components/EnhancedDecisionHistory.tsx",
+        "src/components/ExportMenu.tsx",
+        "src/components/FileUpload.tsx",
+        "src/components/LanguageSelector.tsx",
+        "src/components/LazyLoadingDemo.tsx",
+        "src/components/ManualOptionsCreator.tsx",
+        "src/components/ManualOptionsGenerator.tsx",
+        "src/components/MonthlyTrendingTemplates.tsx",
+        "src/components/Navbar.tsx",
+        "src/components/Onboarding.tsx",
+        "src/components/PerformanceDashboard.tsx",
+        "src/components/SecurityNotice.tsx",
+        "src/components/SentryDashboard.tsx",
+        "src/components/ShareAsTemplateDialog.tsx",
+        "src/components/ShareButton.tsx",
+        "src/components/SharedDecisionView.tsx",
+        "src/components/ThemeToggle.tsx",
+        "src/components/WorkspaceImageUpload.tsx",
+        "src/components/comments/CommentItem.tsx",
+        "src/components/comments/CommentReactions.tsx",
+        "src/components/comments/CommentReplies.tsx",
+        "src/components/comments/CommentSection.tsx",
+        "src/components/comments/CommentableSection.tsx",
+        "src/components/comments/CommentsPanel.tsx",
+        "src/components/core/AppErrorBoundary.tsx",
+        "src/components/decision-maker/AIProviderDashboard.tsx",
+        "src/components/decision-maker/AIProviderMonitor.tsx",
+        "src/components/decision-maker/AnalysisNavigation.tsx",
+        "src/components/decision-maker/AnalysisResult.tsx",
+        "src/components/decision-maker/ComparisonTable.tsx",
+        "src/components/decision-maker/DilemmaSetup.tsx",
+        "src/components/decision-maker/ExpandOptionsButton.tsx",
+        "src/components/decision-maker/FollowUpQuestions.tsx",
+        "src/components/decision-maker/MainActionButton.tsx",
+        "src/components/decision-maker/ParticipantManager.tsx",
+        "src/components/decision-maker/RecommendationCard.tsx",
+        "src/components/decision-maker/ScoreChart.tsx",
+        "src/components/decision-maker/UsefulLinks.tsx",
+        "src/components/decision-maker/VoteButton.tsx",
+        "src/components/history/HistoryItem.tsx",
+        "src/components/history/HistorySearchBar.tsx",
+        "src/components/settings/AppearanceSettings.tsx",
+        "src/components/settings/DocumentsSettings.tsx",
+        "src/components/settings/GoogleAccountSettings.tsx",
+        "src/components/settings/MonthlyTemplatesSettings.tsx",
+        "src/components/settings/ProfileSettings.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/templates/TemplateCard.tsx",
+        "src/components/templates/TemplateGrid.tsx",
+        "src/components/ui/alert-dialog.tsx",
+        "src/components/ui/calendar.tsx",
+        "src/components/ui/carousel.tsx",
+        "src/components/ui/pagination.tsx",
+        "src/components/ui/sidebar.tsx",
+        "src/components/workspace/CreateWorkspaceDialog.tsx",
+        "src/components/workspace/DocumentsSettings.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx",
+        "src/components/workspace/WorkspaceSelector.tsx",
+        "src/pages/Settings.tsx",
+        "src/pages/SharedDecision.tsx",
+        "src/pages/TemplatePreview.tsx"
+      ]
+    },
+    {
+      "name": "calendar",
+      "path": "src/components/ui/calendar.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "card",
+      "path": "src/components/ui/card.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 44,
+      "hasStory": true,
+      "usages": [
+        "src/components/AccessibilityAudit.tsx",
+        "src/components/AdvancedFeaturesDashboard.tsx",
+        "src/components/FileUpload.tsx",
+        "src/components/LazyLoadingDemo.tsx",
+        "src/components/ManualOptionsCreator.tsx",
+        "src/components/ManualOptionsGenerator.tsx",
+        "src/components/Onboarding.tsx",
+        "src/components/PerformanceDashboard.tsx",
+        "src/components/RealTimeSearchToggle.tsx",
+        "src/components/SentryDashboard.tsx",
+        "src/components/SharedDecisionView.tsx",
+        "src/components/comments/CommentItem.tsx",
+        "src/components/comments/CommentReplies.tsx",
+        "src/components/comments/CommentSection.tsx",
+        "src/components/decision-maker/AIProviderDashboard.tsx",
+        "src/components/decision-maker/AIProviderMonitor.tsx",
+        "src/components/decision-maker/AnalysisCharts.tsx",
+        "src/components/decision-maker/AnalysisResult.tsx",
+        "src/components/decision-maker/ComparisonTable.tsx",
+        "src/components/decision-maker/DilemmaSetup.tsx",
+        "src/components/decision-maker/EnhancedRadarChart.tsx",
+        "src/components/decision-maker/FollowUpQuestions.tsx",
+        "src/components/decision-maker/MetricsVisual.tsx",
+        "src/components/decision-maker/ParticipantManager.tsx",
+        "src/components/decision-maker/PieChart.tsx",
+        "src/components/decision-maker/RecommendationCard.tsx",
+        "src/components/decision-maker/ScoreChart.tsx",
+        "src/components/settings/AccountsSettings.tsx",
+        "src/components/settings/AdminSettings.tsx",
+        "src/components/settings/AppearanceSettings.tsx",
+        "src/components/settings/DocumentsSettings.tsx",
+        "src/components/settings/GoogleAccountSettings.tsx",
+        "src/components/settings/MembersSettings.tsx",
+        "src/components/settings/MonthlyTemplatesSettings.tsx",
+        "src/components/settings/ProfileSettings.tsx",
+        "src/components/settings/RealTimeSearchSettings.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/templates/TemplateCard.tsx",
+        "src/components/templates/TemplateGrid.tsx",
+        "src/components/workspace/DocumentsSettings.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx",
+        "src/pages/Auth.tsx",
+        "src/pages/TemplatePreview.tsx",
+        "src/components/AccessibilityAudit.tsx",
+        "src/components/AdvancedFeaturesDashboard.tsx",
+        "src/components/FileUpload.tsx",
+        "src/components/LazyLoadingDemo.tsx",
+        "src/components/ManualOptionsCreator.tsx",
+        "src/components/ManualOptionsGenerator.tsx",
+        "src/components/Onboarding.tsx",
+        "src/components/PerformanceDashboard.tsx",
+        "src/components/RealTimeSearchToggle.tsx",
+        "src/components/SentryDashboard.tsx",
+        "src/components/SharedDecisionView.tsx",
+        "src/components/comments/CommentItem.tsx",
+        "src/components/comments/CommentReplies.tsx",
+        "src/components/comments/CommentSection.tsx",
+        "src/components/decision-maker/AIProviderDashboard.tsx",
+        "src/components/decision-maker/AIProviderMonitor.tsx",
+        "src/components/decision-maker/AnalysisCharts.tsx",
+        "src/components/decision-maker/AnalysisResult.tsx",
+        "src/components/decision-maker/ComparisonTable.tsx",
+        "src/components/decision-maker/DilemmaSetup.tsx",
+        "src/components/decision-maker/EnhancedRadarChart.tsx",
+        "src/components/decision-maker/FollowUpQuestions.tsx",
+        "src/components/decision-maker/MetricsVisual.tsx",
+        "src/components/decision-maker/ParticipantManager.tsx",
+        "src/components/decision-maker/PieChart.tsx",
+        "src/components/decision-maker/RecommendationCard.tsx",
+        "src/components/decision-maker/ScoreChart.tsx",
+        "src/components/settings/AccountsSettings.tsx",
+        "src/components/settings/AdminSettings.tsx",
+        "src/components/settings/AppearanceSettings.tsx",
+        "src/components/settings/DocumentsSettings.tsx",
+        "src/components/settings/GoogleAccountSettings.tsx",
+        "src/components/settings/MembersSettings.tsx",
+        "src/components/settings/MonthlyTemplatesSettings.tsx",
+        "src/components/settings/ProfileSettings.tsx",
+        "src/components/settings/RealTimeSearchSettings.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/templates/TemplateCard.tsx",
+        "src/components/templates/TemplateGrid.tsx",
+        "src/components/workspace/DocumentsSettings.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx",
+        "src/pages/Auth.tsx",
+        "src/pages/TemplatePreview.tsx"
+      ]
+    },
+    {
+      "name": "carousel",
+      "path": "src/components/ui/carousel.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "chart",
+      "path": "src/components/ui/chart.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "checkbox",
+      "path": "src/components/ui/checkbox.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "collapsible",
+      "path": "src/components/ui/collapsible.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/decision-maker/DataAccuracyIndicator.tsx",
+        "src/components/decision-maker/DataAccuracyIndicator.tsx"
+      ]
+    },
+    {
+      "name": "command",
+      "path": "src/components/ui/command.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/components/CategorySelector.tsx",
+        "src/components/comments/MentionsInput.tsx",
+        "src/components/CategorySelector.tsx",
+        "src/components/comments/MentionsInput.tsx"
+      ]
+    },
+    {
+      "name": "context-menu",
+      "path": "src/components/ui/context-menu.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "dialog",
+      "path": "src/components/ui/dialog.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 11,
+      "hasStory": false,
+      "usages": [
+        "src/components/AuthModal.tsx",
+        "src/components/CollaborationDialog.tsx",
+        "src/components/ExportMenu.tsx",
+        "src/components/ShareAsTemplateDialog.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/ui/command.tsx",
+        "src/components/workspace/CreateWorkspaceDialog.tsx",
+        "src/components/history/HistorySearchBar.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/workspace/DocumentsSettings.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx",
+        "src/components/AuthModal.tsx",
+        "src/components/CollaborationDialog.tsx",
+        "src/components/ExportMenu.tsx",
+        "src/components/ShareAsTemplateDialog.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/ui/command.tsx",
+        "src/components/workspace/CreateWorkspaceDialog.tsx"
+      ]
+    },
+    {
+      "name": "drawer",
+      "path": "src/components/ui/drawer.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "dropdown-menu",
+      "path": "src/components/ui/dropdown-menu.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 11,
+      "hasStory": false,
+      "usages": [
+        "src/components/ExportMenu.tsx",
+        "src/components/LanguageSelector.tsx",
+        "src/components/Navbar.tsx",
+        "src/components/ShareButton.tsx",
+        "src/components/ThemeToggle.tsx",
+        "src/components/comments/CommentItem.tsx",
+        "src/components/history/HistoryItem.tsx",
+        "src/components/history/HistorySearchBar.tsx",
+        "src/components/settings/GoogleAccountSettings.tsx",
+        "src/components/workspace/DocumentsSettings.tsx",
+        "src/components/workspace/WorkspaceSelector.tsx",
+        "src/components/ExportMenu.tsx",
+        "src/components/LanguageSelector.tsx",
+        "src/components/Navbar.tsx",
+        "src/components/ShareButton.tsx",
+        "src/components/ThemeToggle.tsx",
+        "src/components/comments/CommentItem.tsx",
+        "src/components/history/HistoryItem.tsx",
+        "src/components/history/HistorySearchBar.tsx",
+        "src/components/settings/GoogleAccountSettings.tsx",
+        "src/components/workspace/DocumentsSettings.tsx",
+        "src/components/workspace/WorkspaceSelector.tsx"
+      ]
+    },
+    {
+      "name": "form",
+      "path": "src/components/ui/form.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 3,
+      "hasStory": false,
+      "usages": [
+        "src/App.tsx",
+        "src/components/PerformanceDashboard.tsx",
+        "src/App.tsx"
+      ]
+    },
+    {
+      "name": "hover-card",
+      "path": "src/components/ui/hover-card.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "input-otp",
+      "path": "src/components/ui/input-otp.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "input",
+      "path": "src/components/ui/input.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 18,
+      "hasStory": true,
+      "usages": [
+        "src/components/AuthForm.tsx",
+        "src/components/CollaborationDialog.tsx",
+        "src/components/CriterionRow.tsx",
+        "src/components/EditableTitle.tsx",
+        "src/components/EmojiPicker.tsx",
+        "src/components/ManualOptionsCreator.tsx",
+        "src/components/Onboarding.tsx",
+        "src/components/ShareAsTemplateDialog.tsx",
+        "src/components/history/HistorySearchBar.tsx",
+        "src/components/settings/DocumentsSettings.tsx",
+        "src/components/settings/ProfileSettings.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/templates/TemplateFilters.tsx",
+        "src/components/ui/sidebar.tsx",
+        "src/components/workspace/CreateWorkspaceDialog.tsx",
+        "src/components/workspace/DocumentsSettings.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx",
+        "src/components/AuthForm.tsx",
+        "src/components/CollaborationDialog.tsx",
+        "src/components/CriterionRow.tsx",
+        "src/components/EditableTitle.tsx",
+        "src/components/EmojiPicker.tsx",
+        "src/components/ManualOptionsCreator.tsx",
+        "src/components/Onboarding.tsx",
+        "src/components/ShareAsTemplateDialog.tsx",
+        "src/components/history/HistorySearchBar.tsx",
+        "src/components/settings/DocumentsSettings.tsx",
+        "src/components/settings/ProfileSettings.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/templates/TemplateFilters.tsx",
+        "src/components/ui/sidebar.tsx",
+        "src/components/workspace/CreateWorkspaceDialog.tsx",
+        "src/components/workspace/DocumentsSettings.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx"
+      ]
+    },
+    {
+      "name": "label",
+      "path": "src/components/ui/label.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 13,
+      "hasStory": false,
+      "usages": [
+        "src/components/CollaborationDialog.tsx",
+        "src/components/ExportMenu.tsx",
+        "src/components/RealTimeSearchToggle.tsx",
+        "src/components/ShareAsTemplateDialog.tsx",
+        "src/components/decision-maker/DilemmaSetup.tsx",
+        "src/components/settings/AppearanceSettings.tsx",
+        "src/components/settings/ProfileSettings.tsx",
+        "src/components/settings/RealTimeSearchSettings.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/ui/form.tsx",
+        "src/components/workspace/CreateWorkspaceDialog.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx",
+        "src/components/CollaborationDialog.tsx",
+        "src/components/ExportMenu.tsx",
+        "src/components/RealTimeSearchToggle.tsx",
+        "src/components/ShareAsTemplateDialog.tsx",
+        "src/components/decision-maker/DilemmaSetup.tsx",
+        "src/components/settings/AppearanceSettings.tsx",
+        "src/components/settings/ProfileSettings.tsx",
+        "src/components/settings/RealTimeSearchSettings.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/ui/form.tsx",
+        "src/components/workspace/CreateWorkspaceDialog.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx"
+      ]
+    },
+    {
+      "name": "menubar",
+      "path": "src/components/ui/menubar.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "navigation-menu",
+      "path": "src/components/ui/navigation-menu.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "pagination",
+      "path": "src/components/ui/pagination.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "popover",
+      "path": "src/components/ui/popover.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 6,
+      "hasStory": false,
+      "usages": [
+        "src/components/CategorySelector.tsx",
+        "src/components/EmojiPicker.tsx",
+        "src/components/comments/CommentItem.tsx",
+        "src/components/comments/CommentReactions.tsx",
+        "src/components/comments/CommentableSection.tsx",
+        "src/components/comments/MentionsInput.tsx",
+        "src/components/CategorySelector.tsx",
+        "src/components/EmojiPicker.tsx",
+        "src/components/comments/CommentItem.tsx",
+        "src/components/comments/CommentReactions.tsx",
+        "src/components/comments/CommentableSection.tsx",
+        "src/components/comments/MentionsInput.tsx"
+      ]
+    },
+    {
+      "name": "progress",
+      "path": "src/components/ui/progress.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 4,
+      "hasStory": false,
+      "usages": [
+        "src/components/Onboarding.tsx",
+        "src/components/PerformanceDashboard.tsx",
+        "src/components/decision-maker/AIProviderDashboard.tsx",
+        "src/components/decision-maker/MainActionButton.tsx",
+        "src/components/Onboarding.tsx",
+        "src/components/PerformanceDashboard.tsx",
+        "src/components/decision-maker/AIProviderDashboard.tsx",
+        "src/components/decision-maker/MainActionButton.tsx"
+      ]
+    },
+    {
+      "name": "radio-group",
+      "path": "src/components/ui/radio-group.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "resizable",
+      "path": "src/components/ui/resizable.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "scroll-area",
+      "path": "src/components/ui/scroll-area.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/EnhancedDecisionHistory.tsx",
+        "src/components/EnhancedDecisionHistory.tsx"
+      ]
+    },
+    {
+      "name": "select",
+      "path": "src/components/ui/select.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 8,
+      "hasStory": false,
+      "usages": [
+        "src/components/ExportMenu.tsx",
+        "src/components/ShareAsTemplateDialog.tsx",
+        "src/components/decision-maker/ParticipantManager.tsx",
+        "src/components/history/HistorySearchBar.tsx",
+        "src/components/settings/AppearanceSettings.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/templates/TemplateFilters.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx",
+        "src/components/ExportMenu.tsx",
+        "src/components/ShareAsTemplateDialog.tsx",
+        "src/components/decision-maker/ParticipantManager.tsx",
+        "src/components/history/HistorySearchBar.tsx",
+        "src/components/settings/AppearanceSettings.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/templates/TemplateFilters.tsx",
+        "src/components/workspace/WorkspaceMembersManager.tsx"
+      ]
+    },
+    {
+      "name": "separator",
+      "path": "src/components/ui/separator.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 6,
+      "hasStory": false,
+      "usages": [
+        "src/components/SharedDecisionView.tsx",
+        "src/components/decision-maker/AnalysisCharts.tsx",
+        "src/components/history/HistoryActions.tsx",
+        "src/components/settings/ProfileSettings.tsx",
+        "src/components/ui/sidebar.tsx",
+        "src/components/workspace/DocumentsSettings.tsx",
+        "src/components/SharedDecisionView.tsx",
+        "src/components/decision-maker/AnalysisCharts.tsx",
+        "src/components/history/HistoryActions.tsx",
+        "src/components/settings/ProfileSettings.tsx",
+        "src/components/ui/sidebar.tsx",
+        "src/components/workspace/DocumentsSettings.tsx"
+      ]
+    },
+    {
+      "name": "sheet",
+      "path": "src/components/ui/sheet.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 3,
+      "hasStory": false,
+      "usages": [
+        "src/components/CriteriaManager.tsx",
+        "src/components/comments/CommentsPanel.tsx",
+        "src/components/ui/sidebar.tsx",
+        "src/components/CriteriaManager.tsx",
+        "src/components/comments/CommentsPanel.tsx",
+        "src/components/ui/sidebar.tsx"
+      ]
+    },
+    {
+      "name": "sidebar",
+      "path": "src/components/ui/sidebar.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "skeleton",
+      "path": "src/components/ui/skeleton.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 3,
+      "hasStory": false,
+      "usages": [
+        "src/components/CriteriaSkeleton.tsx",
+        "src/components/OptionsLoadingSkeleton.tsx",
+        "src/components/ui/sidebar.tsx",
+        "src/components/CriteriaSkeleton.tsx",
+        "src/components/OptionsLoadingSkeleton.tsx",
+        "src/components/ui/sidebar.tsx"
+      ]
+    },
+    {
+      "name": "slider",
+      "path": "src/components/ui/slider.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "sonner",
+      "path": "src/components/ui/sonner.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/App.tsx",
+        "src/App.tsx"
+      ]
+    },
+    {
+      "name": "switch",
+      "path": "src/components/ui/switch.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 4,
+      "hasStory": false,
+      "usages": [
+        "src/components/ExportMenu.tsx",
+        "src/components/RealTimeSearchToggle.tsx",
+        "src/components/decision-maker/DilemmaSetup.tsx",
+        "src/components/settings/RealTimeSearchSettings.tsx",
+        "src/components/ExportMenu.tsx",
+        "src/components/RealTimeSearchToggle.tsx",
+        "src/components/decision-maker/DilemmaSetup.tsx",
+        "src/components/settings/RealTimeSearchSettings.tsx"
+      ]
+    },
+    {
+      "name": "table",
+      "path": "src/components/ui/table.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/components/DecisionMaker.tsx",
+        "src/components/decision-maker/ComparisonTable.tsx",
+        "src/components/decision-maker/ComparisonTable.tsx"
+      ]
+    },
+    {
+      "name": "tabs",
+      "path": "src/components/ui/tabs.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 3,
+      "hasStory": false,
+      "usages": [
+        "src/components/EmojiPicker.tsx",
+        "src/components/PerformanceDashboard.tsx",
+        "src/components/settings/AdminSettings.tsx",
+        "src/components/EmojiPicker.tsx",
+        "src/components/PerformanceDashboard.tsx",
+        "src/components/settings/AdminSettings.tsx"
+      ]
+    },
+    {
+      "name": "textarea",
+      "path": "src/components/ui/textarea.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 10,
+      "hasStory": true,
+      "usages": [
+        "src/components/ManualOptionsCreator.tsx",
+        "src/components/ShareAsTemplateDialog.tsx",
+        "src/components/comments/CommentItem.tsx",
+        "src/components/comments/CommentReplies.tsx",
+        "src/components/comments/MentionsInput.tsx",
+        "src/components/decision-maker/DilemmaSetup.tsx",
+        "src/components/settings/DocumentsSettings.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/workspace/CreateWorkspaceDialog.tsx",
+        "src/components/ManualOptionsCreator.tsx",
+        "src/components/ShareAsTemplateDialog.tsx",
+        "src/components/comments/CommentItem.tsx",
+        "src/components/comments/CommentReplies.tsx",
+        "src/components/comments/MentionsInput.tsx",
+        "src/components/decision-maker/DilemmaSetup.tsx",
+        "src/components/settings/DocumentsSettings.tsx",
+        "src/components/settings/WorkspacesSettings.tsx",
+        "src/components/templates/CustomTemplateManager.tsx",
+        "src/components/workspace/CreateWorkspaceDialog.tsx"
+      ]
+    },
+    {
+      "name": "toast",
+      "path": "src/components/ui/toast.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 3,
+      "hasStory": false,
+      "usages": [
+        "src/App.tsx",
+        "src/components/ui/toaster.tsx",
+        "src/hooks/use-toast.ts",
+        "src/components/ui/toaster.tsx",
+        "src/hooks/use-toast.ts"
+      ]
+    },
+    {
+      "name": "toaster",
+      "path": "src/components/ui/toaster.tsx",
+      "category": "UI",
+      "exports": [
+        "Toaster"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/App.tsx",
+        "src/App.tsx"
+      ]
+    },
+    {
+      "name": "toggle-group",
+      "path": "src/components/ui/toggle-group.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "toggle",
+      "path": "src/components/ui/toggle.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/ui/toggle-group.tsx",
+        "src/components/ui/toggle-group.tsx"
+      ]
+    },
+    {
+      "name": "tooltip",
+      "path": "src/components/ui/tooltip.tsx",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 7,
+      "hasStory": false,
+      "usages": [
+        "src/App.tsx",
+        "src/components/CriteriaManager.tsx",
+        "src/components/decision-maker/AIProviderIndicator.tsx",
+        "src/components/decision-maker/DataAccuracyIndicator.tsx",
+        "src/components/decision-maker/WorkspaceDocumentIndicator.tsx",
+        "src/components/history/HistoryItem.tsx",
+        "src/components/ui/sidebar.tsx",
+        "src/App.tsx",
+        "src/components/CriteriaManager.tsx",
+        "src/components/decision-maker/AIProviderIndicator.tsx",
+        "src/components/decision-maker/DataAccuracyIndicator.tsx",
+        "src/components/decision-maker/WorkspaceDocumentIndicator.tsx",
+        "src/components/history/HistoryItem.tsx",
+        "src/components/ui/sidebar.tsx"
+      ]
+    },
+    {
+      "name": "use-toast",
+      "path": "src/components/ui/use-toast.ts",
+      "category": "UI",
+      "exports": [],
+      "usageCount": 0,
+      "hasStory": false,
+      "usages": []
+    },
+    {
+      "name": "CreateWorkspaceDialog",
+      "path": "src/components/workspace/CreateWorkspaceDialog.tsx",
+      "category": "Workspace",
+      "exports": [
+        "CreateWorkspaceDialog"
+      ],
+      "usageCount": 2,
+      "hasStory": false,
+      "usages": [
+        "src/components/workspace/WorkspaceSelector.tsx",
+        "src/pages/Settings.tsx",
+        "src/pages/Settings.tsx"
+      ]
+    },
+    {
+      "name": "WorkspaceMembersManager",
+      "path": "src/components/workspace/WorkspaceMembersManager.tsx",
+      "category": "Workspace",
+      "exports": [
+        "WorkspaceMembersManager"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/settings/MembersSettings.tsx",
+        "src/components/settings/MembersSettings.tsx"
+      ]
+    },
+    {
+      "name": "WorkspaceSelector",
+      "path": "src/components/workspace/WorkspaceSelector.tsx",
+      "category": "Workspace",
+      "exports": [
+        "WorkspaceSelector"
+      ],
+      "usageCount": 1,
+      "hasStory": false,
+      "usages": [
+        "src/components/Navbar.tsx",
+        "src/components/Navbar.tsx"
+      ]
+    }
+  ]
+}

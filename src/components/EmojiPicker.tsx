@@ -129,7 +129,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ emoji, setEmoji }) => {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-4xl w-14 h-14 rounded-full hover:bg-white/10 shrink-0">
+        <Button variant="ghost" size="icon" className="text-4xl w-14 h-14 rounded-full hover:bg-white/10 shrink-0" style={{ fontSize: '48px', lineHeight: '48px', verticalAlign: 'middle' }}>
           {emoji}
         </Button>
       </PopoverTrigger>

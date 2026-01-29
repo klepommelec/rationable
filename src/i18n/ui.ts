@@ -1069,10 +1069,16 @@ const fr: UITranslations = {
       addButton: "Ajouter un commentaire",
       add: "Ajouter",
       cancel: "Annuler",
+      loading: "Chargement des commentaires...",
+      placeholderDefault: "Partagez votre commentaire, note ou réflexion...",
+      titleDefault: "Commentaires",
       toasts: {
         addSuccess: "Commentaire ajouté avec succès",
         updateSuccess: "Commentaire mis à jour",
         deleteSuccess: "Commentaire supprimé",
+        addError: "Erreur lors de l'ajout du commentaire",
+        loadError: "Erreur lors du chargement des commentaires",
+        emptyError: "Le commentaire ne peut pas être vide",
       },
     },
     item: {
@@ -1743,10 +1749,16 @@ const en: UITranslations = {
       addButton: "Add a comment",
       add: "Add",
       cancel: "Cancel",
+      loading: "Loading comments...",
+      placeholderDefault: "Share your comment, note or reflection...",
+      titleDefault: "Comments",
       toasts: {
         addSuccess: "Comment added successfully",
         updateSuccess: "Comment updated",
         deleteSuccess: "Comment deleted",
+        addError: "Error adding comment",
+        loadError: "Error loading comments",
+        emptyError: "Comment cannot be empty",
       },
     },
     item: {

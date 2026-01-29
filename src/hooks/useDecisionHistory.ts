@@ -164,7 +164,13 @@ export const useDecisionHistory = () => {
                     timestamp: decision.timestamp ? new Date(decision.timestamp).toISOString() : null
                 });
             
-            if (error) throw error;
+            if (error) {
+                throw error;
+            }
+            
+            // Attendre un court délai pour s'assurer que la transaction est commitée et que les RLS policies sont appliquées
+            // Cela permet aux appels API suivants (votes, commentaires) de fonctionner correctement
+            await new Promise(resolve => setTimeout(resolve, 100));
         } catch (error) {
             console.error('Failed to add decision to cloud:', error);
         }

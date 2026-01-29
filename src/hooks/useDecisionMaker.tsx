@@ -131,6 +131,7 @@ export const useDecisionMaker = () => {
         getCurrentDecision,
         updateDecision,
         addDecision,
+        currentDecisionId,
         setCurrentDecisionId,
         templates,
         uploadedFiles,

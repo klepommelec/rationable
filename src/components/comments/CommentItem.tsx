@@ -153,7 +153,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   };
 
   return (
-    <Card className="p-4 space-y-3 group">
+    <Card className="p-4 space-y-3 group mt-0">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6">
@@ -172,11 +172,6 @@ export const CommentItem: React.FC<CommentItemProps> = ({
             <span className="text-xs text-muted-foreground">
               {formatDate(comment.created_at)}
             </span>
-            {comment.step_context && (
-              <span className="text-xs text-muted-foreground">
-                • {comment.step_context}
-              </span>
-            )}
           </div>
         </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

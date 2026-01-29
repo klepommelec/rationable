@@ -57,7 +57,9 @@ export const VoteButton: React.FC<VoteButtonProps> = ({
   }, [decisionId, optionName, voteCount]);
 
   const handleVote = async () => {
-    if (!user || isLoading) return;
+    if (!user || isLoading) {
+      return;
+    }
 
     console.log('🗳️ Vote button clicked:', { decisionId, optionName, userId: user.id });
     setIsLoading(true);

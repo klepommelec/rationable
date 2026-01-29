@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useDecisionMakerContext } from '@/contexts/DecisionMakerContext';
 import { useMultiAnalysis } from '@/hooks/useMultiAnalysis';
 import { detectQuestionType } from '@/services/questionClassificationService';
@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import { useRealTimeSearchSettings } from '@/hooks/useRealTimeSearchSettings';
 import { useAuth } from '@/hooks/useAuth';
+import { CommentsPanel } from './comments/CommentsPanel';
 // Composant principal pour la prise de décision unifiée
 const DecisionMaker = () => {
   const {
@@ -57,6 +58,7 @@ const DecisionMaker = () => {
     getCurrentDecision,
     updateDecision,
     addDecision,
+    currentDecisionId,
     setCurrentDecisionId,
     uploadedFiles,
     setUploadedFiles
@@ -85,6 +87,9 @@ const DecisionMaker = () => {
 
   // Lock analysis by id for safe writes during follow-ups
   const pendingWriteAnalysisIdRef = React.useRef<string | null>(null);
+  
+  // État pour le compteur de commentaires
+  const [commentsCount, setCommentsCount] = React.useState(0);
   
   // Fonction pour gérer la création manuelle des options
   const handleManualOptionsCreated = (options: any[]) => {
@@ -137,6 +142,23 @@ const DecisionMaker = () => {
       // Sauvegarder la décision
       addDecision(newDecision);
       setCurrentDecisionId(newId);
+      
+      // Ajouter automatiquement l'utilisateur comme participant pour permettre les votes
+      // IMPORTANT: Attendre que l'ajout soit terminé pour que les votes fonctionnent immédiatement
+      if (user?.id) {
+        import('@/services/votingService').then(async ({ votingService }) => {
+          try {
+            const participant = await votingService.addParticipant(newId, user.id, 'contributor');
+            if (participant) {
+              console.log('✅ User added as participant (manual mode):', participant);
+            } else {
+              console.warn('⚠️ Failed to add user as participant (manual mode, may already exist)');
+            }
+          } catch (err) {
+            console.error('Error adding user as participant (manual mode):', err);
+          }
+        });
+      }
     } else {
       // Mettre à jour la décision existante
       const currentDecision = getCurrentDecision();
@@ -328,7 +350,28 @@ const DecisionMaker = () => {
       });
     }
   };
-  const currentDecision = getCurrentDecision();
+  
+  // Utiliser useMemo pour recalculer currentDecision quand history ou currentDecisionId change
+  // Cela garantit que currentDecision est toujours à jour même après addDecision
+  // Le problème était que getCurrentDecision() était appelé une seule fois au rendu,
+  // mais history était mis à jour de manière asynchrone via setState
+  const currentDecision = useMemo(() => {
+    if (!currentDecisionId) {
+      return null;
+    }
+    
+    // Chercher directement dans history (qui est mis à jour de manière synchrone par setHistory)
+    // Cela garantit que même si React n'a pas encore re-rendu, on trouve la décision
+    const found = history.find(d => d.id === currentDecisionId);
+    if (found) {
+      return found;
+    }
+    
+    // Si pas trouvé, essayer getCurrentDecision() comme fallback
+    // (mais normalement on ne devrait jamais arriver ici)
+    return getCurrentDecision();
+  }, [currentDecisionId, history]);
+  
   const currentAnalysis = getCurrentAnalysis();
 
   // Etats d'affichage gelés pour éviter les décalages lorsque l'analyse en cours concerne un autre onglet
@@ -429,7 +472,28 @@ const DecisionMaker = () => {
         {displayStep !== 'idle' && <AnalysisNavigation analyses={analyses} currentAnalysisIndex={currentAnalysisIndex} onNavigate={handleAnalysisNavigation} />}
 
         {(displayStep === 'criteria-loaded' || displayStep === 'loading-options' || displayStep === 'done') && <>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 animate-fade-in pt-8 sm:pt-16">
+            {/* Boutons Criteria et Comments côte à côte */}
+            {shouldShowCriteria && (
+              <div className="flex items-center gap-2 pt-[72px] pb-6">
+                <CriteriaManager 
+                  criteria={displayCriteria} 
+                  setCriteria={setCriteria} 
+                  isInteractionDisabled={displayStep === 'loading-options' || isLoading || isUpdating || Boolean(isLockedToOther)} 
+                  onUpdateAnalysis={handleManualUpdate} 
+                  hasChanges={hasChanges} 
+                  currentDecisionId={currentDecision?.id} 
+                  isNewDecision={displayStep === 'criteria-loaded' && !currentDecision?.id} 
+                  isManualDecision={!realTimeSearchEnabled} 
+                />
+                <CommentsPanel 
+                  decisionId={currentDecision?.id}
+                  commentsCount={commentsCount}
+                  onCommentsCountChange={setCommentsCount}
+                />
+              </div>
+            )}
+            
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 animate-fade-in pt-0 h-fit">
               {/* Layout mobile : emoji au-dessus du titre, aligné à gauche */}
               <div className="sm:hidden space-y-2 w-full px-0">
                 <EmojiPicker emoji={displayEmoji} setEmoji={setEmoji} />
@@ -445,8 +509,8 @@ const DecisionMaker = () => {
               </div>
               
               {/* Layout desktop : emoji et titre côte à côte */}
-              <div className="hidden sm:flex items-start gap-4 w-full">
-                <div className="flex-shrink-0 pt-1">
+              <div className="hidden sm:flex flex-col items-start gap-2 w-full pt-0 pb-0">
+                <div className="flex-shrink-0 leading-none text-center" style={{ verticalAlign: 'middle' }}>
                   <EmojiPicker emoji={displayEmoji} setEmoji={setEmoji} />
                 </div>
                 <EditableTitle
@@ -458,18 +522,13 @@ const DecisionMaker = () => {
                 />
               </div>
             </div>
-            
-            
-            {/* Afficher les critères uniquement pour les questions comparatives */}
-            {shouldShowCriteria && <div className="w-full mb-6 px-0">
-                <CriteriaManager criteria={displayCriteria} setCriteria={setCriteria} isInteractionDisabled={displayStep === 'loading-options' || isLoading || isUpdating || Boolean(isLockedToOther)} onUpdateAnalysis={handleManualUpdate} hasChanges={hasChanges} currentDecisionId={currentDecision?.id} isNewDecision={displayStep === 'criteria-loaded' && !currentDecision?.id} isManualDecision={!realTimeSearchEnabled} />
-              </div>}
           </>}
 
         {displayStep === 'idle' && <DilemmaSetup dilemma={dilemma} setDilemma={setDilemma} analysisStep={analysisStep} setAnalysisStep={setAnalysisStep} isLoading={isLoading} isUpdating={isUpdating} applyTemplate={applyTemplate} clearSession={clearAll} clearAnalyses={clearAnalyses} history={history} loadDecision={loadDecisionWithThread} deleteDecision={deleteDecision} clearHistory={clearHistory} handleStartAnalysis={handleStartAnalysis} progress={progress} progressMessage={progressMessage} setProgressMessage={setProgressMessage} templates={templates} selectedCategory={selectedCategory} onCategoryChange={handleCategoryChange} onUpdateCategory={handleUpdateCategory} uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} addDecision={addDecision} setCurrentDecisionId={setCurrentDecisionId} />}
         
         {/* Générateur d'options selon le mode */}
-        {displayStep === 'criteria-loaded' && shouldShowCriteria && <div className="mb-6">
+        {displayStep === 'criteria-loaded' && shouldShowCriteria && (
+          <div className="mb-6">
             {realTimeSearchEnabled ? (
               <ManualOptionsGenerator 
                 onGenerateOptions={handleManualUpdate} 
@@ -495,7 +554,8 @@ const DecisionMaker = () => {
                 }))}
               />
             )}
-          </div>}
+          </div>
+        )}
         
         {displayStep === 'loading-options' && <OptionsLoadingSkeleton />}
         

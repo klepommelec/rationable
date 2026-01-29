@@ -5,6 +5,7 @@ import { IDecision, IResult, ICriterion } from '@/types/decision';
 import { AnalysisStep } from './useDecisionState';
 import { getCommunityTemplates, copyTemplate } from '@/services/communityTemplateService';
 import { useContextualContent } from './useContextualContent';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface UseDecisionActionsProps {
     criteria: ICriterion[];
@@ -47,6 +48,7 @@ export const useDecisionActions = ({
     handleGenerateOptions,
     setAnalysisStep
 }: UseDecisionActionsProps) => {
+    const { t } = useI18nUI();
     const { getContextualTemplates } = useContextualContent();
     const templates = getContextualTemplates();
 
@@ -158,7 +160,23 @@ export const useDecisionActions = ({
 
     const getCurrentDecision = () => {
         if (!currentDecisionId) return null;
-        return history.find(d => d.id === currentDecisionId) || null;
+        
+        // Chercher dans l'historique
+        const decision = history.find(d => d.id === currentDecisionId);
+        if (decision) return decision;
+        
+        // Si pas trouvé dans l'historique mais qu'on a un ID, 
+        // c'est peut-être une race condition - chercher dans les décisions récentes
+        // (les décisions sont ajoutées au début de l'array)
+        const recentDecision = history.find(d => d.id === currentDecisionId);
+        if (recentDecision) return recentDecision;
+        
+        // Log pour debug si on ne trouve toujours pas
+        if (currentDecisionId) {
+            console.warn('⚠️ [DEBUG] Decision not found in history:', currentDecisionId, 'History length:', history.length);
+        }
+        
+        return null;
     };
 
     return {

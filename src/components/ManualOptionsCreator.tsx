@@ -6,7 +6,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Plus, Trash2, Edit3, Sparkles } from 'lucide-react';
 import { toast } from "sonner";
 import { useI18nUI } from '@/contexts/I18nUIContext';
-import { CommentSection } from './comments/CommentSection';
 
 interface Option {
   id: string;
@@ -468,28 +467,6 @@ const ManualOptionsCreator: React.FC<ManualOptionsCreatorProps> = ({
       </Card>
     )}
 
-    {/* Section Commentaires - bloc séparé comme les critères */}
-    <Card className="mt-6">
-      <CardHeader>
-          <CardTitle>{t('decision.manualOptions.comments')}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {effectiveDecisionId ? (
-          <CommentSection
-            decisionId={effectiveDecisionId}
-            commentType="general"
-            title={t('decision.manualOptions.comments')}
-            placeholder={t('decision.manualOptions.commentsPlaceholder')}
-          />
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            <p>{t('decision.manualOptions.commentsUnavailable')}</p>
-            <p className="text-xs mt-2">DecisionId: {decisionId || 'undefined'}</p>
-            <p className="text-xs mt-1">DebugDecisionId: {debugDecisionId || 'undefined'}</p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
   </div>
   );
 };
