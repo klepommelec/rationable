@@ -170,6 +170,12 @@ export interface UITranslations {
       descriptionGenerated: string;
       prosGenerated: string;
       consGenerated: string;
+      analysisSuccess: string;
+      analysisSuccessWithDocs: string;
+      analysisUpdated: string;
+      retrying: string;
+      maxRetriesError: string;
+      errorAfterRetries: string;
     };
     analysisResult: {
       recommendation: string;
@@ -388,6 +394,13 @@ export interface UITranslations {
     title: string;
     addButton: string;
     tooltip: string;
+    addSuccess: string;
+    removeSuccess: string;
+    reorderSuccess: string;
+    minCriteriaError: string;
+    maxCriteriaError: string;
+    updateAnalysis: string;
+    nameAllBeforeContinue: string;
   };
   comments: {
     section: {
@@ -395,6 +408,7 @@ export interface UITranslations {
       addButton: string;
       add: string;
       cancel: string;
+      titleDefault: string;
       toasts: {
         addSuccess: string;
         updateSuccess: string;
@@ -442,10 +456,14 @@ export interface UITranslations {
       one: string;
       other: string;
     };
+    sourcesSection: string;
     createdOn: string;
     by: string;
     updatedOn: string;
     viewSources: string;
+    scanSources: string;
+    scanToShowLinks: string;
+    noExternalSources: string;
   };
   notifications: {
     previousDecisionLoaded: string;
@@ -745,7 +763,7 @@ const fr: UITranslations = {
     analyzeButton: "Analyser",
     launchAnalysis: "Lancer l'analyse",
     manualModeButton: "Mode manuel",
-    aiToggleLabel: "Analyse intelligente par IA",
+    aiToggleLabel: "Analyse intelligente IA",
     toast: {
       decisionCreated: "Décision manuelle créée avec succès !",
     },
@@ -845,6 +863,12 @@ const fr: UITranslations = {
       descriptionGenerated: "Description générée avec succès !",
       prosGenerated: "Avantages générés avec succès !",
       consGenerated: "Inconvénients générés avec succès !",
+      analysisSuccess: "Analyse générée avec succès !",
+      analysisSuccessWithDocs: "Analyse générée avec {count} document(s) de votre workspace !",
+      analysisUpdated: "Analyse mise à jour !",
+      retrying: "Nouvelle tentative...",
+      maxRetriesError: "Impossible de générer les options après {count} tentatives. {message}",
+      errorAfterRetries: "Erreur après {count} tentatives: {message}",
     },
     analysisResult: {
       recommendation: "Recommandé",
@@ -1062,6 +1086,13 @@ const fr: UITranslations = {
     title: "Critères",
     addButton: "Ajouter un critère",
     tooltip: "Les critères vous aident à évaluer vos options de manière objective",
+    addSuccess: "Critère ajouté",
+    removeSuccess: "Critère supprimé",
+    reorderSuccess: "Ordre mis à jour",
+    minCriteriaError: "Conservez au moins deux critères",
+    maxCriteriaError: "Nombre maximum de critères atteint",
+    updateAnalysis: "Mettre à jour l'analyse",
+    nameAllBeforeContinue: "Veuillez nommer tous les critères avant de continuer.",
   },
   comments: {
     section: {
@@ -1122,10 +1153,14 @@ const fr: UITranslations = {
       one: "Source",
       other: "Autres sources",
     },
+    sourcesSection: "Sources",
     createdOn: "Créé le",
     by: "par",
     updatedOn: "Mis à jour le",
     viewSources: "Voir les sources",
+    scanSources: "Scanner les sources",
+    scanToShowLinks: "Cliquez sur « Scanner les sources » pour afficher les liens vérifiés.",
+    noExternalSources: "Aucune source externe",
   },
   notifications: {
     previousDecisionLoaded: "Décision précédente chargée.",
@@ -1425,7 +1460,7 @@ const en: UITranslations = {
     analyzeButton: "Analyze",
     launchAnalysis: "Launch analysis",
     manualModeButton: "Manual mode",
-    aiToggleLabel: "AI intelligent analysis",
+    aiToggleLabel: "AI smart analysis",
     toast: {
       decisionCreated: "Manual decision created successfully!",
     },
@@ -1525,6 +1560,12 @@ const en: UITranslations = {
       descriptionGenerated: "Description generated successfully!",
       prosGenerated: "Pros generated successfully!",
       consGenerated: "Cons generated successfully!",
+      analysisSuccess: "Analysis generated successfully!",
+      analysisSuccessWithDocs: "Analysis generated with {count} document(s) from your workspace!",
+      analysisUpdated: "Analysis updated!",
+      retrying: "Retrying...",
+      maxRetriesError: "Unable to generate options after {count} attempts. {message}",
+      errorAfterRetries: "Error after {count} attempts: {message}",
     },
     analysisResult: {
       recommendation: "Recommended",
@@ -1742,6 +1783,13 @@ const en: UITranslations = {
     title: "Criteria",
     addButton: "Add a criterion",
     tooltip: "Criteria help you evaluate your options objectively",
+    addSuccess: "Criterion added",
+    removeSuccess: "Criterion removed",
+    reorderSuccess: "Order updated",
+    minCriteriaError: "Keep at least two criteria",
+    maxCriteriaError: "Maximum number of criteria reached",
+    updateAnalysis: "Update analysis",
+    nameAllBeforeContinue: "Please name all criteria before continuing.",
   },
   comments: {
     section: {
@@ -1802,10 +1850,14 @@ const en: UITranslations = {
       one: "Source",
       other: "Other sources",
     },
+    sourcesSection: "Sources",
     createdOn: "Created on",
     by: "by",
     updatedOn: "Updated on",
     viewSources: "View sources",
+    scanSources: "Scan sources",
+    scanToShowLinks: "Click « Scan sources » to display verified links.",
+    noExternalSources: "No external sources",
   },
   notifications: {
     previousDecisionLoaded: "Previous decision loaded.",

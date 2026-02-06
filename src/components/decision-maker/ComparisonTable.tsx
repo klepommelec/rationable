@@ -424,7 +424,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
           const optionActionLinks = actionLinks?.[optionKey] || null;
 
           return (
-            <Card key={index} className={`p-4 ${index === 0 ? 'border-green-200 bg-green-50 dark:bg-green-950/30' : ''}`}>
+            <Card key={index} className={`rounded-none p-4 ${index === 0 ? 'border-green-200 bg-green-50 dark:bg-green-950/30' : ''}`}>
               <div className="space-y-3">
                 {/* Header avec badge recommandé */}
                 <div className="flex items-start justify-between">
@@ -447,7 +447,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                     >
                       {option.description}
                     </div>
-                    {option.description.length > 150 && (
+                    {option.description.length > 100 && (
                       <button
                         onClick={() => toggleDescriptionExpansion(optionKey)}
                         className="text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer mt-1"
@@ -640,7 +640,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                     ref={(el) => {
                       cardRefs.current[index] = el;
                     }}
-                    className={`min-w-[320px] max-w-[320px] flex-shrink-0 ${index === 0 ? 'border-green-200 bg-green-50 dark:bg-green-950/30' : ''}`}
+                    className={`rounded-none min-w-[320px] max-w-[320px] flex-shrink-0 ${index === 0 ? 'border-green-200 bg-green-50 dark:bg-green-950/30' : ''}`}
                     style={maxCardHeight ? { height: `${maxCardHeight}px` } : {}}
                   >
                     <div className="p-4 space-y-4 flex flex-col h-full" style={maxCardHeight ? { height: '100%' } : { minHeight: '100%' }}>
@@ -663,7 +663,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                           >
                             {option.description}
                           </div>
-                          {option.description.length > 150 && (
+                          {option.description.length > 100 && (
                             <button
                               onClick={() => toggleDescriptionExpansion(optionKey)}
                               className="text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer mt-1"
@@ -751,18 +751,18 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-xs w-full h-7 flex items-center justify-center gap-1.5 hover:underline"
+className="text-xs w-full h-7 flex items-center justify-center gap-1.5 hover:underline"
                           onClick={() => {
                             const searchQuery = option.option.replace(/^Option\s+\d+:\s*/i, '').trim();
                             window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, '_blank');
                           }}
-                          aria-label={`${t('decision.search')} ${option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}`}
-                        >
-                          <ExternalLink className="h-3 w-3 flex-shrink-0" aria-hidden="true" />
-                          <span>{t('decision.search')}</span>
-                        </Button>
+                            aria-label={`${t('decision.search')} ${option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}`}
+                          >
+                            <ExternalLink className="h-3 w-3 flex-shrink-0" aria-hidden="true" />
+                            <span>{t('decision.search')}</span>
+                          </Button>
 
-                        {/* Liens intelligents */}
+                          {/* Liens intelligents */}
                         {optionActionLinks && (optionActionLinks.official || optionActionLinks.merchants && optionActionLinks.merchants.length > 0 || optionActionLinks.maps) ? (
                           <>
                             {optionActionLinks.actionType === 'directions' && optionActionLinks.maps ? (
@@ -813,7 +813,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
       {/* Version desktop : Tableau */}
       {viewMode === 'table' && (
         <div className="hidden md:block px-6">
-          <div className="rounded-md border w-full table-scroll-container">
+          <div className="rounded-none border w-full table-scroll-container">
             <Table className="comparison-table" style={{ minWidth: '800px' }}>
             <TableHeader>
               <TableRow>
@@ -865,7 +865,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                           >
                             {option.description}
                           </div>
-                          {option.description.length > 150 && (
+                          {option.description.length > 100 && (
                             <button
                               onClick={() => toggleDescriptionExpansion(optionKey)}
                               className="text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer mt-1"

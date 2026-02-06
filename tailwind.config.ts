@@ -21,6 +21,7 @@ export default {
 		extend: {
 			fontFamily: {
 				sans: ['Manrope', 'system-ui', 'sans-serif'],
+				bytesized: ['Bytesized', 'monospace'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',

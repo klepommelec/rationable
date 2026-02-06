@@ -129,7 +129,7 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
 
   return (
     <section 
-      className="animate-fade-in"
+      className="animate-fade-in pt-12"
       role="region"
       aria-labelledby="useful-links-heading"
     >
@@ -149,7 +149,7 @@ export const UsefulLinks: React.FC<UsefulLinksProps> = ({
               role="list"
             >
               {(showAllVideos ? socialContent.youtubeVideos : socialContent.youtubeVideos.slice(0, 3)).map((video) => (
-                <div key={video.id} role="listitem">
+                <div key={video.id} role="listitem" className="h-full min-h-0">
                   <YouTubeVideoCard video={video} />
                 </div>
               ))}

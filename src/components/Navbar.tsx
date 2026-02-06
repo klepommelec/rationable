@@ -77,7 +77,7 @@ const Navbar: React.FC = () => {
         navigate('/');
       }}>
           <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-8 w-8 rounded-none " />
-          <span className="text-xl font-semibold">Rationable</span>
+          <span className="text-[24px] font-semibold font-sans">Rationable</span>
         </Link>
         
         <div className="flex items-center gap-2">

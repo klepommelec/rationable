@@ -7,7 +7,7 @@ import { ComparisonTable } from './ComparisonTable';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import FollowUpQuestions from './FollowUpQuestions';
 import { DataAccuracyIndicator } from './DataAccuracyIndicator';
 import { useI18nUI } from '@/contexts/I18nUIContext';
@@ -22,6 +22,8 @@ interface AnalysisResultProps {
   onUpdateDecision?: (updatedDecision: IDecision) => void;
   onFollowUpQuestion?: (enrichedDilemma: string) => void;
   onEditOptions?: () => void;
+  /** Si false, n'affiche pas DataAccuracyIndicator (déjà rendu au-dessus par le parent). */
+  showDataAccuracyIndicator?: boolean;
 }
 
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
@@ -32,13 +34,11 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   dilemma,
   onUpdateDecision,
   onFollowUpQuestion,
-  onEditOptions
+  onEditOptions,
+  showDataAccuracyIndicator = true
 }) => {
   const { t } = useI18nUI();
-  const [showAllOptions, setShowAllOptions] = useState(false);
-  
-  // Nombre d'options à afficher initialement (5)
-  const initialOptionsCount = 5;
+
   if (!result) {
     // Si on est en train de mettre à jour, afficher le skeleton de chargement
     if (isUpdating) {
@@ -56,18 +56,16 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   }
 
   const hasMultipleOptions = result.breakdown && result.breakdown.length > 1;
-  
-  // Gestion des options affichées
   const allOptions = result.breakdown || [];
-  const displayedOptions = showAllOptions ? allOptions : allOptions.slice(0, initialOptionsCount);
-  const hasMoreOptions = allOptions.length > initialOptionsCount;
 
   // Affichage unifié pour tous les types de questions
   return (
     <div className="space-y-6 animate-fade-in pt-6">
-      {/* Indicateur de sources et mise à jour */}
-      <DataAccuracyIndicator result={result} currentDecision={currentDecision} />
-      
+      {/* Indicateur de sources et mise à jour (optionnel : rendu au-dessus dans DecisionMaker) */}
+      {showDataAccuracyIndicator && (
+        <DataAccuracyIndicator result={result} currentDecision={currentDecision} />
+      )}
+
       <RecommendationCard 
         result={result}
         dilemma={dilemma}
@@ -97,7 +95,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
           </CardHeader>
           <CardContent className="px-0" style={{ overflow: 'visible' }}>
             <ComparisonTable 
-              breakdown={displayedOptions} 
+              breakdown={allOptions} 
               dilemma={dilemma}
               result={result}
               decisionId={currentDecision?.id || undefined}
@@ -113,27 +111,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                 }
               }}
             />
-            {hasMoreOptions && (
-              <div className="flex justify-center mt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowAllOptions(!showAllOptions)}
-                  className="flex items-center gap-2"
-                >
-                  {showAllOptions ? (
-                    <>
-                      <ChevronUp className="h-4 w-4" />
-                      Voir moins d'options
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="h-4 w-4" />
-                      {t('decision.seeMoreOptions')} ({allOptions.length - initialOptionsCount} autres)
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
           </CardContent>
         </Card>
       )}

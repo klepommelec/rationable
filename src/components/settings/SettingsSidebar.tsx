@@ -1,4 +1,4 @@
-import { LogOut, User, Settings, Building2, Users, FileText, Shield, Cog } from 'lucide-react';
+import { LogOut, User, Settings, Building2, Users, FileText, Shield, Cog, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useI18nUI } from '@/contexts/I18nUIContext';
@@ -30,6 +30,10 @@ const getSettingsSections = (t: (key: string) => string) => [{
   id: 'documents',
   label: t('settings.sidebar.documents'),
   icon: FileText
+}, {
+  id: 'usage',
+  label: 'Usage & coût',
+  icon: BarChart3
 }, {
   id: 'admin',
   label: t('settings.sidebar.admin'),
@@ -90,7 +94,7 @@ const SettingsSidebar = ({
               {t('settings.sidebar.system')}
             </h3>
             <div className="space-y-0.5">
-              {settingsSections.filter(section => section.id === 'admin').map(section => {
+              {settingsSections.filter(section => ['usage', 'admin'].includes(section.id)).map(section => {
                 const IconComponent = section.icon;
                 return <button key={section.id} onClick={() => onSectionChange(section.id)} className={cn("w-full flex items-center gap-3 px-3 h-8 text-left rounded-lg transition-colors text-sm font-medium", activeSection === section.id ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground")}>
                       <IconComponent className="h-4 w-4" />

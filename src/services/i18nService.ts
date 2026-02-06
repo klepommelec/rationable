@@ -350,8 +350,7 @@ export class I18nService {
   }
 
   /**
-   * Initialise la langue basée sur la géolocalisation
-   * Anglais par défaut, français pour la France
+   * Initialise la langue : préférence stockée ou anglais par défaut
    */
   static async initializeLanguageWithGeoLocation(): Promise<void> {
     // Vérifier d'abord si l'utilisateur a déjà choisi une langue
@@ -362,24 +361,9 @@ export class I18nService {
       return;
     }
 
-    try {
-      // Importer le service de géolocalisation dynamiquement pour éviter les erreurs SSR
-      const { default: GeoLocationService } = await import('./geoLocationService');
-      
-      const isInFrance = await GeoLocationService.isInFrance();
-      const detectedLanguage = isInFrance ? 'fr' : 'en';
-      
-      this.currentLanguage = detectedLanguage;
-      console.log('🌍 Geo-location based language detection:', {
-        isInFrance,
-        detectedLanguage,
-        country: isInFrance ? 'France' : 'Other'
-      });
-      
-    } catch (error) {
-      console.warn('⚠️ Failed to detect location, using default language (English):', error);
-      this.currentLanguage = 'en';
-    }
+    // Pas de préférence stockée : garder l'anglais comme langue par défaut
+    this.currentLanguage = 'en';
+    console.log('🌐 Using default interface language: English');
   }
 
   private static isValidLanguage(lang: string): boolean {

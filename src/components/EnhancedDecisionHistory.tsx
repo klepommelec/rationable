@@ -134,15 +134,15 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
 
       {/* Liste des décisions */}
       <ScrollArea className="flex-1">
-        <div className="space-y-3">
+        <div className="space-y-0">
           {filteredAndSortedHistory.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <p>{t('history.list.emptyMessage')}</p>
             </div>
           ) : (
-            visibleThreads.map(item => (
+            visibleThreads.map((item, index) => (
               <HistoryItem 
-                key={item.last.id} 
+                key={item.last.id}
                 decision={item.last} 
                 onLoad={handleLoad} 
                 onDelete={onDelete} 
@@ -150,13 +150,14 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
                 followUpDecisions={item.followUps}
                 titleOverride={item.root.dilemma}
                 rootRecommendation={item.root.result?.recommendation || "Décision en cours"}
+                isFirstInList={index === 0}
               />
             ))
           )}
           
           {/* Bouton "Voir plus" */}
           {hasMoreItems && (
-            <div className="flex justify-center pt-4">
+            <div className="flex justify-center pt-6 pb-6">
                <Button 
                 variant="outline" 
                 onClick={loadMoreItems}

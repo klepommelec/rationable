@@ -241,6 +241,20 @@ INSTRUCTIONS POUR LES NOMS D'OPTIONS:
       breakdownCount: jsonContent.result?.breakdown?.length || 0,
       filesProcessed: files?.length || 0
     });
+
+    // Usage et coût estimé pour suivi pricing (gpt-4.1 / gpt-4o-like, $/1M tokens)
+    const usage = data.usage || {};
+    const promptTokens = usage.prompt_tokens || 0;
+    const completionTokens = usage.completion_tokens || 0;
+    const inputPerM = 0.30;  // $/1M input (approx gpt-4.1)
+    const outputPerM = 1.20; // $/1M output
+    const estimatedCostUsd = (promptTokens / 1e6) * inputPerM + (completionTokens / 1e6) * outputPerM;
+    jsonContent.usage = {
+      prompt_tokens: promptTokens,
+      completion_tokens: completionTokens,
+      total_tokens: (usage.total_tokens ?? promptTokens + completionTokens)
+    };
+    jsonContent.estimated_cost_usd = Math.round(estimatedCostUsd * 1e6) / 1e6;
     
     return new Response(JSON.stringify(jsonContent), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

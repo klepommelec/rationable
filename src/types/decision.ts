@@ -73,6 +73,14 @@ export interface IResult {
   followUpQuestions?: IFollowUpQuestion[];
   // Cache pour éviter de re-rechercher les liens dynamiques
   cachedActionLinks?: Record<string, BestLinksResponse>;
+  /** Usage tokens (pour suivi coût / pricing) */
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens?: number;
+  };
+  /** Coût estimé en USD pour cette analyse */
+  estimated_cost_usd?: number;
 }
 
 export interface IDecision {

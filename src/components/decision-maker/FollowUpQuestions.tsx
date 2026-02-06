@@ -113,7 +113,7 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
           {t('analysis.followUpSection.subtitle')}
         </p>
       </CardHeader>
-      <CardContent className="p-0 flex flex-col">
+      <CardContent className="p-0 flex flex-col border-x border-b border-input">
         {questions.map((question) => (
           <Button
             key={question.id}
@@ -124,7 +124,7 @@ const FollowUpQuestions: React.FC<FollowUpQuestionsProps> = ({
             aria-disabled={isLoading || loadingQuestions}
             title={question.text}
           >
-            <span className="font-medium text-sm truncate">
+            <span className="font-medium text-[15px] truncate">
               {question.text}
             </span>
           </Button>

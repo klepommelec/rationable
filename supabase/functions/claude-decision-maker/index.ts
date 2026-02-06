@@ -242,6 +242,14 @@ Les scores doivent refléter l'évaluation objective selon les critères mention
       throw new Error('Impossible de parser la réponse Claude en JSON');
     }
 
+    // Usage et coût estimé pour suivi pricing (Claude Sonnet, $/1M tokens)
+    const usage = data.usage || {};
+    const inputTokens = usage.input_tokens || 0;
+    const outputTokens = usage.output_tokens || 0;
+    const inputPerM = 3.0;   // $/1M input (Claude 3.5 Sonnet)
+    const outputPerM = 15.0; // $/1M output
+    const estimatedCostUsd = (inputTokens / 1e6) * inputPerM + (outputTokens / 1e6) * outputPerM;
+
     // Validation et enrichissement du résultat
     const result = {
       recommendation: parsedResult.recommendation || 'Recommandation non disponible',
@@ -264,7 +272,13 @@ Les scores doivent refléter l'évaluation objective selon les critères mention
         provider: 'claude',
         model: model,
         success: true
-      }
+      },
+      usage: {
+        prompt_tokens: inputTokens,
+        completion_tokens: outputTokens,
+        total_tokens: inputTokens + outputTokens
+      },
+      estimated_cost_usd: Math.round(estimatedCostUsd * 1e6) / 1e6
     };
 
     console.log('✅ Claude analysis completed successfully');

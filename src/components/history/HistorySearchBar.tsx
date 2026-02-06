@@ -118,7 +118,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
             placeholder={t('history.searchBar.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 w-full"
+            className="pl-10 w-full rounded-none"
           />
         </div>
         
@@ -252,7 +252,7 @@ export const HistorySearchBar: React.FC<HistorySearchBarProps> = ({
             placeholder={t('history.searchBar.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 w-full"
+            className="pl-10 w-full rounded-none"
           />
         </div>
 

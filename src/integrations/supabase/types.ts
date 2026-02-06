@@ -95,6 +95,39 @@ export type Database = {
         }
         Relationships: []
       }
+      analysis_usage: {
+        Row: {
+          id: string
+          user_id: string
+          decision_id: string
+          provider: string
+          prompt_tokens: number
+          completion_tokens: number
+          estimated_cost_usd: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          decision_id: string
+          provider: string
+          prompt_tokens?: number
+          completion_tokens?: number
+          estimated_cost_usd?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          decision_id?: string
+          provider?: string
+          prompt_tokens?: number
+          completion_tokens?: number
+          estimated_cost_usd?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
       decisions: {
         Row: {
           category: string | null

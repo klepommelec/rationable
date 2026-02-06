@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MessageSquare } from 'lucide-react';
 import { CommentItem } from './CommentItem';
 import { MentionsInput } from './MentionsInput';
@@ -50,24 +51,23 @@ export const CommentsPanel: React.FC<CommentsPanelProps> = ({
     }
   }, [decisionId, onCommentsCountChange, t]);
 
-  // Charger le compteur dès le montage du composant
+  // Charger commentaires et compteur au montage (pour afficher les avatars sur le bouton sans ouvrir le panel)
   useEffect(() => {
     if (!decisionId) return;
     
-    const loadCount = async () => {
+    const loadCountAndComments = async () => {
       try {
         const fetchedComments = await commentService.getComments(decisionId);
-        // Notifier le parent du nombre de commentaires
+        setComments(fetchedComments);
         if (onCommentsCountChange) {
           onCommentsCountChange(fetchedComments.length);
         }
       } catch (error) {
-        // Ne pas afficher d'erreur pour le chargement initial du compteur
         console.error('Error loading comments count:', error);
       }
     };
     
-    loadCount();
+    loadCountAndComments();
   }, [decisionId, onCommentsCountChange]);
 
   // Charger les commentaires complets quand le panel est ouvert
@@ -265,6 +265,19 @@ export const CommentsPanel: React.FC<CommentsPanelProps> = ({
 
   const displayCount = externalCommentsCount !== undefined ? externalCommentsCount : comments.length;
 
+  // Derniers 3 auteurs distincts (tous commentaires + réponses, triés par date décroissante)
+  const lastThreeCommenters = useMemo(() => {
+    const byDate = [...comments].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    const seen = new Set<string>();
+    return byDate.filter(c => {
+      if (seen.has(c.user_id)) return false;
+      seen.add(c.user_id);
+      return true;
+    }).slice(0, 3);
+  }, [comments]);
+
   if (!decisionId) {
     return null;
   }
@@ -273,12 +286,28 @@ export const CommentsPanel: React.FC<CommentsPanelProps> = ({
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button variant="outline" className="flex items-center gap-2 h-9 px-3 py-1">
-          <MessageSquare className="h-4 w-4" />
-          <span className="font-medium">Comments</span>
-          {displayCount > 0 && (
-            <span className="text-sm font-medium text-muted-foreground">
-              ({displayCount})
-            </span>
+          {displayCount > 0 && lastThreeCommenters.length > 0 && (
+            <div className="flex -space-x-2">
+              {lastThreeCommenters.map((comment) => (
+                <Avatar key={comment.user_id} className="h-5 w-5 border-2 border-background">
+                  <AvatarImage
+                    src={comment.user?.user_metadata?.avatar_url || undefined}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="text-[10px] bg-muted">
+                    {comment.user?.user_metadata?.full_name?.charAt(0).toUpperCase() || '?'}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+            </div>
+          )}
+          {displayCount > 0 ? (
+            <>
+              <span className="font-medium">{t('comments.section.titleDefault')}</span>
+              <span className="text-sm font-medium text-muted-foreground">({displayCount})</span>
+            </>
+          ) : (
+            <span className="font-medium">{t('comments.section.addButton')}</span>
           )}
         </Button>
       </SheetTrigger>

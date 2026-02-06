@@ -550,7 +550,11 @@ INSTRUCTIONS CRITIQUES:
     
     return {
       ...result,
-      description: improvedDescription
+      description: improvedDescription,
+      ...(apiResult && typeof apiResult === 'object' && (apiResult.usage || apiResult.estimated_cost_usd != null) && {
+        usage: apiResult.usage,
+        estimated_cost_usd: apiResult.estimated_cost_usd
+      })
     };
   } catch (error) {
     console.error('❌ Erreur génération comparative:', error);

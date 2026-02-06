@@ -135,7 +135,7 @@ const Layout = () => {
           className={`flex-grow ${
             isSettingsPage 
               ? 'h-[calc(100vh-4rem)] overflow-hidden pt-16' 
-              : 'container mx-auto sm:px-6 lg:px-8 py-6 sm:py-6 lg:py-8 max-w-full px-[3px] sm:px-6 pt-16'
+              : 'container mx-auto sm:px-6 lg:px-8 py-6 sm:py-6 lg:py-8 max-w-full px-4 sm:px-6 pt-16'
           }`}
           style={!isSettingsPage ? { overflowX: 'visible' } : {}}
         >

@@ -10,6 +10,7 @@ import ManualOptionsCreator from './ManualOptionsCreator';
 import AnalysisNavigation from './decision-maker/AnalysisNavigation';
 import DilemmaSetup from './decision-maker/DilemmaSetup';
 import AnalysisResult from './decision-maker/AnalysisResult';
+import { DataAccuracyIndicator } from './decision-maker/DataAccuracyIndicator';
 import { EditableTitle } from './EditableTitle';
 import { toast } from "sonner";
 import { useI18nUI } from '@/contexts/I18nUIContext';
@@ -466,34 +467,14 @@ const DecisionMaker = () => {
   // Note: La synchronisation des états lors de la navigation est gérée par handleAnalysisNavigation
 
   const shouldShowCriteria = true;
-  return <div className={`w-full px-4 sm:px-6 lg:px-0 ${displayStep !== 'idle' ? 'max-w-[896px] mx-auto' : ''}`}>
+  return <div className={`w-full ${displayStep !== 'idle' ? 'max-w-[896px] mx-auto px-4 sm:px-0' : 'px-4 sm:px-6 lg:px-0'}`}>
       <section aria-label="Assistant de décision">
         {/* Navigation entre analyses */}
         {displayStep !== 'idle' && <AnalysisNavigation analyses={analyses} currentAnalysisIndex={currentAnalysisIndex} onNavigate={handleAnalysisNavigation} />}
 
         {(displayStep === 'criteria-loaded' || displayStep === 'loading-options' || displayStep === 'done') && <>
-            {/* Boutons Criteria et Comments côte à côte */}
-            {shouldShowCriteria && (
-              <div className="flex items-center gap-2 pt-[72px] pb-6">
-                <CriteriaManager 
-                  criteria={displayCriteria} 
-                  setCriteria={setCriteria} 
-                  isInteractionDisabled={displayStep === 'loading-options' || isLoading || isUpdating || Boolean(isLockedToOther)} 
-                  onUpdateAnalysis={handleManualUpdate} 
-                  hasChanges={hasChanges} 
-                  currentDecisionId={currentDecision?.id} 
-                  isNewDecision={displayStep === 'criteria-loaded' && !currentDecision?.id} 
-                  isManualDecision={!realTimeSearchEnabled} 
-                />
-                <CommentsPanel 
-                  decisionId={currentDecision?.id}
-                  commentsCount={commentsCount}
-                  onCommentsCountChange={setCommentsCount}
-                />
-              </div>
-            )}
-            
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 animate-fade-in pt-0 h-fit">
+            {/* Titre (emoji + dilemme) en premier */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 animate-fade-in pt-[72px] sm:pt-[72px] pb-0 h-fit">
               {/* Layout mobile : emoji au-dessus du titre, aligné à gauche */}
               <div className="sm:hidden space-y-2 w-full px-0">
                 <EmojiPicker emoji={displayEmoji} setEmoji={setEmoji} />
@@ -507,7 +488,6 @@ const DecisionMaker = () => {
                   />
                 </div>
               </div>
-              
               {/* Layout desktop : emoji et titre côte à côte */}
               <div className="hidden sm:flex flex-col items-start gap-2 w-full pt-0 pb-0">
                 <div className="flex-shrink-0 leading-none text-center" style={{ verticalAlign: 'middle' }}>
@@ -522,6 +502,37 @@ const DecisionMaker = () => {
                 />
               </div>
             </div>
+
+            {/* Bloc "Created on... by..." (uniquement quand le résultat est affiché) */}
+            {displayStep === 'done' && displayResult && (
+              <DataAccuracyIndicator
+                result={displayResult}
+                currentDecision={getCurrentDecision()}
+              />
+            )}
+
+            {/* Boutons Criteria et Comments sous le bloc Created on */}
+            {shouldShowCriteria && (
+              <div className="flex items-center gap-2 pt-4 pb-6">
+                <CriteriaManager
+                  criteria={displayCriteria}
+                  setCriteria={setCriteria}
+                  isInteractionDisabled={displayStep === 'loading-options' || isLoading || isUpdating || Boolean(isLockedToOther)}
+                  onUpdateAnalysis={handleManualUpdate}
+                  hasChanges={hasChanges}
+                  currentDecisionId={currentDecision?.id}
+                  isNewDecision={displayStep === 'criteria-loaded' && !currentDecision?.id}
+                  isManualDecision={!realTimeSearchEnabled}
+                  result={displayStep === 'done' ? displayResult : null}
+                  currentDecision={displayStep === 'done' ? getCurrentDecision() : null}
+                />
+                <CommentsPanel 
+                  decisionId={currentDecision?.id}
+                  commentsCount={commentsCount}
+                  onCommentsCountChange={setCommentsCount}
+                />
+              </div>
+            )}
           </>}
 
         {displayStep === 'idle' && <DilemmaSetup dilemma={dilemma} setDilemma={setDilemma} analysisStep={analysisStep} setAnalysisStep={setAnalysisStep} isLoading={isLoading} isUpdating={isUpdating} applyTemplate={applyTemplate} clearSession={clearAll} clearAnalyses={clearAnalyses} history={history} loadDecision={loadDecisionWithThread} deleteDecision={deleteDecision} clearHistory={clearHistory} handleStartAnalysis={handleStartAnalysis} progress={progress} progressMessage={progressMessage} setProgressMessage={setProgressMessage} templates={templates} selectedCategory={selectedCategory} onCategoryChange={handleCategoryChange} onUpdateCategory={handleUpdateCategory} uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} addDecision={addDecision} setCurrentDecisionId={setCurrentDecisionId} />}
@@ -557,13 +568,15 @@ const DecisionMaker = () => {
           </div>
         )}
         
-        {displayStep === 'loading-options' && <OptionsLoadingSkeleton />}
-        
-        {displayStep === 'done' && <AnalysisResult result={displayResult} isUpdating={isUpdating} analysisStep={displayStep} currentDecision={getCurrentDecision()} dilemma={displayDilemma} onUpdateDecision={(updatedDecision) => {
+        {/* Même wrapper pour chargement et résultat : même largeur / padding */}
+        <div className="w-full min-w-0">
+          {displayStep === 'loading-options' && <OptionsLoadingSkeleton />}
+          {displayStep === 'done' && <AnalysisResult result={displayResult} isUpdating={isUpdating} analysisStep={displayStep} currentDecision={getCurrentDecision()} dilemma={displayDilemma} showDataAccuracyIndicator={false} onUpdateDecision={(updatedDecision) => {
         // Actually update the decision in history (local + cloud)
         console.log('Decision updated with cached data:', updatedDecision);
         updateDecision(updatedDecision);
       }} onFollowUpQuestion={handleFollowUpQuestion} onEditOptions={handleEditOptions} />}
+        </div>
 
       </section>
     </div>;

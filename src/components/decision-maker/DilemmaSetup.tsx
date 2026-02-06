@@ -305,7 +305,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     handleAnalysisClick();
                   }
                 }
-              }} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`pulsing-glow focus:ring-cyan-500 text-base md:text-sm h-[160px] resize-none pr-20 transition-colors dark:bg-card ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-over' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
+              }} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`rounded-none pulsing-glow focus:ring-cyan-500 text-base md:text-sm h-[160px] resize-none pr-20 transition-colors dark:bg-card ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-over' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
                                 {dilemma === '' && !isDragOver && <div className="absolute top-2 left-3 pointer-events-none">
                                         <span className="text-muted-foreground text-base md:text-sm">
                                             <AnimatedPlaceholder interval={2500} />
@@ -397,7 +397,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} onSuccess={handleAuthSuccess} />
 
             {/* Section Templates */}
-            <Card className="bg-transparent border-0 shadow-none ml-[240px] mr-[240px]">
+            <Card className="bg-transparent border-0 shadow-none mb-6 ml-0 mr-0 md:ml-[120px] md:mr-[120px]">
                 <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
                         <div>
@@ -418,7 +418,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     {user ?
         // Utilisateurs connectés : templates basés sur le workspace
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {(context === 'professional' ? PROFESSIONAL_TEMPLATES : PERSONAL_TEMPLATES).slice(0, 6).map(template => <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal">
+                            {(context === 'professional' ? PROFESSIONAL_TEMPLATES : PERSONAL_TEMPLATES).slice(0, 6).map(template => <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-none whitespace-normal">
                                     <div className="flex items-center gap-2 w-full min-w-0">
                                         <span className="text-lg shrink-0">{template.decision_data.emoji}</span>
                                         <span className="text-sm truncate font-semibold">{template.title}</span>
@@ -434,7 +434,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                             <div className="mt-4">
                                 <h3 className="text-xs font-medium text-muted-foreground tracking-wide mb-3">Templates personnels</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    {PERSONAL_TEMPLATES.slice(0, 6).map(template => <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal">
+                                    {PERSONAL_TEMPLATES.slice(0, 6).map(template => <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-none whitespace-normal">
                                             <div className="flex items-center gap-2 w-full min-w-0">
                                                 <span className="text-lg shrink-0">{template.decision_data.emoji}</span>
                                                 <span className="text-sm truncate font-semibold">{template.title}</span>
@@ -450,7 +450,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                             <div>
                                 <h3 className="text-xs font-medium text-muted-foreground tracking-wide mb-3">Templates professionnels</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    {PROFESSIONAL_TEMPLATES.slice(0, 6).map(template => <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-lg whitespace-normal">
+                                    {PROFESSIONAL_TEMPLATES.slice(0, 6).map(template => <Button key={template.id} variant="outline" onClick={() => handleOpenTemplate(template)} disabled={isLoading || isUpdating || analysisStep !== 'idle'} className="h-32 p-4 text-left justify-start flex-col items-start gap-2 rounded-none whitespace-normal">
                                             <div className="flex items-center gap-2 w-full min-w-0">
                                                 <span className="text-lg shrink-0">{template.decision_data.emoji}</span>
                                                 <span className="text-sm truncate font-semibold">{template.title}</span>
@@ -467,7 +467,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             </Card>
 
             {/* Historique intégré directement dans la page - seulement pour les utilisateurs connectés */}
-            {user && <Card className="bg-transparent border-0 shadow-none ml-[240px] mr-[240px]">
+            {user && <Card className="bg-transparent border-0 shadow-none mb-6 ml-0 mr-0 md:ml-[120px] md:mr-[120px]">
                   <CardHeader className="pb-4">
                       <CardTitle className="font-semibold text-2xl">{t('dilemmaSetup.history.title')}</CardTitle>
                       <CardDescription className="text-muted-foreground">

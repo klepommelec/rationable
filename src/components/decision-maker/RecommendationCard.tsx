@@ -123,14 +123,14 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     loadActionLinks();
   }, [result?.breakdown, result?.cachedActionLinks, dilemma, onUpdateResult]);
 
-  // Configuration unifiée pour tous les types de résultats
+  // Configuration unifiée pour tous les types de résultats (vert aligné sur la ligne recommandée de la ComparisonTable)
   const config = {
     icon: <Lightbulb className="h-5 w-5 text-primary" />,
     title: t('decision.title'),
     badge: t('decision.recommended'),
     borderColor: 'border-primary',
     bgGradient: '',
-    badgeColor: 'bg-primary/10 text-primary',
+    badgeColor: 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800',
     titleColor: 'text-primary'
   };
   
@@ -233,7 +233,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             )}
 
             {/* Action buttons for top option - moved to bottom */}
-            {topOption?.option && <div className="w-full pt-4">{/* Added pt-4 for more spacing */}
+            {topOption?.option && <div className="w-full pt-0 mt-8 mb-8">{/* Spacing: pt-0 mt-8 mb-8 */}
                 <div className="flex flex-wrap gap-3">
                   {/* Search button - always visible immediately */}
                   <Button 
@@ -304,7 +304,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               </div>}
 
             {/* Useful Links moved inside recommendation card */}
-            <div className="w-full pt-4">
+            <div className="w-full pt-0 mt-8 mb-8">
               <UsefulLinks shoppingLinks={result.shoppingLinks} socialContent={result.socialContent} dilemma={dilemma} recommendation={result.recommendation} />
             </div>
           </div>

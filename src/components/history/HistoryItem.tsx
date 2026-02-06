@@ -20,6 +20,8 @@ interface HistoryItemProps {
   followUpDecisions?: IDecision[];
   titleOverride?: string;
   rootRecommendation?: string;
+  /** Si false, masque la bordure haute pour éviter le double trait avec la carte précédente */
+  isFirstInList?: boolean;
 }
 
 export const HistoryItem: React.FC<HistoryItemProps> = ({
@@ -30,7 +32,8 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
   followUpCount,
   followUpDecisions,
   titleOverride,
-  rootRecommendation
+  rootRecommendation,
+  isFirstInList = true
 }) => {
   const [isSharing, setIsSharing] = useState(false);
   const { t, getLocaleTag } = useI18nUI();
@@ -76,7 +79,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({
   return (
     <TooltipProvider>
       <div 
-        className="p-4 rounded-lg bg-card border cursor-pointer hover:bg-accent/50 transition-colors relative"
+        className={`p-4 rounded-none bg-card border cursor-pointer hover:bg-accent/50 transition-colors relative ${!isFirstInList ? 'border-t-0' : ''}`}
         onClick={handleLoad}
       >
         <div className="flex justify-between items-start gap-2">

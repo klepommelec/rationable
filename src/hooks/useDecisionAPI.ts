@@ -10,9 +10,11 @@ import { useWorkspaceContext } from './useWorkspaceContext';
 import { generateContextualEmoji } from '@/services/contextualEmojiService';
 import { detectQuestionType } from '@/services/questionClassificationService';
 import { useAuth } from '@/hooks/useAuth';
+import { useI18nUI } from '@/contexts/I18nUIContext';
 import { detectLanguage } from '@/utils/languageDetection';
 import { I18nService } from '@/services/i18nService';
 import { votingService } from '@/services/votingService';
+import { recordAnalysisUsage } from '@/services/analysisUsageService';
 
 interface UseDecisionAPIProps {
     dilemma: string;
@@ -63,6 +65,7 @@ export const useDecisionAPI = ({
 }: UseDecisionAPIProps) => {
     const { getCurrentWorkspaceId, shouldUseWorkspaceDocuments } = useWorkspaceContext();
     const { user, profile } = useAuth();
+    const { t } = useI18nUI();
     
     // Get user display name helper
     const getUserDisplayName = () => {
@@ -92,7 +95,7 @@ export const useDecisionAPI = ({
         if (currentCriteria.length >= 2) {
             if (currentCriteria.some(c => c.name.trim() === '')) {
               console.log("❌ [DEBUG] Empty criteria names found");
-              toast.error("Veuillez nommer tous les critères avant de continuer.");
+              toast.error(t('criteria.nameAllBeforeContinue'));
               return;
             }
         }
@@ -158,13 +161,23 @@ export const useDecisionAPI = ({
                 };
                 updateDecision(updated);
             }
+            if (user?.id && apiResult?.usage && apiResult.estimated_cost_usd != null) {
+              recordAnalysisUsage({
+                userId: user.id,
+                decisionId: currentDecisionId,
+                provider: apiResult.aiProvider?.provider ?? 'openai',
+                promptTokens: apiResult.usage.prompt_tokens,
+                completionTokens: apiResult.usage.completion_tokens,
+                estimatedCostUsd: apiResult.estimated_cost_usd,
+              });
+            }
           }
           
           let successMessage;
           if (apiResult.workspaceData?.documentsUsed) {
-            successMessage = `Analyse générée avec ${apiResult.workspaceData.documentsUsed} document(s) de votre workspace !`;
+            successMessage = t('decision.toasts.analysisSuccessWithDocs').replace('{count}', String(apiResult.workspaceData.documentsUsed));
           } else {
-            successMessage = isRetry ? "Analyse générée avec succès !" : "Analyse mise à jour !";
+            successMessage = isRetry ? t('decision.toasts.analysisSuccess') : t('decision.toasts.analysisUpdated');
           }
           
           toast.success(successMessage);
@@ -190,15 +203,15 @@ export const useDecisionAPI = ({
             }
           }
           
-          const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
+          const errorMessage = error instanceof Error ? error.message : t('common.error');
           
           if (retryCount < 2) {
             console.log(`🔄 [DEBUG] Will retry in 1.5s (attempt ${retryCount + 1}/3)`);
-            toast.error(`${errorMessage} - Nouvelle tentative...`);
+            toast.error(`${errorMessage} - ${t('decision.toasts.retrying')}`);
             setTimeout(() => handleGenerateOptions(true, forcedType), 1500);
           } else {
             console.log("💀 [DEBUG] Max retries reached, giving up");
-            toast.error(`Impossible de générer les options après ${retryCount + 1} tentatives. ${errorMessage}`);
+            toast.error(t('decision.toasts.maxRetriesError').replace('{count}', String(retryCount + 1)).replace('{message}', errorMessage));
             setAnalysisStep('criteria-loaded');
             resetRetry();
           }
@@ -336,11 +349,21 @@ export const useDecisionAPI = ({
                     console.error('Error adding user as participant:', err);
                     // Ne pas bloquer l'UI en cas d'erreur, mais loguer pour debug
                 }
+                if (optionsResult?.usage && optionsResult.estimated_cost_usd != null) {
+                  recordAnalysisUsage({
+                    userId: user.id,
+                    decisionId: newDecision.id,
+                    provider: optionsResult.aiProvider?.provider ?? 'openai',
+                    promptTokens: optionsResult.usage.prompt_tokens,
+                    completionTokens: optionsResult.usage.completion_tokens,
+                    estimatedCostUsd: optionsResult.estimated_cost_usd,
+                  });
+                }
             }
             
             const successMessage = optionsResult.workspaceData?.documentsUsed 
-                ? `Analyse générée avec ${optionsResult.workspaceData.documentsUsed} document(s) de votre workspace !`
-                : "Analyse optimisée générée avec succès !";
+                ? t('decision.toasts.analysisSuccessWithDocs').replace('{count}', String(optionsResult.workspaceData.documentsUsed))
+                : t('decision.toasts.analysisSuccess');
             
             toast.success(successMessage);
             
@@ -358,11 +381,11 @@ export const useDecisionAPI = ({
             if (retryCount < 2) {
                 console.log('🔄 Retrying optimized analysis...');
                 incrementRetry();
-                setProgressMessage('Nouvelle tentative...');
+                setProgressMessage(t('decision.toasts.retrying'));
                 setTimeout(() => handleStartAnalysis(forcedType, options), 1500);
             } else {
-                const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
-                toast.error(`Erreur après ${retryCount + 1} tentatives: ${errorMessage}`);
+                const errorMessage = error instanceof Error ? error.message : t('common.error');
+                toast.error(t('decision.toasts.errorAfterRetries').replace('{count}', String(retryCount + 1)).replace('{message}', errorMessage));
                 setProgressMessage('');
                 resetRetry();
             }
@@ -371,7 +394,7 @@ export const useDecisionAPI = ({
         dilemma, uploadedFiles, resetRetry, setResult, setHasChanges, setSelectedCategory,
         initialCriteriaRef, setCriteria, setEmoji, setAnalysisStep, setProgressMessage,
         getCurrentWorkspaceId, shouldUseWorkspaceDocuments, history, addDecision,
-        setCurrentDecisionId, retryCount, incrementRetry
+        setCurrentDecisionId, retryCount, incrementRetry, t
     ]);
 
     return {

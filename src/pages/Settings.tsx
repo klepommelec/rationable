@@ -18,6 +18,7 @@ import WorkspacesSettings from '@/components/settings/WorkspacesSettings';
 import MembersSettings from '@/components/settings/MembersSettings';
 import DocumentsSettings from '@/components/settings/DocumentsSettings';
 import AdminSettings from '@/components/settings/AdminSettings';
+import AnalysisUsageSettings from '@/components/settings/AnalysisUsageSettings';
 
 
 const Settings = () => {
@@ -101,6 +102,8 @@ const Settings = () => {
         return <DocumentsSettings />;
           case 'preferences':
             return <AppearanceSettings />;
+      case 'usage':
+        return <AnalysisUsageSettings />;
       case 'admin':
         return <AdminSettings />;
       default:
@@ -116,6 +119,7 @@ const Settings = () => {
           members: 'Membres',
           documents: 'settings.sidebar.documents',
           preferences: 'settings.sidebar.preferences',
+          usage: 'Usage & coût',
           admin: 'settings.sidebar.admin'
         };
     const titleKey = titleKeys[activeSection as keyof typeof titleKeys];

@@ -7,10 +7,10 @@ import { useI18nUI } from '@/contexts/I18nUIContext';
 export const OptionsLoadingSkeleton = () => {
   const { t } = useI18nUI();
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2">
-          <LoaderCircle className="h-5 w-5 animate-spin text-cyan-500" />
+    <div className="space-y-6 animate-fade-in pt-6">
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <LoaderCircle className="h-5 w-5 animate-spin text-cyan-500 shrink-0" />
           <span className="text-lg font-medium text-cyan-500">
             {t('optionsLoading.title')}
           </span>
@@ -50,8 +50,8 @@ export const OptionsLoadingSkeleton = () => {
         ))}
       </div>
 
-      <div className="text-center">
-        <Skeleton className="h-12 w-48 mx-auto" />
+      <div>
+        <Skeleton className="h-12 w-48" />
       </div>
     </div>
   );
