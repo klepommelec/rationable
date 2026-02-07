@@ -32,6 +32,9 @@ const Navbar: React.FC = () => {
   // Détection d'une décision active (seulement si analyse démarrée)
   const hasActiveDecision = location.pathname === '/' && user && (result !== null || analysisStep !== 'idle');
 
+  // Sur l'écran de résultat de décision (critères, commentaires, recommandation), on masque profil et Share
+  const isDecisionResultView = location.pathname === '/' && result !== null;
+
   // Créer l'objet currentDecision pour ShareButton
   const currentDecision = hasActiveDecision ? getCurrentDecision() || {
     id: 'temp-decision',
@@ -82,43 +85,45 @@ const Navbar: React.FC = () => {
         
         <div className="flex items-center gap-2">
           {user ? <>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6">
-                      {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt="Avatar" className="object-cover w-full h-full" />}
-                      <AvatarFallback className="text-xs">
-                        {getUserInitials()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="hidden sm:flex items-center gap-1">
-                      {getUserDisplayName()}
-                      <ChevronDown className="h-3 w-3" />
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <WorkspaceSelector />
-                  
-                  <DropdownMenuSeparator />
-                  
-                  <DropdownMenuItem asChild>
-                    <Link to="/settings">
-                      <Settings className="h-4 w-4 mr-2" />
-                      {t('navbar.settings')}
-                    </Link>
-                  </DropdownMenuItem>
-                  
-                  <DropdownMenuSeparator />
-                  
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    <LogOut className="h-4 w-4 mr-2" />
-                    {t('navbar.signOut')}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {!isDecisionResultView && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                      <Avatar className="h-6 w-6">
+                        {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt="Avatar" className="object-cover w-full h-full" />}
+                        <AvatarFallback className="text-xs">
+                          {getUserInitials()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="hidden sm:flex items-center gap-1">
+                        {getUserDisplayName()}
+                        <ChevronDown className="h-3 w-3" />
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <WorkspaceSelector />
+                    
+                    <DropdownMenuSeparator />
+                    
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings">
+                        <Settings className="h-4 w-4 mr-2" />
+                        {t('navbar.settings')}
+                      </Link>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuSeparator />
+                    
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      {t('navbar.signOut')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
               
-              {/* Bouton partager en dernier pour les décisions en cours */}
+              {/* Bouton partager (toujours affiché sur écran résultat, sinon quand décision en cours) */}
               {currentDecision && <ShareButton decision={currentDecision} />}
             </> : <div className="flex items-center gap-2">
               <Link to="/auth">

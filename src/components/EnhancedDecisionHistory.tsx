@@ -161,7 +161,7 @@ export const EnhancedDecisionHistory: React.FC<EnhancedDecisionHistoryProps> = (
                <Button 
                 variant="outline" 
                 onClick={loadMoreItems}
-                className="min-w-[120px] flex items-center gap-2"
+                className="w-full rounded-none flex items-center gap-2"
               >
                 {t('history.list.seeMore')}
                 <ChevronRight className="h-4 w-4" />
