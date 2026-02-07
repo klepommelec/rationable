@@ -409,6 +409,7 @@ export interface UITranslations {
       add: string;
       cancel: string;
       titleDefault: string;
+      blockSubtitle?: string;
       toasts: {
         addSuccess: string;
         updateSuccess: string;
@@ -1103,6 +1104,7 @@ const fr: UITranslations = {
       loading: "Chargement des commentaires...",
       placeholderDefault: "Partagez votre commentaire, note ou réflexion...",
       titleDefault: "Commentaires",
+      blockSubtitle: "Partagez vos réflexions ou posez vos questions.",
       toasts: {
         addSuccess: "Commentaire ajouté avec succès",
         updateSuccess: "Commentaire mis à jour",
@@ -1800,6 +1802,7 @@ const en: UITranslations = {
       loading: "Loading comments...",
       placeholderDefault: "Share your comment, note or reflection...",
       titleDefault: "Comments",
+      blockSubtitle: "Share your thoughts or ask questions.",
       toasts: {
         addSuccess: "Comment added successfully",
         updateSuccess: "Comment updated",

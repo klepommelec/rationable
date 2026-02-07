@@ -19,7 +19,18 @@ import MembersSettings from '@/components/settings/MembersSettings';
 import DocumentsSettings from '@/components/settings/DocumentsSettings';
 import AdminSettings from '@/components/settings/AdminSettings';
 import AnalysisUsageSettings from '@/components/settings/AnalysisUsageSettings';
+import { RealTimeSearchSettings } from '@/components/settings/RealTimeSearchSettings';
+import { useRealTimeSearchSettings } from '@/hooks/useRealTimeSearchSettings';
 
+const RealTimeSearchSettingsWrapper = () => {
+  const { realTimeSearchEnabled, setRealTimeSearchEnabled } = useRealTimeSearchSettings();
+  return (
+    <RealTimeSearchSettings
+      realTimeSearchEnabled={realTimeSearchEnabled}
+      onToggle={setRealTimeSearchEnabled}
+    />
+  );
+};
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState('profile');
@@ -101,7 +112,12 @@ const Settings = () => {
       case 'documents':
         return <DocumentsSettings />;
           case 'preferences':
-            return <AppearanceSettings />;
+            return (
+              <div className="space-y-6">
+                <AppearanceSettings />
+                <RealTimeSearchSettingsWrapper />
+              </div>
+            );
       case 'usage':
         return <AnalysisUsageSettings />;
       case 'admin':

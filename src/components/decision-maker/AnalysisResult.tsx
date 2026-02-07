@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react';
 import { IResult, IDecision, IBreakdownItem } from '@/types/decision';
+import { IComment } from '@/types/comment';
 import { RecommendationCard } from './RecommendationCard';
 import { ComparisonTable } from './ComparisonTable';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Plus } from 'lucide-react';
 import FollowUpQuestions from './FollowUpQuestions';
 import { DataAccuracyIndicator } from './DataAccuracyIndicator';
@@ -24,6 +26,10 @@ interface AnalysisResultProps {
   onEditOptions?: () => void;
   /** Si false, n'affiche pas DataAccuracyIndicator (déjà rendu au-dessus par le parent). */
   showDataAccuracyIndicator?: boolean;
+  /** Ouvre le panneau Comments (depuis le bloc Comments). */
+  onOpenComments?: () => void;
+  commentsCount?: number;
+  lastCommenters?: IComment[];
 }
 
 const AnalysisResult: React.FC<AnalysisResultProps> = ({
@@ -35,7 +41,10 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   onUpdateDecision,
   onFollowUpQuestion,
   onEditOptions,
-  showDataAccuracyIndicator = true
+  showDataAccuracyIndicator = true,
+  onOpenComments,
+  commentsCount = 0,
+  lastCommenters = [],
 }) => {
   const { t } = useI18nUI();
 
@@ -172,6 +181,47 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               <Plus className="h-4 w-4 mr-2" />
               {t('decision.manualOptions.createFollowUpQuestion')}
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Bloc Comments : ouvre le panneau au clic */}
+      {currentDecision?.id && onOpenComments && (
+        <Card className="mt-6 border-0 bg-transparent shadow-none">
+          <CardHeader className="p-0">
+            <CardTitle className="text-lg">{t('comments.section.titleDefault')}</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              {t('comments.section.blockSubtitle')}
+            </p>
+          </CardHeader>
+          <CardContent className="p-0 mt-4 mb-10">
+            <button
+              type="button"
+              onClick={onOpenComments}
+              className="w-full flex items-center gap-3 rounded-none border bg-card p-4 text-left transition-colors hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              {commentsCount > 0 && lastCommenters.length > 0 ? (
+                <>
+                  <div className="flex -space-x-2">
+                    {lastCommenters.slice(0, 3).map((comment) => (
+                      <Avatar key={comment.user_id} className="h-8 w-8 border-2 border-background">
+                        <AvatarImage
+                          src={comment.user?.user_metadata?.avatar_url || undefined}
+                          className="object-cover"
+                        />
+                        <AvatarFallback className="text-xs bg-muted">
+                          {comment.user?.user_metadata?.full_name?.charAt(0).toUpperCase() || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                  </div>
+                  <span className="font-medium">{t('comments.section.titleDefault')}</span>
+                  <span className="text-sm font-medium text-muted-foreground">({commentsCount})</span>
+                </>
+              ) : (
+                <span className="font-medium text-muted-foreground">{t('comments.section.addButton')}</span>
+              )}
+            </button>
           </CardContent>
         </Card>
       )}

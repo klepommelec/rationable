@@ -41,7 +41,7 @@ export const AnimatedPlaceholder: React.FC<AnimatedPlaceholderProps> = ({
 
   return (
     <span 
-      className={`transition-opacity duration-300 ${
+      className={`font-semibold transition-opacity duration-300 ${
         isVisible ? 'opacity-100' : 'opacity-50'
       }`}
     >

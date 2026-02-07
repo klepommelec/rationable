@@ -64,21 +64,26 @@ const MonthlyTrendingTemplates: React.FC<MonthlyTrendingTemplatesProps> = ({
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-        {templates.map((template) => (
-          <Button
+      <div className="flex flex-col gap-2 pt-12 m-0">
+        {templates.map((template, index) => (
+          <div
             key={template.id}
-            variant="outline"
-            size="sm"
-            onClick={() => handlePromptClick(template.prompt)}
-            disabled={disabled}
-            className="text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-full py-[8px] hover:bg-primary/5 px-[13px] group"
+            style={{ animationDelay: `${index * 70}ms` }}
+            className="animate-fade-in opacity-0 transition-transform duration-200 hover:-translate-y-0.5"
           >
-            <TrendingUp className="h-3 w-3 text-primary/70 flex-shrink-0" />
-            <span className="truncate text-sm px-[4px] font-medium text-gray-500 line-clamp-2 group-hover:text-primary/70">
-              {template.prompt}
-            </span>
-          </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePromptClick(template.prompt)}
+              disabled={disabled}
+              className="w-full text-xs sm:text-sm justify-start h-auto whitespace-normal text-left rounded-none py-[12px] hover:bg-primary/5 px-[12px] group"
+            >
+              <TrendingUp className="h-3 w-3 text-primary/70 flex-shrink-0" />
+              <span className="truncate text-sm px-[4px] font-medium text-gray-500 line-clamp-2 group-hover:text-primary/70">
+                {template.prompt}
+              </span>
+            </Button>
+          </div>
         ))}
       </div>
     </div>

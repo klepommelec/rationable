@@ -11,20 +11,36 @@ import { toast } from 'sonner';
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import { useWorkspacesContext } from '@/contexts/WorkspacesContext';
 
+export interface CommentsSummary {
+  count: number;
+  lastCommenters: IComment[];
+}
+
 interface CommentsPanelProps {
   decisionId: string | null | undefined;
   commentsCount?: number;
   onCommentsCountChange?: (count: number) => void;
+  /** Contrôle externe du panneau (pour ouvrir depuis le bloc Comments dans le résultat). */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Appelé quand les commentaires sont chargés/mis à jour (pour afficher le résumé dans le bloc). */
+  onCommentsDataChange?: (data: CommentsSummary) => void;
 }
 
 export const CommentsPanel: React.FC<CommentsPanelProps> = ({
   decisionId,
   commentsCount: externalCommentsCount,
-  onCommentsCountChange
+  onCommentsCountChange,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  onCommentsDataChange,
 }) => {
   const { t } = useI18nUI();
   const { currentWorkspace } = useWorkspacesContext();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined && controlledOnOpenChange !== undefined;
+  const isOpen = isControlled ? controlledOpen : internalOpen;
+  const setIsOpen = isControlled ? controlledOnOpenChange! : setInternalOpen;
   const [comments, setComments] = useState<IComment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -277,6 +293,13 @@ export const CommentsPanel: React.FC<CommentsPanelProps> = ({
       return true;
     }).slice(0, 3);
   }, [comments]);
+
+  useEffect(() => {
+    if (onCommentsDataChange && decisionId) {
+      const count = externalCommentsCount !== undefined ? externalCommentsCount : comments.length;
+      onCommentsDataChange({ count, lastCommenters: lastThreeCommenters });
+    }
+  }, [comments, externalCommentsCount, lastThreeCommenters, decisionId, onCommentsDataChange]);
 
   if (!decisionId) {
     return null;

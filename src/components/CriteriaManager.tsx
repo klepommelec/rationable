@@ -253,7 +253,7 @@ export const CriteriaManager = ({
                 <Database className="h-4 w-4" />
                 {isVerifying ? t('notifications.sourceVerification') : t('dataAccuracy.scanSources')}
               </Button>
-              <div className="space-y-1.5 max-h-48 overflow-y-auto">
+              <div className="space-y-1.5 max-h-48 overflow-y-auto mb-2">
                 {allSources.length === 0 ? (
                   <div className="text-xs text-muted-foreground">{t('dataAccuracy.noExternalSources')}</div>
                 ) : isVerifying ? (

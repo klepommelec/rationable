@@ -18,8 +18,6 @@ import AuthModal from '@/components/AuthModal';
 import { useContextualContent } from '@/hooks/useContextualContent';
 import MonthlyTrendingTemplates from '@/components/MonthlyTrendingTemplates';
 import { useRealTimeSearchSettings } from '@/hooks/useRealTimeSearchSettings';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 interface DilemmaSetupProps {
   dilemma: string;
   setDilemma: (dilemma: string) => void;
@@ -99,10 +97,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   const {
     context
   } = useContextualContent();
-  const {
-    realTimeSearchEnabled,
-    setRealTimeSearchEnabled
-  } = useRealTimeSearchSettings();
+  const { realTimeSearchEnabled } = useRealTimeSearchSettings();
 
   // Afficher seulement les 3 premiers modèles
   const displayedTemplates = templates.slice(0, 3);
@@ -283,21 +278,9 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
             {/* Header principal occupant 90% de la hauteur de l'écran */}
             <div className="h-[94vh] flex items-center justify-center">
                 <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none shadow-none bg-transparent">
-                    <CardHeader className="text-center px-4 sm:px-6">
-                        <h2 className="font-bold" style={{ 
-                            fontSize: 'clamp(32px, 8vw, 68px)', 
-                            lineHeight: '0.8' 
-                        }}>
-                            <div className="font-semibold">{t('dilemmaSetup.hero.titleLine1')}</div>
-                            <div className="flex items-center justify-center gap-2 sm:gap-3">
-                                <img src="/lovable-uploads/58a481be-b921-4741-9446-bea4d2b2d69d.png" alt="Rationable Logo" className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 xl:h-16 xl:w-16" />
-                                <span className="font-semibold">{t('dilemmaSetup.hero.titleLine2')}</span>
-                            </div>
-                        </h2>
-                    </CardHeader>
-                    <CardContent className="space-y-6 px-4 sm:px-6">
+                    <CardContent className="space-y-6 px-4 sm:px-6 pt-6">
                         <div className="space-y-2">
-                            <div className="relative">
+                            <div className="relative h-fit min-h-[280px]">
                                 <Textarea id="dilemma-input" placeholder="" value={dilemma} onChange={e => setDilemma(e.target.value)} onKeyDown={e => {
                 if (e.key === 'Enter' && e.ctrlKey || e.key === 'Enter') {
                   if (!isMainButtonDisabled) {
@@ -305,9 +288,9 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     handleAnalysisClick();
                   }
                 }
-              }} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`rounded-none pulsing-glow focus:ring-cyan-500 text-base md:text-sm h-[160px] resize-none pr-20 transition-colors dark:bg-card ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-over' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
+              }} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`rounded-none pulsing-glow focus:ring-cyan-500 font-semibold text-[48px] leading-tight h-[160px] resize-none pr-20 transition-colors bg-transparent border-0 shadow-none ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-over' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
                                 {dilemma === '' && !isDragOver && <div className="absolute top-2 left-3 pointer-events-none">
-                                        <span className="text-muted-foreground text-base md:text-sm">
+                                        <span className="text-muted-foreground text-[56px] leading-tight">
                                             <AnimatedPlaceholder interval={2500} />
                                         </span>
                                     </div>}
@@ -317,30 +300,16 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                         </div>
                                     </div>}
                                 
-                                {/* Toggle IA intégré dans l'input */}
-                                <div className="absolute bottom-3 left-3 flex items-center gap-1">
-                                    <Switch 
-                                      id="ai-analysis" 
-                                      checked={realTimeSearchEnabled} 
-                                      onCheckedChange={setRealTimeSearchEnabled} 
-                                      className="scale-75 hover:scale-75 active:scale-75 [&:hover]:translate-y-0 [&:active]:translate-y-0" 
-                                    />
-                                    <Label htmlFor="ai-analysis" className="text-xs font-medium cursor-pointer">
-                                        {t('dilemmaSetup.aiToggleLabel')}
-                                    </Label>
-                                </div>
-                                
-                                {/* Boutons d'action à droite */}
-                                <div className="absolute bottom-3 right-3 flex gap-1">
+                                {/* Boutons d'action à gauche */}
+                                <div className="absolute bottom-3 left-3 flex gap-1.5">
+                                    {/* Bouton d'analyse (send) avec feedback visuel */}
+                                    {analysisStep === 'idle' && <button type="button" onClick={handleAnalysisClick} disabled={isMainButtonDisabled} aria-label={realTimeSearchEnabled ? t('dilemmaSetup.launchAnalysis') : t('dilemmaSetup.createManually')} title={realTimeSearchEnabled ? t('dilemmaSetup.launchAnalysis') : t('dilemmaSetup.createManually')} className="p-3 bg-black hover:bg-black/90 text-white transition-all duration-200 disabled:opacity-30 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed rounded-full hover:scale-105 active:scale-95">
+                                        {isAnalysisStarting ? <Loader2 className="h-6 w-6 animate-spin" /> : <ArrowRight className="h-6 w-6" />}
+                                    </button>}
                                     {/* Bouton d'attachement de fichier */}
-                                    <button type="button" onClick={handleFileButtonClick} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-label={t('dilemmaSetup.attachFile')} title={t('dilemmaSetup.attachFile')} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-full">
-                                        <Paperclip className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                    <button type="button" onClick={handleFileButtonClick} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-label={t('dilemmaSetup.attachFile')} title={t('dilemmaSetup.attachFile')} className="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-full">
+                                        <Paperclip className="h-6 w-6 text-gray-500 dark:text-gray-400" />
                                     </button>
-                                    
-                                     {/* Bouton d'analyse avec feedback visuel */}
-                                     {analysisStep === 'idle' && <button type="button" onClick={handleAnalysisClick} disabled={isMainButtonDisabled} aria-label={realTimeSearchEnabled ? t('dilemmaSetup.launchAnalysis') : t('dilemmaSetup.createManually')} title={realTimeSearchEnabled ? t('dilemmaSetup.launchAnalysis') : t('dilemmaSetup.createManually')} className="p-2 bg-black hover:bg-black/90 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full hover:scale-105 active:scale-95">
-                                             {isAnalysisStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-                                         </button>}
                                 </div>
                                 
                                 {/* Input file caché */}

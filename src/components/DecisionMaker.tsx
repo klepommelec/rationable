@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { useI18nUI } from '@/contexts/I18nUIContext';
 import { useRealTimeSearchSettings } from '@/hooks/useRealTimeSearchSettings';
 import { useAuth } from '@/hooks/useAuth';
-import { CommentsPanel } from './comments/CommentsPanel';
+import { CommentsPanel, type CommentsSummary } from './comments/CommentsPanel';
 // Composant principal pour la prise de décision unifiée
 const DecisionMaker = () => {
   const {
@@ -91,6 +91,8 @@ const DecisionMaker = () => {
   
   // État pour le compteur de commentaires
   const [commentsCount, setCommentsCount] = React.useState(0);
+  const [commentsOpen, setCommentsOpen] = React.useState(false);
+  const [commentsSummary, setCommentsSummary] = React.useState<CommentsSummary | null>(null);
   
   // Fonction pour gérer la création manuelle des options
   const handleManualOptionsCreated = (options: any[]) => {
@@ -526,10 +528,13 @@ const DecisionMaker = () => {
                   result={displayStep === 'done' ? displayResult : null}
                   currentDecision={displayStep === 'done' ? getCurrentDecision() : null}
                 />
-                <CommentsPanel 
+                <CommentsPanel
                   decisionId={currentDecision?.id}
                   commentsCount={commentsCount}
                   onCommentsCountChange={setCommentsCount}
+                  open={commentsOpen}
+                  onOpenChange={setCommentsOpen}
+                  onCommentsDataChange={setCommentsSummary}
                 />
               </div>
             )}
@@ -575,7 +580,7 @@ const DecisionMaker = () => {
         // Actually update the decision in history (local + cloud)
         console.log('Decision updated with cached data:', updatedDecision);
         updateDecision(updatedDecision);
-      }} onFollowUpQuestion={handleFollowUpQuestion} onEditOptions={handleEditOptions} />}
+      }} onFollowUpQuestion={handleFollowUpQuestion} onEditOptions={handleEditOptions} onOpenComments={() => setCommentsOpen(true)} commentsCount={commentsCount} lastCommenters={commentsSummary?.lastCommenters ?? []} />}
         </div>
 
       </section>
