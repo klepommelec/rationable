@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -25,6 +26,10 @@ interface CommentsPanelProps {
   onOpenChange?: (open: boolean) => void;
   /** Appelé quand les commentaires sont chargés/mis à jour (pour afficher le résumé dans le bloc). */
   onCommentsDataChange?: (data: CommentsSummary) => void;
+  /** 'sheet' = panneau latéral droit (défaut), 'inline' = contenu affiché en bas de page. */
+  variant?: 'sheet' | 'inline';
+  /** ID du conteneur DOM où rendre le contenu en bas de page quand variant='inline'. */
+  inlineTargetId?: string;
 }
 
 export const CommentsPanel: React.FC<CommentsPanelProps> = ({
@@ -34,6 +39,8 @@ export const CommentsPanel: React.FC<CommentsPanelProps> = ({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
   onCommentsDataChange,
+  variant = 'sheet',
+  inlineTargetId = 'comments-inline-root',
 }) => {
   const { t } = useI18nUI();
   const { currentWorkspace } = useWorkspacesContext();
@@ -95,10 +102,23 @@ export const CommentsPanel: React.FC<CommentsPanelProps> = ({
       const interval = setInterval(() => {
         loadComments(false);
       }, 5000);
-      
+
       return () => clearInterval(interval);
     }
   }, [decisionId, isOpen, loadComments]);
+
+  // En mode inline, scroller vers la zone commentaires à l'ouverture
+  useEffect(() => {
+    if (variant === 'inline' && isOpen && typeof document !== 'undefined') {
+      const target = document.getElementById(inlineTargetId);
+      if (target) {
+        const timer = requestAnimationFrame(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+        return () => cancelAnimationFrame(timer);
+      }
+    }
+  }, [variant, isOpen, inlineTargetId]);
 
   const handleAddComment = async () => {
     if (!newComment.trim() || !decisionId) {
@@ -301,38 +321,126 @@ export const CommentsPanel: React.FC<CommentsPanelProps> = ({
     }
   }, [comments, externalCommentsCount, lastThreeCommenters, decisionId, onCommentsDataChange]);
 
+  const commentsInputBlock = (
+    <div className={variant === 'inline' ? 'pt-6 pb-4' : 'border-t p-4 bg-background'}>
+      <div className="relative rounded-none border border-border bg-background">
+        <MentionsInput
+          value={newComment}
+          onChange={setNewComment}
+          placeholder={t('comments.section.placeholderDefault')}
+          className="min-h-[94px] resize-none border-0 rounded-none shadow-none pb-12 pr-2"
+          disabled={isLoading}
+          workspaceId={currentWorkspace?.id || ''}
+        />
+        <Button
+          onClick={handleAddComment}
+          disabled={isLoading || !newComment.trim()}
+          size="sm"
+          className="absolute bottom-2 right-2"
+        >
+          {t('comments.section.add')}
+        </Button>
+      </div>
+    </div>
+  );
+
+  const commentsListBlock = (
+    <div className="flex-1 overflow-y-auto flex flex-col border border-border">
+      {isLoading && mainComments.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          {t('comments.section.loading')}
+        </div>
+      ) : mainComments.length === 0 ? (
+        <div className="text-center text-muted-foreground flex flex-col items-center justify-center min-h-[120px]">
+          <div className="flex flex-col items-center gap-2">
+            <MessageSquare className="h-8 w-8 text-muted-foreground/50" />
+            <span>{t('comments.section.empty')}</span>
+          </div>
+        </div>
+      ) : (
+        mainComments.map(comment => (
+          <CommentItem
+            key={comment.id}
+            comment={comment}
+            onUpdate={handleUpdateComment}
+            onDelete={handleDeleteComment}
+            onAddReply={handleAddReply}
+            onUpdateReply={handleUpdateReply}
+            onDeleteReply={handleDeleteReply}
+            onAddReaction={handleAddReaction}
+            onRemoveReaction={handleRemoveReaction}
+          />
+        ))
+      )}
+    </div>
+  );
+
+  /** Contenu pour le Sheet (panneau droit) : liste puis input en bas */
+  const commentsContent = (
+    <>
+      {commentsListBlock}
+      {commentsInputBlock}
+    </>
+  );
+
+  const triggerButton = (
+    <Button
+      variant="outline"
+      className="flex items-center gap-2 h-9 px-3 py-1"
+      {...(variant === 'inline' ? { onClick: () => setIsOpen(!isOpen) } : {})}
+    >
+      {displayCount > 0 && lastThreeCommenters.length > 0 && (
+        <div className="flex -space-x-2">
+          {lastThreeCommenters.map((comment) => (
+            <Avatar key={comment.user_id} className="h-5 w-5 border-2 border-background">
+              <AvatarImage
+                src={comment.user?.user_metadata?.avatar_url || undefined}
+                className="object-cover"
+              />
+              <AvatarFallback className="text-[10px] bg-muted">
+                {comment.user?.user_metadata?.full_name?.charAt(0).toUpperCase() || '?'}
+              </AvatarFallback>
+            </Avatar>
+          ))}
+        </div>
+      )}
+      {displayCount > 0 ? (
+        <>
+          <span className="font-medium">{t('comments.section.titleDefault')}</span>
+          <span className="text-sm font-medium text-muted-foreground">({displayCount})</span>
+        </>
+      ) : (
+        <span className="font-medium">{t('comments.section.addButton')}</span>
+      )}
+    </Button>
+  );
+
   if (!decisionId) {
     return null;
+  }
+
+  if (variant === 'inline') {
+    const targetEl = typeof document !== 'undefined' ? document.getElementById(inlineTargetId) : null;
+    return (
+      <>
+        {triggerButton}
+        {isOpen && targetEl &&
+          createPortal(
+            <>
+              {/* Dans la continuité du body : input puis commentaires, sans conteneur */}
+              {commentsInputBlock}
+              {commentsListBlock}
+            </>,
+            targetEl
+          )}
+      </>
+    );
   }
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2 h-9 px-3 py-1">
-          {displayCount > 0 && lastThreeCommenters.length > 0 && (
-            <div className="flex -space-x-2">
-              {lastThreeCommenters.map((comment) => (
-                <Avatar key={comment.user_id} className="h-5 w-5 border-2 border-background">
-                  <AvatarImage
-                    src={comment.user?.user_metadata?.avatar_url || undefined}
-                    className="object-cover"
-                  />
-                  <AvatarFallback className="text-[10px] bg-muted">
-                    {comment.user?.user_metadata?.full_name?.charAt(0).toUpperCase() || '?'}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-            </div>
-          )}
-          {displayCount > 0 ? (
-            <>
-              <span className="font-medium">{t('comments.section.titleDefault')}</span>
-              <span className="text-sm font-medium text-muted-foreground">({displayCount})</span>
-            </>
-          ) : (
-            <span className="font-medium">{t('comments.section.addButton')}</span>
-          )}
-        </Button>
+        {triggerButton}
       </SheetTrigger>
       <SheetContent side="right" className="w-full sm:max-w-lg flex flex-col p-0">
         <SheetHeader className="px-6 pt-6">
@@ -340,58 +448,8 @@ export const CommentsPanel: React.FC<CommentsPanelProps> = ({
             Comments {displayCount > 0 && `(${displayCount})`}
           </SheetTitle>
         </SheetHeader>
-        
-        {/* Liste des commentaires - scrollable */}
-        <div className="flex-1 overflow-y-auto px-6 py-0 flex flex-col gap-4">
-          {isLoading && mainComments.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              {t('comments.section.loading')}
-            </div>
-          ) : mainComments.length === 0 ? (
-            <div className="text-center text-muted-foreground flex flex-col items-center justify-center min-h-[200px] pt-[24px]">
-              <div className="flex flex-col items-center gap-2">
-                <MessageSquare className="h-8 w-8 text-muted-foreground/50" />
-                <span>{t('comments.section.empty')}</span>
-              </div>
-            </div>
-          ) : (
-            mainComments.map(comment => (
-              <CommentItem
-                key={comment.id}
-                comment={comment}
-                onUpdate={handleUpdateComment}
-                onDelete={handleDeleteComment}
-                onAddReply={handleAddReply}
-                onUpdateReply={handleUpdateReply}
-                onDeleteReply={handleDeleteReply}
-                onAddReaction={handleAddReaction}
-                onRemoveReaction={handleRemoveReaction}
-              />
-            ))
-          )}
-        </div>
-        
-        {/* Input pour ajouter un commentaire - fixe en bas */}
-        <div className="border-t p-4 bg-background">
-          <div className="space-y-3">
-            <MentionsInput
-              value={newComment}
-              onChange={setNewComment}
-              placeholder={t('comments.section.placeholderDefault')}
-              className="min-h-[94px] resize-none"
-              disabled={isLoading}
-              workspaceId={currentWorkspace?.id || ''}
-            />
-            <div className="flex gap-2 justify-end">
-              <Button
-                onClick={handleAddComment}
-                disabled={isLoading || !newComment.trim()}
-                size="sm"
-              >
-                {t('comments.section.add')}
-              </Button>
-            </div>
-          </div>
+        <div className="flex-1 overflow-y-auto flex flex-col min-h-0">
+          {commentsContent}
         </div>
       </SheetContent>
     </Sheet>

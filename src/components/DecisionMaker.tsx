@@ -535,6 +535,8 @@ const DecisionMaker = () => {
                   open={commentsOpen}
                   onOpenChange={setCommentsOpen}
                   onCommentsDataChange={setCommentsSummary}
+                  variant="inline"
+                  inlineTargetId="comments-inline-root"
                 />
               </div>
             )}
@@ -580,8 +582,11 @@ const DecisionMaker = () => {
         // Actually update the decision in history (local + cloud)
         console.log('Decision updated with cached data:', updatedDecision);
         updateDecision(updatedDecision);
-      }} onFollowUpQuestion={handleFollowUpQuestion} onEditOptions={handleEditOptions} onOpenComments={() => setCommentsOpen(true)} commentsCount={commentsCount} lastCommenters={commentsSummary?.lastCommenters ?? []} />}
+      }} onFollowUpQuestion={handleFollowUpQuestion} onEditOptions={handleEditOptions} onOpenComments={() => setCommentsOpen(true)} commentsOpen={commentsOpen} commentsCount={commentsCount} lastCommenters={commentsSummary?.lastCommenters ?? []} />}
         </div>
+
+        {/* Ancrage pour afficher les commentaires en bas de page (mode inline) */}
+        <div id="comments-inline-root" className="w-full" />
 
       </section>
     </div>;

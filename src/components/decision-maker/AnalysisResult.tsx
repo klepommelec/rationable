@@ -28,6 +28,8 @@ interface AnalysisResultProps {
   showDataAccuracyIndicator?: boolean;
   /** Ouvre le panneau Comments (depuis le bloc Comments). */
   onOpenComments?: () => void;
+  /** Quand true, le bloc Comments n'est pas affiché (commentaires déjà ouverts en bas). */
+  commentsOpen?: boolean;
   commentsCount?: number;
   lastCommenters?: IComment[];
 }
@@ -43,6 +45,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   onEditOptions,
   showDataAccuracyIndicator = true,
   onOpenComments,
+  commentsOpen = false,
   commentsCount = 0,
   lastCommenters = [],
 }) => {
@@ -185,7 +188,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         </Card>
       )}
 
-      {/* Bloc Comments : ouvre le panneau au clic */}
+      {/* Bloc Comments : titre et sous-titre toujours visibles ; le clic affiche les commentaires en bas */}
       {currentDecision?.id && onOpenComments && (
         <Card className="mt-6 border-0 bg-transparent shadow-none">
           <CardHeader className="p-0">
@@ -194,35 +197,37 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
               {t('comments.section.blockSubtitle')}
             </p>
           </CardHeader>
-          <CardContent className="p-0 mt-4 mb-10">
-            <button
-              type="button"
-              onClick={onOpenComments}
-              className="w-full flex items-center gap-3 rounded-none border bg-card p-4 text-left transition-colors hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              {commentsCount > 0 && lastCommenters.length > 0 ? (
-                <>
-                  <div className="flex -space-x-2">
-                    {lastCommenters.slice(0, 3).map((comment) => (
-                      <Avatar key={comment.user_id} className="h-8 w-8 border-2 border-background">
-                        <AvatarImage
-                          src={comment.user?.user_metadata?.avatar_url || undefined}
-                          className="object-cover"
-                        />
-                        <AvatarFallback className="text-xs bg-muted">
-                          {comment.user?.user_metadata?.full_name?.charAt(0).toUpperCase() || '?'}
-                        </AvatarFallback>
-                      </Avatar>
-                    ))}
-                  </div>
-                  <span className="font-medium">{t('comments.section.titleDefault')}</span>
-                  <span className="text-sm font-medium text-muted-foreground">({commentsCount})</span>
-                </>
-              ) : (
-                <span className="font-medium text-muted-foreground">{t('comments.section.addButton')}</span>
-              )}
-            </button>
-          </CardContent>
+          {!commentsOpen && (
+            <CardContent className="p-0 mt-4 mb-10">
+              <button
+                type="button"
+                onClick={onOpenComments}
+                className="w-full flex items-center gap-3 rounded-none border bg-card p-4 text-left transition-colors hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                {commentsCount > 0 && lastCommenters.length > 0 ? (
+                  <>
+                    <div className="flex -space-x-2">
+                      {lastCommenters.slice(0, 3).map((comment) => (
+                        <Avatar key={comment.user_id} className="h-8 w-8 border-2 border-background">
+                          <AvatarImage
+                            src={comment.user?.user_metadata?.avatar_url || undefined}
+                            className="object-cover"
+                          />
+                          <AvatarFallback className="text-xs bg-muted">
+                            {comment.user?.user_metadata?.full_name?.charAt(0).toUpperCase() || '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                      ))}
+                    </div>
+                    <span className="font-medium">{t('comments.section.titleDefault')}</span>
+                    <span className="text-sm font-medium text-muted-foreground">({commentsCount})</span>
+                  </>
+                ) : (
+                  <span className="font-medium text-muted-foreground">{t('comments.section.addButton')}</span>
+                )}
+              </button>
+            </CardContent>
+          )}
         </Card>
       )}
     </div>

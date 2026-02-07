@@ -153,7 +153,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   };
 
   return (
-    <Card className="p-4 space-y-3 group mt-0">
+    <Card className="rounded-none border-0 border-b border-border bg-card p-4 space-y-3 group mt-0 last:border-b-0">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6">
