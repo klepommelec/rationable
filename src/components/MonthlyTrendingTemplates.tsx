@@ -63,8 +63,8 @@ const MonthlyTrendingTemplates: React.FC<MonthlyTrendingTemplatesProps> = ({
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-col gap-2 pt-12 m-0">
+    <div className="space-y-3 mt-0">
+      <div className="flex flex-col gap-2 pt-0 px-2 m-0">
         {templates.map((template, index) => (
           <div
             key={template.id}

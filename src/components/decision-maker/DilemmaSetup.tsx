@@ -277,8 +277,8 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   return <div className="mx-auto space-y-6 w-full max-w-full overflow-x-hidden">
             {/* Header principal occupant 90% de la hauteur de l'écran */}
             <div className="h-[94vh] flex items-center justify-center">
-                <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none shadow-none bg-transparent">
-                    <CardContent className="space-y-6 px-4 sm:px-6 pt-6">
+                <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none shadow-none bg-transparent mt-10">
+                    <CardContent className="flex flex-col gap-16 px-4 sm:px-6 pt-6">
                         <div className="space-y-2">
                             <div className="relative h-fit min-h-[280px]">
                                 <Textarea id="dilemma-input" placeholder="" value={dilemma} onChange={e => setDilemma(e.target.value)} onKeyDown={e => {
@@ -288,9 +288,9 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                     handleAnalysisClick();
                   }
                 }
-              }} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`rounded-none pulsing-glow focus:ring-cyan-500 font-semibold text-[48px] leading-tight h-[160px] resize-none pr-20 transition-colors bg-transparent border-0 shadow-none ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-over' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
-                                {dilemma === '' && !isDragOver && <div className="absolute top-2 left-3 pointer-events-none">
-                                        <span className="text-muted-foreground text-[56px] leading-tight">
+              }} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`rounded-none pulsing-glow focus:ring-cyan-500 font-semibold text-[56px] leading-tight h-[160px] resize-none pr-20 transition-colors bg-transparent border-0 shadow-none ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-over' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
+                                {dilemma === '' && !isDragOver && <div className="absolute top-0 left-3 -translate-y-0.5 pointer-events-none">
+                                        <span className="text-muted-foreground text-[56px] leading-tight block">
                                             <AnimatedPlaceholder interval={2500} />
                                         </span>
                                     </div>}
