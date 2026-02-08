@@ -14,6 +14,7 @@ import { MentionRenderer } from './MentionRenderer';
 import { CommentReactions } from './CommentReactions';
 import { CommentReplies } from './CommentReplies';
 import { useAuth } from '@/hooks/useAuth';
+import { cn } from '@/lib/utils';
 
 interface CommentItemProps {
   comment: IComment;
@@ -24,6 +25,8 @@ interface CommentItemProps {
   onDeleteReply?: (replyId: string) => Promise<void>;
   onAddReaction?: (commentId: string, emoji: string) => Promise<void>;
   onRemoveReaction?: (reactionId: string) => Promise<void>;
+  /** Quand true, désactive l’ombre (pour les réponses). */
+  isReply?: boolean;
 }
 
 export const CommentItem: React.FC<CommentItemProps> = ({
@@ -34,7 +37,8 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   onUpdateReply,
   onDeleteReply,
   onAddReaction,
-  onRemoveReaction
+  onRemoveReaction,
+  isReply = false
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
@@ -153,7 +157,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   };
 
   return (
-    <Card className="rounded-none border-0 border-b border-border bg-card p-4 space-y-3 group mt-0 last:border-b-0">
+    <Card className={cn("rounded-none border-0 border-b border-border bg-card p-4 space-y-3 group mt-0 last:border-b-0", isReply && "shadow-none")}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6">

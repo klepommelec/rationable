@@ -289,9 +289,9 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                   }
                 }
               }} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`rounded-none pulsing-glow focus:ring-cyan-500 font-semibold text-[56px] leading-tight h-[160px] resize-none pr-20 transition-colors bg-transparent border-0 shadow-none ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-over' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
-                                {dilemma === '' && !isDragOver && <div className="absolute top-0 left-3 -translate-y-0.5 pointer-events-none">
-                                        <span className="text-muted-foreground text-[56px] leading-tight block">
-                                            <AnimatedPlaceholder interval={2500} />
+                                {dilemma === '' && !isDragOver && <div className="absolute top-0 left-3 pt-2 pointer-events-none">
+                                        <span className="text-muted-foreground text-[56px] leading-none block">
+                                            <AnimatedPlaceholder interval={2500} tightLineHeight />
                                         </span>
                                     </div>}
                                 {isDragOver && <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -303,11 +303,11 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
                                 {/* Boutons d'action à gauche */}
                                 <div className="absolute bottom-3 left-3 flex gap-1.5">
                                     {/* Bouton d'analyse (send) avec feedback visuel */}
-                                    {analysisStep === 'idle' && <button type="button" onClick={handleAnalysisClick} disabled={isMainButtonDisabled} aria-label={realTimeSearchEnabled ? t('dilemmaSetup.launchAnalysis') : t('dilemmaSetup.createManually')} title={realTimeSearchEnabled ? t('dilemmaSetup.launchAnalysis') : t('dilemmaSetup.createManually')} className="p-3 bg-black hover:bg-black/90 text-white transition-all duration-200 disabled:opacity-30 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed rounded-full hover:scale-105 active:scale-95">
+                                    {analysisStep === 'idle' && <button type="button" onClick={handleAnalysisClick} disabled={isMainButtonDisabled} aria-label={realTimeSearchEnabled ? t('dilemmaSetup.launchAnalysis') : t('dilemmaSetup.createManually')} title={realTimeSearchEnabled ? t('dilemmaSetup.launchAnalysis') : t('dilemmaSetup.createManually')} className="size-12 flex items-center justify-center shrink-0 bg-black hover:bg-black/90 text-white transition-all duration-200 disabled:opacity-30 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed rounded-full hover:scale-105 active:scale-95">
                                         {isAnalysisStarting ? <Loader2 className="h-6 w-6 animate-spin" /> : <ArrowRight className="h-6 w-6" />}
                                     </button>}
                                     {/* Bouton d'attachement de fichier */}
-                                    <button type="button" onClick={handleFileButtonClick} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-label={t('dilemmaSetup.attachFile')} title={t('dilemmaSetup.attachFile')} className="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-full">
+                                    <button type="button" onClick={handleFileButtonClick} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-label={t('dilemmaSetup.attachFile')} title={t('dilemmaSetup.attachFile')} className="size-12 flex items-center justify-center shrink-0 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 hover:mix-blend-multiply dark:hover:mix-blend-multiply transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full hover:scale-105 active:scale-95">
                                         <Paperclip className="h-6 w-6 text-gray-500 dark:text-gray-400" />
                                     </button>
                                 </div>

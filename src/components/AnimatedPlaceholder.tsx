@@ -5,11 +5,16 @@ import { useContextualContent } from '@/hooks/useContextualContent';
 interface AnimatedPlaceholderProps {
   placeholders?: string[];
   interval?: number;
+  className?: string;
+  /** Interligne serré (line-height: 1) pour aligner le placeholder sur le texte saisi */
+  tightLineHeight?: boolean;
 }
 
 export const AnimatedPlaceholder: React.FC<AnimatedPlaceholderProps> = ({
   placeholders,
-  interval = 3000
+  interval = 3000,
+  className,
+  tightLineHeight = false
 }) => {
   const { getExamples } = useContextualContent();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -43,7 +48,8 @@ export const AnimatedPlaceholder: React.FC<AnimatedPlaceholderProps> = ({
     <span 
       className={`font-semibold transition-opacity duration-300 ${
         isVisible ? 'opacity-100' : 'opacity-50'
-      }`}
+      } ${className ?? ''}`}
+      style={tightLineHeight ? { lineHeight: 1.25 } : undefined}
     >
       {finalPlaceholders[currentIndex]}
     </span>

@@ -114,15 +114,18 @@ export const CommentReplies: React.FC<CommentRepliesProps> = ({
 
       {/* Liste des réponses */}
       {showReplies && replies.length > 0 && (
-        <div className="space-y-3">
-          {replies.map((reply) => (
-            <CommentItem
-              key={reply.id}
-              comment={reply}
-              onUpdate={onUpdateReply}
-              onDelete={onDeleteReply}
-            />
-          ))}
+        <div className="mt-2 pl-0 pt-2 border-t border-border bg-muted/5 rounded-r-md overflow-hidden">
+          <div className="space-y-0">
+            {replies.map((reply) => (
+              <CommentItem
+                key={reply.id}
+                comment={reply}
+                onUpdate={onUpdateReply}
+                onDelete={onDeleteReply}
+                isReply
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
