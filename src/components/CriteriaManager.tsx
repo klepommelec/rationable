@@ -185,8 +185,8 @@ export const CriteriaManager = ({
                   <Info className="h-4 w-4 text-muted-foreground" />
                 </span>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-xs">
-                <p>{t('criteria.tooltip')}</p>
+              <TooltipContent side="bottom" className="max-w-sm">
+                <p className="whitespace-normal break-words">{t('criteria.tooltip')}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

@@ -402,6 +402,12 @@ export interface UITranslations {
     updateAnalysis: string;
     nameAllBeforeContinue: string;
   };
+  deadline: {
+    addButton: string;
+    modalTitle: string;
+    confirm: string;
+    remove: string;
+  };
   comments: {
     section: {
       empty: string;
@@ -1094,6 +1100,12 @@ const fr: UITranslations = {
     maxCriteriaError: "Nombre maximum de critères atteint",
     updateAnalysis: "Mettre à jour l'analyse",
     nameAllBeforeContinue: "Veuillez nommer tous les critères avant de continuer.",
+  },
+  deadline: {
+    addButton: "Ajouter une date limite",
+    modalTitle: "Choisir une date limite",
+    confirm: "Enregistrer",
+    remove: "Supprimer la date limite",
   },
   comments: {
     section: {
@@ -1792,6 +1804,12 @@ const en: UITranslations = {
     maxCriteriaError: "Maximum number of criteria reached",
     updateAnalysis: "Update analysis",
     nameAllBeforeContinue: "Please name all criteria before continuing.",
+  },
+  deadline: {
+    addButton: "Add deadline",
+    modalTitle: "Choose a deadline",
+    confirm: "Save",
+    remove: "Remove deadline",
   },
   comments: {
     section: {

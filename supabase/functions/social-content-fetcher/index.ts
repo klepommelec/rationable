@@ -36,9 +36,10 @@ serve(async (req) => {
       })
     }
 
-    // Utiliser directement le nom de la recommandation (comme l'utilisateur l'a fait)
-    const searchQuery = recommendation || query;
-    console.log('📺 Searching YouTube for:', searchQuery);
+    // Construire une requête contextuelle : dilemme + recommandation pour des vidéos pertinentes
+    // (ex: "Which city as a student in France?" + "Lyon" → "student city France Lyon" au lieu de juste "Lyon" → football)
+    const searchQuery = buildContextualSearchQuery(dilemma, recommendation || query);
+    console.log('📺 Searching YouTube for (contextual):', searchQuery);
     
     // Recherche de vidéos YouTube (incluant les Shorts)
     const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
@@ -80,6 +81,10 @@ serve(async (req) => {
       })
     }
 
+    // Détecter si le dilemme concerne le sport ou le gaming (alors on garde ces vidéos)
+    const dilemmaLower = (dilemma || '').toLowerCase();
+    const isAboutSportOrGaming = /\b(sport|football|soccer|game|gaming|jeux? vidéo|esport|match|équipe|team)\b/i.test(dilemmaLower);
+
     // Filtrer les résultats pour éliminer le contenu non pertinent
     const filteredItems = searchData.items.filter(item => {
       const title = item.snippet.title.toLowerCase();
@@ -102,6 +107,23 @@ serve(async (req) => {
       if (hasForbiddenContent) {
         console.log('🚫 BLOCKED - Forbidden content:', item.snippet.title);
         return false;
+      }
+
+      // Si le dilemme ne porte pas sur le sport/gaming, exclure les vidéos clairement sport/gaming
+      // (ex: "Which city as a student?" ne doit pas donner des résumés OL, Roblox, etc.)
+      if (!isAboutSportOrGaming) {
+        const sportGamingKeywords = [
+          'résumé', 'résumé match', 'match', 'ligue 1', 'ligue 2', 'champions league',
+          'ol ', ' olympique lyon', 'fc nantes', 'football', 'soccer', 'goal', 'but ',
+          'roblox', 'minecraft', 'gameplay', 'let\'s play', 'horror game', 'escape game'
+        ];
+        const looksLikeSportOrGaming = sportGamingKeywords.some(kw => 
+          title.includes(kw) || channel.includes(kw)
+        );
+        if (looksLikeSportOrGaming) {
+          console.log('🚫 BLOCKED - Off-topic (sport/gaming):', item.snippet.title);
+          return false;
+        }
       }
       
       console.log('✅ ACCEPTED - Video:', item.snippet.title);
@@ -183,4 +205,31 @@ function formatViewCount(count: number): string {
   } else {
     return `${count} vues`;
   }
+}
+
+/** Mots vides à ignorer pour extraire l’intent du dilemme (EN + FR). */
+const STOP_WORDS = new Set([
+  'which', 'what', 'where', 'how', 'why', 'when', 'who', 'should', 'could', 'would',
+  'the', 'a', 'an', 'as', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'i', 'my', 'me',
+  'quelle', 'quel', 'quels', 'quelles', 'que', 'qui', 'quoi', 'comment', 'où', 'pourquoi',
+  'le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'et', 'en', 'au', 'aux', 'je', 'mon', 'ma',
+  'choose', 'pick', 'select', 'choisir', 'choisis', '?', '!'
+]);
+
+/**
+ * Construit une requête de recherche contextuelle à partir du dilemme et de la recommandation.
+ * Ex: "Which city I should choose as a student in France?" + "Lyon"
+ *  → "student city France Lyon" (au lieu de "Lyon" seul → football).
+ */
+function buildContextualSearchQuery(dilemma: string | undefined, recommendation: string): string {
+  const rec = (recommendation || '').trim();
+  if (!dilemma || !dilemma.trim()) {
+    return rec;
+  }
+  const text = dilemma.trim().toLowerCase().replace(/[?!.]/g, ' ');
+  const words = text.split(/\s+/).filter(w => w.length > 1 && !STOP_WORDS.has(w));
+  const unique = [...new Set(words)];
+  const context = unique.slice(0, 4).join(' ');
+  const query = context ? `${context} ${rec}`.trim() : rec;
+  return query.slice(0, 100);
 }

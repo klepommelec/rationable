@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -76,6 +76,7 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
   setCurrentDecisionId
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dilemmaTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isAnalysisStarting, setIsAnalysisStarting] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -117,6 +118,20 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
       toast.error('Erreur lors de l\'ouverture du template');
     }
   };
+  // Auto‑resize du textarea principal pour éviter que les longues questions soient tronquées
+  const autoResizeTextarea = () => {
+    const el = dilemmaTextareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    const minHeight = 160; // même base visuelle qu'avant
+    const nextHeight = Math.max(minHeight, el.scrollHeight);
+    el.style.height = `${nextHeight}px`;
+  };
+
+  useEffect(() => {
+    autoResizeTextarea();
+  }, [dilemma]);
+
   const handleFileButtonClick = () => {
     fileInputRef.current?.click();
   };
@@ -275,20 +290,24 @@ const DilemmaSetup: React.FC<DilemmaSetupProps> = ({
     }
   };
   return <div className="mx-auto space-y-6 w-full max-w-full overflow-x-hidden">
-            {/* Header principal occupant 90% de la hauteur de l'écran */}
-            <div className="h-[94vh] flex items-center justify-center">
+      {/* Hero principal : sans hauteur forcée pour que le reste de la page suive la hauteur du titre */}
+            <div className="flex items-start justify-center pt-20 pb-12">
                 <Card className="backdrop-blur-sm relative w-full max-w-3xl border-none shadow-none bg-transparent mt-10">
                     <CardContent className="flex flex-col gap-16 px-4 sm:px-6 pt-6">
                         <div className="space-y-2">
                             <div className="relative h-fit min-h-[280px]">
-                                <Textarea id="dilemma-input" placeholder="" value={dilemma} onChange={e => setDilemma(e.target.value)} onKeyDown={e => {
+                                <Textarea id="dilemma-input" ref={dilemmaTextareaRef} placeholder="" value={dilemma} onChange={e => {
+              setDilemma(e.target.value);
+              // Adapter la hauteur à mesure que l'utilisateur tape
+              autoResizeTextarea();
+            }} onKeyDown={e => {
                 if (e.key === 'Enter' && e.ctrlKey || e.key === 'Enter') {
                   if (!isMainButtonDisabled) {
                     e.preventDefault();
                     handleAnalysisClick();
                   }
                 }
-              }} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`rounded-none pulsing-glow focus:ring-cyan-500 font-semibold text-[56px] leading-tight h-[160px] resize-none pr-20 transition-colors bg-transparent border-0 shadow-none ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-over' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
+              }} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`rounded-none pulsing-glow focus:ring-cyan-500 font-semibold text-[56px] leading-tight min-h-[160px] resize-none pr-20 pb-20 transition-colors bg-transparent border-0 shadow-none ${isDragOver ? 'border-primary bg-primary/5 border-2 border-dashed drag-over' : ''}`} disabled={isLoading || isUpdating || analysisStep === 'done'} aria-describedby="dilemma-help" aria-invalid={dilemma.trim() === '' ? 'true' : 'false'} />
                                 {dilemma === '' && !isDragOver && <div className="absolute top-0 left-3 pt-2 pointer-events-none">
                                         <span className="text-muted-foreground text-[56px] leading-none block">
                                             <AnimatedPlaceholder interval={2500} tightLineHeight />

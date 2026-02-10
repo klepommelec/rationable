@@ -410,7 +410,10 @@ export const CommentsPanel: React.FC<CommentsPanelProps> = ({
           <span className="text-sm font-medium text-muted-foreground">({displayCount})</span>
         </>
       ) : (
-        <span className="font-medium">{t('comments.section.addButton')}</span>
+        <>
+          <MessageSquare className="h-4 w-4 shrink-0" />
+          <span className="font-medium">{t('comments.section.addButton')}</span>
+        </>
       )}
     </Button>
   );

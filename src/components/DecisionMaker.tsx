@@ -17,11 +17,20 @@ import { useI18nUI } from '@/contexts/I18nUIContext';
 import { useRealTimeSearchSettings } from '@/hooks/useRealTimeSearchSettings';
 import { useAuth } from '@/hooks/useAuth';
 import { CommentsPanel, type CommentsSummary } from './comments/CommentsPanel';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Calendar } from '@/components/ui/calendar';
+import { CalendarClock } from 'lucide-react';
+import { format } from 'date-fns';
 // Composant principal pour la prise de décision unifiée
 const DecisionMaker = () => {
-  const {
-    t
-  } = useI18nUI();
+  const { t, getDateFnsLocale } = useI18nUI();
   
   const { realTimeSearchEnabled } = useRealTimeSearchSettings();
   
@@ -93,6 +102,18 @@ const DecisionMaker = () => {
   const [commentsCount, setCommentsCount] = React.useState(0);
   const [commentsOpen, setCommentsOpen] = React.useState(false);
   const [commentsSummary, setCommentsSummary] = React.useState<CommentsSummary | null>(null);
+
+  // Modale date limite (deadlineDate = valeur enregistrée, draftDeadlineDate = en cours dans la modale)
+  const [deadlineModalOpen, setDeadlineModalOpen] = React.useState(false);
+  const [deadlineDate, setDeadlineDate] = React.useState<Date | undefined>(undefined);
+  const [draftDeadlineDate, setDraftDeadlineDate] = React.useState<Date | undefined>(undefined);
+
+  // À l'ouverture de la modale, initialiser le brouillon avec la valeur enregistrée
+  React.useEffect(() => {
+    if (deadlineModalOpen) {
+      setDraftDeadlineDate(deadlineDate);
+    }
+  }, [deadlineModalOpen, deadlineDate]);
   
   // Fonction pour gérer la création manuelle des options
   const handleManualOptionsCreated = (options: any[]) => {
@@ -538,8 +559,76 @@ const DecisionMaker = () => {
                   variant="inline"
                   inlineTargetId="comments-inline-root"
                 />
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2 h-9 px-3 py-1"
+                  onClick={() => setDeadlineModalOpen(true)}
+                >
+                  <CalendarClock className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span className="font-medium truncate max-w-[200px]">
+                    {deadlineDate
+                      ? format(deadlineDate, 'd MMM yyyy', { locale: getDateFnsLocale() })
+                      : t('deadline.addButton')}
+                  </span>
+                </Button>
               </div>
             )}
+
+            {/* Modale date limite */}
+            <Dialog open={deadlineModalOpen} onOpenChange={setDeadlineModalOpen}>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>{t('deadline.modalTitle')}</DialogTitle>
+                </DialogHeader>
+                <div className="flex justify-center py-2">
+                  <Calendar
+                    mode="single"
+                    selected={draftDeadlineDate}
+                    onSelect={setDraftDeadlineDate}
+                    locale={getDateFnsLocale()}
+                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                  />
+                </div>
+                {draftDeadlineDate && (
+                  <p className="text-sm text-muted-foreground text-center">
+                    {format(draftDeadlineDate, 'PPP', { locale: getDateFnsLocale() })}
+                  </p>
+                )}
+                <DialogFooter className="flex-wrap gap-2 sm:justify-between">
+                  {draftDeadlineDate ? (
+                    <Button
+                      variant="ghost"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => setDraftDeadlineDate(undefined)}
+                    >
+                      {t('deadline.remove')}
+                    </Button>
+                  ) : (
+                    <span />
+                  )}
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setDeadlineModalOpen(false)}>
+                      {t('common.cancel')}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setDeadlineDate(draftDeadlineDate);
+                        if (draftDeadlineDate) {
+                          toast.success(
+                            t('deadline.addButton') + ' : ' + format(draftDeadlineDate, 'PPP', { locale: getDateFnsLocale() })
+                          );
+                        } else {
+                          toast.success(t('deadline.remove'));
+                        }
+                        setDeadlineModalOpen(false);
+                      }}
+                    >
+                      {t('deadline.confirm')}
+                    </Button>
+                  </div>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </>}
 
         {displayStep === 'idle' && <DilemmaSetup dilemma={dilemma} setDilemma={setDilemma} analysisStep={analysisStep} setAnalysisStep={setAnalysisStep} isLoading={isLoading} isUpdating={isUpdating} applyTemplate={applyTemplate} clearSession={clearAll} clearAnalyses={clearAnalyses} history={history} loadDecision={loadDecisionWithThread} deleteDecision={deleteDecision} clearHistory={clearHistory} handleStartAnalysis={handleStartAnalysis} progress={progress} progressMessage={progressMessage} setProgressMessage={setProgressMessage} templates={templates} selectedCategory={selectedCategory} onCategoryChange={handleCategoryChange} onUpdateCategory={handleUpdateCategory} uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} addDecision={addDecision} setCurrentDecisionId={setCurrentDecisionId} />}

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useLayoutEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Edit2, Check, X } from 'lucide-react';
@@ -19,35 +19,39 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(title);
   const [initialHeight, setInitialHeight] = useState<number | null>(null);
+  const [contentHeight, setContentHeight] = useState<number | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const h1Ref = useRef<HTMLHeadingElement>(null);
-  
-  useEffect(() => {
-    if (isEditing && textareaRef.current && h1Ref.current && initialHeight !== null) {
-      // Fixer la hauteur du h1 pour éviter que les éléments en dessous bougent
-      h1Ref.current.style.height = `${initialHeight}px`;
-      h1Ref.current.style.minHeight = `${initialHeight}px`;
-      h1Ref.current.style.maxHeight = `${initialHeight}px`;
-      
+
+  useLayoutEffect(() => {
+    if (isEditing && textareaRef.current && h1Ref.current && initialHeight !== null && contentHeight !== null) {
       textareaRef.current.focus();
       textareaRef.current.select();
-      // Limiter le textarea à la hauteur du h1, avec scroll si nécessaire
-      textareaRef.current.style.height = `${initialHeight}px`;
-      textareaRef.current.style.maxHeight = `${initialHeight}px`;
+      textareaRef.current.style.minHeight = `${contentHeight}px`;
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.maxHeight = '';
     }
-  }, [isEditing, initialHeight]);
-  
-  useEffect(() => {
-    if (isEditing && textareaRef.current && initialHeight !== null) {
-      // Le textarea garde sa hauteur fixe, le scroll gère le contenu qui dépasse
-      // Pas besoin de recalculer la hauteur
+  }, [isEditing, initialHeight, contentHeight]);
+
+  // Ajuster la hauteur du textarea au contenu pour un surlignage cohérent
+  useLayoutEffect(() => {
+    if (isEditing && textareaRef.current && contentHeight !== null) {
+      const ta = textareaRef.current;
+      ta.style.height = 'auto';
+      ta.style.height = `${Math.max(contentHeight, ta.scrollHeight)}px`;
     }
-  }, [editValue, isEditing, initialHeight]);
+  }, [editValue, isEditing, contentHeight]);
+
   const handleStartEdit = () => {
     if (disabled) return;
-    // Mesurer la hauteur avant de passer en mode édition
     if (h1Ref.current) {
-      setInitialHeight(h1Ref.current.offsetHeight);
+      const el = h1Ref.current;
+      const full = el.offsetHeight;
+      const cs = getComputedStyle(el);
+      const padT = parseFloat(cs.paddingTop);
+      const padB = parseFloat(cs.paddingBottom);
+      setInitialHeight(full);
+      setContentHeight(full - padT - padB);
     }
     setEditValue(title);
     setIsEditing(true);
@@ -66,8 +70,13 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
       h1Ref.current.style.minHeight = '';
       h1Ref.current.style.maxHeight = '';
     }
+    if (textareaRef.current) {
+      textareaRef.current.style.height = '';
+      textareaRef.current.style.minHeight = '';
+    }
     setIsEditing(false);
     setInitialHeight(null);
+    setContentHeight(null);
   };
   const handleCancel = () => {
     setEditValue(title);
@@ -77,8 +86,13 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
       h1Ref.current.style.minHeight = '';
       h1Ref.current.style.maxHeight = '';
     }
+    if (textareaRef.current) {
+      textareaRef.current.style.height = '';
+      textareaRef.current.style.minHeight = '';
+    }
     setIsEditing(false);
     setInitialHeight(null);
+    setContentHeight(null);
   };
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -89,51 +103,64 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
     }
   };
   if (isEditing) {
-    return <h1 
-      ref={h1Ref}
-      className={`${className} relative pt-2 pb-2`} 
-      style={{ 
-        paddingLeft: '0px', 
-        paddingRight: '0px',
-        overflow: 'hidden'
-      }}
-    >
-      <textarea 
-        ref={textareaRef} 
-        value={editValue} 
-        onChange={e => setEditValue(e.target.value)} 
-        onKeyDown={handleKeyDown} 
-        className="w-full bg-transparent border-0 text-inherit font-inherit resize-none outline-none p-0 m-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" 
+    return (
+      <h1
+        ref={h1Ref}
+        className={`${className} relative pt-2 pb-2 w-full`}
         style={{
-          fontSize: 'inherit',
-          lineHeight: 'inherit',
-          fontFamily: 'inherit',
-          fontWeight: 'inherit',
-          padding: 0,
-          margin: 0,
-          border: 'none',
-          borderRadius: 0,
-          boxShadow: 'none',
-          outline: 'none',
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          appearance: 'none',
-          WebkitAppearance: 'none',
-          MozAppearance: 'none'
-        }} 
-        rows={1} 
-      />
-    </h1>;
+          paddingLeft: '0px',
+          paddingRight: '0px',
+          minHeight: initialHeight !== null ? initialHeight : undefined,
+          boxSizing: 'border-box',
+        }}
+      >
+        <textarea
+          ref={textareaRef}
+          value={editValue}
+          onChange={e => setEditValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="w-full min-w-0 bg-transparent border-0 text-inherit font-inherit resize-none outline-none p-0 m-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 block box-border"
+          style={{
+            fontSize: 'inherit',
+            lineHeight: 'inherit',
+            fontFamily: 'inherit',
+            fontWeight: 'inherit',
+            padding: 0,
+            margin: 0,
+            border: 'none',
+            borderRadius: 0,
+            boxShadow: 'none',
+            outline: 'none',
+            overflow: 'hidden',
+            overflowWrap: 'break-word',
+            minHeight: contentHeight !== null ? `${contentHeight}px` : undefined,
+            appearance: 'none',
+            WebkitAppearance: 'none',
+            MozAppearance: 'none',
+          }}
+          rows={1}
+        />
+      </h1>
+    );
   }
-  
-  return <h1 
-    ref={h1Ref}
-    className={`${className} group pt-2 pb-2`} 
-    style={{ paddingLeft: '0px', paddingRight: '0px' }}
-  >
+
+  return (
+    <h1
+      ref={h1Ref}
+      className={`${className} group pt-2 pb-2`}
+      style={{ paddingLeft: '0px', paddingRight: '0px' }}
+    >
       {title}
-      {!disabled && <Button variant="ghost" size="sm" onClick={handleStartEdit} className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 shrink-0 ml-4 mt-0 mb-0 align-middle inline-flex items-center justify-center bg-white border border-border rounded-full hover:bg-gray-50">
+      {!disabled && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleStartEdit}
+          className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 shrink-0 ml-4 mt-0 mb-0 align-middle inline-flex items-center justify-center bg-white border border-border rounded-full hover:bg-gray-50"
+        >
           <Edit2 className="h-4 w-4" />
-        </Button>}
-    </h1>;
+        </Button>
+      )}
+    </h1>
+  );
 };
