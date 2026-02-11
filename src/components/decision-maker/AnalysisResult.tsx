@@ -70,9 +70,9 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   const hasMultipleOptions = result.breakdown && result.breakdown.length > 1;
   const allOptions = result.breakdown || [];
 
-  // Affichage unifié pour tous les types de questions
+  // Affichage unifié pour tous les types de questions (même wrapper que OptionsLoadingSkeleton pour alignement padding/margin)
   return (
-    <div className="space-y-6 animate-fade-in pt-6">
+    <div className="w-full max-w-full space-y-6 animate-fade-in pt-6">
       {/* Indicateur de sources et mise à jour (optionnel : rendu au-dessus dans DecisionMaker) */}
       {showDataAccuracyIndicator && (
         <DataAccuracyIndicator result={result} currentDecision={currentDecision} />

@@ -10,6 +10,32 @@ import { getLanguagePrompts } from '@/utils/languageDetection';
 
 const aiService = AIProviderService.getInstance();
 
+/** Cache en mémoire pour les résultats de génération d'options (dilemma + critères). TTL 24h. */
+const OPTIONS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const optionsGenerationCache = new Map<string, { result: IResult; timestamp: number }>();
+
+const getOptionsCacheKey = (dilemma: string, criteriaList: string, language?: string, workspaceId?: string): string => {
+  return [dilemma.trim().toLowerCase(), criteriaList, language ?? '', workspaceId ?? ''].join('|');
+};
+
+const getCachedOptions = (key: string): IResult | null => {
+  const entry = optionsGenerationCache.get(key);
+  if (!entry || Date.now() - entry.timestamp > OPTIONS_CACHE_TTL_MS) {
+    if (entry) optionsGenerationCache.delete(key);
+    return null;
+  }
+  console.log('✅ Options cache hit');
+  return entry.result;
+};
+
+const setCachedOptions = (key: string, result: IResult): void => {
+  optionsGenerationCache.set(key, { result, timestamp: Date.now() });
+  if (optionsGenerationCache.size > 100) {
+    const oldest = [...optionsGenerationCache.entries()].sort((a, b) => a[1].timestamp - b[1].timestamp)[0];
+    if (oldest) optionsGenerationCache.delete(oldest[0]);
+  }
+};
+
 const cleanAIResponse = (text: string): string => {
   if (!text) return text;
   
@@ -342,47 +368,34 @@ export const generateOptionsWithFallback = async (
     return generateManualOptions(dilemma, criteria, language);
   }
 
+  const criteriaList = criteria.map(c => c.name).join(', ');
+
+  // Cache : retourner le résultat en cache si même dilemma + critères (sans fichiers)
+  if (!files?.length) {
+    const cacheKey = getOptionsCacheKey(dilemma, criteriaList, language, workspaceId);
+    const cached = getCachedOptions(cacheKey);
+    if (cached) return cached;
+  }
+
   // Déterminer le type de question en utilisant le service de classification
   const questionType = await detectQuestionType(dilemma);
   console.log(`🎯 Question type determined: ${questionType}`);
-
-  const criteriaList = criteria.map(c => c.name).join(', ');
   
-  // Vérifier si on a besoin de données externes (temps réel ou factuelles)
+  // Paralléliser : données externes et documents workspace en même temps
   const needsExternalData = detectExternalDataNeeded(dilemma, realTimeSearchEnabled);
-  let realTimeContext = '';
-  let realTimeData = null;
 
-  if (needsExternalData) {
+  const fetchExternalData = async (): Promise<{ realTimeContext: string; realTimeData: any }> => {
+    if (!needsExternalData) return { realTimeContext: '', realTimeData: null };
     console.log('🔍 External data needed, using search providers...');
-    
-    // Déterminer le contexte de recherche approprié
     let searchContext = 'Informations actuelles et vérifiées';
-    
-    // Context spécifique selon le type de question
-    if (/exposition|musée|galerie/i.test(dilemma)) {
-      searchContext = 'Expositions actuelles et événements culturels';
-    } else if (/sport|football|NBA|tennis|championnat/i.test(dilemma)) {
-      searchContext = 'Résultats sportifs récents et compétitions actuelles';
-    } else if (/qui a gagné|vainqueur|gagnant|résultat/i.test(dilemma)) {
-      searchContext = 'Résultats récents et informations vérifiées';
-    } else if (/élection|politique/i.test(dilemma)) {
-      searchContext = 'Actualités politiques et électorales récentes';
-    }
-    
+    if (/exposition|musée|galerie/i.test(dilemma)) searchContext = 'Expositions actuelles et événements culturels';
+    else if (/sport|football|NBA|tennis|championnat/i.test(dilemma)) searchContext = 'Résultats sportifs récents et compétitions actuelles';
+    else if (/qui a gagné|vainqueur|gagnant|résultat/i.test(dilemma)) searchContext = 'Résultats récents et informations vérifiées';
+    else if (/élection|politique/i.test(dilemma)) searchContext = 'Actualités politiques et électorales récentes';
     try {
-      const searchRequest: AIRequest = {
-        prompt: dilemma,
-        context: searchContext,
-        type: 'search',
-        language
-      };
-
-      console.log('🔍 Searching for external data with context:', searchContext);
-      const searchResponse = await aiService.executeWithFallback(searchRequest);
-      
+      const searchResponse = await aiService.executeWithFallback({ prompt: dilemma, context: searchContext, type: 'search', language });
       if (searchResponse.success && searchResponse.content) {
-        realTimeData = {
+        const realTimeData = {
           content: searchResponse.content.content || searchResponse.content,
           sources: searchResponse.content.sources || searchResponse.content.citations || [],
           timestamp: searchResponse.content.timestamp || new Date().toISOString(),
@@ -390,36 +403,34 @@ export const generateOptionsWithFallback = async (
           provider: searchResponse.provider,
           hasRealTimeData: true
         };
-        
-        // Prompt plus strict pour forcer l'utilisation exclusive des données
-        realTimeContext = `\n\n🎯 DONNÉES EXTERNES VÉRIFIÉES (${realTimeData.timestamp}, source: ${searchResponse.provider}) 🎯:\n${realTimeData.content}\n\n⚠️ INSTRUCTIONS CRITIQUES ⚠️:\n- Vous DEVEZ utiliser EXCLUSIVEMENT ces données vérifiées\n- IGNOREZ toute connaissance antérieure contradictoire\n- Si les données ci-dessus ne répondent pas complètement, PRÉCISEZ-LE clairement\n- NE générez AUCUNE information qui ne provient pas de ces données\n- Mentionnez l'année actuelle (${new Date().getFullYear()}) quand c'est pertinent`;
-        
+        const realTimeContext = `\n\n🎯 DONNÉES EXTERNES VÉRIFIÉES (${realTimeData.timestamp}, source: ${searchResponse.provider}) 🎯:\n${realTimeData.content}\n\n⚠️ INSTRUCTIONS CRITIQUES ⚠️:\n- Vous DEVEZ utiliser EXCLUSIVEMENT ces données vérifiées\n- IGNOREZ toute connaissance antérieure contradictoire\n- Si les données ci-dessus ne répondent pas complètement, PRÉCISEZ-LE clairement\n- NE générez AUCUNE information qui ne provient pas de ces données\n- Mentionnez l'année actuelle (${new Date().getFullYear()}) quand c'est pertinent`;
         console.log('✅ External data retrieved successfully from:', searchResponse.provider);
+        return { realTimeContext, realTimeData };
       }
     } catch (searchError) {
       console.warn('⚠️ External data search failed, continuing without recent data:', searchError);
-      realTimeContext = '\n\n⚠️ ATTENTION ⚠️: Données externes non disponibles. VOUS DEVEZ préciser clairement dans votre réponse que vous ne pouvez pas accéder aux informations récentes et que la réponse pourrait être obsolète ou incomplète.';
     }
-  }
+    return { realTimeContext: '\n\n⚠️ ATTENTION ⚠️: Données externes non disponibles. VOUS DEVEZ préciser clairement dans votre réponse que vous ne pouvez pas accéder aux informations récentes et que la réponse pourrait être obsolète ou incomplète.', realTimeData: null };
+  };
 
-  // Récupérer les documents du workspace (avec filtrage de pertinence amélioré)
-  let workspaceContext = '';
-  let workspaceDocuments = [];
-  
-  if (workspaceId) {
+  const fetchWorkspaceContext = async (): Promise<{ workspaceContext: string; workspaceDocuments: any[] }> => {
+    if (!workspaceId) return { workspaceContext: '', workspaceDocuments: [] };
     console.log('📚 Fetching workspace documents for options generation...');
-    workspaceDocuments = await getWorkspaceDocumentsForAnalysis(workspaceId, dilemma);
-    
-    if (workspaceDocuments.length > 0) {
-      const relevantContent = searchRelevantContent(workspaceDocuments, dilemma, 15);
-      if (relevantContent) {
-        workspaceContext = `\n\n${relevantContent}`;
-        console.log(`✅ Using ${workspaceDocuments.length} relevant workspace documents for analysis`);
-      }
-    } else {
+    const workspaceDocuments = await getWorkspaceDocumentsForAnalysis(workspaceId, dilemma);
+    if (workspaceDocuments.length === 0) {
       console.log('📝 No relevant workspace documents found for this query');
+      return { workspaceContext: '', workspaceDocuments: [] };
     }
-  }
+    const relevantContent = searchRelevantContent(workspaceDocuments, dilemma, 15);
+    const workspaceContext = relevantContent ? `\n\n${relevantContent}` : '';
+    if (workspaceContext) console.log(`✅ Using ${workspaceDocuments.length} relevant workspace documents for analysis`);
+    return { workspaceContext, workspaceDocuments };
+  };
+
+  const [{ realTimeContext, realTimeData }, { workspaceContext, workspaceDocuments }] = await Promise.all([
+    fetchExternalData(),
+    fetchWorkspaceContext()
+  ]);
   
   // Get language-specific prompts
   const languagePrompts = getLanguagePrompts(language);
@@ -470,111 +481,16 @@ ${files.map(f => `- ${f.fileName} (${f.fileType})`).join('\n')}
 ${analyzeText}`;
   }
 
-  // Create localized response format instructions
-  const responseInstructions = language === 'fr' ? 
-    `IMPORTANT: Vous DEVEZ générer entre 6 et 8 options distinctes et de qualité avec des scores différents (pas tous identiques).
-
-Retournez un objet JSON avec:
-1. "recommendation": La meilleure option recommandée (texte court)
-2. "description": Explication détaillée de pourquoi cette option est recommandée
-3. "imageQuery": Description pour générer une image (en anglais, très descriptive)
-4. "confidenceLevel": Niveau de confiance de l'analyse (1-100)
-5. "dataFreshness": Fraîcheur des données utilisées ("very-fresh", "fresh", "moderate", "stale")
-6. "infoLinks": Tableau de 3-5 liens utiles avec "title" et "url" (obligatoire)
-7. "shoppingLinks": Tableau de 2-3 liens d'achat avec "title" et "url" (obligatoire)
-8. "breakdown": Tableau de 6-8 objets avec:
-   - "option": Nom de l'option (différent pour chaque option)
-   - "description": Description courte de 2-3 lignes expliquant cette option (obligatoire, 100-200 caractères)
-   - "pros": Tableau des avantages spécifiques
-   - "cons": Tableau des inconvénients spécifiques
-   - "score": Note sur 100 (VARIEZ les scores: 85-95 pour la meilleure, 70-84 pour les bonnes, 50-69 pour les moyennes)
-
-Générez des options concrètes et pertinentes avec des scores réalistes et variés. Évitez les options génériques sans valeur.
-
-Répondez UNIQUEMENT avec un objet JSON valide.` :
-    language === 'en' ? 
-    `IMPORTANT: You MUST generate between 6 and 8 distinct quality options with different scores (not all identical).
-
-Return a JSON object with:
-1. "recommendation": The best recommended option (short text)
-2. "description": Detailed explanation of why this option is recommended
-3. "imageQuery": Description to generate an image (in English, very descriptive)
-4. "confidenceLevel": Analysis confidence level (1-100)
-5. "dataFreshness": Freshness of data used ("very-fresh", "fresh", "moderate", "stale")
-6. "infoLinks": Array of 3-5 useful links with "title" and "url" (mandatory)
-7. "shoppingLinks": Array of 2-3 purchase links with "title" and "url" (mandatory)
-8. "breakdown": Array of 6-8 objects with:
-   - "option": Option name (different for each option)
-   - "description": Short 2-3 line description explaining this option (mandatory, 100-200 characters)
-   - "pros": Array of specific advantages
-   - "cons": Array of specific disadvantages
-   - "score": Score out of 100 (VARY scores: 85-95 for best, 70-84 for good, 50-69 for average)
-
-Generate concrete and relevant options with realistic and varied scores. Avoid generic options without value.
-
-Respond ONLY with a valid JSON object.` :
+  // Instructions de réponse allégées : 4-6 options, liens optionnels (une seule langue selon language)
+  const responseInstructions = language === 'fr' ?
+    `Générez entre 4 et 6 options distinctes avec des scores variés. JSON avec: "recommendation", "description", "confidenceLevel" (1-100), "dataFreshness" ("very-fresh"|"fresh"|"moderate"|"stale"), "infoLinks" et "shoppingLinks" (optionnels, tableaux avec "title"/"url"), "breakdown": tableau de 4-6 objets avec "option", "description" (2-3 lignes), "pros", "cons", "score" (85-95 meilleure, 70-84 bonnes, 50-69 moyennes). Répondez UNIQUEMENT en JSON valide.` :
+    language === 'en' ?
+    `Generate 4 to 6 distinct options with varied scores. JSON with: "recommendation", "description", "confidenceLevel" (1-100), "dataFreshness" ("very-fresh"|"fresh"|"moderate"|"stale"), "infoLinks" and "shoppingLinks" (optional, arrays with "title"/"url"), "breakdown": array of 4-6 objects with "option", "description" (2-3 lines), "pros", "cons", "score" (85-95 best, 70-84 good, 50-69 average). Respond ONLY with valid JSON.` :
     language === 'es' ?
-    `IMPORTANTE: DEBES generar entre 6 y 8 opciones distintas de calidad con puntuaciones diferentes (no todas idénticas).
-
-Devuelve un objeto JSON con:
-1. "recommendation": La mejor opción recomendada (texto corto)
-2. "description": Explicación detallada de por qué se recomienda esta opción
-3. "imageQuery": Descripción para generar una imagen (en inglés, muy descriptiva)
-4. "confidenceLevel": Nivel de confianza del análisis (1-100)
-5. "dataFreshness": Frescura de los datos utilizados ("very-fresh", "fresh", "moderate", "stale")
-6. "infoLinks": Array de 3-5 enlaces útiles con "title" y "url" (obligatorio)
-7. "shoppingLinks": Array de 2-3 enlaces de compra con "title" y "url" (obligatorio)
-8. "breakdown": Array de 6-8 objetos con:
-   - "option": Nombre de la opción (diferente para cada opción)
-   - "description": Descripción corta de 2-3 líneas explicando esta opción (obligatorio, 100-200 caracteres)
-   - "pros": Array de ventajas específicas
-   - "cons": Array de desventajas específicas
-   - "score": Puntuación sobre 100 (VARIA las puntuaciones: 85-95 para la mejor, 70-84 para las buenas, 50-69 para las promedio)
-
-Genera opciones concretas y relevantes con puntuaciones realistas y variadas. Evita opciones genéricas sin valor.
-
-Responde ÚNICAMENTE con un objeto JSON válido.` :
+    `Genera 4 a 6 opciones distintas con puntuaciones variadas. JSON con: "recommendation", "description", "confidenceLevel" (1-100), "dataFreshness", "infoLinks" y "shoppingLinks" (opcionales), "breakdown": array de 4-6 objetos con "option", "description", "pros", "cons", "score". Responde ÚNICAMENTE en JSON válido.` :
     language === 'it' ?
-    `IMPORTANTE: DEVI generare tra 6 e 8 opzioni distinte di qualità con punteggi diversi (non tutti identici).
-
-Restituisci un oggetto JSON con:
-1. "recommendation": La migliore opzione raccomandata (testo breve)
-2. "description": Spiegazione dettagliata del perché questa opzione è raccomandata
-3. "imageQuery": Descrizione per generare un'immagine (in inglese, molto descrittiva)
-4. "confidenceLevel": Livello di fiducia dell'analisi (1-100)
-5. "dataFreshness": Freschezza dei dati utilizzati ("very-fresh", "fresh", "moderate", "stale")
-6. "infoLinks": Array di 3-5 link utili con "title" e "url" (obbligatorio)
-7. "shoppingLinks": Array di 2-3 link di acquisto con "title" e "url" (obbligatorio)
-8. "breakdown": Array di 6-8 oggetti con:
-   - "option": Nome dell'opzione (diverso per ogni opzione)
-   - "description": Descrizione breve di 2-3 righe che spiega questa opzione (obbligatorio, 100-200 caratteri)
-   - "pros": Array di vantaggi specifici
-   - "cons": Array di svantaggi specifici
-   - "score": Punteggio su 100 (VARIA i punteggi: 85-95 per il migliore, 70-84 per i buoni, 50-69 per la media)
-
-Genera opzioni concrete e pertinenti con punteggi realistici e variati. Evita opzioni generiche senza valore.
-
-Rispondi SOLO con un oggetto JSON valido.` :
-    `WICHTIG: Sie MÜSSEN zwischen 6 und 8 unterschiedliche Qualitätsoptionen mit verschiedenen Bewertungen generieren (nicht alle identisch).
-
-Geben Sie ein JSON-Objekt zurück mit:
-1. "recommendation": Die beste empfohlene Option (kurzer Text)
-2. "description": Detaillierte Erklärung, warum diese Option empfohlen wird
-3. "imageQuery": Beschreibung zur Bildgenerierung (auf Englisch, sehr beschreibend)
-4. "confidenceLevel": Vertrauensniveau der Analyse (1-100)
-5. "dataFreshness": Aktualität der verwendeten Daten ("very-fresh", "fresh", "moderate", "stale")
-6. "infoLinks": Array von 3-5 nützlichen Links mit "title" und "url" (obligatorisch)
-7. "shoppingLinks": Array von 2-3 Einkaufslinks mit "title" und "url" (obligatorisch)
-8. "breakdown": Array von 6-8 Objekten mit:
-   - "option": Optionsname (unterschiedlich für jede Option)
-   - "description": Kurze 2-3 Zeilen Beschreibung, die diese Option erklärt (obligatorisch, 100-200 Zeichen)
-   - "pros": Array spezifischer Vorteile
-   - "cons": Array spezifischer Nachteile
-   - "score": Bewertung von 100 (VARIIEREN Sie die Bewertungen: 85-95 für die beste, 70-84 für gute, 50-69 für durchschnittliche)
-
-Generieren Sie konkrete und relevante Optionen mit realistischen und varierten Bewertungen. Vermeiden Sie generische Optionen ohne Wert.
-
-Antworten Sie NUR mit einem gültigen JSON-Objekt.`;
+    `Genera 4-6 opzioni distinte con punteggi variati. JSON con: "recommendation", "description", "confidenceLevel", "dataFreshness", "infoLinks" e "shoppingLinks" (opzionali), "breakdown": array di 4-6 oggetti con "option", "description", "pros", "cons", "score". Rispondi SOLO con JSON valido.` :
+    `Generieren Sie 4-6 Optionen mit variierten Bewertungen. JSON mit: "recommendation", "description", "confidenceLevel", "dataFreshness", "infoLinks" und "shoppingLinks" (optional), "breakdown": Array mit 4-6 Objekten mit "option", "description", "pros", "cons", "score". Antworten Sie NUR mit gültigem JSON.`;
 
   // Use the complete localized instruction from languagePrompts
   prompt += `
@@ -689,7 +605,8 @@ ${responseInstructions}`;
     } catch (socialError) {
       console.error('❌ Social content fetch failed:', socialError);
     }
-    
+
+    if (!files?.length) setCachedOptions(getOptionsCacheKey(dilemma, criteriaList, language, workspaceId), result);
     return result;
   } catch (error) {
     console.error('❌ All providers failed for options generation:', error);

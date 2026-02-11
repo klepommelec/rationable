@@ -28,7 +28,7 @@ export const ExpandableText: React.FC<ExpandableTextProps> = ({
   }, [text]);
   const toggleExpanded = () => setIsExpanded(!isExpanded);
   return <div className={className}>
-      <p ref={textRef} className={`text-muted-foreground leading-relaxed break-words ${!isExpanded && shouldTruncate ? 'line-clamp-3' : ''}`}>
+      <p ref={textRef} className={`text-muted-foreground text-lg leading-relaxed break-words ${!isExpanded && shouldTruncate ? 'line-clamp-3' : ''}`}>
         {text}
       </p>
       {shouldTruncate && <button

@@ -7,7 +7,7 @@ import { useI18nUI } from '@/contexts/I18nUIContext';
 export const OptionsLoadingSkeleton = () => {
   const { t } = useI18nUI();
   return (
-    <div className="space-y-6 animate-fade-in pt-6">
+    <div className="w-full max-w-full space-y-6 animate-fade-in pt-6">
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <LoaderCircle className="h-5 w-5 animate-spin text-cyan-500 shrink-0" />

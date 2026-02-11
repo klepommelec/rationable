@@ -38,6 +38,8 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   const [expandedPros, setExpandedPros] = useState<Record<string, boolean>>({});
   const [expandedCons, setExpandedCons] = useState<Record<string, boolean>>({});
   const [expandedDescriptions, setExpandedDescriptions] = useState<Record<string, boolean>>({});
+  /** Détection réelle du débordement (scrollHeight > clientHeight) par option, pour n'afficher See more que si la description est tronquée. */
+  const [descriptionTruncated, setDescriptionTruncated] = useState<Record<string, boolean>>({});
   const [voteCounts, setVoteCounts] = useState<Record<string, number>>({});
   const [userVotes, setUserVotes] = useState<Record<string, boolean>>({});
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
@@ -46,7 +48,30 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const cardsWrapperRef = useRef<HTMLDivElement | null>(null);
+  const descriptionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const detectedLanguage = I18nService.getCurrentLanguage();
+
+  // Détecter si chaque description est réellement tronquée (overflow) pour afficher See more uniquement dans ce cas
+  useEffect(() => {
+    const checkTruncation = () => {
+      setDescriptionTruncated((prev) => {
+        const next = { ...prev };
+        for (const key of Object.keys(descriptionRefs.current)) {
+          const el = descriptionRefs.current[key];
+          if (el) {
+            next[key] = el.scrollHeight > el.clientHeight;
+          }
+        }
+        return next;
+      });
+    };
+    const t = setTimeout(checkTruncation, 0);
+    window.addEventListener('resize', checkTruncation);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener('resize', checkTruncation);
+    };
+  }, [breakdown, expandedDescriptions, viewMode]);
   
   // Ajouter/retirer la classe sur body et les conteneurs pour le fallback CSS
   useEffect(() => {
@@ -235,30 +260,34 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
     loadVotingData();
   }, [showVoting, decisionId, user, breakdown]);
 
-  // Calculer la hauteur maximale des cards pour uniformiser
+  // Calculer la hauteur maximale des cards pour uniformiser (après layout pour éviter des hauteurs à 0)
   useEffect(() => {
-    if (viewMode !== 'cards' || !cardRefs.current.length) return;
+    if (viewMode !== 'cards') return;
 
     const calculateMaxHeight = () => {
-      const heights = cardRefs.current
-        .filter(ref => ref !== null)
-        .map(ref => ref?.offsetHeight || 0);
-      
+      const refs = cardRefs.current;
+      const heights = refs
+        .filter((ref): ref is HTMLDivElement => ref !== null)
+        .map(ref => ref.offsetHeight || 0)
+        .filter(h => h > 0);
       if (heights.length > 0) {
-        const maxHeight = Math.max(...heights);
+        const maxHeight = Math.max(...heights, 380);
         setMaxCardHeight(maxHeight);
       }
     };
 
-    // Calculer après un court délai pour laisser le temps au rendu
-    const timeoutId = setTimeout(calculateMaxHeight, 100);
-    
-    // Recalculer lors du redimensionnement
-    window.addEventListener('resize', calculateMaxHeight);
-    
+    const runAfterLayout = () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(calculateMaxHeight);
+      });
+    };
+
+    const timeoutId = setTimeout(runAfterLayout, 150);
+    window.addEventListener('resize', runAfterLayout);
+
     return () => {
       clearTimeout(timeoutId);
-      window.removeEventListener('resize', calculateMaxHeight);
+      window.removeEventListener('resize', runAfterLayout);
     };
   }, [viewMode, breakdown, expandedPros, expandedCons, expandedDescriptions, actionLinks]);
 
@@ -435,33 +464,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                   </div>
                 </div>
 
-                {/* Description */}
-                {option.description && (
-                  <div className="text-sm text-muted-foreground">
-                    <div 
-                      className={`overflow-hidden transition-all ${
-                        expandedDescriptions[optionKey] 
-                          ? '' 
-                          : 'line-clamp-3'
-                      }`}
-                    >
-                      {option.description}
-                    </div>
-                    {option.description.length > 100 && (
-                      <button
-                        onClick={() => toggleDescriptionExpansion(optionKey)}
-                        className="text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer mt-1"
-                      >
-                        {expandedDescriptions[optionKey] 
-                          ? t('decision.seeLess') 
-                          : t('decision.seeMore') || 'See more'
-                        }
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                {/* Bouton de vote - en premier */}
+                {/* Bouton de vote - juste sous le titre */}
                 {showVoting && decisionId && user && (
                   <VoteButton
                     decisionId={decisionId}
@@ -473,10 +476,44 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                   />
                 )}
 
+                {/* Description */}
+                {option.description && (
+                  <div className="text-sm text-muted-foreground">
+                    <div 
+                      ref={(el) => {
+                        if (el) descriptionRefs.current[optionKey] = el;
+                        else delete descriptionRefs.current[optionKey];
+                      }}
+                      className={`overflow-hidden transition-all ${
+                        expandedDescriptions[optionKey] 
+                          ? '' 
+                          : 'line-clamp-3'
+                      }`}
+                    >
+                      {option.description}
+                    </div>
+                    {/* Toujours réserver l'espace See more (largeur 100 %) pour éviter le décalage de layout */}
+                    <div className="block w-full min-h-[1.25rem] mt-1">
+                      {(expandedDescriptions[optionKey] || descriptionTruncated[optionKey]) ? (
+                        <button
+                          onClick={() => toggleDescriptionExpansion(optionKey)}
+                          className="block w-full text-left text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer"
+                        >
+                          {expandedDescriptions[optionKey] 
+                            ? t('decision.seeLess') 
+                            : t('decision.seeMore') || 'See more'
+                          }
+                        </button>
+                      ) : (
+                        <span className="block w-full text-xs opacity-0" aria-hidden="true">{t('decision.seeMore') || 'See more'}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Avantages et Inconvénients en deux colonnes */}
                 {(option.pros?.length > 0 || option.cons?.length > 0) && (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4 mt-6">
                     {/* Avantages */}
                     {option.pros && option.pros.length > 0 && (
                       <div>
@@ -644,109 +681,122 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                     style={maxCardHeight ? { height: `${maxCardHeight}px` } : {}}
                   >
                     <div className="p-4 space-y-4 flex flex-col h-full" style={maxCardHeight ? { height: '100%' } : { minHeight: '100%' }}>
-                      {/* Header */}
-                      <div className="space-y-2 min-w-0">
-                        <h3 className="font-medium text-base leading-tight truncate">
-                          {option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
-                        </h3>
+                      {/* Bloc fixe (titre + vote + description) : ne rétrécit jamais, même avec hauteur de carte fixe */}
+                      <div className="flex-shrink-0 space-y-4 min-w-0">
+                        {/* Header */}
+                        <div className="space-y-2 min-w-0">
+                          <h3 className="font-medium text-base leading-tight truncate">
+                            {option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
+                          </h3>
+                        </div>
+
+                        {/* Bouton de vote - juste sous le titre */}
+                        {showVoting && decisionId && user && (
+                          <VoteButton
+                            decisionId={decisionId}
+                            optionName={option.option}
+                            initialVoteCount={voteCounts[option.option] || 0}
+                            initialHasVoted={userVotes[option.option] || false}
+                            onVoteChange={handleVoteChange}
+                            className="text-xs w-full h-7"
+                          />
+                        )}
+
+                        {/* Description */}
+                        {option.description && (
+                          <div className="text-sm text-muted-foreground">
+                            <div 
+                              ref={(el) => {
+                                if (el) descriptionRefs.current[optionKey] = el;
+                                else delete descriptionRefs.current[optionKey];
+                              }}
+                              className={`overflow-hidden transition-all ${
+                                expandedDescriptions[optionKey] 
+                                  ? '' 
+                                  : 'line-clamp-3'
+                              }`}
+                            >
+                              {option.description}
+                            </div>
+                            {/* Toujours réserver l'espace See more (largeur 100 %) pour éviter le décalage de layout */}
+                            <div className="block w-full min-h-[1.25rem] mt-1">
+                              {(expandedDescriptions[optionKey] || descriptionTruncated[optionKey]) ? (
+                                <button
+                                  onClick={() => toggleDescriptionExpansion(optionKey)}
+                                  className="block w-full text-left text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer"
+                                >
+                                  {expandedDescriptions[optionKey] 
+                                    ? t('decision.seeLess') 
+                                    : t('decision.seeMore') || 'See more'
+                                  }
+                                </button>
+                              ) : (
+                                <span className="block w-full text-xs opacity-0" aria-hidden="true">{t('decision.seeMore') || 'See more'}</span>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
 
-                      {/* Description */}
-                      {option.description && (
-                        <div className="text-sm text-muted-foreground">
-                          <div 
-                            className={`overflow-hidden transition-all ${
-                              expandedDescriptions[optionKey] 
-                                ? '' 
-                                : 'line-clamp-3'
-                            }`}
-                          >
-                            {option.description}
+                      {/* Zone scrollable Avantages + Inconvénients : garde les boutons d'action toujours visibles */}
+                      <div className="flex-1 min-h-0 flex flex-col overflow-y-auto mt-6">
+                        {option.pros && option.pros.length > 0 && (
+                          <div className="flex-shrink-0">
+                            <div className="text-xs font-semibold text-muted-foreground mb-2">
+                              {t('decision.advantages')}
+                            </div>
+                            <ul className="space-y-1.5">
+                              {(expandedPros[optionKey] ? option.pros : option.pros.slice(0, 4)).map((pro, proIndex) => (
+                                <li key={proIndex} className="text-xs text-muted-foreground flex items-start gap-2">
+                                  <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+                                  <span>{pro}</span>
+                                </li>
+                              ))}
+                              {option.pros.length > 4 && (
+                                <button
+                                  onClick={() => toggleProsExpansion(optionKey)}
+                                  className="text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer"
+                                >
+                                  {expandedPros[optionKey] 
+                                    ? t('decision.seeLess') 
+                                    : `+${option.pros.length - 4} more`
+                                  }
+                                </button>
+                              )}
+                            </ul>
                           </div>
-                          {option.description.length > 100 && (
-                            <button
-                              onClick={() => toggleDescriptionExpansion(optionKey)}
-                              className="text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer mt-1"
-                            >
-                              {expandedDescriptions[optionKey] 
-                                ? t('decision.seeLess') 
-                                : t('decision.seeMore') || 'See more'
-                              }
-                            </button>
-                          )}
-                        </div>
-                      )}
+                        )}
 
-                      {/* Bouton de vote */}
-                      {showVoting && decisionId && user && (
-                        <VoteButton
-                          decisionId={decisionId}
-                          optionName={option.option}
-                          initialVoteCount={voteCounts[option.option] || 0}
-                          initialHasVoted={userVotes[option.option] || false}
-                          onVoteChange={handleVoteChange}
-                          className="text-xs w-full h-7"
-                        />
-                      )}
-
-                      {/* Avantages */}
-                      {option.pros && option.pros.length > 0 && (
-                        <div className="flex-1">
-                          <div className="text-xs font-semibold text-muted-foreground mb-2">
-                            {t('decision.advantages')}
+                        {option.cons && option.cons.length > 0 && (
+                          <div className={`flex-shrink-0 ${option.pros?.length ? 'mt-4' : ''}`}>
+                            <div className="text-xs font-semibold text-muted-foreground mb-2">
+                              {t('decision.disadvantages')}
+                            </div>
+                            <ul className="space-y-1.5">
+                              {(expandedCons[optionKey] ? option.cons : option.cons.slice(0, 4)).map((con, conIndex) => (
+                                <li key={conIndex} className="text-xs text-muted-foreground flex items-start gap-2">
+                                  <XCircle className="h-3 w-3 text-red-500 mt-0.5 flex-shrink-0" />
+                                  <span>{con}</span>
+                                </li>
+                              ))}
+                              {option.cons.length > 4 && (
+                                <button
+                                  onClick={() => toggleConsExpansion(optionKey)}
+                                  className="text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer"
+                                >
+                                  {expandedCons[optionKey] 
+                                    ? t('decision.seeLess') 
+                                    : `+${option.cons.length - 4} more`
+                                  }
+                                </button>
+                              )}
+                            </ul>
                           </div>
-                          <ul className="space-y-1.5">
-                            {(expandedPros[optionKey] ? option.pros : option.pros.slice(0, 4)).map((pro, proIndex) => (
-                              <li key={proIndex} className="text-xs text-muted-foreground flex items-start gap-2">
-                                <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
-                                <span>{pro}</span>
-                              </li>
-                            ))}
-                            {option.pros.length > 4 && (
-                              <button
-                                onClick={() => toggleProsExpansion(optionKey)}
-                                className="text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer"
-                              >
-                                {expandedPros[optionKey] 
-                                  ? t('decision.seeLess') 
-                                  : `+${option.pros.length - 4} more`
-                                }
-                              </button>
-                            )}
-                          </ul>
-                        </div>
-                      )}
+                        )}
+                      </div>
 
-                      {/* Inconvénients */}
-                      {option.cons && option.cons.length > 0 && (
-                        <div className="flex-1">
-                          <div className="text-xs font-semibold text-muted-foreground mb-2">
-                            {t('decision.disadvantages')}
-                          </div>
-                          <ul className="space-y-1.5">
-                            {(expandedCons[optionKey] ? option.cons : option.cons.slice(0, 4)).map((con, conIndex) => (
-                              <li key={conIndex} className="text-xs text-muted-foreground flex items-start gap-2">
-                                <XCircle className="h-3 w-3 text-red-500 mt-0.5 flex-shrink-0" />
-                                <span>{con}</span>
-                              </li>
-                            ))}
-                            {option.cons.length > 4 && (
-                              <button
-                                onClick={() => toggleConsExpansion(optionKey)}
-                                className="text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer"
-                              >
-                                {expandedCons[optionKey] 
-                                  ? t('decision.seeLess') 
-                                  : `+${option.cons.length - 4} more`
-                                }
-                              </button>
-                            )}
-                          </ul>
-                        </div>
-                      )}
-
-                      {/* Action buttons */}
-                      <div className="flex flex-col gap-1.5 mt-auto pt-4 border-t">
+                      {/* Action buttons - fixe en bas, ne rétrécit pas */}
+                      <div className="flex flex-col gap-1.5 flex-shrink-0 mt-auto pt-4 border-t">
                         {/* Bouton Search */}
                         <Button 
                           variant="outline" 
@@ -853,35 +903,9 @@ className="text-xs w-full h-7 flex items-center justify-center gap-1.5 hover:und
                         {option.option.replace(/^Option\s+\d+:\s*/i, '').trim()}
                       </div>
                       
-                      {/* Description */}
-                      {option.description && (
-                        <div className="text-sm text-muted-foreground">
-                          <div 
-                            className={`overflow-hidden transition-all ${
-                              expandedDescriptions[optionKey] 
-                                ? '' 
-                                : 'line-clamp-3'
-                            }`}
-                          >
-                            {option.description}
-                          </div>
-                          {option.description.length > 100 && (
-                            <button
-                              onClick={() => toggleDescriptionExpansion(optionKey)}
-                              className="text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer mt-1"
-                            >
-                              {expandedDescriptions[optionKey] 
-                                ? t('decision.seeLess') 
-                                : t('decision.seeMore') || 'See more'
-                              }
-                            </button>
-                          )}
-                        </div>
-                      )}
-                      
-                      {/* Bouton de vote - en premier */}
+                      {/* Bouton de vote - juste sous le titre */}
                       {showVoting && decisionId && user && (
-                        <div className="mt-6 w-full">
+                        <div className="w-full">
                           <VoteButton
                             decisionId={decisionId}
                             optionName={option.option}
@@ -890,6 +914,41 @@ className="text-xs w-full h-7 flex items-center justify-center gap-1.5 hover:und
                             onVoteChange={handleVoteChange}
                             className="text-xs w-full h-7"
                           />
+                        </div>
+                      )}
+                      
+                      {/* Description */}
+                      {option.description && (
+                        <div className="text-sm text-muted-foreground">
+                          <div 
+                            ref={(el) => {
+                              if (el) descriptionRefs.current[optionKey] = el;
+                              else delete descriptionRefs.current[optionKey];
+                            }}
+                            className={`overflow-hidden transition-all ${
+                              expandedDescriptions[optionKey] 
+                                ? '' 
+                                : 'line-clamp-3'
+                            }`}
+                          >
+                            {option.description}
+                          </div>
+                          {/* Toujours réserver l'espace See more (largeur 100 %) pour éviter le décalage de layout */}
+                          <div className="block w-full min-h-[1.25rem] mt-1">
+                            {(expandedDescriptions[optionKey] || descriptionTruncated[optionKey]) ? (
+                              <button
+                                onClick={() => toggleDescriptionExpansion(optionKey)}
+                                className="block w-full text-left text-xs text-muted-foreground italic hover:text-foreground hover:underline transition-colors cursor-pointer"
+                              >
+                                {expandedDescriptions[optionKey] 
+                                  ? t('decision.seeLess') 
+                                  : t('decision.seeMore') || 'See more'
+                                }
+                              </button>
+                            ) : (
+                              <span className="block w-full text-xs opacity-0" aria-hidden="true">{t('decision.seeMore') || 'See more'}</span>
+                            )}
+                          </div>
                         </div>
                       )}
 

@@ -664,8 +664,8 @@ const DecisionMaker = () => {
           </div>
         )}
         
-        {/* Même wrapper pour chargement et résultat : même largeur / padding */}
-        <div className="w-full min-w-0">
+        {/* Même wrapper pour chargement et résultat : même largeur / padding que le bloc titre + critères */}
+        <div className="w-full min-w-0 px-0">
           {displayStep === 'loading-options' && <OptionsLoadingSkeleton />}
           {displayStep === 'done' && <AnalysisResult result={displayResult} isUpdating={isUpdating} analysisStep={displayStep} currentDecision={getCurrentDecision()} dilemma={displayDilemma} showDataAccuracyIndicator={false} onUpdateDecision={(updatedDecision) => {
         // Actually update the decision in history (local + cloud)
