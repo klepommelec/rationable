@@ -142,7 +142,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   return <Card className={`${config.bgGradient} w-full shadow-none bg-transparent border-0`}>
       <CardContent className="px-0 py-0 space-y-6">
         <div className="flex flex-col gap-6">
-          <div className="w-full space-y-4 bg-transparent px-0" style={{ boxSizing: 'border-box' }}>
+          <div className="w-full space-y-6 bg-transparent px-0" style={{ boxSizing: 'border-box' }}>
             {/* Layout mobile : badge centré */}
             <div className="sm:hidden">
               <div className="flex items-center justify-between">
@@ -193,15 +193,15 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               <ConfidenceIndicator breakdown={result.breakdown} topOption={topOption} result={result} />
             </div>
             
-            {/* Afficher la description de l'option recommandée si disponible, sinon la description globale */}
-            {(topOption?.description || result?.description) && (topOption?.description || result?.description)?.trim() !== '' && (
-              <div className="w-full">
-                <ExpandableText text={topOption?.description || result?.description || ''} />
+            {/* Même source que le tableau de comparaison : uniquement la description de l'option (breakdown) pour cohérence */}
+            {topOption?.description?.trim() && (
+              <div className="w-full mt-6">
+                <ExpandableText text={topOption.description} />
               </div>
             )}
 
             {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && (
-              <div className="grid md:grid-cols-2 gap-4 w-full py-[8px]">
+              <div className="grid md:grid-cols-2 gap-4 w-full py-[8px] mt-6">
                 {/* Avantages - affiché seulement s'il y a des avantages */}
                 {topOption.pros?.length > 0 && (
                   <div>
