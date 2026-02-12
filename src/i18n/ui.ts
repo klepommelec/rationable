@@ -457,6 +457,12 @@ export interface UITranslations {
   optionsLoading: {
     title: string;
     subtitle: string;
+    thinkingStep1: string;
+    thinkingStep2: string;
+    thinkingStep3: string;
+    thinkingStep4: string;
+    thinkingStep5: string;
+    thinkingStep6: string;
   };
   dataAccuracy: {
     sources: {
@@ -696,6 +702,18 @@ export interface UITranslations {
         title: string;
         description: string;
       };
+    };
+  };
+  emoji: {
+    searchPlaceholder: string;
+    tabs: {
+      popular: string;
+      emotions: string;
+      activities: string;
+      objects: string;
+      nature: string;
+      food: string;
+      symbols: string;
     };
   };
 }
@@ -1160,7 +1178,13 @@ const fr: UITranslations = {
   },
   optionsLoading: {
     title: "Génération des options...",
-    subtitle: "Analyse en cours, veuillez patienter",
+    subtitle: "Évaluation de vos critères → recherche des options pertinentes → comparaison en cours…",
+    thinkingStep1: "Évaluation de vos critères",
+    thinkingStep2: "Recherche des options pertinentes",
+    thinkingStep3: "Identification des options les plus adaptées",
+    thinkingStep4: "Comparaison détaillée en cours",
+    thinkingStep5: "Calcul des scores et des recommandations",
+    thinkingStep6: "Finalisation de l’analyse",
   },
   dataAccuracy: {
     sources: {
@@ -1263,6 +1287,18 @@ const fr: UITranslations = {
     card: {
       question: "Question",
       open: "Ouvrir",
+    },
+  },
+  emoji: {
+    searchPlaceholder: "Rechercher un emoji...",
+    tabs: {
+      popular: "Populaire",
+      emotions: "Émotions",
+      activities: "Activités",
+      objects: "Objets",
+      nature: "Nature",
+      food: "Nourriture",
+      symbols: "Symboles",
     },
   },
   footer: {
@@ -1864,7 +1900,13 @@ const en: UITranslations = {
   },
   optionsLoading: {
     title: "Generating options...",
-    subtitle: "Analysis in progress, please wait",
+    subtitle: "Evaluating your criteria → searching for relevant options → building the comparison…",
+    thinkingStep1: "Evaluating your criteria",
+    thinkingStep2: "Searching for relevant options",
+    thinkingStep3: "Identifying the most relevant options",
+    thinkingStep4: "Running a detailed comparison",
+    thinkingStep5: "Computing scores and recommendations",
+    thinkingStep6: "Finalizing the analysis",
   },
   dataAccuracy: {
     sources: {
@@ -1967,6 +2009,18 @@ const en: UITranslations = {
     card: {
       question: "Question",
       open: "Open",
+    },
+  },
+  emoji: {
+    searchPlaceholder: "Search emoji...",
+    tabs: {
+      popular: "Popular",
+      emotions: "Emotions",
+      activities: "Activities",
+      objects: "Objects",
+      nature: "Nature",
+      food: "Food",
+      symbols: "Symbols",
     },
   },
   footer: {

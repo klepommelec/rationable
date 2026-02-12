@@ -185,20 +185,20 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               </div>
             </div>
             
-            <h2 className={`text-2xl font-semibold leading-snug ${config.titleColor} w-full max-w-full sm:max-w-[75%]`}>
-              {topOption?.option || result.recommendation?.replace(/^Option\s+\d+:\s*/i, '').trim()}
-            </h2>
-            
-            <div className="w-full">
-              <ConfidenceIndicator breakdown={result.breakdown} topOption={topOption} result={result} />
-            </div>
-            
-            {/* Même source que le tableau de comparaison : uniquement la description de l'option (breakdown) pour cohérence */}
-            {topOption?.description?.trim() && (
-              <div className="w-full mt-6">
-                <ExpandableText text={topOption.description} />
+            <div className="w-full space-y-1">
+              <h2 className={`text-2xl font-semibold leading-snug ${config.titleColor} w-full max-w-full sm:max-w-[75%]`}>
+                {topOption?.option || result.recommendation?.replace(/^Option\s+\d+:\s*/i, '').trim()}
+              </h2>
+              <div className="w-full">
+                <ConfidenceIndicator breakdown={result.breakdown} topOption={topOption} result={result} />
               </div>
-            )}
+              {/* Même source que le tableau de comparaison : uniquement la description de l'option (breakdown) pour cohérence */}
+              {topOption?.description?.trim() && (
+                <div className="w-full">
+                  <ExpandableText text={topOption.description} />
+                </div>
+              )}
+            </div>
 
             {topOption && (topOption.pros?.length > 0 || topOption.cons?.length > 0) && (
               <div className="grid md:grid-cols-2 gap-4 w-full py-[8px] mt-6">

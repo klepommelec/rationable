@@ -108,8 +108,8 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
         ref={h1Ref}
         className={`${className} relative pt-2 pb-2 w-full`}
         style={{
-          paddingLeft: '0px',
-          paddingRight: '0px',
+          paddingLeft: 0,
+          paddingRight: 0,
           minHeight: initialHeight !== null ? initialHeight : undefined,
           boxSizing: 'border-box',
         }}
@@ -119,6 +119,7 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
           value={editValue}
           onChange={e => setEditValue(e.target.value)}
           onKeyDown={handleKeyDown}
+          onBlur={handleSave}
           className="w-full min-w-0 bg-transparent border-0 text-inherit font-inherit resize-none outline-none p-0 m-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 block box-border"
           style={{
             fontSize: 'inherit',
@@ -147,15 +148,19 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
   return (
     <h1
       ref={h1Ref}
-      className={`${className} group pt-2 pb-2`}
-      style={{ paddingLeft: '0px', paddingRight: '0px' }}
+      role={disabled ? undefined : 'button'}
+      tabIndex={disabled ? undefined : 0}
+      onClick={disabled ? undefined : handleStartEdit}
+      onKeyDown={disabled ? undefined : (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleStartEdit(); } }}
+      className={`${className} group pt-2 pb-2 ${!disabled ? 'cursor-pointer hover:bg-muted/30 hover:opacity-[0.64] rounded-sm transition-colors' : ''}`}
+      style={{ paddingLeft: 0, paddingRight: 0 }}
     >
       {title}
       {!disabled && (
         <Button
           variant="ghost"
           size="sm"
-          onClick={handleStartEdit}
+          onClick={(e) => { e.stopPropagation(); handleStartEdit(); }}
           className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 shrink-0 ml-4 mt-0 mb-0 align-middle inline-flex items-center justify-center bg-white border border-border rounded-full hover:bg-gray-50"
         >
           <Edit2 className="h-4 w-4" />

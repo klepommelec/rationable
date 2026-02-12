@@ -4,7 +4,8 @@ import { IResult } from '@/types/decision';
 import { useI18nUI } from '@/contexts/I18nUIContext';
 
 interface DataAccuracyIndicatorProps {
-  result: IResult;
+  /** Optionnel en chargement : on n'affiche que "Created on ... by ..." */
+  result?: IResult | null;
   currentDecision?: any;
   className?: string;
 }
@@ -40,9 +41,9 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
 
   const creationTimestamp = currentDecision?.timestamp;
   const author = currentDecision?.createdByName || currentDecision?.author || '—';
-  const updateTimestamp = currentDecision?.updatedAt || result.realTimeData?.timestamp;
+  const updateTimestamp = currentDecision?.updatedAt || result?.realTimeData?.timestamp;
   const updatedBy = currentDecision?.updatedByName || currentDecision?.updatedBy || '—';
-  const hasUpdates = !!currentDecision?.updatedAt || !!result.realTimeData?.timestamp;
+  const hasUpdates = !!currentDecision?.updatedAt || !!result?.realTimeData?.timestamp;
 
   return (
     <TooltipProvider>
@@ -59,7 +60,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{t('dataAccuracy.createdOn')} {formatDateTime(creationTimestamp)} {t('dataAccuracy.by')} {author}</p>
+                  <p>{formatDateTime(creationTimestamp)}</p>
                 </TooltipContent>
               </Tooltip>
               <span>{t('dataAccuracy.by')} {author}</span>
@@ -74,7 +75,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>{t('dataAccuracy.updatedOn')} {formatDateTime(updateTimestamp)} {t('dataAccuracy.by')} {updatedBy}</p>
+                    <p>{formatDateTime(updateTimestamp)}</p>
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -94,7 +95,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{t('dataAccuracy.createdOn')} {formatDateTime(creationTimestamp)} {t('dataAccuracy.by')} {author}</p>
+                  <p>{formatDateTime(creationTimestamp)}</p>
                 </TooltipContent>
               </Tooltip>
               <span className="flex-shrink-0">{t('dataAccuracy.by')}</span>
@@ -109,7 +110,7 @@ export const DataAccuracyIndicator: React.FC<DataAccuracyIndicatorProps> = ({
                       </span>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{t('dataAccuracy.updatedOn')} {formatDateTime(updateTimestamp)} {t('dataAccuracy.by')} {updatedBy}</p>
+                      <p>{formatDateTime(updateTimestamp)}</p>
                     </TooltipContent>
                   </Tooltip>
                 </>

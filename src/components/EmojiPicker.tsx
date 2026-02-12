@@ -23,49 +23,50 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ emoji, setEmoji }) => {
   const { t } = useI18nUI();
   const [isOpen, setIsOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   const EMOJI_CATEGORIES: EmojiCategory[] = [
     {
       name: t('emoji.tabs.popular'),
-      shortName: "Pop",
+      shortName: "⭐",
       emojis: ['🤔', '💻', '✈️', '🏠', '🎉', '💡', '💸', '❤️', '🍔', '📚', '🏆', '🤷', '😊', '👍', '🔥', '⭐', '🚀', '🎯', '💪', '🌟'],
-      searchTerms: ['populaire', 'fréquent', 'commun', 'utilisé']
+      searchTerms: ['populaire', 'fréquent', 'commun', 'utilisé', 'popular', 'common', 'frequent', 'used']
     },
     {
       name: t('emoji.tabs.emotions'),
       shortName: "😊",
       emojis: ['😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '☺️', '😚', '😙', '🥲', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '🥸', '😎', '🤓', '🧐'],
-      searchTerms: ['émotion', 'sentiment', 'visage', 'sourire', 'content', 'triste', 'colère', 'joie']
+      searchTerms: ['émotion', 'sentiment', 'visage', 'sourire', 'content', 'triste', 'colère', 'joie', 'emotion', 'feeling', 'face', 'smile', 'happy', 'sad', 'anger', 'joy']
     },
     {
       name: t('emoji.tabs.activities'),
       shortName: "⚽",
       emojis: ['⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱', '🪀', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '🪃', '🥅', '⛳', '🪁', '🏹', '🎣', '🤿', '🥊', '🥋', '🎽', '🛹', '🛷', '⛸️', '🥌', '🎿', '⛷️', '🏂', '🪂', '🏋️‍♀️', '🏋️', '🏋️‍♂️', '🤼‍♀️', '🤼', '🤼‍♂️', '🤸‍♀️', '🤸', '🤸‍♂️', '⛹️‍♀️', '⛹️', '⛹️‍♂️', '🤾‍♀️', '🤾', '🤾‍♂️', '🏌️‍♀️', '🏌️', '🏌️‍♂️', '🏇', '🧘‍♀️', '🧘', '🧘‍♂️', '🏄‍♀️', '🏄', '🏄‍♂️', '🏊‍♀️', '🏊', '🏊‍♂️', '🤽‍♀️', '🤽', '🤽‍♂️', '🚣‍♀️', '🚣', '🚣‍♂️', '🧗‍♀️', '🧗', '🧗‍♂️', '🚵‍♀️', '🚵', '🚵‍♂️', '🚴‍♀️', '🚴', '🚴‍♂️'],
-      searchTerms: ['sport', 'activité', 'jeu', 'exercice', 'fitness', 'loisir', 'compétition', 'match']
+      searchTerms: ['sport', 'activité', 'jeu', 'exercice', 'fitness', 'loisir', 'compétition', 'match', 'activity', 'game', 'exercise', 'competition']
     },
     {
       name: t('emoji.tabs.objects'),
       shortName: "💻",
       emojis: ['💻', '🖥️', '🖨️', '⌨️', '🖱️', '🖲️', '💽', '💾', '💿', '📀', '📼', '📷', '📸', '📹', '🎥', '📽️', '🎞️', '📞', '☎️', '📟', '📠', '📺', '📻', '🎙️', '🎚️', '🎛️', '🧭', '⏱️', '⏲️', '⏰', '🕰️', '⌛', '⏳', '📡', '🔋', '🔌', '💡', '🔦', '🕯️', '🪔', '🧯', '🛢️', '💸', '💵', '💴', '💶', '💷', '💰', '💳', '💎', '⚖️', '🪜', '🧰', '🔧', '🔨', '⚒️', '🛠️', '⛏️', '🪚', '🔩', '⚙️', '🪤', '🧱', '⛓️', '🧲', '🔫', '💣', '🧨', '🪓', '🔪', '🗡️', '⚔️', '🛡️', '🚬', '⚰️', '🪦', '⚱️', '🏺', '🔮', '📿', '🧿', '💈', '⚗️', '🔭', '🔬', '🕳️', '🩹', '🩺', '💊', '💉', '🩸', '🧬', '🦠', '🧫', '🧪', '🌡️', '🧹', '🧽', '🪣', '🧴', '🛎️', '🔑', '🗝️', '🚪', '🪑', '🛋️', '🛏️', '🛌', '🧸', '🖼️', '🛍️', '🛒', '🎁', '🎈', '🎏', '🎀', '🎊', '🎉', '🎎', '🏮', '🎐', '🧧', '✉️', '📩', '📨', '📧', '💌', '📥', '📤', '📦', '🏷️', '📪', '📫', '📬', '📭', '📮', '📯', '📜', '📃', '📄', '📑', '📊', '📈', '📉', '🗒️', '🗓️', '📆', '📅', '📇', '🗃️', '🗳️', '🗄️', '📋', '📁', '📂', '🗂️', '🗞️', '📰', '📓', '📔', '📒', '📕', '📗', '📘', '📙', '📚', '📖', '🔖', '🧷', '🔗', '📎', '🖇️', '📐', '📏', '🧮', '📌', '📍', '✂️', '🖊️', '🖋️', '✒️', '🖌️', '🖍️', '📝', '✏️', '🔍', '🔎', '🔏', '🔐', '🔒', '🔓', '👟', '👠', '🥿', '👞', '👡', '🩴'],
-      searchTerms: ['objet', 'outil', 'technologie', 'appareil', 'machine', 'ordinateur', 'téléphone', 'chaussure', 'sneakers', 'baskets', 'avion', 'voiture', 'transport']
+      searchTerms: ['objet', 'outil', 'technologie', 'appareil', 'machine', 'ordinateur', 'téléphone', 'chaussure', 'sneakers', 'baskets', 'avion', 'voiture', 'transport', 'object', 'tool', 'technology', 'device', 'computer', 'phone', 'shoe', 'plane', 'car']
     },
     {
       name: t('emoji.tabs.nature'),
       shortName: "🌱",
       emojis: ['🌍', '🌎', '🌏', '🌐', '🗺️', '🗾', '🧭', '🏔️', '⛰️', '🌋', '🗻', '🏕️', '🏖️', '🏜️', '🏝️', '🏞️', '🏟️', '🏛️', '🏗️', '🧱', '🪨', '🪵', '🛖', '🏘️', '🏚️', '🏠', '🏡', '🏢', '🏣', '🏤', '🏥', '🏦', '🏨', '🏩', '🏪', '🏫', '🏬', '🏭', '🏯', '🏰', '🗼', '🗽', '⛪', '🕌', '🛕', '🕍', '⛩️', '🕋', '⛲', '⛺', '🌁', '🌃', '🏙️', '🌄', '🌅', '🌆', '🌇', '🌉', '♨️', '🎠', '🎡', '🎢', '💈', '🎪', '🚂', '🚃', '🚄', '🚅', '🚆', '🚇', '🚈', '🚉', '🚊', '🚝', '🚞', '🚋', '🚌', '🚍', '🚎', '🚐', '🚑', '🚒', '🚓', '🚔', '🚕', '🚖', '🚗', '🚘', '🚙', '🛻', '🚚', '🚛', '🚜', '🏎️', '🏍️', '🛵', '🦽', '🦼', '🛺', '🚲', '🛴', '🛹', '🛼', '🚁', '🛸', '✈️', '🛩️', '🛫', '🛬', '🪂', '💺', '🚀', '🛰️', '🚤', '🛥️', '🚢', '⛵', '🛶', '⚓', '⛽', '🚧', '🚨', '🚥', '🚦', '🛑', '🚏', '🌱', '🌿', '☘️', '🍀', '🎍', '🪴', '🎋', '🍃', '🍂', '🍁', '🍄', '🐚', '🪨', '🌾', '💐', '🌷', '🌹', '🥀', '🌺', '🌸', '🌼', '🌻', '🌞', '🌝', '🌛', '🌜', '🌚', '🌕', '🌖', '🌗', '🌘', '🌑', '🌒', '🌓', '🌔', '🌙', '🌎', '🌍', '🌏', '🪐', '💫', '⭐', '🌟', '✨', '⚡', '☄️', '💥', '🔥', '🌪️', '🌈', '☀️', '🌤️', '⛅', '🌦️', '🌧️', '⛈️', '🌩️', '🌨️', '❄️', '☃️', '⛄', '🌬️', '💨', '💧', '💦', '☔', '☂️', '🌊', '🌫️'],
-      searchTerms: ['nature', 'plante', 'animal', 'environnement', 'monde', 'terre', 'météo', 'transport', 'voyage', 'avion', 'voiture']
+      searchTerms: ['nature', 'plante', 'animal', 'environnement', 'monde', 'terre', 'météo', 'transport', 'voyage', 'avion', 'voiture', 'plant', 'animal', 'environment', 'world', 'weather', 'travel', 'plane', 'car']
     },
     {
       name: t('emoji.tabs.food'),
       shortName: "🍔",
       emojis: ['🍏', '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🍅', '🍆', '🥑', '🥦', '🥬', '🥒', '🌶️', '🫑', '🌽', '🥕', '🧄', '🧅', '🥔', '🍠', '🥐', '🥖', '🍞', '🥨', '🥯', '🧇', '🥞', '🧈', '🍯', '🥛', '🍼', '☕', '🫖', '🍵', '🧃', '🥤', '🧋', '🍶', '🍾', '🍷', '🍸', '🍹', '🍺', '🍻', '🥂', '🥃', '🥧', '🧁', '🍰', '🎂', '🍮', '🍭', '🍬', '🍫', '🍿', '🍩', '🍪', '🌰', '🥜', '🍯', '🥛', '🧀', '🍖', '🍗', '🥩', '🥓', '🍔', '🍟', '🍕', '🌭', '🥪', '🌮', '🌯', '🫔', '🥙', '🧆', '🥚', '🍳', '🥘', '🍲', '🫕', '🥣', '🥗', '🍿', '🧈', '🧂', '🥫', '🍱', '🍘', '🍙', '🍚', '🍛', '🍜', '🍝', '🍠', '🍢', '🍣', '🍤', '🍥', '🥮', '🍡', '🥟', '🥠', '🥡'],
-      searchTerms: ['nourriture', 'manger', 'repas', 'cuisine', 'restaurant', 'boisson', 'fruit', 'légume']
+      searchTerms: ['nourriture', 'manger', 'repas', 'cuisine', 'restaurant', 'boisson', 'fruit', 'légume', 'food', 'eat', 'meal', 'restaurant', 'drink', 'fruit', 'vegetable']
     },
     {
       name: t('emoji.tabs.symbols'),
       shortName: "❤️",
       emojis: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '☮️', '✝️', '☪️', '🕉️', '☸️', '✡️', '🔯', '🕎', '☯️', '☦️', '🛐', '⛎', '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓', '🆔', '⚛️', '🉑', '☢️', '☣️', '📴', '📳', '🈶', '🈚', '🈸', '🈺', '🈷️', '✴️', '🆚', '💮', '🉐', '㊙️', '㊗️', '🈴', '🈵', '🈹', '🈲', '🅰️', '🅱️', '🆎', '🆑', '🅾️', '🆘', '❌', '⭕', '🛑', '⛔', '📛', '🚫', '💯', '💢', '♨️', '🚷', '🚯', '🚳', '🚱', '🔞', '📵', '🚭', '❗', '❕', '❓', '❔', '‼️', '⁉️', '🔅', '🔆', '〽️', '⚠️', '🚸', '🔱', '⚜️', '🔰', '♻️', '✅', '🈯', '💹', '❇️', '✳️', '❎', '🌐', '💠', 'Ⓜ️', '🌀', '💤', '🏧', '🚾', '♿', '🅿️', '🈳', '🈂️', '🛂', '🛃', '🛄', '🛅', '🚹', '🚺', '🚼', '⚧️', '🚻', '🚮', '🎦', '📶', '🈁', '🔣', 'ℹ️', '🔤', '🔡', '🔠', '🆖', '🆗', '🆙', '🆒', '🆕', '🆓', '0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟', '🔢', '#️⃣', '*️⃣', '⏏️', '▶️', '⏸️', '⏯️', '⏹️', '⏺️', '⏭️', '⏮️', '⏩', '⏪', '⏫', '⏬', '◀️', '🔼', '🔽', '➡️', '⬅️', '⬆️', '⬇️', '↗️', '↘️', '↙️', '↖️', '↕️', '↔️', '↪️', '↩️', '⤴️', '⤵️', '🔀', '🔁', '🔂', '🔄', '🔃', '🎵', '🎶', '➕', '➖', '➗', '✖️', '🟰', '💲', '💱', '™️', '©️', '®️', '〰️', '➰', '➿', '🔚', '🔙', '🔛', '🔝', '🔜', '✔️', '☑️', '🔘', '🔴', '🟠', '🟡', '🟢', '🔵', '🟣', '⚫', '⚪', '🟤', '🔺', '🔻', '🔸', '🔹', '🔶', '🔷', '🔳', '🔲', '▪️', '▫️', '◾', '◽', '◼️', '◻️', '🟥', '🟧', '🟨', '🟩', '🟦', '🟪', '⬛', '⬜', '🟫', '🔈', '🔇', '🔉', '🔊', '📢', '📣', '📯', '🔔', '🔕', '🎼', '🎵', '🎶', '🎙️', '🎚️', '🎛️', '🎤', '🎧', '📻', '🎷', '🪗', '🎸', '🎹', '🎺', '🎻', '🪕', '🥁', '🪘', '💃', '🕺', '🕴️', '👯', '👯‍♂️', '👯‍♀️', '🕋', '🤲', '👐', '🙌', '👏', '🤝', '👍', '👎', '👊', '✊', '🤛', '🤜', '🤞', '✌️', '🤟', '🤘', '👌', '🤌', '🤏', '👈', '👉', '👆', '👇', '☝️', '✋', '🤚', '🖐️', '🖖', '👋', '🤙', '💪', '🦾', '🖕', '✍️', '🙏', '🦶', '🦵', '🦿', '💄', '💋', '👄', '🦷', '👅', '👂', '🦻', '👃', '👣', '👁️', '👀', '🧠', '🫀', '🫁', '🩸', '👶', '🧒', '👦', '👧', '🧑', '👱', '👨', '🧔', '👨‍🦰', '👨‍🦱', '👨‍🦳', '👨‍🦲', '👩', '👩‍🦰', '🧑‍🦰', '👩‍🦱', '🧑‍🦱', '👩‍🦳', '🧑‍🦳', '👩‍🦲', '🧑‍🦲', '👱‍♀️', '👱‍♂️', '🧓', '👴', '👵', '🙍', '🙍‍♂️', '🙍‍♀️', '🙎', '🙎‍♂️', '🙎‍♀️', '🙅', '🙅‍♂️', '🙅‍♀️', '🙆', '🙆‍♂️', '🙆‍♀️', '💁', '💁‍♂️', '💁‍♀️', '🙋', '🙋‍♂️', '🙋‍♀️', '🧏', '🧏‍♂️', '🧏‍♀️', '🙇', '🙇‍♂️', '🙇‍♀️', '🤦', '🤦‍♂️', '🤦‍♀️', '🤷', '🤷‍♂️', '🤷‍♀️'],
-      searchTerms: ['symbole', 'signe', 'coeur', 'amour', 'couleur', 'forme', 'flèche', 'main', 'personne']
+      searchTerms: ['symbole', 'signe', 'coeur', 'amour', 'couleur', 'forme', 'flèche', 'main', 'personne', 'symbol', 'sign', 'heart', 'love', 'color', 'shape', 'arrow', 'hand', 'person']
     }
   ];
 
@@ -76,26 +77,26 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ emoji, setEmoji }) => {
     
     // Créer un mapping des emojis vers leurs termes de recherche
     const emojiSearchMap: Record<string, string[]> = {
-      '🤔': ['réfléchir', 'penser', 'hmm', 'question', 'doute'],
-      '💻': ['ordinateur', 'computer', 'travail', 'bureau', 'laptop', 'pc'],
-      '✈️': ['avion', 'voyage', 'vacances', 'vol', 'transport'],
-      '🏠': ['maison', 'home', 'habiter', 'domicile', 'logement'],
-      '🎉': ['fête', 'célébration', 'party', 'joie', 'succès'],
-      '💡': ['idée', 'lumière', 'innovation', 'créativité', 'solution'],
-      '💸': ['argent', 'money', 'dépense', 'coût', 'prix'],
-      '❤️': ['amour', 'love', 'coeur', 'romance', 'affection'],
-      '🍔': ['burger', 'nourriture', 'manger', 'fast food', 'restaurant'],
-      '📚': ['livre', 'étudier', 'école', 'lecture', 'apprendre'],
-      '🏆': ['trophée', 'gagner', 'victoire', 'champion', 'réussite'],
-      '🤷': ['hausser épaules', 'je sais pas', 'peu importe', 'indifférent'],
-      '😊': ['sourire', 'content', 'heureux', 'joie', 'satisfait'],
-      '👍': ['pouce', 'bien', 'ok', 'approuver', 'accord'],
-      '🔥': ['feu', 'chaud', 'excellent', 'populaire', 'tendance'],
-      '⭐': ['étoile', 'star', 'favori', 'excellent', 'top'],
-      '🚀': ['fusée', 'rapide', 'lancement', 'startup', 'croissance'],
-      '🎯': ['cible', 'objectif', 'but', 'précision', 'focus'],
-      '💪': ['force', 'muscle', 'pouvoir', 'détermination', 'fort'],
-      '🌟': ['brillant', 'star', 'succès', 'excellent', 'remarquable']
+      '🤔': ['réfléchir', 'penser', 'hmm', 'question', 'doute', 'think', 'wonder', 'doubt'],
+      '💻': ['ordinateur', 'computer', 'travail', 'bureau', 'laptop', 'pc', 'work', 'office'],
+      '✈️': ['avion', 'voyage', 'vacances', 'vol', 'transport', 'plane', 'travel', 'flight', 'trip'],
+      '🏠': ['maison', 'home', 'habiter', 'domicile', 'logement', 'house', 'housing'],
+      '🎉': ['fête', 'célébration', 'party', 'joie', 'succès', 'celebration', 'joy', 'success'],
+      '💡': ['idée', 'lumière', 'innovation', 'créativité', 'solution', 'idea', 'light', 'innovation', 'solution'],
+      '💸': ['argent', 'money', 'dépense', 'coût', 'prix', 'expense', 'cost', 'price'],
+      '❤️': ['amour', 'love', 'coeur', 'romance', 'affection', 'heart', 'like', 'red'],
+      '🍔': ['burger', 'nourriture', 'manger', 'fast food', 'restaurant', 'food', 'eat', 'hamburger'],
+      '📚': ['livre', 'étudier', 'école', 'lecture', 'apprendre', 'book', 'study', 'school', 'read', 'learn'],
+      '🏆': ['trophée', 'gagner', 'victoire', 'champion', 'réussite', 'trophy', 'win', 'victory', 'champion', 'success'],
+      '🤷': ['hausser épaules', 'je sais pas', 'peu importe', 'indifférent', 'shrug', 'dunno', 'whatever', 'indifferent'],
+      '😊': ['sourire', 'content', 'heureux', 'joie', 'satisfait', 'smile', 'happy', 'joy', 'satisfied'],
+      '👍': ['pouce', 'bien', 'ok', 'approuver', 'accord', 'thumb', 'good', 'ok', 'approve', 'yes'],
+      '🔥': ['feu', 'chaud', 'excellent', 'populaire', 'tendance', 'fire', 'hot', 'excellent', 'popular', 'trend'],
+      '⭐': ['étoile', 'star', 'favori', 'excellent', 'top', 'favorite', 'best'],
+      '🚀': ['fusée', 'rapide', 'lancement', 'startup', 'croissance', 'rocket', 'fast', 'launch', 'growth'],
+      '🎯': ['cible', 'objectif', 'but', 'précision', 'focus', 'target', 'goal', 'aim', 'precision', 'focus'],
+      '💪': ['force', 'muscle', 'pouvoir', 'détermination', 'fort', 'strength', 'muscle', 'power', 'determination', 'strong'],
+      '🌟': ['brillant', 'star', 'succès', 'excellent', 'remarquable', 'sparkle', 'success', 'excellent', 'remarkable']
     };
     
     return EMOJI_CATEGORIES.map(category => ({
@@ -129,7 +130,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ emoji, setEmoji }) => {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-4xl w-14 h-14 rounded-full hover:bg-white/10 shrink-0" style={{ fontSize: '48px', lineHeight: '48px', verticalAlign: 'middle' }}>
+        <Button variant="ghost" size="icon" className="text-4xl w-14 h-14 rounded-full hover:bg-muted shrink-0 transition-colors" style={{ fontSize: '48px', lineHeight: '48px', verticalAlign: 'middle' }}>
           {emoji}
         </Button>
       </PopoverTrigger>
@@ -138,9 +139,27 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ emoji, setEmoji }) => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
+              ref={searchInputRef}
               placeholder={t('emoji.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onPaste={(e) => {
+                const pasted = e.clipboardData.getData('text');
+                if (!pasted) return;
+                e.preventDefault();
+                const input = searchInputRef.current;
+                const start = input?.selectionStart ?? searchTerm.length;
+                const end = input?.selectionEnd ?? searchTerm.length;
+                const next = searchTerm.slice(0, start) + pasted + searchTerm.slice(end);
+                setSearchTerm(next);
+                const pos = start + pasted.length;
+                setTimeout(() => {
+                  if (searchInputRef.current) {
+                    searchInputRef.current.focus();
+                    searchInputRef.current.setSelectionRange(pos, pos);
+                  }
+                }, 0);
+              }}
               className="pl-10"
             />
           </div>
@@ -148,7 +167,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ emoji, setEmoji }) => {
         
         <Tabs defaultValue={t('emoji.tabs.popular')} className="w-full">
           <TabsList className="grid w-full grid-cols-7 bg-muted/50 rounded-none border-b h-auto p-1 text-xs">
-            <TabsTrigger value={t('emoji.tabs.popular')} className="text-xs py-2 px-1">Pop</TabsTrigger>
+            <TabsTrigger value={t('emoji.tabs.popular')} className="text-xs py-2 px-1">⭐</TabsTrigger>
             <TabsTrigger value={t('emoji.tabs.emotions')} className="text-xs py-2 px-1">😊</TabsTrigger>
             <TabsTrigger value={t('emoji.tabs.activities')} className="text-xs py-2 px-1">⚽</TabsTrigger>
             <TabsTrigger value={t('emoji.tabs.objects')} className="text-xs py-2 px-1">💻</TabsTrigger>

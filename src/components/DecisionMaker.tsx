@@ -97,7 +97,9 @@ const DecisionMaker = () => {
 
   // Lock analysis by id for safe writes during follow-ups
   const pendingWriteAnalysisIdRef = React.useRef<string | null>(null);
-  
+  // Date de début du chargement des options (pour afficher "Created on" pendant le loading)
+  const loadingStartTimeRef = React.useRef<number | null>(null);
+
   // État pour le compteur de commentaires
   const [commentsCount, setCommentsCount] = React.useState(0);
   const [commentsOpen, setCommentsOpen] = React.useState(false);
@@ -446,6 +448,15 @@ const DecisionMaker = () => {
 
   // Plus d'effet nécessaire - toutes les questions utilisent l'approche comparative unifiée
 
+  // Mémoriser l’instant de début du chargement pour "Created on" pendant loading-options
+  React.useEffect(() => {
+    if (analysisStep === 'loading-options') {
+      if (loadingStartTimeRef.current === null) loadingStartTimeRef.current = Date.now();
+    } else {
+      loadingStartTimeRef.current = null;
+    }
+  }, [analysisStep]);
+
   // Ajouter la première analyse dès qu'elle démarre
   React.useEffect(() => {
     if (dilemma && (analysisStep === 'criteria-loaded' || analysisStep === 'loading-options' || analysisStep === 'done') && analyses.length === 0) {
@@ -481,23 +492,44 @@ const DecisionMaker = () => {
       category: selectedCategory
     });
 
+    // Persister la décision courante (emoji, titre, etc.) pour qu'elle survive au refresh
+    if (currentDecisionId) {
+      const decisionToUpdate = history.find(d => d.id === currentDecisionId);
+      if (decisionToUpdate) {
+        updateDecision({
+          ...decisionToUpdate,
+          dilemma,
+          emoji,
+          result,
+          criteria,
+          category: selectedCategory
+        });
+      }
+    }
+
     // Libérer le verrou uniquement si la finalisation concerne l'analyse verrouillée
     if (analysisStep === 'done' && lockId === currentAnalysis.id) {
       pendingWriteAnalysisIdRef.current = null;
     }
-  }, [dilemma, emoji, result, analysisStep, criteria, selectedCategory, currentAnalysisIndex]);
+  }, [dilemma, emoji, result, analysisStep, criteria, selectedCategory, currentAnalysisIndex, currentDecisionId]);
 
   // Note: La synchronisation des états lors de la navigation est gérée par handleAnalysisNavigation
 
   const shouldShowCriteria = true;
-  return <div className={`w-full ${displayStep !== 'idle' ? 'max-w-[896px] mx-auto px-4 sm:px-0' : 'px-4 sm:px-6 lg:px-0'}`}>
+  return <div className={`w-full ${
+        displayStep === 'idle' ? 'px-4 sm:px-6 lg:px-0' :
+        displayStep === 'loading-options' ? 'max-w-[340px] mx-auto px-[4.5rem] sm:px-[7.5rem] lg:px-48 xl:px-[17rem]' :
+        'max-w-[896px] mx-auto px-4 sm:px-0'
+      }`}>
       <section aria-label="Assistant de décision">
         {/* Navigation entre analyses */}
         {displayStep !== 'idle' && <AnalysisNavigation analyses={analyses} currentAnalysisIndex={currentAnalysisIndex} onNavigate={handleAnalysisNavigation} />}
 
         {(displayStep === 'criteria-loaded' || displayStep === 'loading-options' || displayStep === 'done') && <>
+            {/* Bloc emoji + titre + boutons : même marge horizontale (px-4) en chargement qu’à l’écran final pour limiter le décalage */}
+            <div className={displayStep === 'loading-options' ? 'px-1' : ''}>
             {/* Titre (emoji + dilemme) en premier */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 animate-fade-in pt-[72px] sm:pt-[72px] pb-0 h-fit">
+            <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-4 animate-fade-in pt-[72px] sm:pt-[72px] h-fit ${displayStep === 'loading-options' ? 'pb-4' : 'pb-0'}`}>
               {/* Layout mobile : emoji au-dessus du titre, aligné à gauche */}
               <div className="sm:hidden space-y-2 w-full px-0">
                 <EmojiPicker emoji={displayEmoji} setEmoji={setEmoji} />
@@ -526,17 +558,22 @@ const DecisionMaker = () => {
               </div>
             </div>
 
-            {/* Bloc "Created on... by..." (uniquement quand le résultat est affiché) */}
-            {displayStep === 'done' && displayResult && (
+            {/* Bloc "Created on... by..." (affiché dès le chargement : date et auteur connus) */}
+            {(displayStep === 'loading-options' || (displayStep === 'done' && displayResult)) && (
               <DataAccuracyIndicator
-                result={displayResult}
-                currentDecision={getCurrentDecision()}
+                result={displayStep === 'done' ? displayResult ?? null : null}
+                currentDecision={(() => {
+                  if (displayStep !== 'loading-options') return getCurrentDecision();
+                  const decision = getCurrentDecision();
+                  if (decision?.timestamp != null) return decision;
+                  if (loadingStartTimeRef.current === null) loadingStartTimeRef.current = Date.now();
+                  return { timestamp: loadingStartTimeRef.current, createdByName: getUserDisplayName() };
+                })()}
               />
             )}
-
             {/* Boutons Criteria et Comments sous le bloc Created on */}
             {shouldShowCriteria && (
-              <div className="flex items-center gap-2 pt-4 pb-6">
+              <div className={`flex items-center gap-2 ${displayStep === 'loading-options' ? 'pt-6 pb-8' : 'pt-4 pb-6'}`}>
                 <CriteriaManager
                   criteria={displayCriteria}
                   setCriteria={setCriteria}
@@ -573,6 +610,7 @@ const DecisionMaker = () => {
                 </Button>
               </div>
             )}
+            </div>
 
             {/* Modale date limite */}
             <Dialog open={deadlineModalOpen} onOpenChange={setDeadlineModalOpen}>
